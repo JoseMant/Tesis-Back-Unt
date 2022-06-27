@@ -97,4 +97,9 @@ return [
         ],
     ],
 
+    'variables' => [
+        'mail_matriculas' => env('MAIL_USERNAME_MATRICULAS')
+      ]
+  
+
 ];

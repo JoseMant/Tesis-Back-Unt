@@ -17,5 +17,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/banco', 'BancoController@index')->name('banco');
+Route::Post('/usuarios', 'UsuarioController@store');
 // Route::get('/personas/{dni}/{password}', 'PersonaController@Login');
+
+Route::get('test', function () {
+
+    $user = [
+        'name' => 'Harsukh Makwana',
+        'info' => 'Laravel & Python Devloper'
+    ];
+
+    \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($user));
+
+    dd("success");
+
+});

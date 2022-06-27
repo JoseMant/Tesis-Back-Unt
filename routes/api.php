@@ -24,6 +24,10 @@ Route::resource('bancos','BancoController');
 Route::resource('cargos','CargoController');
 Route::resource('personas','PersonaController');
 Route::resource('usuarios','UsuarioController');
-// Route::get('personas/login/{dni}/{password}','PersonaController@Login');
-//Route::Post('personasSuv/loginRequest/','PersonaSuvController@LoginRequest');
-Route::get('personasSga/datosAlumno/{dni}','PersonaSgaController@DatosAlumno');
+Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
+
+
+
+
+// E-mail verification
+Route::get('/register/verify/{code}', 'UsuarioController@verify');
