@@ -26,6 +26,11 @@ Route::resource('personas','PersonaController');
 Route::resource('usuarios','UsuarioController');
 Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
+Route::group(['middleware' => ['api']], function () {
+Route::post('login','LoginController@Login');
+Route::get('dato','LoginController@Dato');
+});
+
 
 
 // Login
