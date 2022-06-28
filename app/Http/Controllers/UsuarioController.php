@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Usuario;
 
 
@@ -61,12 +62,12 @@ class UsuarioController extends Controller
                 $usuario -> celular=$request->input('celular');
                 $usuario -> sexo=$request->input('sexo');
                 $usuario -> idTipoUsuario=$request->input('idTipoUsuario');
-                $usuario -> confirmation_code="1234444444444444444444444";
+                $usuario -> confirmation_code=Str::random(25);;
                 $usuario -> save();
-                
-                // \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($usuario));
                 DB::commit();
-                return response()->json(['status' => '200', 'message' => 'Usuario registrado correctamente'], 200);
+                \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
+                // \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($usuario));
+                return response()->json(['status' => '200', 'message' => 'Confirmar correo!!'], 200);
             }
         } catch (\Exception $e) {
             DB::rollback();
@@ -122,14 +123,14 @@ class UsuarioController extends Controller
 
     public function verify($code)
     {
-        // $user = Usuario::where('confirmation_code', $code)->first();
+        $user = Usuario::where('confirmation_code', $code)->first();
     
-        // if (! $user)
-        //     return redirect('/');
+        if (! $user)
+            return redirect('/');
     
-        // $user->confirmed = true;
-        // $user->confirmation_code = null;
-        // $user->save();
+        $user->confirmed = true;
+        $user->confirmation_code = null;
+        $user->save();
         return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!'], 200);
         // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
     }

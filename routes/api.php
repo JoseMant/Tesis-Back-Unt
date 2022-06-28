@@ -28,6 +28,9 @@ Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
 
 
+// Login
+// Route::Post('login','LoginController@DatosAlumno');
+
 
 // E-mail verification
 Route::get('/register/verify/{code}', 'UsuarioController@verify');
