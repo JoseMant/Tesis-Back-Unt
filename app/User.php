@@ -2,38 +2,47 @@
 
 namespace App;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+// use Illuminate\Contracts\Auth\Authenticatable;
+// use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+
+// class Usuario extends Model
+class User extends Authenticatable implements JWTSubject
+
 {
-    use Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    protected $connection = 'mysql2';
+    protected $table = 'usuario';
+    protected $primaryKey = 'idUsuario';
+    public $timestamps = false;
     protected $fillable = [
-        'name', 'email', 'password',
+        'username','password'
     ];
+    protected $guarded = [];
+
+
+    // Rest omitted for brevity
 
     /**
-     * The attributes that should be hidden for arrays.
+     * Get the identifier that will be stored in the subject claim of the JWT.
      *
-     * @var array
+     * @return mixed
      */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
 
     /**
-     * The attributes that should be cast to native types.
+     * Return a key value array, containing any custom claims to be added to the JWT.
      *
-     * @var array
+     * @return array
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
 }

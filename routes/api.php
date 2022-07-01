@@ -14,6 +14,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+// configuration jwt
+Route::group([
+    'prefix' => 'auth'
+], function () {
+    Route::post('register', 'AuthController@register');
+    Route::post('login', 'AuthController@login');
+    Route::post('logout', 'AuthController@logout');
+});
+
+// Route::prefix('auth')->group(function () {
+//     Route::post('login', 'AuthController@login');
+//     Route::middleware('auth.jwt')->group(function () {
+//         Route::post('logout', 'AuthController@logout');
+//         Route::post('refresh', 'AuthController@refresh');
+//         Route::post('me', 'AuthController@me');
+//     });
+// });
+
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -23,11 +43,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::resource('bancos','BancoController');
 Route::resource('cargos','CargoController');
 Route::resource('personas','PersonaController');
-Route::resource('usuarios','UsuarioController');
+Route::resource('usuarios','UserController');
 Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
 Route::group(['middleware' => ['api']], function () {
-Route::post('login','LoginController@Login');
+// Route::post('login','LoginController@Login');
 Route::get('dato','LoginController@Dato');
 });
 
