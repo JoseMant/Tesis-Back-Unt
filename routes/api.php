@@ -22,17 +22,10 @@ Route::group([
     Route::post('register', 'AuthController@register');
     Route::post('login', 'AuthController@login');
     Route::post('logout', 'AuthController@logout');
+    Route::post('SignInUsingToken', 'AuthController@SignInUsingToken');
+    Route::get('me', 'AuthController@me');
+    Route::get('refresh', 'AuthController@refresh');
 });
-
-// Route::prefix('auth')->group(function () {
-//     Route::post('login', 'AuthController@login');
-//     Route::middleware('auth.jwt')->group(function () {
-//         Route::post('logout', 'AuthController@logout');
-//         Route::post('refresh', 'AuthController@refresh');
-//         Route::post('me', 'AuthController@me');
-//     });
-// });
-
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -46,16 +39,17 @@ Route::resource('personas','PersonaController');
 Route::resource('usuarios','UserController');
 Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
-Route::group(['middleware' => ['api']], function () {
-// Route::post('login','LoginController@Login');
-Route::get('dato','LoginController@Dato');
-});
-
-
-
-// Login
-// Route::Post('login','LoginController@DatosAlumno');
+//TIPOS DE TRÁMITE
+Route::resource('tipos_tramites','Tipo_TramiteController');
+//ESTADO DE TRÁMITE
+Route::resource('estados_tramites','Estado_TramiteController');
+//TRÁMITE
+Route::resource('tramites','TramiteController');
+//REQUISITOS
+Route::resource('requisitos','RequisitoController');
+//TRÁMITES_REQUISITOS
+Route::resource('tramites_requisitos','Tramite_RequisitoController');
 
 
 // E-mail verification
-Route::get('/register/verify/{code}', 'UsuarioController@verify');
+Route::get('/register/verify/{code}', 'UserController@verify');

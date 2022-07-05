@@ -10,12 +10,13 @@ use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('jwt', ['except' => ['login','register']]);
+        $this->middleware('jwt', ['except' => ['login','register','SignInUsingToken']]);
     }
 
 
@@ -93,11 +94,33 @@ class AuthController extends Controller
 
     protected function respondWithToken($token)
     {
+        $user=JWTAuth::user();
+        $response['idUsuario']=$user->idUsuario;
+        $response['username']=$user->username;
+        $response['estado']=$user->estado;
+        $response['nro_matricula']=$user->nro_matricula;
+        $response['nombres']=$user->nombres;
+        $response['apellidos']=$user->apellidos;
+        $response['tipo_doc']=$user->tipo_doc;
+        $response['nro_doc']=$user->nro_doc;
+        $response['correo']=$user->correo;
+        $response['celular']=$user->celular;
+        $response['sexo']=$user->sexo;
+        $response['idTipoUsuario']=$user->idTipoUsuario;
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
+            'user'=>$response,
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
+
+    // public function SignInUsingToken(Request $request){
+    //     // $user = auth()->->user();
+    //     // $token= json_decode($request->access_token);
+    //     return $token = JWTAuth::getToken();
+        
+    //     return $apy = JWTAuth::decode($token);
+    // }
 
 }
