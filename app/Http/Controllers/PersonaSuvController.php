@@ -47,10 +47,10 @@ class PersonaSuvController extends Controller
      */
     public function show($dni)
     {
-        return PersonaSuv::select('usuario.per_pass')
-        ->join('usuario','persona.idpersona','usuario.idpersona')
-        ->Where('persona.per_dni',$dni)
-        ->get();
+        $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
+                'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
+                ->join('alumno','persona.idpersona','alumno.idpersona')
+                ->Where('persona.per_dni',$dni)->first();
 
         // $datosGenerales = Curso::select('curso.codigo as codigoCurso', 'curso.orden as ordenCurso', 'curso.nombre as nombreCurso', 'curso.creditos as creditosCurso', 'curso.tipo as tipoCurso',
         //                 'curso.idMencion', 'curso_docente_sede_seccion.idSede', 'curso_docente_sede_seccion.idAnio_Semestre', 'curso.idCiclo', 'curso_docente_sede_seccion.idDocente',

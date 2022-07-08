@@ -6,7 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Usuario;
+// use App\Usuario;
 class NewMail extends Mailable{
 
     use Queueable, SerializesModels;
@@ -27,8 +27,8 @@ class NewMail extends Mailable{
 
     public function build()
     {
-    //   $subject = 'REVISIÓN DE PADRÓN DE MATRICULADOS - "'.$this->padron.'"';
+      $subject = 'CONFIRMACIÓN DE CORREO ELECTRÓNICO PARA EL REGISTRO DE USUARIO';
       $emisor = config('mail.mailers.smtp.username');
-      return  $this->from($emisor, 'UNIDAD DE REGISTRO ACADÉMICO ADMINISTRATIVO')->subject('This is Testing Mail')->view('emails.confirmation_code');
+      return  $this->from($emisor, 'UNIDAD DE REGISTRO ACADÉMICO ADMINISTRATIVO')->subject($subject)->view('emails.confirmation_code');
     }
 }

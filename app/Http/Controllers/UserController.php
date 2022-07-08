@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\User;
-
+use Illuminate\Support\Facades\Hash;
 
 
 use Illuminate\Mail\Mailable;
@@ -62,7 +62,7 @@ class UserController extends Controller
                 $usuario -> celular=$request->input('celular');
                 $usuario -> sexo=$request->input('sexo');
                 $usuario -> idTipoUsuario=$request->input('idTipoUsuario');
-                $usuario -> confirmation_code=Str::random(25);;
+                $usuario -> confirmation_code=Str::random(25);
                 $usuario -> save();
                 DB::commit();
                 \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
@@ -134,4 +134,72 @@ class UserController extends Controller
         return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!'], 200);
         // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
     }
+
+    // public function forgotPassword(Request $request){
+    //     DB::beginTransaction();
+    //     try {
+    //         $usuario = User::where('correo', $request->input('correo'))->first();
+    //         if($usuario){
+    //             $usuario->reset_password=Str::random(25);
+    //             $usuario->update();
+    //             DB::commit();
+    //             //Enviamos un msj al correo con el link de resetear password
+    //             \Mail::to($usuario->correo)->send(new \App\Mail\ResetPasswordMail($usuario));
+    //             return response()->json(['status' => '200', 'message' => 'Se envió un mensaje al correo electrónico proporcionado para continuar con la recuperación de la contraseña.'], 200);
+    //         }else{
+    //             return response()->json(['status' => '400', 'message' => 'El correo no se encuentra registrado para ningún usuario'], 400);
+    //         }
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json(['status' => '400', 'message' => 'Error!!'], 400);
+    //     }
+    // }
+
+
+    // public function verifyCodePassword(Request $request)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $user = User::where('reset_password', $request->input('code'))->first();
+    //         if (! $user)
+    //             return redirect('/');
+    //         $user->reset_password = null;
+    //         $user->save();
+    //         DB::commit();
+    //         return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!','data'=>$user], 200);
+    //         // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json(['status' => '400', 'message' => 'Error!!'], 400);
+    //     }
+    // }
+
+
+    // public function ResetPassword(Request $request){
+    //     DB::beginTransaction();
+    //     try {
+    //         $user = User::where('username', $request->input('username'))->first();
+    //         if ($user){
+    //             $user->password=Hash::make($request->input('password'));
+    //             $user->update();
+    //             DB::commit();
+    //             //loguearlo
+    //             $credentials = request([$user->username, $user->password]);
+    //             if (! $token = auth()->attempt($credentials)) {
+    //                 return response()->json(['error' => 'Usuario inválido'], 401);
+    //             }
+                
+    //             return $this->respondWithToken($token);
+
+    //             // return response()->json(['status' => '200', 'message' => 'Cambio de contraseña con éxito!'], 200);
+    //         }else{
+    //             return response()->json(['status' => '400', 'message' => 'El nombre de usuario no se encuentra registrado'], 400);
+    //         }
+            
+    //         // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json(['status' => '400', 'message' => 'Error!!'], 400);
+    //     }
+    // }
 }

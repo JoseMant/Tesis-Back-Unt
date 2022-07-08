@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\PersonaSga;
 use App\PersonaSuv;
-use App\Usuario;
+use App\User;
 
 class PersonaController extends Controller
 {
@@ -86,7 +86,7 @@ class PersonaController extends Controller
         //
     }
 
-    public function DatosAlumno($dni)
+    public function DatosAlumno(Request $request)
     {
 
         DB::beginTransaction();
@@ -94,9 +94,9 @@ class PersonaController extends Controller
             //$pass=md5(md5($request->password));
             $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo','per_login')
             // ->join('usuario','persona.idpersona','usuario.idpersona')
-            ->Where('per_dni',$dni)->first();
+            ->Where('per_dni',$request->input('dni'))->first();
             if(isset($personaSga)){
-                $usuario=new Usuario;
+                $usuario=new User;
                 $usuario->nro_matricula=$personaSga->per_login;
                 $usuario->nombres=$personaSga->per_nombres;
                 $usuario->apellidos=$personaSga->per_apellidos;
@@ -112,9 +112,9 @@ class PersonaController extends Controller
                 $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
                 'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
                 ->join('alumno','persona.idpersona','alumno.idpersona')
-                ->Where('persona.per_dni',$dni)->first();
+                ->Where('persona.per_dni',$request->input('dni'))->first();
                 if(isset($personaSuv)){
-                    $usuario=new Usuario;
+                    $usuario=new User;
                     $usuario->nro_matricula=$personaSuv->idalumno;
                     $usuario->nombres=$personaSuv->per_nombres;
                     $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
