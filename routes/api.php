@@ -37,12 +37,18 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //TRÁMITE
 Route::resource('tramites','TramiteController');
-// Route::post('pruebasFiles','TramiteController@PruebaFiles');
+Route::get('bancos','BancoController@index');
+Route::get('tipos_tramites','Tipo_TramiteController@index');
+Route::get('sedes','SedeController@index');
 
 
 
 
-// Route::resource('bancos','BancoController');
+
+
+
+//-------------------------------
+
 // Route::resource('cargos','CargoController');
 Route::resource('personas','PersonaController');
 Route::resource('usuarios','UserController');

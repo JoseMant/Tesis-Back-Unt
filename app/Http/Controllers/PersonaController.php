@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\PersonaSga;
 use App\PersonaSuv;
 use App\User;
+use App\Dependencia;
 
 class PersonaController extends Controller
 {
@@ -91,10 +92,14 @@ class PersonaController extends Controller
 
         DB::beginTransaction();
         try {
-            //$pass=md5(md5($request->password));
-            $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo','per_login')
-            // ->join('usuario','persona.idpersona','usuario.idpersona')
+            $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
+            ,'per_login','sga_sede.sed_nombre','dependencia.dep_nombre','dependencia.sdep_id')
+            ->join('perfil','persona.per_id','perfil.per_id')
+            ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
+            ->join('dependencia','dependencia.dep_id','perfil.dep_id')
             ->Where('per_dni',$request->input('dni'))->first();
+            $facultad=Dependencia::select('dep_nombre')
+            ->Where('dep_id',$personaSga->sdep_id)->first();
             if(isset($personaSga)){
                 $usuario=new User;
                 $usuario->nro_matricula=$personaSga->per_login;
@@ -104,7 +109,10 @@ class PersonaController extends Controller
                 $usuario->nro_doc=$personaSga->per_dni;
                 $usuario->correo=$personaSga->per_mail;
                 $usuario->celular=$personaSga->per_celular;
-                $usuario->sexo=$personaSga->per_sexo;;
+                $usuario->sexo=$personaSga->per_sexo;
+                $usuario->facultad=$facultad->dep_nombre;
+                $usuario->escuela=$personaSga->dep_nombre;
+                $usuario->sede=$personaSga->sed_nombre;
                 return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                 //return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSga], 200);
             }else{

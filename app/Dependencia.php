@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Banco extends Model
+class Dependencia extends Model
 {
     protected $connection = 'mysql';
-    protected $table = 'sga_banco';
-    protected $primaryKey = 'ban_id';
+    protected $table = 'dependencia';
+    protected $primaryKey = 'dep_id';
     public $timestamps = false;
     protected $fillable = [
       'ban_descripcion',
