@@ -117,7 +117,8 @@ class PersonaController extends Controller
                 //return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSga], 200);
             }else{
                 //$pass=md5(md5($request->password));
-                $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
+                return "hola";
+                return $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
                 'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
                 ->join('alumno','persona.idpersona','alumno.idpersona')
                 ->Where('persona.per_dni',$request->input('dni'))->first();

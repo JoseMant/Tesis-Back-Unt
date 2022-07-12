@@ -126,7 +126,7 @@ class TramiteController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error al registrar trámite'], 400);
+            return response()->json(['status' => '400', 'message' => $e], 400);
         }
     }
 
