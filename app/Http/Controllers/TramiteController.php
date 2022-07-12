@@ -79,7 +79,7 @@ class TramiteController extends Controller
                     $nombreBD = "/storage/vouchers_tramites/".$nombre;
                     // $nombreBD = "/storage/resoluciones_PDFs/".$nombre_imagen_con_extension";
             
-                    if($file->guessExtension()=="jpg"){
+                    if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/vouchers_tramites', $nombre);
                       $voucher->archivo = $nombreBD;
                     }

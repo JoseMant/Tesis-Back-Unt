@@ -98,9 +98,11 @@ class PersonaController extends Controller
             ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
             ->join('dependencia','dependencia.dep_id','perfil.dep_id')
             ->Where('per_dni',$request->input('dni'))->first();
-            $facultad=Dependencia::select('dep_nombre')
-            ->Where('dep_id',$personaSga->sdep_id)->first();
+            // return $facultad=Dependencia::select('dep_nombre')
+            // ->Where('dep_id',$personaSga->sdep_id)->first();
             if(isset($personaSga)){
+                $facultad=Dependencia::select('dep_nombre')
+                ->Where('dep_id',$personaSga->sdep_id)->first();
                 $usuario=new User;
                 $usuario->nro_matricula=$personaSga->per_login;
                 $usuario->nombres=$personaSga->per_nombres;
@@ -116,13 +118,12 @@ class PersonaController extends Controller
                 return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                 //return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSga], 200);
             }else{
-                //$pass=md5(md5($request->password));
-                return "hola";
                 return $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
                 'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
                 ->join('alumno','persona.idpersona','alumno.idpersona')
                 ->Where('persona.per_dni',$request->input('dni'))->first();
                 if(isset($personaSuv)){
+                    
                     $usuario=new User;
                     $usuario->nro_matricula=$personaSuv->idalumno;
                     $usuario->nombres=$personaSuv->per_nombres;
