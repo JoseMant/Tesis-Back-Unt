@@ -58,11 +58,49 @@ estado TINYINT(1) NOT NULL DEFAULT 1
 );
 
 
+CREATE TABLE unidad(
+idUnidad INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(255) NOT NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1
+);
+
+
+CREATE TABLE dependencia(
+idDependencia INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(255) NOT NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+idUnidad INT NOT NULL,
+FOREIGN KEY(idUnidad) REFERENCES unidad(idUnidad)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE cronograma(
+idCronograma INT AUTO_INCREMENT PRIMARY KEY,
+fecha_cierre_alumno DATETIME NOT NULL,
+fecha_colacion DATETIME NOT NULL,
+fecha_cierre_secretaria DATETIME NOT NULL,
+fecha_cierre_decanato DATETIME NOT NULL,
+fecha_cierre_registro_tecnico DATETIME NOT NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+idDependencia INT NOT NULL,
+FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE escuela(
+idEscuela INT AUTO_INCREMENT PRIMARY KEY,
+idDependencia INT NOT NULL,
+nombre VARCHAR(255) NOT NULL,
+descripcion_grado VARCHAR(255) NULL,
+descripcion_titulo VARCHAR(255) NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE tramite(
 idTramite INT AUTO_INCREMENT PRIMARY KEY,
 idTipo_tramite INT NOT NULL,
 nro_documento VARCHAR(30) NOT NULL,
-idColacion INT NOT NULL,
+idCronograma INT NOT NULL,
 idVoucher INT NOT NULL,
 idEstado_tramite INT NOT NULL,
 estado TINYINT(1) NOT NULL DEFAULT 1,
@@ -72,6 +110,7 @@ exonerado TINYINT(1) NOT NULL DEFAULT 0,
 codigo VARCHAR(15) NOT NULL,
 FOREIGN KEY(idTipo_tramite) REFERENCES tipo_tramite(idTipo_tramite)ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(idEstado_tramite) REFERENCES estado_tramite(idEstado_tramite)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(idCronograma) REFERENCES cronograma(idCronograma)ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(idVoucher) REFERENCES voucher(idVoucher)ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -107,8 +146,14 @@ estado TINYINT(1) NOT NULL DEFAULT 1
 );
 
 
-CREATE TABLE unidad(
-idUnidad INT AUTO_INCREMENT PRIMARY KEY,
-nombre VARCHAR(255) NOT NULL,
-estado TINYINT(1) NOT NULL DEFAULT 1
+CREATE TABLE tipo_tramite_unidad(
+idTipo_tramite_unidad INT AUTO_INCREMENT PRIMARY KEY,
+idTipo_Tramite INT NOT NULL,
+idUnidad INT NOT NULL,
+descripcion VARCHAR(255) NOT NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+FOREIGN KEY(idTipo_Tramite) REFERENCES tipo_tramite(idTipo_Tramite)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(idUnidad) REFERENCES unidad(idUnidad)ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+

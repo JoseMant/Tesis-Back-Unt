@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Unidad;
-class UnidadController extends Controller
+use App\Tipo_tramite_unidad;
+class Tipo_Tramite_UnidadController extends Controller
 {
     public function __construct()
     {
@@ -17,7 +17,7 @@ class UnidadController extends Controller
      */
     public function index()
     {
-        return Unidad::all();
+        return Tipo_tramite_unidad::all();
     }
 
     /**
@@ -84,5 +84,11 @@ class UnidadController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getById($idTipo_tramite,$idUnidad){
+        return Tipo_tramite_unidad::where('idTipo_tramite',$idTipo_tramite)
+        ->where('idUnidad',$idUnidad)
+        ->get();
     }
 }

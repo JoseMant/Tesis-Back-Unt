@@ -64,21 +64,8 @@ class TramiteController extends Controller
 
                 if($request->hasFile("archivo")){
                     $file=$request->file("archivo");
-            
-                    // EL NOMBRE DEL VOUCHER SERÁ EL NÚMERO DE DNI
-                    $nro_doc=$request->input('nro_documento');
-
-                    // Vemos el número de oficio que es.
-                    // $aux = str_replace("RESOLUCIÓN DE CONSEJO UNIVERSITARIO N° ", "", $request->input('nombre_resolucion'));
-                    // $num_oficio = str_replace("/UNT", "", $aux);
-            
-                    // nomenclatura de los PDFs: RCU-N-029-2021-UNT.pdf
-                    // $nombre = "RCU-N-".$num_oficio."-UNT.".$file->guessExtension();
                     $nombre = $file->getClientOriginalName();
-                    // $nombreBD = "/storage/resoluciones_PDFs/RCU-N-".$num_oficio."-UNT.".$file->guessExtension();
-                    $nombreBD = "/storage/vouchers_tramites/".$nombre;
-                    // $nombreBD = "/storage/resoluciones_PDFs/".$nombre_imagen_con_extension";
-            
+                    $nombreBD = "/storage/vouchers_tramites/".$nombre;            
                     if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/vouchers_tramites', $nombre);
                       $voucher->archivo = $nombreBD;
@@ -90,7 +77,7 @@ class TramiteController extends Controller
                 $tramite=new Tramite;
                 $tramite -> idTipo_tramite=$request->input('idTipo_tramite');
                 $tramite -> nro_documento=$request->input('nro_documento');
-                $tramite -> idColacion=$request->input('idColacion');
+                $tramite -> idCronograma=$request->input('idCronograma');
                 $tramite -> idVoucher=$voucher->idVoucher;
                 $tramite -> idEstado_tramite=$request->input('idEstado_tramite');
                 $tramite -> idModalidad_grado=$request->input('idModalidad_grado');
