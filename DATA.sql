@@ -31,7 +31,8 @@ INSERT INTO tipo_tramite_unidad(idTipo_Tramite,idUnidad,descripcion) VALUES(1,1,
 (1,2,'CERTIFICADO DE ESTUDIOS DE 3 AÑO');
 
 
-INSERT INTO dependencia(nombre,idUnidad) VALUES('FACULTAD DE INGENIERIA',1);
+INSERT INTO dependencia(nombre,idUnidad) VALUES('FACULTAD DE INGENIERIA',1),
+('FACULTAD DE CIENCIAS BIOLOGICAS',1);
 
 
 INSERT INTO cronograma(idDependencia,fecha_cierre_alumno,fecha_colacion,fecha_cierre_secretaria,fecha_cierre_decanato,fecha_cierre_registro_tecnico) 
@@ -39,7 +40,9 @@ VALUES(1,23/01/2022,23/02/2022,23/03/2022,23/04/2022,23/05/2022);
 
 INSERT INTO escuela(idDependencia,nombre,descripcion_grado,descripcion_titulo) VALUES(1,'ESCUELA DE INGENIERIA DE SISTEMAS','DESCRIPCION_GRADO','DESCRIPCION_TITULO'),
 (1,'ESCUELA DE INGENIERIA CIVIL','DESCRIPCION_GRADO','DESCRIPCION_TITULO'),
-(1,'ESCUELA DE INGENIERIA DE MINAS','DESCRIPCION_GRADO','DESCRIPCION_TITULO');
+(1,'ESCUELA DE INGENIERIA DE MINAS','DESCRIPCION_GRADO','DESCRIPCION_TITULO'),
+(2,'ESCUELA PROFESIONAL DE CIENCIAS BIOLOGICAS','DESCRIPCION_GRADO','DESCRIPCION_TITULO')
+;
 
 /*INSERT INTO voucher(entidad,nro_operacion,fecha_operacion,archivo) VALUES('BCP','215484',23/03/1997,'voucher.jpg');
 

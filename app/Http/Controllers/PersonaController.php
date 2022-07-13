@@ -190,9 +190,8 @@ class PersonaController extends Controller
                     ->Where('dep_id',$personaSga->sdep_id)->first();
                     // Seleccionamos la facultad del alumno en la bd del sistema
                     $dependencia= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
-                    $dependencia->escuelas=Escuela::where('idDependencia',$dependencia->idDependencia)->get();
+                    $dependencia->escuela=Escuela::where('nombre',$personaSga->dep_nombre)->get();
                     return response()->json(['status' => '200', 'facultad' => $dependencia], 200);
-                    //return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSga], 200);
                 }else{
                     $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
                     'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.estr_descripcion'
@@ -203,9 +202,11 @@ class PersonaController extends Controller
                     ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
                     ->Where('persona.per_dni',$dni)->first();
                     if(isset($personaSuv)){
-                        return $facultad=Estructura::select('estr_descripcion')
+                        $facultad=Estructura::select('estr_descripcion')
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
-
+                        $dependencia= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
+                        $dependencia->escuela=Escuela::where('nombre',$personaSuv->estr_descripcion)->get();
+                        return response()->json(['status' => '200', 'facultad' => $dependencia], 200);
                         // $usuario=new User;
                         // $usuario->nro_matricula=$personaSuv->idalumno;
                         // $usuario->nombres=$personaSuv->per_nombres;
