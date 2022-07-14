@@ -47,11 +47,16 @@ class TramiteController extends Controller
     {
         DB::beginTransaction();
         try {
-            
-            $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
+            // se tiene que validar tmb el nro de documento 
+            $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
             ->where('fecha_operacion',$request->input('fecha_operacion'))
-            ->first();
-            if($voucherValidate){
+            ->where('nro_documento',$request->input('nro_documento'))
+            ->get();
+            // $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
+            // ->where('fecha_operacion',$request->input('fecha_operacion'))
+            // ->first();
+            if($tramiteValidate){
                 return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado!!'], 400);
             }else{
                 // REGISTRAMOS LE VOUCHER

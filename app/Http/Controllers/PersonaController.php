@@ -154,7 +154,6 @@ class PersonaController extends Controller
                     $usuario->escuela=$personaSuv->estr_descripcion;
                     $usuario->sede=$personaSuv->sed_descripcion;
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
-                    // return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSuv], 200);
                 }else{
                     // verificamos en la bd del sga
                     $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
@@ -183,10 +182,7 @@ class PersonaController extends Controller
                         return response()->json([ 'message' => 'Alumno no encontrado.']);
                     }
                 }
-            }
-
-
-            
+            }            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => 'Error!!!'], 400);
@@ -255,7 +251,6 @@ class PersonaController extends Controller
                 $token = JWTAuth::getToken();
                 $apy = JWTAuth::getPayload($token);
                 $dni=$apy['nro_doc'];
-
                 //obtenemos uno(cualquiera) para sacar la dependencia
                 $personaSE=PersonaSE::select('segunda_especialidad.nombre')
                     ->join('mencion','alumno.idMencion','mencion.idMencion')
