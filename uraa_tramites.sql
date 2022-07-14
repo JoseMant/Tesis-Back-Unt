@@ -1,6 +1,6 @@
-DROP DATABASE uraa_tramites
-CREATE DATABASE uraa_tramites
-USE uraa_tramites
+DROP DATABASE uraa_tramites;
+CREATE DATABASE uraa_tramites;
+USE uraa_tramites;
 
 CREATE TABLE tipo_usuario(
  idTipoUsuario INT AUTO_INCREMENT PRIMARY KEY,

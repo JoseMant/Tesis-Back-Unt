@@ -45,6 +45,7 @@ Route::get('tipos_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_U
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
 
 
+Route::resource('alumnosSE','PersonaSEController');
 
 
 

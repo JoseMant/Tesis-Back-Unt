@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\PersonaSga;
 use App\PersonaSuv;
+use App\PersonaSE;
 use App\User;
 use App\Dependencia;
 use App\DependenciaURAA;
@@ -154,6 +155,9 @@ class PersonaController extends Controller
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                     // return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSuv], 200);
                 }else{
+                    // return $personaSE=PersonaSE::select('*')
+                    // ->join('mencion','alumno.idMencion','mencion.idMencion')
+                    // ->Where('persona.per_dni',$request->input('dni'))->first();
                     return response()->json([ 'message' => 'Alumno no encontrado.']);
                 }
             }
@@ -184,15 +188,19 @@ class PersonaController extends Controller
                 ->join('perfil','persona.per_id','perfil.per_id')
                 ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
                 ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-                ->Where('per_dni',$dni)->first();
+                    ->Where('per_dni',$dni)->first();
                 if(isset($personaSga)){
                     $facultad=Dependencia::select('dep_nombre')
                     ->Where('dep_id',$personaSga->sdep_id)->first();
                     // Seleccionamos la facultad del alumno en la bd del sistema
-                    $dependencia= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
-                    $dependencia->escuela=Escuela::where('nombre',$personaSga->dep_nombre)->get();
-                    return response()->json(['status' => '200', 'facultad' => $dependencia], 200);
+                    $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
+                    $dependenciaSGA->escuela=Escuela::where('nombre',$personaSga->dep_nombre)->get();
+                    return response()->json(['status' => '200', 'facultad' => $dependenciaSGA], 200);
                 }else{
+                    // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+                    $token = JWTAuth::getToken();
+                    $apy = JWTAuth::getPayload($token);
+                    $dni=$apy['nro_doc'];
                     $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
                     'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.estr_descripcion'
                     ,'patrimonio.estructura.iddependencia')
@@ -200,33 +208,15 @@ class PersonaController extends Controller
                     ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
                     ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
                     ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
-                    ->Where('persona.per_dni',$dni)->first();
+                        ->Where('persona.per_dni',$dni)->first();
                     if(isset($personaSuv)){
                         $facultad=Estructura::select('estr_descripcion')
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
-                        $dependencia= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
-                        $dependencia->escuela=Escuela::where('nombre',$personaSuv->estr_descripcion)->get();
-                        return response()->json(['status' => '200', 'facultad' => $dependencia], 200);
-                        // $usuario=new User;
-                        // $usuario->nro_matricula=$personaSuv->idalumno;
-                        // $usuario->nombres=$personaSuv->per_nombres;
-                        // $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
-                        // $usuario->tipo_doc=$personaSuv->per_tipo_documento;
-                        // $usuario->nro_doc=$personaSuv->per_dni;
-                        // $usuario->correo=$personaSuv->per_email;
-                        // $usuario->celular=$personaSuv->per_celular;
-                        // if ($personaSuv->per_sexo==0) {
-                        //     $usuario->sexo="F";
-                        // }else{
-                        //     $usuario->sexo="M";
-                        // }
-                        // $usuario->facultad=$facultad->estr_descripcion;
-                        // $usuario->escuela=$personaSuv->estr_descripcion;
-                        // $usuario->sede=$personaSuv->sed_descripcion;
-                        return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
-                        // return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSuv], 200);
+                        $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
+                        $dependenciaSUV->escuela=Escuela::where('nombre',$personaSuv->estr_descripcion)->get();
+                        return response()->json(['status' => '200', 'facultad' => $dependenciaSUV], 200);
                     }else{
-                        return response()->json([ 'message' => 'Alumno no encontrado.']);
+                        return response()->json(['status' => '400', 'message' => 'Alumno no encontrado'], 400);
                     }
                 }
             }else if($idUnidad==2){ //doctorado
@@ -235,11 +225,19 @@ class PersonaController extends Controller
                 // donde
             }else{
                 // verifico facultad en segunda especialidad
+                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+                $token = JWTAuth::getToken();
+                $apy = JWTAuth::getPayload($token);
+                $dni=$apy['nro_doc'];
+                return $personaSE=PersonaSE::select('*')
+                    ->join('mencion','alumno.idMencion','mencion.idMencion')
+                    ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
+                    ->Where('alumno.nro_documento',$dni)->first();
             } 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => 'Error!!!'], 400);
             //return redirect()->route('alumno.show', $resolucion->idResolucion) -> with('error', 'Error al registrar alumno');
-        }      
+        }
     }
 }
