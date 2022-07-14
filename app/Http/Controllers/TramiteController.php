@@ -83,6 +83,8 @@ class TramiteController extends Controller
                 $tramite -> idModalidad_grado=$request->input('idModalidad_grado');
                 $tramite -> descripcion_estado=$request->input('descripcion_estado');
                 $tramite -> codigo=$request->input('codigo');
+                $tramite -> idDependencia=$request->input('idDependencia');
+                $tramite -> idDependencia_detalle=$request->input('idDependencia_detalle');
                 $tramite -> save();
 
                 // GUARDAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO

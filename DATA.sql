@@ -46,7 +46,7 @@ INSERT INTO escuela(idDependencia,nombre_sga,nombre_suv,descripcion_grado,descri
 (2,'ESCUELA DE CIENCIAS BIOLOGICAS','ESCUELA PROFESIONAL DE CIENCIAS BIOLOGICAS','DESCRIPCION_GRADO','DESCRIPCION_TITULO')
 ;
 
-INSERT INTO mencion() VALUES();
+
 
 /*INSERT INTO voucher(entidad,nro_operacion,fecha_operacion,archivo) VALUES('BCP','215484',23/03/1997,'voucher.jpg');
 

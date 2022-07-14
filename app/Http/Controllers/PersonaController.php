@@ -101,30 +101,31 @@ class PersonaController extends Controller
 
         DB::beginTransaction();
         try {
-            $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
-            ,'per_login','sga_sede.sed_nombre','dependencia.dep_nombre','dependencia.sdep_id')
-            ->join('perfil','persona.per_id','perfil.per_id')
-            ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
-            ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-            ->Where('per_dni',$request->input('dni'))->first();
-            if(isset($personaSga)){
-                $facultad=Dependencia::select('dep_nombre')
-                ->Where('dep_id',$personaSga->sdep_id)->first();
+            // verificamos en la bd de SE
+            $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
+            ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo','segunda_especialidad.nombre as dependencia',
+            'mencion.nombre as mencion','sede.nombre as sede')
+                    ->join('mencion','alumno.idMencion','mencion.idMencion')
+                    ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
+                    ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                    ->join('sede','matricula.idSede','matricula.idSede')
+                    ->Where('alumno.nro_documento',$request->input('dni'))->first();
+            if($personaSE){
                 $usuario=new User;
-                $usuario->nro_matricula=$personaSga->per_login;
-                $usuario->nombres=$personaSga->per_nombres;
-                $usuario->apellidos=$personaSga->per_apellidos;
-                $usuario->tipo_doc=1;
-                $usuario->nro_doc=$personaSga->per_dni;
-                $usuario->correo=$personaSga->per_mail;
-                $usuario->celular=$personaSga->per_celular;
-                $usuario->sexo=$personaSga->per_sexo;
-                $usuario->facultad=$facultad->dep_nombre;
-                $usuario->escuela=$personaSga->dep_nombre;
-                $usuario->sede=$personaSga->sed_nombre;
+                $usuario->nro_matricula=$personaSE->codigo;
+                $usuario->nombres=$personaSE->nombre;
+                $usuario->apellidos=$personaSE->paterno." ".$personaSE->materno;
+                $usuario->tipo_doc=$personaSE->idTipo_documento;
+                $usuario->nro_doc=$personaSE->nro_documento;
+                $usuario->correo=$personaSE->correo_personal;
+                $usuario->celular=$personaSE->celular;
+                $usuario->sexo=$personaSE->sexo;
+                $usuario->dependencia=$personaSE->dependencia;
+                $usuario->mencion=$personaSE->mencion;
+                $usuario->sede=$personaSE->sede;
                 return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
-                //return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSga], 200);
             }else{
+                // verificamos en la bd del suv
                 $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
                 'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.estr_descripcion'
                 ,'patrimonio.estructura.iddependencia')
@@ -133,7 +134,7 @@ class PersonaController extends Controller
                 ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
                 ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
                 ->Where('persona.per_dni',$request->input('dni'))->first();
-                if(isset($personaSuv)){
+                if($personaSuv){
                     $facultad=Estructura::select('estr_descripcion')
                     ->Where('idestructura',$personaSuv->iddependencia)->first();
                     $usuario=new User;
@@ -155,12 +156,37 @@ class PersonaController extends Controller
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                     // return response()->json(['status' => '200', 'message' => 'Sesión iniciada correctamente.', 'datos_alumno' => $personaSuv], 200);
                 }else{
-                    // return $personaSE=PersonaSE::select('*')
-                    // ->join('mencion','alumno.idMencion','mencion.idMencion')
-                    // ->Where('persona.per_dni',$request->input('dni'))->first();
-                    return response()->json([ 'message' => 'Alumno no encontrado.']);
+                    // verificamos en la bd del sga
+                    $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
+                    ,'per_login','sga_sede.sed_nombre','dependencia.dep_nombre','dependencia.sdep_id')
+                    ->join('perfil','persona.per_id','perfil.per_id')
+                    ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
+                    ->join('dependencia','dependencia.dep_id','perfil.dep_id')
+                    ->Where('per_dni',$request->input('dni'))->first();
+                    if($personaSga){
+                        $facultad=Dependencia::select('dep_nombre')
+                        ->Where('dep_id',$personaSga->sdep_id)->first();
+                        $usuario=new User;
+                        $usuario->nro_matricula=$personaSga->per_login;
+                        $usuario->nombres=$personaSga->per_nombres;
+                        $usuario->apellidos=$personaSga->per_apellidos;
+                        $usuario->tipo_doc=1;
+                        $usuario->nro_doc=$personaSga->per_dni;
+                        $usuario->correo=$personaSga->per_mail;
+                        $usuario->celular=$personaSga->per_celular;
+                        $usuario->sexo=$personaSga->per_sexo;
+                        $usuario->dependencia=$facultad->dep_nombre;
+                        $usuario->mencion=$personaSga->dep_nombre;
+                        $usuario->sede=$personaSga->sed_nombre;
+                        return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+                    }else{
+                        return response()->json([ 'message' => 'Alumno no encontrado.']);
+                    }
                 }
             }
+
+
+            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => 'Error!!!'], 400);
