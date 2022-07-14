@@ -89,9 +89,20 @@ FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCAD
 CREATE TABLE escuela(
 idEscuela INT AUTO_INCREMENT PRIMARY KEY,
 idDependencia INT NOT NULL,
-nombre VARCHAR(255) NOT NULL,
+nombre_sga VARCHAR(255) NOT NULL,
+nombre_suv VARCHAR(255) NOT NULL,
 descripcion_grado VARCHAR(255) NULL,
 descripcion_titulo VARCHAR(255) NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE mencion(
+idEscuela INT AUTO_INCREMENT PRIMARY KEY,
+idDependencia INT NOT NULL,
+nombre VARCHAR(255) NOT NULL,
+nombre_especialidad VARCHAR(255) NOT NULL,
 estado TINYINT(1) NOT NULL DEFAULT 1,
 FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCADE ON UPDATE CASCADE
 );

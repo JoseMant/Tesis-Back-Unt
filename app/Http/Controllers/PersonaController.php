@@ -194,7 +194,7 @@ class PersonaController extends Controller
                     ->Where('dep_id',$personaSga->sdep_id)->first();
                     // Seleccionamos la facultad del alumno en la bd del sistema
                     $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
-                    $dependenciaSGA->escuela=Escuela::where('nombre',$personaSga->dep_nombre)->get();
+                    $dependenciaSGA->escuela=Escuela::where('nombre_sga',$personaSga->dep_nombre)->get();
                     return response()->json(['status' => '200', 'facultad' => $dependenciaSGA], 200);
                 }else{
                     // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -213,7 +213,7 @@ class PersonaController extends Controller
                         $facultad=Estructura::select('estr_descripcion')
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
                         $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
-                        $dependenciaSUV->escuela=Escuela::where('nombre',$personaSuv->estr_descripcion)->get();
+                        $dependenciaSUV->escuela=Escuela::where('nombre_suv',$personaSuv->estr_descripcion)->get();
                         return response()->json(['status' => '200', 'facultad' => $dependenciaSUV], 200);
                     }else{
                         return response()->json(['status' => '400', 'message' => 'Alumno no encontrado'], 400);
@@ -229,10 +229,17 @@ class PersonaController extends Controller
                 $token = JWTAuth::getToken();
                 $apy = JWTAuth::getPayload($token);
                 $dni=$apy['nro_doc'];
-                return $personaSE=PersonaSE::select('*')
+
+                //obtenemos uno(cualquiera) para sacar la dependencia
+                $personaSE=PersonaSE::select('segunda_especialidad.nombre')
                     ->join('mencion','alumno.idMencion','mencion.idMencion')
                     ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
                     ->Where('alumno.nro_documento',$dni)->first();
+                $dependencia = DependenciaURAA::where('nombre',strtoupper($personaSE->nombre))->first();
+                $dependencia->menciones=PersonaSE::select('mencion.*')
+                ->join('mencion','alumno.idMencion','mencion.idMencion')
+                ->Where('alumno.nro_documento',$dni)->get();
+                return $dependencia;
             } 
         } catch (\Exception $e) {
             DB::rollback();
