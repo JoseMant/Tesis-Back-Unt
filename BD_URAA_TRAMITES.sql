@@ -542,7 +542,9 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `uraa_tramite`;
-INSERT INTO `uraa_tramite`.`requisito` (`idRequisito`, `idTipo_tramite`, `descripcion`, `estado`) VALUES (DEFAULT, 2, 'CONSTANCIA DE EXONERACION', 1);
+INSERT INTO `uraa_tramite`.`requisito` (`idRequisito`, `idTipo_tramite`, `descripcion`, `estado`) VALUES (DEFAULT, 2, 'CONSTANCIA DE EXONERACION', 1),
+(DEFAULT, 1, 'COPIA DE DNI', 1)
+;
 
 COMMIT;
 
