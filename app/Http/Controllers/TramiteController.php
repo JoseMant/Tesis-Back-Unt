@@ -50,9 +50,9 @@ class TramiteController extends Controller
         try {
             // se tiene que validar tmb el nro de documento 
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
-            ->where('fecha_operacion',$request->input('fecha_operacion'))
-            ->where('nro_documento',$request->input('nro_documento'))
+            ->Where('entidad',trim($request->entidad))->where('nro_operacion',trim($request->nro_operacion))
+            ->where('fecha_operacion',trim($request->fecha_operacion))
+            ->where('nro_documento',trim($request->nro_documento))
             ->get();
             // $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
             // ->where('fecha_operacion',$request->input('fecha_operacion'))
@@ -80,24 +80,24 @@ class TramiteController extends Controller
 
                 // REGISTRAMOS EL TRÁMITE
                 $tramite=new Tramite;
-                $tramite -> idTipo_tramite=$request->input('idTipo_unidad_tramite');
-                $tramite -> nro_documento=$request->input('nro_documento');
-                $tramite -> codigo=$request->input('nro_tramite');
+                $tramite -> idTipo_tramite=trim($request->idTipo_unidad_tramite);
+                $tramite -> nro_documento=trim($request->nro_documento);
+                $tramite -> codigo=trim($request->nro_tramite);
                 $tramite -> idVoucher=$voucher->idVoucher;
-                $tramite -> idEstado_tramite=$request->input('idEstado_tramite');
-                $tramite -> idDependencia_detalle=$request->input('idDependencia_detalle');
-                $tramite -> idDependencia=$request->input('idDependencia');
-                $tramite -> descripcion_estado=$request->input('des_estado_tramite');
+                $tramite -> idEstado_tramite=trim($request->idEstado_tramite);
+                $tramite -> idDependencia_detalle=trim($request->idDependencia_detalle);
+                $tramite -> idDependencia=trim($request->idDependencia);
+                $tramite -> descripcion_estado=trim($request->des_estado_tramite);
                 $tramite -> save();
                 
 
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
                 $tramite_detalle=new Tramite_Detalle();
-                $tramite_detalle->idCronograma_carpeta=$request->idCronograma_carpeta;
-                $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
-                $tramite_detalle->exonerado_carpeta=$request->exonerado_carpeta;
-                $tramite_detalle->motivo_certificado=$request->idMotivo_certificado;
-                $tramite_detalle->objeto_solicitud_certificado=$request->objeto_solicitud_certificado;
+                $tramite_detalle->idCronograma_carpeta=trim($request->idCronograma_carpeta);
+                $tramite_detalle->idModalidad_carpeta=trim($request->idModalidad_carpeta);
+                $tramite_detalle->exonerado_carpeta=trim($request->exonerado_carpeta);
+                $tramite_detalle->motivo_certificado=trim($request->idMotivo_certificado);
+                $tramite_detalle->objeto_solicitud_certificado=trim($request->objeto_solicitud_certificado);
                 $tramite_detalle->idTramite=$tramite->idTramite;
 
                 // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
