@@ -108,7 +108,7 @@ class PersonaController extends Controller
                     ->join('mencion','alumno.idMencion','mencion.idMencion')
                     ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
                     ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                    ->join('sede','matricula.idSede','matricula.idSede')
+                    ->join('sede','matricula.idSede','sede.idSede')
                     ->Where('alumno.nro_documento',$request->input('dni'))->first();
             if($personaSE){
                 $usuario=new User;
@@ -175,7 +175,7 @@ class PersonaController extends Controller
                         $usuario->celular=$personaSga->per_celular;
                         $usuario->sexo=$personaSga->per_sexo;
                         $usuario->dependencia=$facultad->dep_nombre;
-                        $usuario->mencion=$personaSga->dep_nombre;
+                        $usuario->escuela=$personaSga->dep_nombre;
                         $usuario->sede=$personaSga->sed_nombre;
                         return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                     }else{
@@ -197,16 +197,15 @@ class PersonaController extends Controller
     {
         // return $idUnidad."-".$dni;
         try{
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $dni=$apy['nro_doc'];
+            // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
-                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                $token = JWTAuth::getToken();
-                $apy = JWTAuth::getPayload($token);
-                $dni=$apy['nro_doc'];
-                // return $user=JWTAuth::user();
-
                 // verificar facultad en el sga o suv
                 $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
-                ,'per_login','sga_sede.sed_nombre','dependencia.dep_nombre','dependencia.sdep_id')
+                ,'per_login','sga_sede.sed_nombre','dependencia.dep_id','dependencia.dep_nombre','dependencia.sdep_id')
                 ->join('perfil','persona.per_id','perfil.per_id')
                 ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
                 ->join('dependencia','dependencia.dep_id','perfil.dep_id')
@@ -216,16 +215,14 @@ class PersonaController extends Controller
                     ->Where('dep_id',$personaSga->sdep_id)->first();
                     // Seleccionamos la facultad del alumno en la bd del sistema
                     $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
-                    $dependenciaSGA->escuela=Escuela::where('nombre_sga',$personaSga->dep_nombre)->get();
+                    $dependenciaSGA->escuela=Escuela::where('idSga',$personaSga->dep_id)->first();
+                    $dependenciaSGA->escuela->nro_matricula=$personaSga->per_login;
+                    $dependenciaSGA->escuela->sede=$personaSga->sed_nombre;
                     return response()->json(['status' => '200', 'facultad' => $dependenciaSGA], 200);
                 }else{
-                    // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                    $token = JWTAuth::getToken();
-                    $apy = JWTAuth::getPayload($token);
-                    $dni=$apy['nro_doc'];
                     $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
-                    'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.estr_descripcion'
-                    ,'patrimonio.estructura.iddependencia')
+                    'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura'
+                    ,'patrimonio.estructura.estr_descripcion','patrimonio.estructura.iddependencia')
                     ->join('alumno','persona.idpersona','alumno.idpersona')
                     ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
                     ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
@@ -235,7 +232,9 @@ class PersonaController extends Controller
                         $facultad=Estructura::select('estr_descripcion')
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
                         $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
-                        $dependenciaSUV->escuela=Escuela::where('nombre_suv',$personaSuv->estr_descripcion)->get();
+                        $dependenciaSUV->escuela=Escuela::where('idSuv',$personaSuv->idestructura)->first();
+                        $dependenciaSUV->escuela->nro_matricula=$personaSuv->idalumno;
+                        $dependenciaSUV->escuela->sede=$personaSuv->sed_descripcion;
                         return response()->json(['status' => '200', 'facultad' => $dependenciaSUV], 200);
                     }else{
                         return response()->json(['status' => '400', 'message' => 'Alumno no encontrado'], 400);
@@ -246,20 +245,24 @@ class PersonaController extends Controller
             }else if($idUnidad==3){ //maestría
                 // donde
             }else{
-                // verifico facultad en segunda especialidad
-                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                $token = JWTAuth::getToken();
-                $apy = JWTAuth::getPayload($token);
-                $dni=$apy['nro_doc'];
                 //obtenemos uno(cualquiera) para sacar la dependencia
                 $personaSE=PersonaSE::select('segunda_especialidad.nombre')
                     ->join('mencion','alumno.idMencion','mencion.idMencion')
                     ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
+                    ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                    ->join('sede','matricula.idSede','sede.idSede')
                     ->Where('alumno.nro_documento',$dni)->first();
                 $dependencia = DependenciaURAA::where('nombre',strtoupper($personaSE->nombre))->first();
-                $dependencia->menciones=PersonaSE::select('mencion.*')
+                $dependencia->menciones=PersonaSE::select('alumno.idAlumno','alumno.codigo as nro_matricula','mencion.*')
                 ->join('mencion','alumno.idMencion','mencion.idMencion')
                 ->Where('alumno.nro_documento',$dni)->get();
+                foreach($dependencia->menciones as $mencion){
+                    $sede=PersonaSE::select('sede.nombre')
+                    ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                    ->join('sede','matricula.idSede','sede.idSede')
+                    ->Where('alumno.idAlumno',$mencion->idAlumno)->first();
+                    $mencion->sede=$sede->nombre;
+                }
                 return $dependencia;
             } 
         } catch (\Exception $e) {

@@ -33,7 +33,6 @@ FOREIGN KEY(idTipoUsuario) REFERENCES tipo_usuario(idTipoUsuario)ON DELETE CASCA
 CREATE TABLE tipo_tramite(
 idTipo_tramite INT AUTO_INCREMENT PRIMARY KEY,
 descripcion VARCHAR(255) NOT NULL,
-pago FLOAT NOT NULL,
 estado TINYINT(1) NOT NULL DEFAULT 1
 );
 
@@ -89,6 +88,7 @@ FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCAD
 CREATE TABLE escuela(
 idEscuela INT AUTO_INCREMENT PRIMARY KEY,
 idDependencia INT NOT NULL,
+nombre VARCHAR(255) NOT NULL,
 idSga INT NOT NULL,
 idSuv INT NOT NULL,
 descripcion_grado VARCHAR(255) NULL,
@@ -107,24 +107,33 @@ estado TINYINT(1) NOT NULL DEFAULT 1,
 FOREIGN KEY(idDependencia) REFERENCES dependencia(idDependencia)ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+
+CREATE TABLE tipo_tramite_unidad(
+idTipo_tramite_unidad INT AUTO_INCREMENT PRIMARY KEY,
+idTipo_Tramite INT NOT NULL,
+idUnidad INT NOT NULL,
+descripcion VARCHAR(255) NOT NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+costo FLOAT NOT NULL,
+FOREIGN KEY(idTipo_Tramite) REFERENCES tipo_tramite(idTipo_Tramite)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(idUnidad) REFERENCES unidad(idUnidad)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
 CREATE TABLE tramite(
 idTramite INT AUTO_INCREMENT PRIMARY KEY,
-idTipo_tramite INT NOT NULL,
+idTipo_tramite_unidad INT NOT NULL,
 nro_documento VARCHAR(30) NOT NULL,
-idCronograma INT NOT NULL,
+nro_tramite VARCHAR(15) NOT NULL,
 idVoucher INT NOT NULL,
 idEstado_tramite INT NOT NULL,
-estado TINYINT(1) NOT NULL DEFAULT 1,
-idModalidad_grado INT NULL,
-descripcion_estado TEXT NULL,
-exonerado TINYINT(1) NOT NULL DEFAULT 0,
-codigo VARCHAR(15) NOT NULL,
-idDependencia INT NOT NULL,
 idDependencia_detalle INT NOT NULL,
-FOREIGN KEY(idTipo_tramite) REFERENCES tipo_tramite(idTipo_tramite)ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(idEstado_tramite) REFERENCES estado_tramite(idEstado_tramite)ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(idCronograma) REFERENCES cronograma(idCronograma)ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(idVoucher) REFERENCES voucher(idVoucher)ON DELETE CASCADE ON UPDATE CASCADE
+idDependencia INT NOT NULL,
+des_estado_tramite TEXT NULL,
+estado TINYINT(1) NOT NULL DEFAULT 1,
+FOREIGN KEY(idVoucher) REFERENCES voucher(idVoucher)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(idTipo_tramite_unidad) REFERENCES tipo_tramite_unidad(idTipo_tramite_unidad)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(idEstado_tramite) REFERENCES estado_tramite(idEstado_tramite)ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
@@ -142,6 +151,8 @@ idRequisito INT NOT NULL,
 idTramite INT NOT NULL,
 archivo VARCHAR(255) NULL,
 estado TINYINT(1) NOT NULL DEFAULT 1,
+idUsuario_aprobador INT NULL,
+validado TINYINT(1) NOT NULL DEFAULT 0,
 PRIMARY KEY(idTramite,idRequisito),
 FOREIGN KEY(idTramite) REFERENCES tramite(idTramite)ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(idRequisito) REFERENCES requisitos(idRequisito)ON DELETE CASCADE ON UPDATE CASCADE
@@ -159,14 +170,6 @@ estado TINYINT(1) NOT NULL DEFAULT 1
 );
 
 
-CREATE TABLE tipo_tramite_unidad(
-idTipo_tramite_unidad INT AUTO_INCREMENT PRIMARY KEY,
-idTipo_Tramite INT NOT NULL,
-idUnidad INT NOT NULL,
-descripcion VARCHAR(255) NOT NULL,
-estado TINYINT(1) NOT NULL DEFAULT 1,
-FOREIGN KEY(idTipo_Tramite) REFERENCES tipo_tramite(idTipo_Tramite)ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(idUnidad) REFERENCES unidad(idUnidad)ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 
 
