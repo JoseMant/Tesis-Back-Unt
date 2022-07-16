@@ -104,11 +104,11 @@ class AuthController extends Controller
         $response['idUsuario']=$user->idUsuario;
         $response['username']=$user->username;
         $response['estado']=$user->estado;
-        $response['nro_matricula']=$user->nro_matricula;
+        // $response['nro_matricula']=$user->nro_matricula;
         $response['nombres']=$user->nombres;
         $response['apellidos']=$user->apellidos;
-        $response['tipo_doc']=$user->tipo_doc;
-        $response['nro_doc']=$user->nro_doc;
+        $response['tipo_documento']=$user->tipo_documento;
+        $response['nro_documento']=$user->nro_documento;
         $response['correo']=$user->correo;
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
