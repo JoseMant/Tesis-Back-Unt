@@ -532,7 +532,7 @@ START TRANSACTION;
 USE `uraa_tramite`;
 INSERT INTO `uraa_tramite`.`dependencia` (`idDependencia`, `idUnidad`, `nombre`, `estado`) VALUES (DEFAULT, 1, 'FACULTAD DE INGENIERIA', 1);
 INSERT INTO `uraa_tramite`.`dependencia` (`idDependencia`, `idUnidad`, `nombre`, `estado`) VALUES (DEFAULT, 1, 'FACULTAD DE CIENCIAS BIOLOGICAS', 1);
-INSERT INTO `uraa_tramite`.`dependencia` (`idDependencia`, `idUnidad`, `nombre`, `estado`) VALUES (DEFAULT, 4, 'SEGUNDA ESPECIALIDAD PROFESIONAL DE ENFERMERIA', 1);
+INSERT INTO `uraa_tramite`.`dependencia` (`idDependencia`, `idUnidad`, `nombre`, `estado`) VALUES (DEFAULT, 4, 'SEGUNDA ESPECIALIDAD PROFESIONAL EN ENFERMERÍA', 1);
 
 COMMIT;
 

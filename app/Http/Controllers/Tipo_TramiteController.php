@@ -14,7 +14,7 @@ class Tipo_TramiteController extends Controller
      */
     public function index()
     {
-        return Tipo_tramite::select('idTipo_tramite','descripcion','pago')->get();
+        return Tipo_tramite::select('idTipo_tramite','descripcion')->get();
     }
 
     /**

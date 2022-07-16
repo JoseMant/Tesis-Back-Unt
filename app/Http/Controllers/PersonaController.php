@@ -200,7 +200,7 @@ class PersonaController extends Controller
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
-            $dni=$apy['nro_doc'];
+            $dni=$apy['nro_documento'];
             // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
                 // verificar facultad en el sga o suv
@@ -215,7 +215,7 @@ class PersonaController extends Controller
                     ->Where('dep_id',$personaSga->sdep_id)->first();
                     // Seleccionamos la facultad del alumno en la bd del sistema
                     $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
-                    $dependenciaSGA->escuela=Escuela::where('idSga',$personaSga->dep_id)->first();
+                    $dependenciaSGA->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->first();
                     $dependenciaSGA->escuela->nro_matricula=$personaSga->per_login;
                     $dependenciaSGA->escuela->sede=$personaSga->sed_nombre;
                     return response()->json(['status' => '200', 'facultad' => $dependenciaSGA], 200);
@@ -232,7 +232,7 @@ class PersonaController extends Controller
                         $facultad=Estructura::select('estr_descripcion')
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
                         $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
-                        $dependenciaSUV->escuela=Escuela::where('idSuv',$personaSuv->idestructura)->first();
+                        $dependenciaSUV->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->first();
                         $dependenciaSUV->escuela->nro_matricula=$personaSuv->idalumno;
                         $dependenciaSUV->escuela->sede=$personaSuv->sed_descripcion;
                         return response()->json(['status' => '200', 'facultad' => $dependenciaSUV], 200);
