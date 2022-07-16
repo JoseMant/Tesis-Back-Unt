@@ -42,9 +42,9 @@ class AuthController extends Controller
                 $usuario -> password=Hash::make($request->input('password'));
                 $usuario -> nombres=strtoupper($request->input('nombres'));
                 $usuario -> apellidos=strtoupper($request->input('apellidos'));
-                $usuario -> nro_matricula=$request->input('nro_matricula');
-                $usuario -> tipo_doc=$request->input('tipo_doc');
-                $usuario -> nro_doc=$request->input('nro_doc');
+                // $usuario -> nro_matricula=$request->input('nro_matricula');
+                $usuario -> tipo_documento=$request->input('tipo_documento');
+                $usuario -> nro_documento=$request->input('nro_documento');
                 $usuario -> correo=$request->input('correo');
                 $usuario -> celular=$request->input('celular');
                 $usuario -> sexo=$request->input('sexo');
