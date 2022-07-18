@@ -43,6 +43,7 @@ Route::get('sedes','SedeController@index');
 Route::get('unidades','UnidadController@index');
 Route::get('tipos_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getById');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
+Route::resource('motivos_certificado','Motivo_CertificadoController');
 
 
 Route::resource('alumnosSE','PersonaSEController');
