@@ -60,6 +60,11 @@ class TramiteController extends Controller
             if($tramiteValidate){
                 return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado!!'], 400);
             }else{
+                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+                $token = JWTAuth::getToken();
+                $apy = JWTAuth::getPayload($token);
+                $idUsuario=$apy['idUsuario'];
+
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
                 $voucher->entidad=trim($request->entidad);
@@ -78,18 +83,6 @@ class TramiteController extends Controller
                 }
                 $voucher->save();
 
-                // REGISTRAMOS EL TRÁMITE
-                $tramite=new Tramite;
-                $tramite -> idTipo_tramite=trim($request->idTipo_unidad_tramite);
-                $tramite -> nro_documento=trim($request->nro_documento);
-                $tramite -> codigo=trim($request->nro_tramite);
-                $tramite -> idVoucher=$voucher->idVoucher;
-                $tramite -> idEstado_tramite=trim($request->idEstado_tramite);
-                $tramite -> idDependencia_detalle=trim($request->idDependencia_detalle);
-                $tramite -> idDependencia=trim($request->idDependencia);
-                $tramite -> descripcion_estado=trim($request->des_estado_tramite);
-                $tramite -> save();
-                
 
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
                 $tramite_detalle=new Tramite_Detalle();
@@ -98,7 +91,31 @@ class TramiteController extends Controller
                 $tramite_detalle->exonerado_carpeta=trim($request->exonerado_carpeta);
                 $tramite_detalle->motivo_certificado=trim($request->idMotivo_certificado);
                 $tramite_detalle->objeto_solicitud_certificado=trim($request->objeto_solicitud_certificado);
-                $tramite_detalle->idTramite=$tramite->idTramite;
+                
+                // REGISTRAMOS EL TRÁMITE
+                $tramite=new Tramite;
+                $tramite -> idTramite_detallle=$tramite_detalle->idTramite_detallle;
+                $tramite -> idTipo_tramite_unidad=trim($request->idTipo_unidad_tramite);
+                $tramite -> idVoucher=$voucher->idVoucher;
+                $tramite -> idUsuario=$idUsuario;
+                $tramite -> nro_tramite=trim($request->nro_tramite);
+                $tramite -> idUnidad=trim($request->idUnidad);
+                $tramite -> idDependencia=trim($request->idDependencia);
+                $tramite -> idDependencia_detalle=trim($request->idDependencia_detalle);
+                $tramite -> nro_matricula=trim($request->nro_matricula);
+                $tramite -> sede=trim($request->sede);
+                $tramite -> idEstado_tramite=trim($request->idEstado_tramite);
+                // REGISTRAMOS LA FIRMA DEL TRÁMITE
+                if($request->hasFile("archivo_firma")){
+                    $file=$request->file("archivo_firma");
+                    $nombre = $file->getClientOriginalName();
+                    $nombreBD = "/storage/firmas_tramites/".$nombre;            
+                    if($file->guessExtension()=="pdf"){
+                      $file->storeAs('public/firmas_tramites', $nombre);
+                      $tramite->firma_tramite = $nombreBD;
+                    }
+                }
+                $tramite -> save();
 
                 // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
 
@@ -123,18 +140,13 @@ class TramiteController extends Controller
                     $tramite_requisito -> save();
                 }
 
-                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                $token = JWTAuth::getToken();
-                $apy = JWTAuth::getPayload($token);
-                $idUsuario=$apy['idUsuario'];
-
                 // REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$idUsuario;
-                $historial_estados->estado_nuevo='TRÁMITE REGISTRADO';
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
+                // $historial_estados=new Historial_Estado;
+                // $historial_estados->idTramite=$tramite->idTramite;
+                // $historial_estados->idUsuario=$idUsuario;
+                // $historial_estados->estado_nuevo='TRÁMITE REGISTRADO';
+                // $historial_estados->fecha=date('Y-m-d h:i:s');
+                // $historial_estados->save();
                 DB::commit();
                 return response()->json(['status' => '200', 'message' => 'Trámite registrado correctamente!!'], 200);
             }
