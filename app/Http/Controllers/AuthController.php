@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\ConfirmacionCorreoJob;
+use App\Jobs\ResetPasswordJob;
 class AuthController extends Controller
 {
 
@@ -137,7 +138,9 @@ class AuthController extends Controller
                 $usuario->update();
                 DB::commit();
                 //Enviamos un msj al correo con el link de resetear password
-                \Mail::to($usuario->correo)->send(new \App\Mail\ResetPasswordMail($usuario));
+                // \Mail::to($usuario->correo)->send(new \App\Mail\ResetPasswordMail($usuario));
+                // PRUEBAS JOB---------------------------------
+                dispatch(new ResetPasswordJob($usuario));
                 return response()->json(['status' => '200', 'message' => 'Se envió un mensaje al correo electrónico proporcionado para continuar con la recuperación de la contraseña.'], 200);
             }else{
                 return response()->json(['status' => '400', 'message' => 'El correo no se encuentra registrado para ningún usuario'], 400);
