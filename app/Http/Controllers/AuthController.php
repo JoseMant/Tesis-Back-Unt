@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\ConfirmacionCorreoJob;
 class AuthController extends Controller
 {
 
@@ -23,7 +24,7 @@ class AuthController extends Controller
     public function Register(Request $request){
         DB::beginTransaction();
         try {
-            $dniValidate=User::Where('nro_doc',$request->input('nro_doc'))->first();
+            $dniValidate=User::Where('nro_documento',$request->input('nro_documento'))->first();
             $correoValidate=User::Where('correo',$request->input('correo'))->first();
             $usernameValidate=User::Where('username',$request->input('username'))->first();
             if($dniValidate){
@@ -38,22 +39,28 @@ class AuthController extends Controller
                     'password'=>['required','min:8']
                 ]);
                 $usuario = new User;
+                $usuario -> idTipo_usuario=$request->input('idTipo_usuario');
                 $usuario -> username=$request->input('username');
-                $usuario -> password=Hash::make($request->input('password'));
+                $usuario -> password=md5(md5($request->input('password')));
                 $usuario -> nombres=strtoupper($request->input('nombres'));
                 $usuario -> apellidos=strtoupper($request->input('apellidos'));
-                // $usuario -> nro_matricula=$request->input('nro_matricula');
                 $usuario -> tipo_documento=$request->input('tipo_documento');
                 $usuario -> nro_documento=$request->input('nro_documento');
                 $usuario -> correo=$request->input('correo');
                 $usuario -> celular=$request->input('celular');
                 $usuario -> sexo=$request->input('sexo');
-                $usuario -> idTipoUsuario=$request->input('idTipoUsuario');
                 $usuario -> confirmation_code=Str::random(25);
                 $usuario -> save();
                 DB::commit();
-                \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
-                // \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($usuario));
+                // return $usuario;
+                
+                // \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
+                
+                // PRUEBAS JOB---------------------------------
+                dispatch(new ConfirmacionCorreoJob($usuario));
+
+                //---------------------------------------------
+
                 return response()->json(['status' => '200', 'message' => 'Confirmar correo!!'], 200);
             }
         } catch (\Exception $e) {

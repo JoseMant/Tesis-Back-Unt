@@ -67,6 +67,12 @@ class UserController extends Controller
                 DB::commit();
                 \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
                 // \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($usuario));
+                
+                // PRUEBAS JOB---------------------------------
+                dispatch(new ConfirmacionCorreoJob($usuario));
+
+                //---------------------------------------------
+
                 return response()->json(['status' => '200', 'message' => 'Confirmar correo!!'], 200);
             }
         } catch (\Exception $e) {

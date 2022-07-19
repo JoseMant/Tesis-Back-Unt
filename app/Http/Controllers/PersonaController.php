@@ -115,8 +115,8 @@ class PersonaController extends Controller
                 $usuario->nro_matricula=$personaSE->codigo;
                 $usuario->nombres=$personaSE->nombre;
                 $usuario->apellidos=$personaSE->paterno." ".$personaSE->materno;
-                $usuario->tipo_doc=$personaSE->idTipo_documento;
-                $usuario->nro_doc=$personaSE->nro_documento;
+                $usuario->tipo_documento=$personaSE->idTipo_documento;
+                $usuario->nro_documento=$personaSE->nro_documento;
                 $usuario->correo=$personaSE->correo_personal;
                 $usuario->celular=$personaSE->celular;
                 $usuario->sexo=$personaSE->sexo;
@@ -141,8 +141,8 @@ class PersonaController extends Controller
                     $usuario->nro_matricula=$personaSuv->idalumno;
                     $usuario->nombres=$personaSuv->per_nombres;
                     $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
-                    $usuario->tipo_doc=$personaSuv->per_tipo_documento;
-                    $usuario->nro_doc=$personaSuv->per_dni;
+                    $usuario->tipo_documento=$personaSuv->per_tipo_documento;
+                    $usuario->nro_documento=$personaSuv->per_dni;
                     $usuario->correo=$personaSuv->per_email;
                     $usuario->celular=$personaSuv->per_celular;
                     if ($personaSuv->per_sexo==0) {
@@ -169,8 +169,8 @@ class PersonaController extends Controller
                         $usuario->nro_matricula=$personaSga->per_login;
                         $usuario->nombres=$personaSga->per_nombres;
                         $usuario->apellidos=$personaSga->per_apellidos;
-                        $usuario->tipo_doc=1;
-                        $usuario->nro_doc=$personaSga->per_dni;
+                        $usuario->tipo_documento=1;
+                        $usuario->nro_documento=$personaSga->per_dni;
                         $usuario->correo=$personaSga->per_mail;
                         $usuario->celular=$personaSga->per_celular;
                         $usuario->sexo=$personaSga->per_sexo;
