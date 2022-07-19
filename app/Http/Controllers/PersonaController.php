@@ -216,9 +216,13 @@ class PersonaController extends Controller
                     // Seleccionamos la facultad del alumno en la bd del sistema
                     $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->get();
                     foreach($dependenciaSGA as $dependencia){
-                        $dependencia->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->first();
-                        $dependencia->escuela->nro_matricula=$personaSga->per_login;
-                        $dependencia->escuela->sede=$personaSga->sed_nombre;
+                        $dependencia->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->get();
+                        foreach($dependencia->escuela as $escuela){
+                            $escuela->nro_matricula=$personaSga->per_login;
+                            $escuela->sede=$personaSga->sed_nombre;
+                        }
+                        // $dependencia->escuela->nro_matricula=$personaSga->per_login;
+                        // $dependencia->escuela->sede=$personaSga->sed_nombre;
                     }
                     // $dependenciaSGA->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->first();
                     // $dependenciaSGA->escuela->nro_matricula=$personaSga->per_login;
@@ -238,9 +242,13 @@ class PersonaController extends Controller
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
                         $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->get();
                         foreach($dependenciaSUV as $dependencia){
-                            $dependencia->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->first();
-                            $dependencia->escuela->nro_matricula=$personaSuv->idalumno;
-                            $dependencia->escuela->sede=$personaSuv->sed_descripcion;
+                            $dependencia->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->get();
+                            foreach($dependencia->escuela as $escuela){
+                                $escuela->nro_matricula=$personaSuv->idalumno;
+                                $escuela->sede=$personaSuv->sed_descripcion;
+                            }
+                            // $dependencia->escuela->nro_matricula=$personaSuv->idalumno;
+                            // $dependencia->escuela->sede=$personaSuv->sed_descripcion;
                         }
                         // $dependenciaSUV->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->first();
                         // $dependenciaSUV->escuela->nro_matricula=$personaSuv->idalumno;
@@ -262,18 +270,30 @@ class PersonaController extends Controller
                     ->join('matricula','alumno.idAlumno','matricula.idAlumno')
                     ->join('sede','matricula.idSede','sede.idSede')
                     ->Where('alumno.nro_documento',$dni)->first();
-                $dependencia = DependenciaURAA::where('nombre',strtoupper($personaSE->nombre))->first();
-                $dependencia->menciones=PersonaSE::select('alumno.idAlumno','alumno.codigo as nro_matricula','mencion.*')
-                ->join('mencion','alumno.idMencion','mencion.idMencion')
-                ->Where('alumno.nro_documento',$dni)->get();
-                foreach($dependencia->menciones as $mencion){
-                    $sede=PersonaSE::select('sede.nombre')
-                    ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                    ->join('sede','matricula.idSede','sede.idSede')
-                    ->Where('alumno.idAlumno',$mencion->idAlumno)->first();
-                    $mencion->sede=$sede->nombre;
+                $dependencias = DependenciaURAA::where('nombre',strtoupper($personaSE->nombre))->get();
+                foreach($dependencias as $dependencia){
+                    $dependencia->menciones=PersonaSE::select('alumno.idAlumno','alumno.codigo as nro_matricula','mencion.*')
+                    ->join('mencion','alumno.idMencion','mencion.idMencion')
+                    ->Where('alumno.nro_documento',$dni)->get();
+                    foreach($dependencia->menciones as $mencion){
+                        $sede=PersonaSE::select('sede.nombre')
+                        ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                        ->join('sede','matricula.idSede','sede.idSede')
+                        ->Where('alumno.idAlumno',$mencion->idAlumno)->first();
+                        $mencion->sede=$sede->nombre;
+                    }
                 }
-                return $dependencia;
+                // $dependencia->menciones=PersonaSE::select('alumno.idAlumno','alumno.codigo as nro_matricula','mencion.*')
+                // ->join('mencion','alumno.idMencion','mencion.idMencion')
+                // ->Where('alumno.nro_documento',$dni)->get();
+                // foreach($dependencia->menciones as $mencion){
+                //     $sede=PersonaSE::select('sede.nombre')
+                //     ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                //     ->join('sede','matricula.idSede','sede.idSede')
+                //     ->Where('alumno.idAlumno',$mencion->idAlumno)->first();
+                //     $mencion->sede=$sede->nombre;
+                // }
+                return $dependencias;
             } 
         } catch (\Exception $e) {
             DB::rollback();
