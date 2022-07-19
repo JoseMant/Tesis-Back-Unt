@@ -51,7 +51,7 @@ class TramiteController extends Controller
         try {
             // se tiene que validar tmb el nro de documento 
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->Where('entidad',trim($request->entidad))->where('nro_operacion',trim($request->nro_operacion))
+            ->Where('idEntidad',trim($request->idEntidad))->where('nro_operacion',trim($request->nro_operacion))
             ->where('fecha_operacion',trim($request->fecha_operacion))
             ->where('nro_documento',trim($request->nro_documento))
             ->get();
