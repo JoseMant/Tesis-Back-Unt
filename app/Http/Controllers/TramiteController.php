@@ -11,6 +11,7 @@ use App\Historial_Estado;
 use App\Tramite_Requisito;
 use App\Voucher;
 use App\Tramite_Detalle;
+use Illuminate\Support\Str;
 class TramiteController extends Controller
 {
     public function __construct()
@@ -67,7 +68,7 @@ class TramiteController extends Controller
 
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
-                $voucher->entidad=trim($request->entidad);
+                $voucher->idEntidad=trim($request->idEntidad);
                 $voucher->nro_operacion=trim($request->nro_operacion);
                 $voucher->fecha_operacion=trim($request->fecha_operacion);
                 $voucher->des_estado_voucher=trim($request->des_estado_voucher);
@@ -98,7 +99,7 @@ class TramiteController extends Controller
                 $tramite -> idTipo_tramite_unidad=trim($request->idTipo_unidad_tramite);
                 $tramite -> idVoucher=$voucher->idVoucher;
                 $tramite -> idUsuario=$idUsuario;
-                $tramite -> nro_tramite=trim($request->nro_tramite);
+                $tramite -> nro_tramite=Str::random(8);
                 $tramite -> idUnidad=trim($request->idUnidad);
                 $tramite -> idDependencia=trim($request->idDependencia);
                 $tramite -> idDependencia_detalle=trim($request->idDependencia_detalle);

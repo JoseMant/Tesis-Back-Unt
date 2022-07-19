@@ -214,10 +214,15 @@ class PersonaController extends Controller
                     $facultad=Dependencia::select('dep_nombre')
                     ->Where('dep_id',$personaSga->sdep_id)->first();
                     // Seleccionamos la facultad del alumno en la bd del sistema
-                    $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first();
-                    $dependenciaSGA->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->first();
-                    $dependenciaSGA->escuela->nro_matricula=$personaSga->per_login;
-                    $dependenciaSGA->escuela->sede=$personaSga->sed_nombre;
+                    $dependenciaSGA= DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->get();
+                    foreach($dependenciaSGA as $dependencia){
+                        $dependencia->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->first();
+                        $dependencia->escuela->nro_matricula=$personaSga->per_login;
+                        $dependencia->escuela->sede=$personaSga->sed_nombre;
+                    }
+                    // $dependenciaSGA->escuela=Escuela::where('idSGA_PREG',$personaSga->dep_id)->first();
+                    // $dependenciaSGA->escuela->nro_matricula=$personaSga->per_login;
+                    // $dependenciaSGA->escuela->sede=$personaSga->sed_nombre;
                     return response()->json(['status' => '200', 'facultad' => $dependenciaSGA], 200);
                 }else{
                     $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
@@ -231,10 +236,15 @@ class PersonaController extends Controller
                     if(isset($personaSuv)){
                         $facultad=Estructura::select('estr_descripcion')
                         ->Where('idestructura',$personaSuv->iddependencia)->first();
-                        $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first();
-                        $dependenciaSUV->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->first();
-                        $dependenciaSUV->escuela->nro_matricula=$personaSuv->idalumno;
-                        $dependenciaSUV->escuela->sede=$personaSuv->sed_descripcion;
+                        $dependenciaSUV= DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->get();
+                        foreach($dependenciaSUV as $dependencia){
+                            $dependencia->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->first();
+                            $dependencia->escuela->nro_matricula=$personaSuv->idalumno;
+                            $dependencia->escuela->sede=$personaSuv->sed_descripcion;
+                        }
+                        // $dependenciaSUV->escuela=Escuela::where('idSUV_PREG',$personaSuv->idestructura)->first();
+                        // $dependenciaSUV->escuela->nro_matricula=$personaSuv->idalumno;
+                        // $dependenciaSUV->escuela->sede=$personaSuv->sed_descripcion;
                         return response()->json(['status' => '200', 'facultad' => $dependenciaSUV], 200);
                     }else{
                         return response()->json(['status' => '400', 'message' => 'Alumno no encontrado'], 400);
