@@ -71,7 +71,7 @@ class TramiteController extends Controller
                 $voucher->idEntidad=trim($request->idEntidad);
                 $voucher->nro_operacion=trim($request->nro_operacion);
                 $voucher->fecha_operacion=trim($request->fecha_operacion);
-                $voucher->des_estado_voucher=trim($request->des_estado_voucher);
+                // $voucher->des_estado_voucher=trim($request->des_estado_voucher);
                 
                 if($request->hasFile("archivo")){
                     $file=$request->file("archivo");
