@@ -57,7 +57,7 @@ class TramiteController extends Controller
             return $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->Where('idEntidad',trim($request->idEntidad))->where('nro_operacion',trim($request->nro_operacion))
             ->where('fecha_operacion',trim($request->fecha_operacion))
-            ->where('idUsuario',trim($request->idUsuario))
+            ->where('idUsuario',trim($idUsuario))
             ->get();
             // $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
             // ->where('fecha_operacion',$request->input('fecha_operacion'))
