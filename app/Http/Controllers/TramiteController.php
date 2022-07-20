@@ -54,7 +54,7 @@ class TramiteController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
             // se tiene que validar tmb el nro de documento 
-            return $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
+            $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->Where('idEntidad',trim($request->idEntidad))->where('nro_operacion',trim($request->nro_operacion))
             ->where('fecha_operacion',trim($request->fecha_operacion))
             ->where('idUsuario',trim($idUsuario))
