@@ -49,11 +49,15 @@ class TramiteController extends Controller
     {
         DB::beginTransaction();
         try {
+
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
             // se tiene que validar tmb el nro de documento 
-            $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
+            return $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->Where('idEntidad',trim($request->idEntidad))->where('nro_operacion',trim($request->nro_operacion))
             ->where('fecha_operacion',trim($request->fecha_operacion))
-            // ->where('nro_documento',trim($request->nro_documento))
+            ->where('idUsuario',trim($request->idUsuario))
             ->get();
             // $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
             // ->where('fecha_operacion',$request->input('fecha_operacion'))
@@ -62,9 +66,9 @@ class TramiteController extends Controller
                 return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado!!'], 400);
             }else{
                 // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                $token = JWTAuth::getToken();
-                $apy = JWTAuth::getPayload($token);
-                $idUsuario=$apy['idUsuario'];
+                // $token = JWTAuth::getToken();
+                // $apy = JWTAuth::getPayload($token);
+                // $idUsuario=$apy['idUsuario'];
 
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
