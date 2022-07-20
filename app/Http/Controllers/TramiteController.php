@@ -49,7 +49,7 @@ class TramiteController extends Controller
     {
         DB::beginTransaction();
         try {
-
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
@@ -58,7 +58,7 @@ class TramiteController extends Controller
             ->Where('idEntidad',trim($request->idEntidad))->where('nro_operacion',trim($request->nro_operacion))
             ->where('fecha_operacion',trim($request->fecha_operacion))
             ->where('idUsuario',trim($idUsuario))
-            ->get();
+            ->first();
             // $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
             // ->where('fecha_operacion',$request->input('fecha_operacion'))
             // ->first();
@@ -70,6 +70,9 @@ class TramiteController extends Controller
                 // $apy = JWTAuth::getPayload($token);
                 // $idUsuario=$apy['idUsuario'];
 
+                $tramite=new Tramite;
+                $tramite -> nro_tramite=Str::random(8);
+
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
                 $voucher->idEntidad=trim($request->idEntidad);
@@ -79,7 +82,7 @@ class TramiteController extends Controller
                 
                 if($request->hasFile("archivo")){
                     $file=$request->file("archivo");
-                    $nombre = $file->getClientOriginalName();
+                    $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
                     $nombreBD = "/storage/vouchers_tramites/".$nombre;            
                     if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/vouchers_tramites', $nombre);
@@ -87,33 +90,44 @@ class TramiteController extends Controller
                     }
                 }
                 $voucher->save();
-
+                // return $voucher;
 
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
+                $tipo_tramite = Tipo_Tramite::join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
+                ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $request->idTipo_tramite_unidad)->first();
+                // return $tipo_tramite;
                 $tramite_detalle=new Tramite_Detalle();
-                $tramite_detalle->idCronograma_carpeta=trim($request->idCronograma_carpeta);
-                $tramite_detalle->idModalidad_carpeta=trim($request->idModalidad_carpeta);
-                $tramite_detalle->exonerado_carpeta=trim($request->exonerado_carpeta);
-                $tramite_detalle->motivo_certificado=trim($request->idMotivo_certificado);
-                $tramite_detalle->objeto_solicitud_certificado=trim($request->objeto_solicitud_certificado);
+                
+                switch ($tipo_tramite->idTipo_tramite) {
+                    case 1:
+                        $tramite_detalle->idCronograma_carpeta = null;
+                        $tramite_detalle->idModalidad_titulo_carpeta=null;
+                        $tramite_detalle->exonerado_carpeta=null;
+                        $tramite_detalle->idMotivo_certificado=trim($request->idMotivo_certificado);
+                        $tramite_detalle->solicitud_certificado=trim($request->solicitud_certificado);
+                        break;
+                        
+                    default:
+                        # code...
+                        break;
+                }
+                $tramite_detalle->save();
                 
                 // REGISTRAMOS EL TRÁMITE
-                $tramite=new Tramite;
-                $tramite -> idTramite_detallle=$tramite_detalle->idTramite_detallle;
-                $tramite -> idTipo_tramite_unidad=trim($request->idTipo_unidad_tramite);
+                $tramite -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
+                $tramite -> idTipo_tramite_unidad=trim($request->idTipo_tramite_unidad);
                 $tramite -> idVoucher=$voucher->idVoucher;
                 $tramite -> idUsuario=$idUsuario;
-                $tramite -> nro_tramite=Str::random(8);
                 $tramite -> idUnidad=trim($request->idUnidad);
                 $tramite -> idDependencia=trim($request->idDependencia);
                 $tramite -> idDependencia_detalle=trim($request->idDependencia_detalle);
                 $tramite -> nro_matricula=trim($request->nro_matricula);
                 $tramite -> sede=trim($request->sede);
-                $tramite -> idEstado_tramite=trim($request->idEstado_tramite);
+                $tramite -> idEstado_tramite=1;
                 // REGISTRAMOS LA FIRMA DEL TRÁMITE
                 if($request->hasFile("archivo_firma")){
                     $file=$request->file("archivo_firma");
-                    $nombre = $file->getClientOriginalName();
+                    $nombre = $tramite->nro_tramite.$file->guessExtension();
                     $nombreBD = "/storage/firmas_tramites/".$nombre;            
                     if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/firmas_tramites', $nombre);
@@ -128,21 +142,23 @@ class TramiteController extends Controller
                 // ->join('requisitos','tipo_tramite.idTipo_tramite','requisitos.idTipo_tramite')
                 // ->Where('tipo_tramite.idTipo_tramite',$request->idTipo_tramite)->get();
 
-                foreach ($request->requisitos as $requisito) {
-                    $tramite_requisito=new Tramite_Requisito;
-                    $tramite_requisito->idTramite=$tramite->idTramite;
-                    $tramite_requisito->idRequisito=$requisito->idRequisito;
+                if($request->hasFile("files")){
+                    foreach ($request->file("files") as $file) {
+                        return "entró"; 
+                        // return $file; 
+                //     $tramite_requisito=new Tramite_Requisito;
+                //     $tramite_requisito->idTramite=$tramite->idTramite;
+                //     $tramite_requisito->idRequisito=$requisito->idRequisito;
                     //Verificar archivo
-                    if($requisito->hasFile("archivo")){
-                        $file=$request->file("archivo");
+                        // $file=$request->file("archivo");
                         $nombre = $file->getClientOriginalName();
-                        $nombreBD = "/storage/requisitos_tramites/".$nombre;            
-                        if($file->guessExtension()=="pdf"){
-                          $file->storeAs('public/requisitos_tramites', $nombre);
-                          $tramite_requisito->archivo = $nombreBD;
-                        }
+                        $nombreBD = "/storage/requisitos_tramites/".$nombre;    
+                        // if($file->guessExtension()=="pdf"){
+                        //   $file->storeAs('public/requisitos_tramites', $nombre);
+                        //   $tramite_requisito->archivo = $nombreBD;
+                        // }
+                        //     $tramite_requisito -> save();
                     }
-                    $tramite_requisito -> save();
                 }
 
                 // REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
