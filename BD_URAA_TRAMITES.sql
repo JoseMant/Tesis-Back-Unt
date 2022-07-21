@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`usuario` (
   PRIMARY KEY (`idUsuario`),
   INDEX `fk_usuario_tipo_usuario_idx` (`idTipo_usuario` ASC) VISIBLE,
   CONSTRAINT `fk_usuario_tipo_usuario`
-    FOREIGN KEY (`idTipo_usuario`)
+    FOREIGN KEY (`idTipo_usuariidTipo_tramite_unidado`)
     REFERENCES `uraa_tramite`.`tipo_usuario` (`idTipo_usuario`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
