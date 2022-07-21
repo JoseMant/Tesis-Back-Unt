@@ -24,7 +24,7 @@ Route::group([
     Route::post('logout', 'AuthController@logout');
     Route::post('SignInUsingToken', 'AuthController@SignInUsingToken');
     Route::get('me', 'AuthController@me');
-    Route::get('refresh', 'AuthController@refresh');
+    Route::post('refresh', 'AuthController@refresh');
     Route::post('getAlumnoByDocument','PersonaController@DatosAlumno');
     Route::post('forgot-password', 'AuthController@forgotPassword');
     Route::post('verifyCodePassword', 'AuthController@verifyCodePassword');

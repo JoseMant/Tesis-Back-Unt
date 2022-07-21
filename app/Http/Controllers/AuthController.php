@@ -92,11 +92,32 @@ class AuthController extends Controller
 
     public function refresh()
     {
+        $user=JWTAuth::user();
+        $response['idUsuario']=$user->idUsuario;
+        $response['username']=$user->username;
+        $response['estado']=$user->estado;
+        // $response['nro_matricula']=$user->nro_matricula;
+        $response['nombres']=$user->nombres;
+        $response['apellidos']=$user->apellidos;
+        $response['tipo_documento']=$user->tipo_documento;
+        $response['nro_documento']=$user->nro_documento;
+        $response['correo']=$user->correo;
+        $response['celular']=$user->celular;
+        $response['sexo']=$user->sexo;
+        $response['idTipoUsuario']=$user->idTipoUsuario;
         return response()->json([
-            'access_token' => JWTAuth::refresh(),
+            'accessToken' => JWTAuth::refresh(),
             'token_type' => 'bearer',
+            'user'=>$response,
             'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
+
+
+        // return response()->json([
+        //     'access_token' => JWTAuth::refresh(),
+        //     'token_type' => 'bearer',
+        //     'expires_in' => JWTAuth::factory()->getTTL() * 60
+        // ]);
     }
 
     public function me()
