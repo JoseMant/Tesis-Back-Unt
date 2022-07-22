@@ -201,7 +201,7 @@ class TramiteController extends Controller
                         //Verificar archivo
                         // $file=$request->file("archivo");
                         $nombre = $dni.".".$file->guessExtension();
-                        return $requisito["descripcion"];  
+                        return $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"]."/".$nombre;  
                         if($file->guessExtension()==$requisito["extension"]){
                           $file->storeAs('public/requisitos_tramites', $nombre);
                           $tramite_requisito->archivo = $nombreBD;
