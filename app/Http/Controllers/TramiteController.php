@@ -122,20 +122,26 @@ class TramiteController extends Controller
                 // return $voucher;
 
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
-                $tipo_tramite = Tipo_Tramite::join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
+                $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
                 ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $request->idTipo_tramite_unidad)->first();
-                // return $tipo_tramite;
+                $tipo_tramite;
                 $tramite_detalle=new Tramite_Detalle();
                 
                 switch ($tipo_tramite->idTipo_tramite) {
                     case 1:
                         $tramite_detalle->idCronograma_carpeta = null;
                         $tramite_detalle->idModalidad_titulo_carpeta=null;
-                        $tramite_detalle->exonerado_carpeta=null;
+                        // $tramite_detalle->exonerado_carpeta=null;
                         $tramite_detalle->idMotivo_certificado=trim($request->idMotivo_certificado);
                         $tramite_detalle->solicitud_certificado=trim($request->solicitud_certificado);
                         break;
-                        
+                    case 2:
+                        $tramite_detalle->idCronograma_carpeta = trim($request->idCronograma_carpeta);
+                        $tramite_detalle->idModalidad_titulo_carpeta=trim($request->idModalidad_titulo_carpeta);
+                        // $tramite_detalle->exonerado_carpeta=null;
+                        $tramite_detalle->idMotivo_certificado=null;
+                        $tramite_detalle->solicitud_certificado=null;
+                        break;    
                     default:
                         # code...
                         break;
@@ -201,10 +207,11 @@ class TramiteController extends Controller
                         //Verificar archivo
                         // $file=$request->file("archivo");
                         $nombre = $dni.".".$file->guessExtension();
-                        return $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"]."/".$nombre;  
+                        $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"]."/".$nombre;  
                         if($file->guessExtension()==$requisito["extension"]){
-                          $file->storeAs('public/requisitos_tramites', $nombre);
+                          $file->storeAs("/public"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"], $nombre);
                           $tramite_requisito->archivo = $nombreBD;
+                          $tramite_requisito;
                         }
                         $tramite_requisito -> save();
                     }
