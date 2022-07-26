@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Tipo_tramite_unidad;
+use App\Tipo_Tramite_Unidad;
 use App\Requisito;
 class Tipo_Tramite_UnidadController extends Controller
 {
@@ -87,11 +87,12 @@ class Tipo_Tramite_UnidadController extends Controller
         //
     }
 
-    public function getById($idTipo_tramite,$idUnidad){
-        $tipos= Tipo_tramite_unidad::where('idTipo_tramite',$idTipo_tramite)
+    public function getAllByTipo_tramiteUnidad($idTipo_tramite,$idUnidad){
+        $tipo_tramites= Tipo_Tramite_Unidad::where('idTipo_tramite',$idTipo_tramite)
         ->where('idUnidad',$idUnidad)
         ->get();
-        $requisitos=Requisito::where('idTipo_tramite',$idTipo_tramite)->get();
-        return response()->json(['status' => '200', 'tipos_unida_tratmites' => $tipos,'requisitos'=>$requisitos], 200);
+        // $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite)->get();
+        // return response()->json(['status' => '200', 'tipos_unida_tratmites' => $tipos,'requisitos'=>$requisitos], 200);
+        return response()->json(['status' => '200', 'tipo_tramite_unidad' => $tipo_tramites], 200);
     }
 }

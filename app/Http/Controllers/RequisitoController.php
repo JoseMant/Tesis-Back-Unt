@@ -81,4 +81,9 @@ class RequisitoController extends Controller
     {
         //
     }
+
+    public function getAllByTipo_tramite_unidad($idTipo_tramite_unidad){
+        $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)->get();
+        return response()->json(['status' => '200', 'requisitos'=>$requisitos], 200);
+    }
 }
