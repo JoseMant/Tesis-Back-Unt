@@ -105,12 +105,11 @@ class PersonaController extends Controller
         try {
             // verificamos en la bd de SE
             $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
-            ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo','segunda_especialidad.nombre as dependencia',
-            'mencion.nombre as mencion','sede.nombre as sede')
-                    ->join('mencion','alumno.idMencion','mencion.idMencion')
-                    ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
-                    ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                    ->join('sede','matricula.idSede','sede.idSede')
+            ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo')
+                    // ->join('mencion','alumno.idMencion','mencion.idMencion')
+                    // ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
+                    // ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                    // ->join('sede','matricula.idSede','sede.idSede')
                     ->Where('alumno.nro_documento',$request->input('dni'))->first();
             if($personaSE){
                 $usuario=new User;
@@ -122,19 +121,18 @@ class PersonaController extends Controller
                 $usuario->correo=$personaSE->correo_personal;
                 $usuario->celular=$personaSE->celular;
                 $usuario->sexo=$personaSE->sexo;
-                $usuario->dependencia=$personaSE->dependencia;
-                $usuario->mencion=$personaSE->mencion;
-                $usuario->sede=$personaSE->sede;
+                // $usuario->dependencia=$personaSE->dependencia;
+                // $usuario->mencion=$personaSE->mencion;
+                // $usuario->sede=$personaSE->sede;
                 return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
             }else{
                 // verificamos en la bd del suv
                 $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
-                'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.estr_descripcion'
-                ,'patrimonio.estructura.iddependencia')
+                'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
                 ->join('alumno','persona.idpersona','alumno.idpersona')
-                ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
-                ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
-                ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
+                // ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
+                // ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
+                // ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
                 ->Where('persona.per_dni',$request->input('dni'))->first();
                 if($personaSuv){
                     $facultad=Estructura::select('estr_descripcion')
@@ -152,17 +150,17 @@ class PersonaController extends Controller
                     }else{
                         $usuario->sexo="M";
                     }
-                    $usuario->facultad=$facultad->estr_descripcion;
-                    $usuario->escuela=$personaSuv->estr_descripcion;
-                    $usuario->sede=$personaSuv->sed_descripcion;
+                    // $usuario->facultad=$facultad->estr_descripcion;
+                    // $usuario->escuela=$personaSuv->estr_descripcion;
+                    // $usuario->sede=$personaSuv->sed_descripcion;
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                 }else{
                     // verificamos en la bd del sga
                     $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
-                    ,'per_login','sga_sede.sed_nombre','dependencia.dep_nombre','dependencia.sdep_id')
-                    ->join('perfil','persona.per_id','perfil.per_id')
-                    ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
-                    ->join('dependencia','dependencia.dep_id','perfil.dep_id')
+                    ,'per_login')
+                    // ->join('perfil','persona.per_id','perfil.per_id')
+                    // ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
+                    // ->join('dependencia','dependencia.dep_id','perfil.dep_id')
                     ->Where('per_dni',$request->input('dni'))->first();
                     if($personaSga){
                         $facultad=Dependencia::select('dep_nombre')
@@ -176,9 +174,9 @@ class PersonaController extends Controller
                         $usuario->correo=$personaSga->per_mail;
                         $usuario->celular=$personaSga->per_celular;
                         $usuario->sexo=$personaSga->per_sexo;
-                        $usuario->dependencia=$facultad->dep_nombre;
-                        $usuario->escuela=$personaSga->dep_nombre;
-                        $usuario->sede=$personaSga->sed_nombre;
+                        // $usuario->dependencia=$facultad->dep_nombre;
+                        // $usuario->escuela=$personaSga->dep_nombre;
+                        // $usuario->sede=$personaSga->sed_nombre;
                         return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                     }else{
                         return response()->json([ 'message' => 'Alumno no encontrado.']);
