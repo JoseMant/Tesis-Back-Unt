@@ -124,7 +124,6 @@ class TramiteController extends Controller
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
                 $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
                 ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $request->idTipo_tramite_unidad)->first();
-                $tipo_tramite;
                 $tramite_detalle=new Tramite_Detalle();
 
                 switch ($tipo_tramite->idTipo_tramite) {
@@ -205,7 +204,6 @@ class TramiteController extends Controller
                         if($file->guessExtension()==$requisito["extension"]){
                           $file->storeAs("/public"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"], $nombre);
                           $tramite_requisito->archivo = $nombreBD;
-                          $tramite_requisito;
                         }
                         $tramite_requisito -> save();
                     }
