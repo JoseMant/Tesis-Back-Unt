@@ -45,9 +45,14 @@ Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_Un
 Route::get('requisitos/{idTipo_tramite_unidad}','RequisitoController@getAllByTipo_tramite_unidad');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
 Route::resource('motivos_certificado','Motivo_CertificadoController');
-
-
 Route::resource('alumnosSE','PersonaSEController');
+
+
+//VOUCHERS
+Route::resource('vouchers','VoucherController');
+Route::get('vouchers-pendientes/{perPage}','VoucherController@Pendientes');
+Route::get('vouchers-aprobados/{perPage}','VoucherController@Aprobados');
+Route::get('vouchers-rechazados/{perPage}','VoucherController@Rechazados');
 
 
 
@@ -69,8 +74,7 @@ Route::resource('requisitos','RequisitoController');
 Route::resource('tramites_requisitos','Tramite_RequisitoController');
 //HISTORIAL ESTADOS
 Route::resource('historial_estados','Historial_EstadoController');
-//VOUCHERS
-Route::resource('vouchers','VoucherController');
+
 
 // E-mail verification
 Route::get('/register/verify/{code}', 'UserController@verify');
