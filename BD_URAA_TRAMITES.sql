@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`tipo_usuario` (
   `nombre` VARCHAR(50) NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`idTipo_usuario`))
-ENGINE = InnoDB;
+ENGINE = INNODB;
 
 
 -- -----------------------------------------------------
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`usuario` (
     REFERENCES `uraa_tramite`.`tipo_usuario` (`idTipo_usuario`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = INNODB;
 
 
 -- -----------------------------------------------------
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`tipo_tramite` (
   `descripcion` VARCHAR(50) NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`idTipo_tramite`))
-ENGINE = InnoDB;
+ENGINE = INNODB;
 
 
 -- -----------------------------------------------------
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`unidad` (
   `descripcion` VARCHAR(50) NOT NULL,
   `estado` TINYINT(1) NOT NULL,
   PRIMARY KEY (`idUnidad`))
-ENGINE = InnoDB;
+ENGINE = INNODB;
 
 
 -- -----------------------------------------------------
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`tipo_tramite_unidad` (
     REFERENCES `uraa_tramite`.`unidad` (`idUnidad`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = INNODB;
 
 
 -- -----------------------------------------------------
@@ -125,6 +125,7 @@ DROP TABLE IF EXISTS `uraa_tramite`.`voucher` ;
 CREATE TABLE IF NOT EXISTS `uraa_tramite`.`voucher` (
   `idVoucher` INT NOT NULL AUTO_INCREMENT,
   `idEntidad` INT NOT NULL,
+  `nombre_entidad` VARCHAR(255) NOT NULL,
   `nro_operacion` VARCHAR(45) NOT NULL,
   `fecha_operacion` DATE NOT NULL,
   `archivo` VARCHAR(255) NULL,
@@ -133,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `uraa_tramite`.`voucher` (
   `validado` TINYINT(1) NOT NULL DEFAULT 0,
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`idVoucher`))
-ENGINE = InnoDB;
+ENGINE = INNODB;
 
 
 -- -----------------------------------------------------

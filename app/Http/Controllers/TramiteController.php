@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Mail\Mailable;
 use App\Tramite;
 use App\Tipo_Tramite;
 use App\Historial_Estado;
 use App\Tramite_Requisito;
 use App\Voucher;
+use App\User;
 use App\Tramite_Detalle;
+use App\Jobs\RegistroTramiteJob;
 use Illuminate\Support\Str;
 class TramiteController extends Controller
 {
@@ -54,7 +57,7 @@ class TramiteController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
-
+            $usuario = User::findOrFail($idUsuario);
 
             // $file=$request->file("archivo_firma");
             // $nombre = $dni.".".$file->guessExtension();
@@ -218,6 +221,8 @@ class TramiteController extends Controller
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
                 DB::commit();
+                // Enviamos correo de confirmación al usuario
+                dispatch(new RegistroTramiteJob($usuario));
                 return response()->json(['status' => '200', 'message' => 'Trámite registrado correctamente!!'], 200);
             }
         } catch (\Exception $e) {
