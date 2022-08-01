@@ -51,8 +51,8 @@ Route::resource('alumnosSE','PersonaSEController');
 //VOUCHERS
 Route::resource('vouchers','VoucherController');
 Route::get('vouchers-pendientes','VoucherController@Pendientes');
-Route::get('vouchers-aprobados/{perPage}','VoucherController@Aprobados');
-Route::get('vouchers-rechazados/{perPage}','VoucherController@Rechazados');
+Route::get('vouchers-aprobados','VoucherController@Aprobados');
+Route::get('vouchers-rechazados','VoucherController@Rechazados');
 
 
 
