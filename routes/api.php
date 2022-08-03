@@ -75,7 +75,7 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 
 // E-mail verification
-Route::get('/register/verify/{code}', 'UserController@verify');
+Route::get('/auth/verify/{code}', 'UserController@verify');
 // Route::post('/auth/forgot-password', 'UserController@forgotPassword');
 // Route::post('/auth/verifyCodePassword', 'UserController@verifyCodePassword');
 // Route::post('/auth/ResetPassword', 'UserController@ResetPassword');

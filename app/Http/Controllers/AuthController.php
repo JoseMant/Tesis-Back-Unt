@@ -54,9 +54,9 @@ class AuthController extends Controller
                 $usuario -> save();
                 DB::commit();
                 // return $usuario;
-                
+
                 // \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
-                
+
                 // PRUEBAS JOB---------------------------------
                 dispatch(new ConfirmacionCorreoJob($usuario));
 
@@ -73,11 +73,11 @@ class AuthController extends Controller
     public function login()
     {
         $credentials = request(['username', 'password']);
-        
+
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['status' => '400','error' => 'Usuario inválido'], 400);
+            return response()->json(['status' => 400,'message' => 'Correo o contraseña equivocada'], 400);
         }
-        
+
         return $this->respondWithToken($token);
     }
 
@@ -152,7 +152,7 @@ class AuthController extends Controller
         }else{
             return response()->json(['status' => '400', 'message' => 'Confirme su correo electrónico para poder iniciar sesión'], 400);
         }
-        
+
     }
 
     public function forgotPassword(Request $request){
@@ -213,14 +213,14 @@ class AuthController extends Controller
                 if (! $token = auth()->attempt($credentials)) {
                     return response()->json(['error' => 'Usuario inválido'], 401);
                 }
-                
+
                 return $this->respondWithToken($token);
 
                 // return response()->json(['status' => '200', 'message' => 'Cambio de contraseña con éxito!'], 200);
             }else{
                 return response()->json(['status' => '400', 'message' => 'El nombre de usuario no se encuentra registrado'], 400);
             }
-            
+
             // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
         } catch (\Exception $e) {
             DB::rollback();

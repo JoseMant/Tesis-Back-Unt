@@ -46,7 +46,7 @@ class UserController extends Controller
             if(isset($usuarioValidate)){
               return response()->json(['status' => '400', 'message' => 'El usuario ya se encuentra registrado!!'], 400);
             }else{
-                
+
                 $request->validate([
                     'password'=>['required','min:8']
                 ]);
@@ -67,7 +67,7 @@ class UserController extends Controller
                 DB::commit();
                 \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
                 // \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($usuario));
-                
+
                 // PRUEBAS JOB---------------------------------
                 dispatch(new ConfirmacionCorreoJob($usuario));
 
@@ -130,14 +130,17 @@ class UserController extends Controller
     public function verify($code)
     {
         $user = User::where('confirmation_code', $code)->first();
-    
-        if (! $user)
-            return redirect('/');
-    
-        $user->confirmed = true;
-        // $user->confirmation_code = null;
-        $user->save();
-        return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!'], 200);
+
+        if (!$user)
+            return response()->json(['status' => '400', 'message' => 'Código de verificación inválido o expirado'], 200);
+        else if ($user->confirmed)
+            return response()->json(['status' => '400', 'message' => 'El correo ha sido validado anteriormente'], 200);
+        else {
+          $user->confirmed = 1;
+          // $user->confirmation_code = null;
+          $user->save();
+          return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo'], 200);
+        }
         // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
     }
 
@@ -194,14 +197,14 @@ class UserController extends Controller
     //             if (! $token = auth()->attempt($credentials)) {
     //                 return response()->json(['error' => 'Usuario inválido'], 401);
     //             }
-                
+
     //             return $this->respondWithToken($token);
 
     //             // return response()->json(['status' => '200', 'message' => 'Cambio de contraseña con éxito!'], 200);
     //         }else{
     //             return response()->json(['status' => '400', 'message' => 'El nombre de usuario no se encuentra registrado'], 400);
     //         }
-            
+
     //         // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
     //     } catch (\Exception $e) {
     //         DB::rollback();
