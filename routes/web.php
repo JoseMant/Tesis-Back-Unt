@@ -32,3 +32,6 @@ Route::get('test', function () {
     dd("success");
 
 });
+
+
+Route::view('/email', 'emails.registro_tramite');

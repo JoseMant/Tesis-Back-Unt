@@ -6,13 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Banco extends Model
 {
-    protected $connection = 'mysql';
-    protected $table = 'sga_banco';
-    protected $primaryKey = 'ban_id';
-    public $timestamps = false;
-    protected $fillable = [
-      'ban_descripcion',
-      'ban_estado'
-    ];
-    protected $guarded = [];
+  protected $connection = 'pgsql3';
+  protected $table = 'admision.banco';
+  protected $primaryKey = 'idbanco';
+  public $timestamps = false;
+  protected $fillable = [];
+  protected $guarded = [];
 }

@@ -14,14 +14,20 @@ class RegistroTramiteJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $usuario;
+    public $tramite;
+    public $tipo_tramite;
+    public $tipo_tramite_unidad;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($usuario)
+    public function __construct($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad)
     {
         $this->usuario = $usuario;
+        $this->tramite = $tramite;
+        $this->tipo_tramite = $tipo_tramite;
+        $this->tipo_tramite_unidad = $tipo_tramite_unidad;
     }
 
     /**
@@ -33,6 +39,6 @@ class RegistroTramiteJob implements ShouldQueue
     {
         Mail::to($this->usuario->correo)
         // ->cc($this->correoUsuario)
-        ->send(new \App\Mail\RegistroTramiteMail($this->usuario));
+        ->send(new \App\Mail\RegistroTramiteMail($this->usuario,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad));
     }
 }

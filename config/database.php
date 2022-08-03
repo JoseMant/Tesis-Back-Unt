@@ -133,6 +133,21 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'pgsql3' => [
+            'driver' => 'pgsql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_PG', '127.0.0.1'),
+            'port' => env('DB_PORT_PG', '5432'),
+            'database' => env('DB_DATABASE_PG', 'forge'),
+            'username' => env('DB_USERNAME_PG', 'forge'),
+            'password' => env('DB_PASSWORD_PG', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => env('DB_SCHEMA3', ''),
+            'sslmode' => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),

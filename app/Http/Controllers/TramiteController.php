@@ -8,6 +8,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Mail\Mailable;
 use App\Tramite;
 use App\Tipo_Tramite;
+use App\Tipo_Tramite_Unidad;
 use App\Historial_Estado;
 use App\Tramite_Requisito;
 use App\Voucher;
@@ -64,12 +65,12 @@ class TramiteController extends Controller
             // $nombreBD = "/storage/firmas_tramites/".$nombre;
             // // Validamos que no se gaurde la misma firma para otro trámite
             // return $tramiteValidate=Tramite::where("firma_tramite",$nombreBD)->first();
-
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
 
 
             // se tiene que validar también el idUsuario
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->Where('idEntidad',trim($request->idEntidad))->where('nro_operacion',trim($request->nro_operacion))
+            ->Where('entidad',trim($request->entidad))->where('nro_operacion',trim($request->nro_operacion))
             ->where('fecha_operacion',trim($request->fecha_operacion))
             ->where('idUsuario',trim($idUsuario))
             ->first();
@@ -107,7 +108,7 @@ class TramiteController extends Controller
 
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
-                $voucher->idEntidad=trim($request->idEntidad);
+                $voucher->entidad=trim($request->entidad);
                 $voucher->nro_operacion=trim($request->nro_operacion);
                 $voucher->fecha_operacion=trim($request->fecha_operacion);
                 // $voucher->des_estado_voucher=trim($request->des_estado_voucher);
@@ -134,19 +135,16 @@ class TramiteController extends Controller
                         $tramite_detalle->idCronograma_carpeta = null;
                         $tramite_detalle->idModalidad_titulo_carpeta=null;
                         $tramite_detalle->idMotivo_certificado=trim($request->idMotivo_certificado);
-                        $tramite_detalle->solicitud_certificado=trim($request->solicitud_certificado);
                         break;
                     case 2:
                         $tramite_detalle->idCronograma_carpeta = trim($request->idCronograma_carpeta);
                         $tramite_detalle->idModalidad_titulo_carpeta=trim($request->idModalidad_titulo_carpeta);
                         $tramite_detalle->idMotivo_certificado=null;
-                        $tramite_detalle->solicitud_certificado=null;
                         break;
                     case 3:
                         $tramite_detalle->idCronograma_carpeta = null;
                         $tramite_detalle->idModalidad_titulo_carpeta=null;
                         $tramite_detalle->idMotivo_certificado=null;
-                        $tramite_detalle->solicitud_certificado=null;
                         break;
                 }
                 $tramite_detalle->save();
@@ -160,6 +158,7 @@ class TramiteController extends Controller
                 $tramite -> idDependencia=trim($request->idDependencia);
                 $tramite -> idDependencia_detalle=trim($request->idDependencia_detalle);
                 $tramite -> nro_matricula=trim($request->nro_matricula);
+                $tramite -> comentario=trim($request->comentario);
                 $tramite -> sede=trim($request->sede);
                 $tramite -> exonerado_archivo=null; //corregir
                 $tramite -> idEstado_tramite=1;
@@ -221,9 +220,12 @@ class TramiteController extends Controller
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
                 DB::commit();
+                // var_dump($tipo_tramite_unidad);
+                // exit();
                 // Enviamos correo de confirmación al usuario
-                dispatch(new RegistroTramiteJob($usuario));
-                return response()->json(['status' => '200', 'message' => 'Trámite registrado correctamente!!'], 200);
+                // return $usuario;
+                dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente!!'], 200);
             }
         } catch (\Exception $e) {
             DB::rollback();

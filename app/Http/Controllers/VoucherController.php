@@ -111,7 +111,7 @@ class VoucherController extends Controller
     }
     public function Pendientes(){
         $vouchers=Voucher::select('tramite.nro_tramite','usuario.apellidos','usuario.nombres','usuario.nro_documento','tramite.nro_matricula'
-        ,'tipo_tramite_unidad.descripcion','exonerado_archivo','voucher.idEntidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
+        ,'tipo_tramite_unidad.descripcion','exonerado_archivo','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
         ,'voucher.archivo','voucher.des_estado_voucher','voucher.idUsuario_aprobador','voucher.validado','voucher.estado')
         ->join('tramite','tramite.idVoucher','voucher.idVoucher')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -122,7 +122,7 @@ class VoucherController extends Controller
     }
     public function Aprobados(){
         $vouchers=Voucher::select('tramite.nro_tramite','usuario.apellidos','usuario.nombres','usuario.nro_documento','tramite.nro_matricula'
-        ,'tipo_tramite_unidad.descripcion','exonerado_archivo','voucher.idEntidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
+        ,'tipo_tramite_unidad.descripcion','exonerado_archivo','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
         ,'voucher.archivo','voucher.des_estado_voucher','voucher.idUsuario_aprobador','voucher.validado','voucher.estado')
         ->join('tramite','tramite.idVoucher','voucher.idVoucher')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -132,7 +132,7 @@ class VoucherController extends Controller
     }
     public function Rechazados(){
         $vouchers=Voucher::select('tramite.nro_tramite','usuario.apellidos','usuario.nombres','usuario.nro_documento','tramite.nro_matricula'
-        ,'tipo_tramite_unidad.descripcion','exonerado_archivo','voucher.idEntidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
+        ,'tipo_tramite_unidad.descripcion','exonerado_archivo','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
         ,'voucher.archivo','voucher.des_estado_voucher','voucher.idUsuario_aprobador','voucher.validado','voucher.estado')
         ->join('tramite','tramite.idVoucher','voucher.idVoucher')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
