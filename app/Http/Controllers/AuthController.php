@@ -42,7 +42,7 @@ class AuthController extends Controller
                 $usuario = new User;
                 $usuario -> idTipo_usuario=$request->input('idTipo_usuario');
                 $usuario -> username=$request->input('username');
-                $usuario -> password=md5(md5($request->input('password')));
+                $usuario -> password=Hash::make($request->input('password'));
                 $usuario -> nombres=strtoupper($request->input('nombres'));
                 $usuario -> apellidos=strtoupper($request->input('apellidos'));
                 $usuario -> tipo_documento=$request->input('tipo_documento');
@@ -142,12 +142,17 @@ class AuthController extends Controller
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
         $response['idTipoUsuario']=$user->idTipoUsuario;
-        return response()->json([
-            'accessToken' => $token,
-            'token_type' => 'bearer',
-            'user'=>$response,
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
+        if ($user->confirmed==true) {
+            return response()->json([
+                'accessToken' => $token,
+                'token_type' => 'bearer',
+                'user'=>$response,
+                'expires_in' => auth()->factory()->getTTL() * 60
+            ]);
+        }else{
+            return response()->json(['status' => '400', 'message' => 'Confirme su correo electrónico para poder iniciar sesión'], 400);
+        }
+        
     }
 
     public function forgotPassword(Request $request){
