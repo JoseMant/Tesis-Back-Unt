@@ -14,13 +14,14 @@ use App\Tramite_Requisito;
 use App\Voucher;
 use App\User;
 use App\Tramite_Detalle;
+use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
 use Illuminate\Support\Str;
 class TramiteController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt', ['except' => ['login','register','PruebaFiles']]);
+        $this->middleware('jwt');
     }
 
     /**
@@ -30,7 +31,19 @@ class TramiteController extends Controller
      */
     public function index()
     {
-        return Tramite::All();
+        $tramites=Tramite::All();
+        foreach ($tramites as $key => $tramite) {
+            $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
+            foreach ($tramite->historial as $key => $item) {
+                if($item->idEstado_actual!=null){
+                    $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->get();
+                }else{
+                    $item->estado_actual="Ninguno";
+                }
+                $item->estado_nuevo=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_nuevo)->get();
+            }
+        }
+        return $tramites;
     }
 
     /**

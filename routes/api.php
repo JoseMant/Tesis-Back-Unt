@@ -49,7 +49,7 @@ Route::resource('alumnosSE','PersonaSEController');
 
 
 //VOUCHERS
-Route::resource('vouchers','VoucherController');
+Route::resource('/voucher','VoucherController');
 Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
