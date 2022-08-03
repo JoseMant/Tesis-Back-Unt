@@ -154,7 +154,7 @@
                             </p>
 						</div>
             <hr>
-						<a href="http://127.0.0.1:8000/api/register/verify/{{$usuario['confirmation_code']}}" target="_blank"><button type="button" class="btn btn-info">Confirmar Correo</button></a>
+						<a href="https://tramites-uraa.unitru.edu.pe/confirmation-validated/{{$usuario['confirmation_code']}}" target="_blank"><button type="button" class="btn btn-info">Confirmar Correo</button></a>
         </div>
         <div class="redes">
             <ul>
