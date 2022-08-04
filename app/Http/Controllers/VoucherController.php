@@ -114,29 +114,6 @@ class VoucherController extends Controller
         DB::beginTransaction();
         try {
             if ($request->query('search')!="") {
-                
-                // return $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                // ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion')
-                // ->join('tramite','tramite.idVoucher','voucher.idVoucher')
-                // ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                // ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-                // ->where('des_estado_voucher','PENDIENTE')
-                // ->where('descripcion','LIKE','%'.$request->query('search').'%')
-                // ->orWhere('nro_tramite','LIKE','%'.$request->query('search').'%')
-                // ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
-                // ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
-                // ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
-                // ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
-                // ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%')
-                // ->toSql();
-
-                // return $vouchers = Voucher::select("select `tramite`.`nro_tramite`, CONCAT(usuario.nombres,' ',usuario.apellidos) as alumno,
-                // `tipo_tramite_unidad`.`descripcion`, `exonerado_archivo` as `exonerado`, `voucher`.`entidad`, `voucher`.`nro_operacion`,
-                // `voucher`.`fecha_operacion` from `voucher` inner join `tramite` on `tramite`.`idVoucher` = `voucher`.`idVoucher` inner
-                // join `usuario` on `usuario`.`idUsuario` = `tramite`.`idUsuario` inner join `tipo_tramite_unidad` on
-                // `tipo_tramite_unidad`.`idTipo_tramite_unidad` = `tramite`.`idTipo_tramite_unidad` where `descripcion` LIKE ? or
-                // `nro_tramite` LIKE ? or `entidad` LIKE ? or `nro_operacion` LIKE ? or `fecha_operacion` LIKE ? or `usuario`.`nombres`
-                // LIKE ? or `usuario`.`apellidos` LIKE ?", ['%SOLICITUD%', '%SOLICITUD%', '%SOLICITUD%', '%SOLICITUD%', '%SOLICITUD%', '%SOLICITUD%', '%SOLICITUD%']); 
                 $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
@@ -164,33 +141,6 @@ class VoucherController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }
-                
-
-
-            // $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-            //     ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion')
-            //     ->join('tramite','tramite.idVoucher','voucher.idVoucher')
-            //     ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            //     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            //     ->where('des_estado_voucher','PENDIENTE')
-            //     ->orderBy($request->query('sort'), $request->query('order'))
-            //     ->get();
-            // if ($request->query('search')!="") {
-            //     $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-            //     ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion')
-            //     ->join('tramite','tramite.idVoucher','voucher.idVoucher')
-            //     ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            //     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            //     ->where('des_estado_voucher','PENDIENTE')
-            //     ->where('descripcion','LIKE','%'.$request->query('search').'%')
-            //     ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
-            //     ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
-            //     ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
-            //     ->orderBy($request->query('sort'), $request->query('order'))
-            //     ->get();
-            // }
-            
-
             foreach ($vouchers as $key => $voucher) {
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
