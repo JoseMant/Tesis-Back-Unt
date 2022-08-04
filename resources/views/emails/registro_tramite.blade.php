@@ -150,8 +150,8 @@
 						<hr>
 						<div style="text-align: justify!important;">
 							<p>Se ha registrado con éxito tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
-                                virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Tu voucher de pago sera validado en un maximo de 48 horas. Para revisar tus trámites
-                                ingresa al siguiente link:
+                                virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Tu voucher de pago sera validado en un maximo de 48 horas. Recuerda ingresar al 
+                                sistema para revisar el estado de tus trámites.
                             </p>
 						</div>
             <hr>

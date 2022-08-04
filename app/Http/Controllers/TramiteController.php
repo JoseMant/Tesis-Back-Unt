@@ -31,7 +31,34 @@ class TramiteController extends Controller
      */
     public function index()
     {
-        $tramites=Tramite::All();
+        // TRÁMITES POR USUARIO
+        $tramites=Tramite::all();
+        foreach ($tramites as $key => $tramite) {
+            // Obtenemos el tipo de cada trámite
+            $tramite->tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+            $tramite->tipo_tramite=Tipo_Tramite::Where('idTipo_tramite',$tramite->tipo_tramite_unidad->idTipo_tramite)->first();
+            $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
+            foreach ($tramite->historial as $key => $item) {
+                if($item->idEstado_actual!=null){
+                    $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->get();
+                }else{
+                    $item->estado_actual="Ninguno";
+                }
+                $item->estado_nuevo=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_nuevo)->get();
+            }
+        }
+        return $tramites;
+    }
+
+    public function GetByUser()
+    {
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $dni=$apy['nro_documento'];
+        // TRÁMITES POR USUARIO
+        $tramites=Tramite::Where('idUsuario',$idUsuario)->get();
         foreach ($tramites as $key => $tramite) {
             $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
             foreach ($tramite->historial as $key => $item) {
@@ -100,6 +127,7 @@ class TramiteController extends Controller
 
                 $tramite=new Tramite;
 
+                //AÑADIMOS EL NÚMERO DE TRÁMITE
                 $inicio=date('Y-m-d')." 00:00:00";
                 $fin=date('Y-m-d')." 23:59:59";
                 $last_tramite=Tramite::whereBetween('created_at', [$inicio , $fin])->orderBy("created_at","DESC")->first();

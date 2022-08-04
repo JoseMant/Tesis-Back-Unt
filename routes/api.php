@@ -37,6 +37,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //TRÁMITE
 Route::resource('tramites','TramiteController');
+Route::get('tramite/usuario','TramiteController@GetByUser');
 Route::get('bancos','BancoController@index');
 Route::get('tipos_tramites','Tipo_TramiteController@index');
 Route::get('sedes','SedeController@index');
