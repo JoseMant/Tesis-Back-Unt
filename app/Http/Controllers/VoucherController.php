@@ -115,7 +115,7 @@ class VoucherController extends Controller
         try {
             if ($request->query('search')!="") {
                 $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion')
+                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -133,7 +133,7 @@ class VoucherController extends Controller
                 ->get();
             }else {
                 $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion')
+                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -142,6 +142,7 @@ class VoucherController extends Controller
                 ->get();
             }
             foreach ($vouchers as $key => $voucher) {
+                $voucher->archivo="http://127.0.0.1:8000".$voucher->archivo;
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
                 }else {
@@ -166,53 +167,117 @@ class VoucherController extends Controller
         }   
         
     }
-    public function Aprobados(){
+    public function Aprobados(Request $request){
         DB::beginTransaction();
         try {
-            $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'),'usuario.nro_documento','tramite.nro_matricula'
-            ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
-            ,'voucher.archivo','voucher.des_estado_voucher','voucher.idUsuario_aprobador','voucher.validado','voucher.estado','unidad.descripcion as unidad')
-            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('unidad','unidad.idUnidad','tipo_tramite_unidad.idUnidad')
-            ->where('des_estado_voucher','APROBADO')->get();
+            if ($request->query('search')!="") {
+                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo')
+                ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where('des_estado_voucher','APROBADO')
+                ->where(function($query) use ($request)
+                {
+                    $query->where('descripcion','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
+                })
+                ->get();
+            }else {
+                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo')
+                ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where('des_estado_voucher','APROBADO')
+                ->orderBy($request->query('sort'), $request->query('order'))
+                ->get();
+            }
             foreach ($vouchers as $key => $voucher) {
+                $voucher->archivo=public_path().$voucher->archivo;
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
                 }else {
                     $voucher->exonerado="SI";
                 }
             }
-            return response()->json(['status' => '200', 'vouchers' =>$vouchers], 200);
+            $pagination=$this->Paginacion($vouchers, $request->query('size'), $request->query('page')+1);
+            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
+            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
+            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
+                'length'    => $pagination->total(),
+                'size'      => $pagination->perPage(),
+                'page'      => $pagination->currentPage()-1,
+                'lastPage'  => $pagination->lastPage()-1,
+                'startIndex'=> $begin,
+                'endIndex'  => $end - 1
+            ]], 200);
+            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e], 400);
         }   
     }
-    public function Rechazados(){
+    public function Rechazados(Request $request){
         DB::beginTransaction();
         try {
-            $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'),'usuario.nro_documento','tramite.nro_matricula'
-            ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.idVoucher'
-            ,'voucher.archivo','voucher.des_estado_voucher','voucher.idUsuario_aprobador','voucher.validado','voucher.estado','unidad.descripcion as unidad')
-            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('unidad','unidad.idUnidad','tipo_tramite_unidad.idUnidad')
-            ->where('des_estado_voucher','RECHAZADO')->get();
+            if ($request->query('search')!="") {
+                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo')
+                ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where('des_estado_voucher','RECHAZADO')
+                ->where(function($query) use ($request)
+                {
+                    $query->where('descripcion','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
+                })
+                ->get();
+            }else {
+                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                ,'tipo_tramite_unidad.descripcion','exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo')
+                ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where('des_estado_voucher','RECHAZADO')
+                ->orderBy($request->query('sort'), $request->query('order'))
+                ->get();
+            }
             foreach ($vouchers as $key => $voucher) {
+                $voucher->archivo=public_path().$voucher->archivo;
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
                 }else {
                     $voucher->exonerado="SI";
                 }
             }
-            return response()->json(['status' => '200', 'vouchers' =>$vouchers], 200);
+            $pagination=$this->Paginacion($vouchers, $request->query('size'), $request->query('page')+1);
+            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
+            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
+            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
+                'length'    => $pagination->total(),
+                'size'      => $pagination->perPage(),
+                'page'      => $pagination->currentPage()-1,
+                'lastPage'  => $pagination->lastPage()-1,
+                'startIndex'=> $begin,
+                'endIndex'  => $end - 1
+            ]], 200);
+            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e], 400);
-        }   
+        }  
     }
     public function Paginacion($items, $size, $page = null, $options = [])
     {

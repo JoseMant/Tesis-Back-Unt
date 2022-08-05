@@ -73,6 +73,15 @@ class TramiteController extends Controller
         return $tramites;
     }
 
+
+    public function GetCertificados()
+    {
+        // TRÁMITES POR USUARIO
+        $tramites=Tramite::join('Tipo_Tramite_Unidad','','');
+        
+        return $tramites;
+    }
+
     /**
      * Show the form for creating a new resource.
      *
