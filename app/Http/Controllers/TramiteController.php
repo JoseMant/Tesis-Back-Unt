@@ -74,11 +74,12 @@ class TramiteController extends Controller
     }
 
 
-    public function GetCertificados()
+    public function GetValidados()
     {
         // TRÁMITES POR USUARIO
-        $tramites=Tramite::join('Tipo_Tramite_Unidad','','');
-        
+        $tramites=Tramite::join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->where('tramite.idEstado_tramite',3)
+        ->get();
         return $tramites;
     }
 
