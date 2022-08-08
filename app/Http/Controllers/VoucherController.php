@@ -114,7 +114,7 @@ class VoucherController extends Controller
         DB::beginTransaction();
         try {
             if ($request->query('search')!="") {
-                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                $vouchers=Voucher::select('voucher.idVoucher','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'))
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
@@ -136,7 +136,7 @@ class VoucherController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }else {
-                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                $vouchers=Voucher::select('voucher.idVoucher','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'))
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
@@ -178,7 +178,7 @@ class VoucherController extends Controller
         DB::beginTransaction();
         try {
             if ($request->query('search')!="") {
-                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                $vouchers=Voucher::select('voucher.idVoucher','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'))
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
@@ -200,7 +200,7 @@ class VoucherController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }else {
-                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                $vouchers=Voucher::select('voucher.idVoucher','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'))
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
@@ -240,7 +240,7 @@ class VoucherController extends Controller
         DB::beginTransaction();
         try {
             if ($request->query('search')!="") {
-                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                $vouchers=Voucher::select('voucher.idVoucher','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'))
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
@@ -262,7 +262,7 @@ class VoucherController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }else {
-                $vouchers=Voucher::select('tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
+                $vouchers=Voucher::select('voucher.idVoucher','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'))
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')

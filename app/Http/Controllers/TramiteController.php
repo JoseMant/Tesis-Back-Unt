@@ -17,6 +17,13 @@ use App\Tramite_Detalle;
 use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
 use Illuminate\Support\Str;
+
+use App\PersonaSE;
+
+use App\Mencion;
+use App\Escuela;
+use App\PersonaSuv;
+use App\PersonaSga;
 class TramiteController extends Controller
 {
     public function __construct()
@@ -74,14 +81,143 @@ class TramiteController extends Controller
     }
 
 
-    public function GetValidados()
+    public function GetCertificadosValidados()
     {
         // TRÁMITES POR USUARIO
-        $tramites=Tramite::join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        $tramites=Tramite::select('tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante'),'tramite.created_at as fecha','unidad.descripcion as unidad',
+        'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','motivo_certificado.nombre as motivo','tramite.nro_matricula')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->where('tramite.idEstado_tramite',3)
+        ->where('tipo_tramite.idTipo_tramite',1)
         ->get();
+        foreach ($tramites as $key => $tramite) {
+            //Datos del usuario al que pertenece el trámite
+            $usuario=User::findOrFail($tramite->idUsuario)->first();
+            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+            $dependenciaDetalle=null;
+            $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
+            if ($personaSE) {
+                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+            }else{
+              $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+              if ($personaSuv) {
+                  $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+              }else {
+                $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+                if ($personaSga) {
+                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                }
+              }
+            }
+            $tramite->facultad=$dependenciaDetalle->nombre;
+        }
+        // $response->
         return $tramites;
     }
+
+
+    //Data de la primera vista 
+    public function GetCertificadosAsignados()
+    {
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        // TRÁMITES POR USUARIO
+        $tramites=Tramite::select('tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+        ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo','voucher.entidad')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->where('tramite.idEstado_tramite',3)
+        ->where('tipo_tramite.idTipo_tramite',1)
+        ->where('tramite_detalle.asignado_certificado',$idUsuario)
+        ->get();
+        foreach ($tramites as $key => $tramite) {
+            $tramite->archivo="http://127.0.0.1:8000".$tramite->archivo;
+            //Datos del usuario al que pertenece el trámite
+            $usuario=User::findOrFail($tramite->idUsuario)->first();
+            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+            $dependenciaDetalle=null;
+            $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
+            if ($personaSE) {
+                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+            }else{
+              $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+              if ($personaSuv) {
+                  $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+              }else {
+                $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+                if ($personaSga) {
+                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                }
+              }
+            }
+            $tramite->escuela=$dependenciaDetalle->nombre;
+        }
+        // $response->
+        return $tramites;
+    }
+
+    // Data del detalle
+    // public function GetCertificadosAsignados()
+    // {
+    //     // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+    //     $token = JWTAuth::getToken();
+    //     $apy = JWTAuth::getPayload($token);
+    //     $idUsuario=$apy['idUsuario'];
+    //     // TRÁMITES POR USUARIO
+    //     $tramites=Tramite::select('tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante'),'tramite.created_at as fecha','unidad.descripcion as unidad',
+    //     'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','motivo_certificado.nombre as motivo','tramite.nro_matricula')
+    //     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+    //     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+    //     ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+    //     ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+    //     ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+    //     ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+    //     ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+    //     ->where('tramite.idEstado_tramite',3)
+    //     ->where('tipo_tramite.idTipo_tramite',1)
+    //     ->where('tramite_detalle.asignado_certificado',$idUsuario)
+    //     ->get();
+    //     foreach ($tramites as $key => $tramite) {
+    //         //Datos del usuario al que pertenece el trámite
+    //         $usuario=User::findOrFail($tramite->idUsuario)->first();
+    //         // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+    //         $dependenciaDetalle=null;
+    //         $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
+    //         if ($personaSE) {
+    //             $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+    //         }else{
+    //           $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+    //           if ($personaSuv) {
+    //               $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+    //           }else {
+    //             $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+    //             if ($personaSga) {
+    //                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+    //             }
+    //           }
+    //         }
+    //         $tramite->facultad=$dependenciaDetalle->nombre;
+    //     }
+    //     // $response->
+    //     return $tramites;
+    // }
+
 
     /**
      * Show the form for creating a new resource.
@@ -198,6 +334,7 @@ class TramiteController extends Controller
                         $tramite_detalle->idMotivo_certificado=null;
                         break;
                 }
+                $tramite_detalle->asignado_certificado=null;
                 $tramite_detalle->save();
 
                 // REGISTRAMOS EL TRÁMITE
