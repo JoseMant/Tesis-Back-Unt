@@ -40,6 +40,7 @@ Route::resource('tramites','TramiteController');
 Route::get('tramite/usuario','TramiteController@GetByUser');
 Route::get('tramite/certificados/validados','TramiteController@GetCertificadosValidados');
 Route::get('tramite/certificados/asignados','TramiteController@GetCertificadosAsignados');
+Route::get('tramite/certificados/aprobados','TramiteController@GetCertificadosAprobados');
 Route::get('bancos','BancoController@index');
 Route::get('tipos_tramites','Tipo_TramiteController@index');
 Route::get('sedes','SedeController@index');

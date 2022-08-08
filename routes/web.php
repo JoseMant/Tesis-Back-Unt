@@ -35,3 +35,8 @@ Route::get('test', function () {
 
 
 Route::view('/email', 'emails.registro_tramite');
+
+
+// AUTENTICADOR
+Route::get('/autenticador', ['as'=>'autenticador.qr','uses'=>'AutenticadorController@AuthQr']);
+Route::post('/check','AutenticadorController@CheckQr');
