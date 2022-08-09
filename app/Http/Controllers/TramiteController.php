@@ -382,6 +382,7 @@ class TramiteController extends Controller
                       $voucher->archivo = $nombreBD;
                     }
                 }
+                $voucher->comentario=null;
                 $voucher->save();
                 // return $voucher;
 
