@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Arr;
 use App\Voucher;
+use App\Tramite;
+use App\Historial_Estado;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -93,6 +95,23 @@ class VoucherController extends Controller
             $voucher->idUsuario_aprobador=$idUsuario;
             $voucher->comentario=trim($request->comentario);
             $voucher -> update();
+            // modificamos el estado del trámite
+            $tramite=Tramite::Where('idVoucher',$voucher->idVoucher)->first();
+
+            //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+            $historial_estados=new Historial_Estado;
+            $historial_estados->idTramite=$tramite->idTramite;
+            $historial_estados->idUsuario=$idUsuario;
+            $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+            if (strtoupper($request->des_estado_voucher)=="APROBADO") {
+                $historial_estados->idEstado_nuevo=3;
+            }elseif (strtoupper($request->des_estado_voucher)=="RECHAZADO") {
+                $historial_estados->idEstado_nuevo=4;
+            }
+            $historial_estados->fecha=date('Y-m-d h:i:s');
+            $historial_estados->save();
+            $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
+            $tramite->save();
             DB::commit();
             return response()->json(['status' => '200', 'message' => "Voucher validado con éxito"], 200);
         } catch (\Exception $e) {
@@ -186,7 +205,7 @@ class VoucherController extends Controller
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite','tipo_tramite.descripcion')
-                ->where('des_estado_voucher','PENDIENTE')
+                ->where('des_estado_voucher','APROBADO')
                 ->where(function($query) use ($request)
                 {
                     $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -270,7 +289,7 @@ class VoucherController extends Controller
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-                ->where('des_estado_voucher','PENDIENTE')
+                ->where('des_estado_voucher','RECHAZADO')
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }

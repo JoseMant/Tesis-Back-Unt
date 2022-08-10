@@ -17,6 +17,9 @@ use App\Tramite_Detalle;
 use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 use App\PersonaSE;
 
@@ -58,27 +61,84 @@ class TramiteController extends Controller
         // return $tramites;
     }
 
-    public function GetByUser()
+    public function GetByUser(Request $request)
     {
-        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-        $token = JWTAuth::getToken();
-        $apy = JWTAuth::getPayload($token);
-        $idUsuario=$apy['idUsuario'];
-        $dni=$apy['nro_documento'];
-        // TRÁMITES POR USUARIO
-        $tramites=Tramite::Where('idUsuario',$idUsuario)->get();
-        foreach ($tramites as $key => $tramite) {
-            $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
-            foreach ($tramite->historial as $key => $item) {
-                if($item->idEstado_actual!=null){
-                    $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->get();
-                }else{
-                    $item->estado_actual="Ninguno";
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            $dni=$apy['nro_documento'];
+            
+            if ($request->query('search')!="") {
+                // TRÁMITES POR USUARIO
+                $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                ->Where('tramite.idUsuario',$idUsuario)
+                ->where(function($query) use ($request)
+                {
+                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                })
+                ->orderBy($request->query('sort'), $request->query('order'))
+                ->get();
+                foreach ($tramites as $key => $tramite) {
+                    //Obtenemos el historial de cada trámite
+                    $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
+                    foreach ($tramite->historial as $key => $item) {
+                        if($item->idEstado_actual!=null){
+                            $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->first();
+                        }else{
+                            $item->estado_actual="Ninguno";
+                        }
+                        $item->estado_nuevo=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_nuevo)->first();
+                    }
                 }
-                $item->estado_nuevo=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_nuevo)->get();
+            }else {
+                // TRÁMITES POR USUARIO
+                $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                ->Where('tramite.idUsuario',$idUsuario)
+                ->orderBy($request->query('sort'), $request->query('order'))
+                ->get();
+                foreach ($tramites as $key => $tramite) {
+                    $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
+                    foreach ($tramite->historial as $key => $item) {
+                        if($item->idEstado_actual!=null){
+                            $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->first();
+                        }else{
+                            $item->estado_actual="Ninguno";
+                        }
+                        $item->estado_nuevo=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_nuevo)->first();
+                    }
+                }
             }
-        }
-        return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+            $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
+            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
+            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
+            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
+                'length'    => $pagination->total(),
+                'size'      => $pagination->perPage(),
+                'page'      => $pagination->currentPage()-1,
+                'lastPage'  => $pagination->lastPage()-1,
+                'startIndex'=> $begin,
+                'endIndex'  => $end - 1
+            ]], 200);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
+        }  
     }
 
 
@@ -423,7 +483,7 @@ class TramiteController extends Controller
                 $tramite -> comentario=trim($request->comentario);
                 $tramite -> sede=trim($request->sede);
                 $tramite -> exonerado_archivo=null; //corregir
-                $tramite -> idEstado_tramite=1;
+                $tramite -> idEstado_tramite=2;
                 // REGISTRAMOS LA FIRMA DEL TRÁMITE(DEBE SER UNA SOLA VEZ EL REGISTRO PARA TODOS LOS TRÁMITES)
 
 
@@ -481,6 +541,16 @@ class TramiteController extends Controller
                 $historial_estados->idEstado_nuevo=1;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
+
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=1;
+                $historial_estados->idEstado_nuevo=2;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+
                 DB::commit();
                 // var_dump($tipo_tramite_unidad);
                 // exit();
@@ -541,14 +611,10 @@ class TramiteController extends Controller
     }
 
 
-    // public function PruebaFiles(Request $request){
-    //     $file = $request->file("archivo");
-    //     //Obtener el nombre de la imagen completo con su extension
-    //     $nombre_imagen_con_extension = $request->file('archivo')->getClientOriginalName();
-    //     // Obtener solo el nombre de la imagen, sin la extension
-    //     $nombre_imagen = pathinfo($nombre_imagen_con_extension,PATHINFO_FILENAME);
-    //     //Obtener solo la extension de la imagen
-    //     $extension_imagen = $request->file('archivo')->getClientOriginalExtension();
-    //     return $file->getClientOriginalName();
-    // }
+    public function Paginacion($items, $size, $page = null, $options = [])
+    {
+        // $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+        $items = $items instanceof Collection ? $items : Collection::make($items);
+        return $response=new LengthAwarePaginator($items->forPage($page, $size), $items->count(), $size, $page, $options);
+    }
 }
