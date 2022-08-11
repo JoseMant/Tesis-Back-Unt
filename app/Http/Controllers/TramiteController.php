@@ -141,6 +141,31 @@ class TramiteController extends Controller
         }  
     }
 
+    public function GetTramitesByUser(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            $dni=$apy['nro_documento'];
+            
+            $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                ->Where('tramite.idUsuario',$idUsuario)
+                ->get();
+            return response()->json($tramites, 200);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
+        }  
+    }
+
 
     public function GetCertificadosValidados()
     {
@@ -184,30 +209,66 @@ class TramiteController extends Controller
 
 
     //Data de la primera vista 
-    public function GetCertificadosAsignados()
+    public function GetCertificadosAsignados(Request $request)
     {
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
-        // TRÁMITES POR USUARIO
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-        ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo','tramite.exonerado_archivo')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-        ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
-        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-        ->where('tramite.idEstado_tramite',3)
-        ->where('tipo_tramite.idTipo_tramite',1)
-        ->where('tramite_detalle.asignado_certificado',$idUsuario)
-        ->get();
+
+        if ($request->query('search')!="") {
+            // TRÁMITES POR USUARIO
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad',DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo','tramite.exonerado_archivo')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tramite.idEstado_tramite',3)
+            ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('motivo_certificado.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+            })
+            ->orderBy($request->query('sort'), $request->query('order'))
+            ->get();
+        }else {
+            // TRÁMITES POR USUARIO
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo','tramite.exonerado_archivo')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tramite.idEstado_tramite',3)
+            ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->orderBy($request->query('sort'), $request->query('order'))
+            ->get();   
+        }
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -238,12 +299,20 @@ class TramiteController extends Controller
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
         }
-        return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
+            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
+            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
+            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
+                'length'    => $pagination->total(),
+                'size'      => $pagination->perPage(),
+                'page'      => $pagination->currentPage()-1,
+                'lastPage'  => $pagination->lastPage()-1,
+                'startIndex'=> $begin,
+                'endIndex'  => $end - 1
+            ]], 200);
+        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
     }
 
-
-
-    //Data de la primera vista 
     public function GetCertificadosAprobados()
     {
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -302,56 +371,6 @@ class TramiteController extends Controller
         return $tramites;
     }
 
-
-
-
-    // Data del detalle
-    // public function GetCertificadosAsignados()
-    // {
-    //     // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-    //     $token = JWTAuth::getToken();
-    //     $apy = JWTAuth::getPayload($token);
-    //     $idUsuario=$apy['idUsuario'];
-    //     // TRÁMITES POR USUARIO
-    //     $tramites=Tramite::select('tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante'),'tramite.created_at as fecha','unidad.descripcion as unidad',
-    //     'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','motivo_certificado.nombre as motivo','tramite.nro_matricula')
-    //     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-    //     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-    //     ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-    //     ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-    //     ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-    //     ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
-    //     ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-    //     ->where('tramite.idEstado_tramite',3)
-    //     ->where('tipo_tramite.idTipo_tramite',1)
-    //     ->where('tramite_detalle.asignado_certificado',$idUsuario)
-    //     ->get();
-    //     foreach ($tramites as $key => $tramite) {
-    //         //Datos del usuario al que pertenece el trámite
-    //         $usuario=User::findOrFail($tramite->idUsuario)->first();
-    //         // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-    //         $dependenciaDetalle=null;
-    //         $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
-    //         if ($personaSE) {
-    //             $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-    //         }else{
-    //           $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-    //           if ($personaSuv) {
-    //               $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-    //           }else {
-    //             $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-    //             if ($personaSga) {
-    //                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-    //             }
-    //           }
-    //         }
-    //         $tramite->facultad=$dependenciaDetalle->nombre;
-    //     }
-    //     // $response->
-    //     return $tramites;
-    // }
-
-
     /**
      * Show the form for creating a new resource.
      *
@@ -379,13 +398,7 @@ class TramiteController extends Controller
             $dni=$apy['nro_documento'];
             $usuario = User::findOrFail($idUsuario);
 
-            // $file=$request->file("archivo_firma");
-            // $nombre = $dni.".".$file->guessExtension();
-            // $nombreBD = "/storage/firmas_tramites/".$nombre;
-            // // Validamos que no se gaurde la misma firma para otro trámite
-            // return $tramiteValidate=Tramite::where("firma_tramite",$nombreBD)->first();
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
-
 
             // se tiene que validar también el idUsuario
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
@@ -393,17 +406,9 @@ class TramiteController extends Controller
             ->where('fecha_operacion',trim($request->fecha_operacion))
             ->where('idUsuario',trim($idUsuario))
             ->first();
-            // $voucherValidate=Voucher::Where('entidad',$request->input('entidad'))->where('nro_operacion',$request->input('nro_operacion'))
-            // ->where('fecha_operacion',$request->input('fecha_operacion'))
-            // ->first();
             if($tramiteValidate){
                 return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado!!'], 400);
             }else{
-                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                // $token = JWTAuth::getToken();
-                // $apy = JWTAuth::getPayload($token);
-                // $idUsuario=$apy['idUsuario'];
-
                 $tramite=new Tramite;
 
                 //AÑADIMOS EL NÚMERO DE TRÁMITE
@@ -424,8 +429,6 @@ class TramiteController extends Controller
                     $tramite -> nro_tramite="001".date('d').date('m').substr(date('Y'),2,3);
                 }
 
-
-
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
                 $voucher->entidad=trim($request->entidad);
@@ -444,7 +447,6 @@ class TramiteController extends Controller
                 }
                 $voucher->comentario=null;
                 $voucher->save();
-                // return $voucher;
 
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
                 $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
@@ -521,8 +523,6 @@ class TramiteController extends Controller
                         $tramite_requisito=new Tramite_Requisito;
                         $tramite_requisito->idTramite=$tramite->idTramite;
                         $tramite_requisito->idRequisito=$requisito["idRequisito"];
-                        //Verificar archivo
-                        // $file=$request->file("archivo");
                         $nombre = $dni.".".$file->guessExtension();
                         $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"]."/".$nombre;
                         if($file->guessExtension()==$requisito["extension"]){
@@ -552,10 +552,6 @@ class TramiteController extends Controller
                 $historial_estados->save();
 
                 DB::commit();
-                // var_dump($tipo_tramite_unidad);
-                // exit();
-                // Enviamos correo de confirmación al usuario
-                // return $usuario;
                 dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                 return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente!!'], 200);
             }
@@ -613,7 +609,6 @@ class TramiteController extends Controller
 
     public function Paginacion($items, $size, $page = null, $options = [])
     {
-        // $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
         $items = $items instanceof Collection ? $items : Collection::make($items);
         return $response=new LengthAwarePaginator($items->forPage($page, $size), $items->count(), $size, $page, $options);
     }
