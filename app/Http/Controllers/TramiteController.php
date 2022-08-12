@@ -61,6 +61,10 @@ class TramiteController extends Controller
         // return $tramites;
     }
 
+
+
+
+
     public function GetByUser(Request $request)
     {
         DB::beginTransaction();
@@ -151,13 +155,43 @@ class TramiteController extends Controller
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
             
-            $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado')
-                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-                ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
-                ->Where('tramite.idUsuario',$idUsuario)
-                ->get();
+            // TRÁMITES POR USUARIO
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo','tramite.exonerado_archivo','tipo_tramite.idTipo_tramite','tramite.comentario as comentario_tramite','voucher.comentario as comentario_voucher')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tramite.idusuario',$idUsuario)
+            ->get();   
+            foreach ($tramites as $key => $tramite) {
+                //Datos del usuario al que pertenece el trámite
+                $usuario=User::findOrFail($tramite->idUsuario)->first();
+                // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+                $dependenciaDetalle=null;
+                $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
+                if ($personaSE) {
+                    $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+                }else{
+                  $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                  if ($personaSuv) {
+                      $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                  }else {
+                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+                    if ($personaSga) {
+                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                    }
+                  }
+                }
+                $tramite->escuela=$dependenciaDetalle->nombre;
+            }
             return response()->json($tramites, 200);
             
         } catch (\Exception $e) {
@@ -219,7 +253,7 @@ class TramiteController extends Controller
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad',DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo','tramite.exonerado_archivo')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -239,7 +273,7 @@ class TramiteController extends Controller
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
                 ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
                 ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
+                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
