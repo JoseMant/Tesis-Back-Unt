@@ -39,6 +39,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::resource('tramites','TramiteController');
 Route::get('tramite/usuario','TramiteController@GetByUser');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+Route::get('tramite/certificados','TramiteController@GetCertificados');
 Route::get('tramite/certificados/validados','TramiteController@GetCertificadosValidados');
 Route::get('tramite/certificados/asignados','TramiteController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','TramiteController@GetCertificadosAprobados');
