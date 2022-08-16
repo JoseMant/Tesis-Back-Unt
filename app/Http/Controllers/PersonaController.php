@@ -231,9 +231,9 @@ class PersonaController extends Controller
                                 array_push($escuelas,$escuelaSede);
                             }
                         }
-                        $facultad->escuelas=$escuelas;
+                        $facultad->subdependencias=$escuelas;
                     }
-                    return response()->json(['status' => '200', 'facultades' => $facultades], 200); 
+                    return response()->json(['status' => '200', 'dependencias' => $facultades], 200); 
                 }
                 else{
                     //Obtenemos datos de la persona que inicia sesión
@@ -268,9 +268,9 @@ class PersonaController extends Controller
                                     array_push($escuelas, $escuelaSede);
                                 }
                             }
-                            $facultad->escuelas=$escuelas;
+                            $facultad->subdependencias=$escuelas;
                         }
-                        return response()->json(['status' => '200', 'facultades' => $facultades], 200); 
+                        return response()->json(['status' => '200', 'dependencias' => $facultades], 200); 
                     }else {
                         return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado'], 400); 
                     }
@@ -316,9 +316,9 @@ class PersonaController extends Controller
                             array_push($menciones, $mencionSede);
                         }
                     }
-                    $facultad->menciones=$menciones;
+                    $facultad->subdependencias=$menciones;
                 }
-                return response()->json(['status' => '200', 'facultades' => $facultades], 200);
+                return response()->json(['status' => '200', 'dependencias' => $facultades], 200);
             } 
         } catch (\Exception $e) {
             DB::rollback();
