@@ -280,10 +280,20 @@ class PersonaController extends Controller
             }else if($idUnidad==3){ //maestría
                 // donde
             }else{
+                // Obtenemos las menciones a las que pertenece el alumno
                 $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','idSegunda_Especialidad')
                 ->join('mencion','alumno.idMencion','mencion.idMencion')
                 ->Where('alumno.nro_documento',$dni)
                 ->get();
+                // obtenemos la sede de la última matricula a la que pertenece el alumno
+                $sede=PersonaSE::select('matricula.fecha_hora','sede.nombre')
+                ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                ->join('sede','matricula.idSede','sede.idSede')
+                ->where('alumno.nro_documento',$dni)
+                ->orderBy('matricula.fecha_hora','desc')
+                ->limit(1)
+                ->first()
+                ;
                 //Guardamos la(s) segunda especialidad(es) a la que pertenece dicho alumno
                 $facultades=[];
                 foreach ($alumnoMenciones as $key => $mencion) {
@@ -312,7 +322,7 @@ class PersonaController extends Controller
                         if ($facultad['nombre']===strtoupper($facultadMencion['nombre'])) {
                             $mencionSede=Mencion::where('idSGA_SE',$mencion->idMencion)->first();
                             $mencionSede->nro_matricula=$mencion->codigo;
-                            $mencionSede->sede=$mencion->sed_descripcion;
+                            $mencionSede->sede=$sede->nombre;
                             array_push($menciones, $mencionSede);
                         }
                     }
