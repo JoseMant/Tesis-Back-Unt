@@ -280,64 +280,45 @@ class PersonaController extends Controller
             }else if($idUnidad==3){ //maestría
                 // donde
             }else{
-                $alumnoMenciones=PersonaSE::select('mencion.idMencion','mencion.nombre','idSegunda_Especialidad')
+                $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','idSegunda_Especialidad')
                 ->join('mencion','alumno.idMencion','mencion.idMencion')
                 ->Where('alumno.nro_documento',$dni)
                 ->get();
                 //Guardamos la(s) segunda especialidad(es) a la que pertenece dicho alumno
                 $facultades=[];
                 foreach ($alumnoMenciones as $key => $mencion) {
-                    $facultad=Segunda_Especialidad::select('nombre')->Where('idSegunda_Especialidad',$mencion->idSegunda_Especialidad)->first();
-                    array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->nombre))->first());
+                    $flag=false;
+                    // obtenemos la facultad a la que pertenece cada mencion
+                    $facultad_mencion=Segunda_Especialidad::select('nombre')->Where('idSegunda_Especialidad',$mencion->idSegunda_Especialidad)->first();
+                    //Recorremos el aray de facultades para que no se repitan al agregar la facultad de una mencion nueva
+                    foreach ($facultades as $key => $facultad) {
+                        if ($facultad->nombre==strtoupper($facultad_mencion->nombre)) {
+                            $flag=true;
+                            break;
+                        }
+                    }
+                    if (!$flag) {
+                        array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad_mencion->nombre))->first());                    
+                    }
+                    // if (!in_array($facultad, $facultades)) {
+                    //     // return "existe";
+                    // }
                 }
-                //Recorremos la(s) segunda especialidad(es) y mencion(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
+                //Recorremos la(s) segunda especialidad(es) y mencion(s) para ir añadiendo cada mencion a su respectiva segunda especialidad
                 foreach ($facultades as $key => $facultad) {
                     $menciones=[];
                     foreach ($alumnoMenciones as $key => $mencion) {
                         $facultadMencion=Segunda_Especialidad::select('nombre')->Where('idSegunda_Especialidad',$mencion->idSegunda_Especialidad)->first();
                         if ($facultad['nombre']===strtoupper($facultadMencion['nombre'])) {
                             $mencionSede=Mencion::where('idSGA_SE',$mencion->idMencion)->first();
-                            // $mencionSede->nro_matricula=$mencion->idalumno;
-                            // $mencionSede->sede=$mencion->sed_descripcion;
+                            $mencionSede->nro_matricula=$mencion->codigo;
+                            $mencionSede->sede=$mencion->sed_descripcion;
                             array_push($menciones, $mencionSede);
                         }
                     }
                     $facultad->menciones=$menciones;
                 }
-                return response()->json(['status' => '200', 'facultades' => $facultades], 200); 
-                //-----------------------------------
-                // //obtenemos uno(cualquiera) para sacar la dependencia
-                // $personaSE=PersonaSE::select('segunda_especialidad.nombre')
-                //     ->join('mencion','alumno.idMencion','mencion.idMencion')
-                //     ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
-                //     ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                //     ->join('sede','matricula.idSede','sede.idSede')
-                //     ->Where('alumno.nro_documento',$dni)->first();
-                // $dependencias = DependenciaURAA::where('nombre',strtoupper($personaSE->nombre))->get();
-                // foreach($dependencias as $dependencia){
-                //     $dependencia->menciones=PersonaSE::select('alumno.idAlumno','alumno.codigo as nro_matricula','mencion.*')
-                //     ->join('mencion','alumno.idMencion','mencion.idMencion')
-                //     ->Where('alumno.nro_documento',$dni)->get();
-                //     foreach($dependencia->menciones as $mencion){
-                //         $sede=PersonaSE::select('sede.nombre')
-                //         ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                //         ->join('sede','matricula.idSede','sede.idSede')
-                //         ->Where('alumno.idAlumno',$mencion->idAlumno)->first();
-                //         $mencion->sede=$sede->nombre;
-                //     }
-                // }
-                //------------------------------------
-                // $dependencia->menciones=PersonaSE::select('alumno.idAlumno','alumno.codigo as nro_matricula','mencion.*')
-                // ->join('mencion','alumno.idMencion','mencion.idMencion')
-                // ->Where('alumno.nro_documento',$dni)->get();
-                // foreach($dependencia->menciones as $mencion){
-                //     $sede=PersonaSE::select('sede.nombre')
-                //     ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                //     ->join('sede','matricula.idSede','sede.idSede')
-                //     ->Where('alumno.idAlumno',$mencion->idAlumno)->first();
-                //     $mencion->sede=$sede->nombre;
-                // }
-                return $dependencias;
+                return response()->json(['status' => '200', 'facultades' => $facultades], 200);
             } 
         } catch (\Exception $e) {
             DB::rollback();
