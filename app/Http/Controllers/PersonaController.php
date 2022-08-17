@@ -17,6 +17,7 @@ use App\Escuela;
 use App\Alumno;
 use App\Segunda_Especialidad;
 use App\Mencion;
+use Illuminate\Support\Facades\Http;
 
 class PersonaController extends Controller
 {
@@ -277,8 +278,14 @@ class PersonaController extends Controller
                 }
             }else if($idUnidad==2){ //doctorado
                 // dónde?
+                return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+                    'dni' => $dni
+                  ]);
             }else if($idUnidad==3){ //maestría
                 // donde
+                return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+                    'dni' => $dni
+                  ]);
             }else{
                 // Obtenemos las menciones a las que pertenece el alumno
                 $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','idSegunda_Especialidad')

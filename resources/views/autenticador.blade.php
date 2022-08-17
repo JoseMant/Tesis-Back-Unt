@@ -16,7 +16,7 @@
 
         .bg { 
             /* The image used */
-            background-image: url("images/bg.jpg");
+            background-image: url("img/fondo.png");
             /* Full height */
             height: 100%; 
             /* Center and scale the image nicely */
@@ -34,10 +34,10 @@
                 <h1>Time-Based Authentication</h1>
                 <p style="font-style: italic;">A Google Authenticator kinda Authentication</p>
                 <hr>
-                <form action="/check" method="post" role="form" id="frmCheck" name="frmCheck">
+                <form action="{{route('autenticador.store')}}" method="post" role="form" id="frmCheck" name="frmCheck">
                     @csrf
 	                <div style="text-align: center;">
-	                	<img style="text-align: center;;" class="img-fluid" src="<?php   echo $qrCodeUrl ?>" alt="Verify this Google Authenticator"><br><br> 
+	                	<img style="text-align: center;;" class="img-fluid" src="<?php   echo $QRcode ?>" alt="Verify this Google Authenticator"><br><br> 
 	                	<input type="text" class="form-control" name="code" placeholder="******" style="font-size: xx-large;width: 200px;border-radius: 0px;text-align: center;display: inline;color: #0275d8;">
 	                	<br> <br>    
 	                	<button type="submit" class="btn btn-md btn-primary" style="width: 200px;border-radius: 0px;">VERIFICAR</button>

@@ -8,10 +8,15 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Arr;
 use App\Voucher;
 use App\Tramite;
+use App\Tipo_Tramite_Unidad;
+use App\Tipo_Tramite;
+use App\User;
 use App\Historial_Estado;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Jobs\ActualizacionTramiteJob;
+
 class VoucherController extends Controller
 {
     public function __construct()
@@ -88,6 +93,12 @@ class VoucherController extends Controller
             $idUsuario=$apy['idUsuario'];
             // Obtenemos el voucher a validar y actualizamos los datos
             $voucher = Voucher::findOrFail($id);
+            // modificamos el estado del trámite
+            $tramite=Tramite::Where('idVoucher',$voucher->idVoucher)->first();
+            $usuario=User::where('idUsuario',$tramite->idUsuario)->first();
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+            $tipo_tramite=Tipo_Tramite::where('idTipo_tramite',$tipo_tramite_unidad->idTipo_tramite)->first();
+
             $voucher->des_estado_voucher=$request->des_estado_voucher;
             if (strtoupper($request->des_estado_voucher)=="APROBADO") {
                 $voucher->validado=1;
@@ -95,8 +106,6 @@ class VoucherController extends Controller
             $voucher->idUsuario_aprobador=$idUsuario;
             $voucher->comentario=trim($request->comentario);
             $voucher -> update();
-            // modificamos el estado del trámite
-            $tramite=Tramite::Where('idVoucher',$voucher->idVoucher)->first();
 
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
             $historial_estados=new Historial_Estado;
@@ -113,6 +122,9 @@ class VoucherController extends Controller
             $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
             $tramite->save();
             DB::commit();
+            // mensaje de validación de voucher
+            dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+
             return response()->json(['status' => '200', 'message' => "Voucher validado con éxito"], 200);
         } catch (\Exception $e) {
           DB::rollback();

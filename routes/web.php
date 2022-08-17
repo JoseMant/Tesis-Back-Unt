@@ -38,5 +38,6 @@ Route::view('/email', 'emails.registro_tramite');
 
 
 // AUTENTICADOR
-Route::get('/autenticador', ['as'=>'autenticador.qr','uses'=>'AutenticadorController@AuthQr']);
-Route::post('/check','AutenticadorController@CheckQr');
+Route::resource('/autenticador', AutenticadorController::class);
+// Route::get('/', ['as'=>'autenticador.qr','uses'=>'AutenticadorController@AuthQr']);
+// Route::post('/check','AutenticadorController@CheckQr');

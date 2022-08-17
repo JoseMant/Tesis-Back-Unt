@@ -6,26 +6,27 @@ use Illuminate\Http\Request;
 
 class AutenticadorController extends Controller
 {
-    public function AuthQr(){
+    public function index(){
 
 		$Authenticator =new Autenticador;
 		$secret = $Authenticator->generateRandomSecret();
-		session(['secret' => $secret]);
+
+		session(['auth_secret' => $secret]);
+		var_dump($secret);
         
-		$qrCodeUrl = $Authenticator->getQR('capacitacion_dth', $secret);
-        // dd($qrCodeUrl);
-        // exit();
-		return view('autenticador', compact('secret','qrCodeUrl'));	
+		$QRcode = $Authenticator->getQR('API_TRAMITES', $secret);
+        
+		return view('autenticador', compact('secret','QRcode'));	
 	}
 
-	public function CheckQr(){
+	public function store(){
 
 		$Authenticator = new Autenticador();
-		$value = session('secret');
-        // dd($value);
+		$value = session('auth_secret');
         // exit();
 		$checkResult = $Authenticator->verifyCode($value, $_POST['code'], 2);    // 2 = 2*30sec clock tolerance
-
+		
+        dd($value, $_POST['code'], $checkResult);
 		var_dump($checkResult);
 		
 	}
