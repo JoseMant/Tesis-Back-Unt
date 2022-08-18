@@ -154,7 +154,7 @@ class TramiteController extends Controller
             
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             ,'voucher.nro_operacion','voucher.entidad','voucher.fecha_operacion','tipo_tramite_unidad.costo','tramite.exonerado_archivo'
             ,'tipo_tramite.idTipo_tramite','tramite.comentario as comentario_tramite','voucher.comentario as comentario_voucher'
@@ -436,7 +436,25 @@ class TramiteController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $tramite=Tramite::where('idTramite',$id)->first();
+        // Editamos el voucher
+        $voucher=Voucher::where('idVoucher',$tramite->idVoucher)->first();
+        // $voucher->entidad=trim($request->entidad);
+        // $voucher->nro_operacion=trim($request->nro_operacion);
+        // $voucher->fecha_operacion=trim($request->fecha_operacion);
+        $voucher->des_estado_voucher='PENDIENTE';
+        $voucher->idUsuario_aprobador=null;
+        $voucher->comentario=null;
+        if($request->hasFile("archivo")){
+             $file=$request->file("archivo");
+             $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+             $nombreBD = "/storage/vouchers_tramites/".$nombre;
+             if($file->guessExtension()=="pdf"){
+               $file->storeAs('public/vouchers_tramites', $nombre);
+               $voucher->archivo = $nombreBD;
+             }
+         }
+        $voucher->update();
     }
 
     /**

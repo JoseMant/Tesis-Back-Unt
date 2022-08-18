@@ -141,7 +141,7 @@ class AuthController extends Controller
         $response['correo']=$user->correo;
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
-        $response['idTipoUsuario']=$user->idTipoUsuario;
+        $response['idTipoUsuario']=$user->idTipo_usuario;
         if ($user->confirmed==true) {
             return response()->json([
                 'accessToken' => $token,
