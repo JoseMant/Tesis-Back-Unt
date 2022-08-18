@@ -158,7 +158,7 @@ class TramiteController extends Controller
             /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             ,'voucher.nro_operacion','voucher.entidad','voucher.fecha_operacion','tipo_tramite_unidad.costo','tramite.exonerado_archivo'
             ,'tipo_tramite.idTipo_tramite','tramite.comentario as comentario_tramite','voucher.comentario as comentario_voucher'
-            ,'tramite_detalle.idMotivo_certificado','voucher.des_estado_voucher')
+            ,'tramite_detalle.idMotivo_certificado','voucher.des_estado_voucher','tramite.sede')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -171,6 +171,11 @@ class TramiteController extends Controller
             ->where('tramite.idusuario',$idUsuario)
             ->get();   
             foreach ($tramites as $key => $tramite) {
+                //Requisitos
+                $tramite->requisitos=Tramite_Requisito::select('*')
+                ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                ->where('tramite_requisito.idTramite',$tramite->idTramite)
+                ->get();
                 //Datos del usuario al que pertenece el trámite
                 $usuario=User::findOrFail($tramite->idUsuario)->first();
                 // Obtenemos el motivo certificado(en caso lo tengan) de cada trámite 
