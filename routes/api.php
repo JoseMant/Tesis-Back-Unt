@@ -38,6 +38,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 //TRÁMITE
 Route::resource('tramites','TramiteController');
 Route::get('tramite/usuario','TramiteController@GetByUser');
+Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
 Route::get('tramite/certificados','CertificadoController@GetCertificados');
 Route::get('tramite/certificados/validados','CertificadoController@GetCertificadosValidados');

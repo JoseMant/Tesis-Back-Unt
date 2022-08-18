@@ -439,9 +439,6 @@ class TramiteController extends Controller
         $tramite=Tramite::where('idTramite',$id)->first();
         // Editamos el voucher
         $voucher=Voucher::where('idVoucher',$tramite->idVoucher)->first();
-        // $voucher->entidad=trim($request->entidad);
-        // $voucher->nro_operacion=trim($request->nro_operacion);
-        // $voucher->fecha_operacion=trim($request->fecha_operacion);
         $voucher->des_estado_voucher='PENDIENTE';
         $voucher->idUsuario_aprobador=null;
         $voucher->comentario=null;
@@ -453,7 +450,7 @@ class TramiteController extends Controller
                $file->storeAs('public/vouchers_tramites', $nombre);
                $voucher->archivo = $nombreBD;
              }
-         }
+        }
         $voucher->update();
     }
 

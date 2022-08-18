@@ -106,86 +106,167 @@ class PersonaController extends Controller
 
         DB::beginTransaction();
         try {
-            // verificamos en la bd de SE
-            $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
-            ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo')
-                    // ->join('mencion','alumno.idMencion','mencion.idMencion')
-                    // ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
-                    // ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                    // ->join('sede','matricula.idSede','sede.idSede')
-                    ->Where('alumno.nro_documento',$request->input('dni'))->first();
-            if($personaSE){
-                $usuario=new User;
-                $usuario->nro_matricula=$personaSE->codigo;
-                $usuario->nombres=$personaSE->nombre;
-                $usuario->apellidos=$personaSE->paterno." ".$personaSE->materno;
-                $usuario->tipo_documento=$personaSE->idTipo_documento;
-                $usuario->nro_documento=$personaSE->nro_documento;
-                $usuario->correo=$personaSE->correo_personal;
-                $usuario->celular=$personaSE->celular;
-                $usuario->sexo=$personaSE->sexo;
-                // $usuario->dependencia=$personaSE->dependencia;
-                // $usuario->mencion=$personaSE->mencion;
-                // $usuario->sede=$personaSE->sede;
-                return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
-            }else{
-                // verificamos en la bd del suv
-                $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
-                'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
-                ->join('alumno','persona.idpersona','alumno.idpersona')
-                // ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
-                // ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
-                // ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
-                ->Where('persona.per_dni',$request->input('dni'))->first();
-                if($personaSuv){
-                    $facultad=Estructura::select('estr_descripcion')
-                    ->Where('idestructura',$personaSuv->iddependencia)->first();
+            $personaPos= Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+                'dni' => $request->input('dni')
+              ]);
+            // return $personaPos[0]["status"];
+            if ($personaPos[0]["status"]=="200"){
                     $usuario=new User;
-                    $usuario->nro_matricula=$personaSuv->idalumno;
-                    $usuario->nombres=$personaSuv->per_nombres;
-                    $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
-                    $usuario->tipo_documento=$personaSuv->per_tipo_documento;
-                    $usuario->nro_documento=$personaSuv->per_dni;
-                    $usuario->correo=$personaSuv->per_email;
-                    $usuario->celular=$personaSuv->per_celular;
-                    if ($personaSuv->per_sexo==0) {
-                        $usuario->sexo="F";
-                    }else{
-                        $usuario->sexo="M";
-                    }
-                    // $usuario->facultad=$facultad->estr_descripcion;
-                    // $usuario->escuela=$personaSuv->estr_descripcion;
-                    // $usuario->sede=$personaSuv->sed_descripcion;
+                    $usuario->nro_matricula=$personaPos[0]["codigo"];
+                    $usuario->nombres=$personaPos[0]["nombres"];
+                    $usuario->apellidos=$personaPos[0]["ape_paterno"]." ".$personaPos[0]["ape_materno"];
+                    $usuario->tipo_documento=1;
+                    $usuario->nro_documento=$personaPos[0]["dni"];
+                    $usuario->correo=$personaPos[0]["alu_email"];
+                    // $usuario->celular=$personaSE->celular;
+                    // $usuario->sexo=$personaSE->sexo;
+                    return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+                return $personaPos[0];
+            }else{
+                // verificamos en la bd de SE
+                $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
+                ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo')
+                        ->Where('alumno.nro_documento',$request->input('dni'))->first();
+                if($personaSE){
+                    $usuario=new User;
+                    $usuario->nro_matricula=$personaSE->codigo;
+                    $usuario->nombres=$personaSE->nombre;
+                    $usuario->apellidos=$personaSE->paterno." ".$personaSE->materno;
+                    $usuario->tipo_documento=$personaSE->idTipo_documento;
+                    $usuario->nro_documento=$personaSE->nro_documento;
+                    $usuario->correo=$personaSE->correo_personal;
+                    $usuario->celular=$personaSE->celular;
+                    $usuario->sexo=$personaSE->sexo;
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                 }else{
-                    // verificamos en la bd del sga
-                    $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
-                    ,'per_login')
-                    // ->join('perfil','persona.per_id','perfil.per_id')
-                    // ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
-                    // ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-                    ->Where('per_dni',$request->input('dni'))->first();
-                    if($personaSga){
-                        $facultad=Dependencia::select('dep_nombre')
-                        ->Where('dep_id',$personaSga->sdep_id)->first();
+                    // verificamos en la bd del suv
+                    $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
+                    'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
+                    ->join('alumno','persona.idpersona','alumno.idpersona')
+                    ->Where('persona.per_dni',$request->input('dni'))->first();
+                    if($personaSuv){
+                        $facultad=Estructura::select('estr_descripcion')
+                        ->Where('idestructura',$personaSuv->iddependencia)->first();
                         $usuario=new User;
-                        $usuario->nro_matricula=$personaSga->per_login;
-                        $usuario->nombres=$personaSga->per_nombres;
-                        $usuario->apellidos=$personaSga->per_apellidos;
-                        $usuario->tipo_documento=1;
-                        $usuario->nro_documento=$personaSga->per_dni;
-                        $usuario->correo=$personaSga->per_mail;
-                        $usuario->celular=$personaSga->per_celular;
-                        $usuario->sexo=$personaSga->per_sexo;
-                        // $usuario->dependencia=$facultad->dep_nombre;
-                        // $usuario->escuela=$personaSga->dep_nombre;
-                        // $usuario->sede=$personaSga->sed_nombre;
+                        $usuario->nro_matricula=$personaSuv->idalumno;
+                        $usuario->nombres=$personaSuv->per_nombres;
+                        $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
+                        $usuario->tipo_documento=$personaSuv->per_tipo_documento;
+                        $usuario->nro_documento=$personaSuv->per_dni;
+                        $usuario->correo=$personaSuv->per_email;
+                        $usuario->celular=$personaSuv->per_celular;
+                        if ($personaSuv->per_sexo==0) {
+                            $usuario->sexo="F";
+                        }else{
+                            $usuario->sexo="M";
+                        }
                         return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                     }else{
-                        return response()->json([ 'message' => 'Alumno no encontrado.']);
+                        // verificamos en la bd del sga
+                        $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
+                        ,'per_login')
+                        ->Where('per_dni',$request->input('dni'))->first();
+                        if($personaSga){
+                            $facultad=Dependencia::select('dep_nombre')
+                            ->Where('dep_id',$personaSga->sdep_id)->first();
+                            $usuario=new User;
+                            $usuario->nro_matricula=$personaSga->per_login;
+                            $usuario->nombres=$personaSga->per_nombres;
+                            $usuario->apellidos=$personaSga->per_apellidos;
+                            $usuario->tipo_documento=1;
+                            $usuario->nro_documento=$personaSga->per_dni;
+                            $usuario->correo=$personaSga->per_mail;
+                            $usuario->celular=$personaSga->per_celular;
+                            $usuario->sexo=$personaSga->per_sexo;
+                            return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+                        }else{
+                            return response()->json([ 'message' => 'Alumno no encontrado.']);
+                        }
                     }
-                }
-            }            
+                }  
+            }
+
+
+            // // verificamos en la bd de SE
+            // $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
+            // ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo')
+            //         // ->join('mencion','alumno.idMencion','mencion.idMencion')
+            //         // ->join('segunda_especialidad','segunda_especialidad.idSegunda_Especialidad','mencion.idSegunda_Especialidad')
+            //         // ->join('matricula','alumno.idAlumno','matricula.idAlumno')
+            //         // ->join('sede','matricula.idSede','sede.idSede')
+            //         ->Where('alumno.nro_documento',$request->input('dni'))->first();
+            // if($personaSE){
+            //     $usuario=new User;
+            //     $usuario->nro_matricula=$personaSE->codigo;
+            //     $usuario->nombres=$personaSE->nombre;
+            //     $usuario->apellidos=$personaSE->paterno." ".$personaSE->materno;
+            //     $usuario->tipo_documento=$personaSE->idTipo_documento;
+            //     $usuario->nro_documento=$personaSE->nro_documento;
+            //     $usuario->correo=$personaSE->correo_personal;
+            //     $usuario->celular=$personaSE->celular;
+            //     $usuario->sexo=$personaSE->sexo;
+            //     // $usuario->dependencia=$personaSE->dependencia;
+            //     // $usuario->mencion=$personaSE->mencion;
+            //     // $usuario->sede=$personaSE->sede;
+            //     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+            // }else{
+            //     // verificamos en la bd del suv
+            //     $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
+            //     'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
+            //     ->join('alumno','persona.idpersona','alumno.idpersona')
+            //     // ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
+            //     // ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
+            //     // ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
+            //     ->Where('persona.per_dni',$request->input('dni'))->first();
+            //     if($personaSuv){
+            //         $facultad=Estructura::select('estr_descripcion')
+            //         ->Where('idestructura',$personaSuv->iddependencia)->first();
+            //         $usuario=new User;
+            //         $usuario->nro_matricula=$personaSuv->idalumno;
+            //         $usuario->nombres=$personaSuv->per_nombres;
+            //         $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
+            //         $usuario->tipo_documento=$personaSuv->per_tipo_documento;
+            //         $usuario->nro_documento=$personaSuv->per_dni;
+            //         $usuario->correo=$personaSuv->per_email;
+            //         $usuario->celular=$personaSuv->per_celular;
+            //         if ($personaSuv->per_sexo==0) {
+            //             $usuario->sexo="F";
+            //         }else{
+            //             $usuario->sexo="M";
+            //         }
+            //         // $usuario->facultad=$facultad->estr_descripcion;
+            //         // $usuario->escuela=$personaSuv->estr_descripcion;
+            //         // $usuario->sede=$personaSuv->sed_descripcion;
+            //         return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+            //     }else{
+            //         // verificamos en la bd del sga
+            //         $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
+            //         ,'per_login')
+            //         // ->join('perfil','persona.per_id','perfil.per_id')
+            //         // ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
+            //         // ->join('dependencia','dependencia.dep_id','perfil.dep_id')
+            //         ->Where('per_dni',$request->input('dni'))->first();
+            //         if($personaSga){
+            //             $facultad=Dependencia::select('dep_nombre')
+            //             ->Where('dep_id',$personaSga->sdep_id)->first();
+            //             $usuario=new User;
+            //             $usuario->nro_matricula=$personaSga->per_login;
+            //             $usuario->nombres=$personaSga->per_nombres;
+            //             $usuario->apellidos=$personaSga->per_apellidos;
+            //             $usuario->tipo_documento=1;
+            //             $usuario->nro_documento=$personaSga->per_dni;
+            //             $usuario->correo=$personaSga->per_mail;
+            //             $usuario->celular=$personaSga->per_celular;
+            //             $usuario->sexo=$personaSga->per_sexo;
+            //             // $usuario->dependencia=$facultad->dep_nombre;
+            //             // $usuario->escuela=$personaSga->dep_nombre;
+            //             // $usuario->sede=$personaSga->sed_nombre;
+            //             return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+            //         }else{
+            //             return response()->json([ 'message' => 'Alumno no encontrado.']);
+            //         }
+            //     }
+            // }            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => 'Error!!!'], 400);

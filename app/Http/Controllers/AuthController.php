@@ -105,6 +105,11 @@ class AuthController extends Controller
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
         $response['idTipoUsuario']=$user->idTipoUsuario;
+        $tipo_usuario=User::select('tipo_usuario.nombre')
+        ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+        ->where('usuario.idUsuario',$user->idUsuario)
+        ->first();
+        $response['rol']=$tipo_usuario->nombre;
         return response()->json([
             'accessToken' => JWTAuth::refresh(),
             'token_type' => 'bearer',
@@ -142,6 +147,11 @@ class AuthController extends Controller
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
         $response['idTipoUsuario']=$user->idTipo_usuario;
+        $tipo_usuario=User::select('tipo_usuario.nombre')
+        ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+        ->where('usuario.idUsuario',$user->idUsuario)
+        ->first();
+        $response['rol']=$tipo_usuario->nombre;
         if ($user->confirmed==true) {
             return response()->json([
                 'accessToken' => $token,
