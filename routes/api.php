@@ -66,6 +66,7 @@ Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 // Route::resource('cargos','CargoController');
 Route::resource('personas','PersonaController');
 Route::resource('usuarios','UserController');
+Route::get('usuario/search','UserController@buscar');
 // Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
 //TIPOS DE TRÁMITE

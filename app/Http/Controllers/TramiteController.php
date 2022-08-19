@@ -463,7 +463,22 @@ class TramiteController extends Controller
             }
             $voucher->update();
 
-
+            // Editamos los requisitos
+            if($request->hasFile("files")){
+                foreach ($request->file("files") as $key => $file) {
+                    $requisito=json_decode($request->requisitos[$key],true);
+                    $tramite_requisito=new Tramite_Requisito;
+                    $tramite_requisito->idTramite=$tramite->idTramite;
+                    $tramite_requisito->idRequisito=$requisito["idRequisito"];
+                    $nombre = $dni.".".$file->guessExtension();
+                    $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"]."/".$nombre;
+                    if($file->guessExtension()==$requisito["extension"]){
+                    $file->storeAs("/public"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"], $nombre);
+                    $tramite_requisito->archivo = $nombreBD;
+                    }
+                    $tramite_requisito -> save();
+                }
+            }
             // TRÁMITES POR USUARIO
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'

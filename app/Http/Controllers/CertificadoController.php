@@ -122,7 +122,6 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',3)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }

@@ -28,7 +28,31 @@ class UserController extends Controller
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
         ->get();
-        return response()->json([$usuarios], 200);
+        return response()->json($usuarios, 200);
+    }
+
+    public function buscar(Request $request){
+        if ($request->query('query')!="") {
+            $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+            ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+            ->where('usuario.idTipo_usuario','!=',1)
+            ->where(function($query) use ($request)
+                {
+                    $query->where('usuario.nombres','LIKE', '%'.$request->query('query').'%')
+                    ->orWhere('tipo_usuario.nombre','LIKE', '%'.$request->query('query').'%')
+                    ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('query').'%');
+                })
+            ->get();
+        }else{
+            return "hola";
+            $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+            ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+            ->where('usuario.idTipo_usuario','!=',1)
+            ->get();
+        }
+        return response()->json($usuarios, 200);
     }
 
     /**
