@@ -23,9 +23,12 @@ class UserController extends Controller
      */
     public function index()
     {
-        $usuarios=User::where('idTipo_usuario','!=',1)->get();
-        return response()->json(['status' => '200', 'data' => $usuarios], 200);
-
+        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
+        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+        ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+        ->where('usuario.idTipo_usuario','!=',1)
+        ->get();
+        return response()->json([$usuarios], 200);
     }
 
     /**
