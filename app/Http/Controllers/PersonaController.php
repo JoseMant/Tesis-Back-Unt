@@ -307,6 +307,7 @@ class PersonaController extends Controller
                         foreach ($alumnoEscuelas as $key => $escuela) {
                             $facultadEscuela=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
+                                
                                 $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
                                 $escuelaSede->nro_matricula=$escuela->per_login;
                                 $escuelaSede->sede=$escuela->sed_nombre;
@@ -315,6 +316,7 @@ class PersonaController extends Controller
                         }
                         $facultad->subdependencias=$escuelas;
                     }
+                    
                     return response()->json(['status' => '200', 'dependencias' => $facultades], 200); 
                 }
                 else{

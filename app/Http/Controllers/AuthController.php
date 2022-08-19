@@ -152,17 +152,20 @@ class AuthController extends Controller
         ->where('usuario.idUsuario',$user->idUsuario)
         ->first();
         $response['rol']=$tipo_usuario->nombre;
-        if ($user->confirmed==true) {
-            return response()->json([
-                'accessToken' => $token,
-                'token_type' => 'bearer',
-                'user'=>$response,
-                'expires_in' => auth()->factory()->getTTL() * 60
-            ]);
+        if ($user->estado==true) {
+            if ($user->confirmed==true) {
+                return response()->json([
+                    'accessToken' => $token,
+                    'token_type' => 'bearer',
+                    'user'=>$response,
+                    'expires_in' => auth()->factory()->getTTL() * 60
+                ]);
+            }else{
+                return response()->json(['status' => '400', 'message' => 'Confirme su correo electrónico para poder iniciar sesión'], 400);
+            }
         }else{
-            return response()->json(['status' => '400', 'message' => 'Confirme su correo electrónico para poder iniciar sesión'], 400);
+            return response()->json(['status' => '400', 'message' => 'Usuario bloqueado'], 400);
         }
-
     }
 
     public function forgotPassword(Request $request){

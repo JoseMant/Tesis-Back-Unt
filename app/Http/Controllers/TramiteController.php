@@ -243,12 +243,13 @@ class TramiteController extends Controller
             $usuario = User::findOrFail($idUsuario);
 
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
-
+            // return "hola";
             // se tiene que validar también el idUsuario
+            // return Str::substr($request->fecha_operacion,0, 10);
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->Where('entidad',trim($request->entidad))->where('nro_operacion',trim($request->nro_operacion))
-            ->where('fecha_operacion',trim($request->fecha_operacion))
-            ->where('idUsuario',trim($idUsuario))
+            ->Where('voucher.entidad',trim($request->entidad))->where('voucher.nro_operacion',trim($request->nro_operacion))
+            ->where('voucher.fecha_operacion',Str::substr(trim($request->fecha_operacion),0, 10))
+            ->where('tramite.idUsuario',$idUsuario)
             ->first();
             if($tramiteValidate){
                 return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado!!'], 400);
@@ -436,22 +437,92 @@ class TramiteController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $tramite=Tramite::where('idTramite',$id)->first();
-        // Editamos el voucher
-        $voucher=Voucher::where('idVoucher',$tramite->idVoucher)->first();
-        $voucher->des_estado_voucher='PENDIENTE';
-        $voucher->idUsuario_aprobador=null;
-        $voucher->comentario=null;
-        if($request->hasFile("archivo")){
-             $file=$request->file("archivo");
-             $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
-             $nombreBD = "/storage/vouchers_tramites/".$nombre;
-             if($file->guessExtension()=="pdf"){
-               $file->storeAs('public/vouchers_tramites', $nombre);
-               $voucher->archivo = $nombreBD;
-             }
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            $dni=$apy['nro_documento'];
+            
+            
+            $tramite=Tramite::where('idTramite',$id)->first();
+            // Editamos el voucher
+            $voucher=Voucher::where('idVoucher',$tramite->idVoucher)->first();
+            $voucher->des_estado_voucher='PENDIENTE';
+            $voucher->idUsuario_aprobador=null;
+            $voucher->comentario=null;
+            if($request->hasFile("archivo")){
+                 $file=$request->file("archivo");
+                 $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                 $nombreBD = "/storage/vouchers_tramites/".$nombre;
+                 if($file->guessExtension()=="pdf"){
+                   $file->storeAs('public/vouchers_tramites', $nombre);
+                   $voucher->archivo = $nombreBD;
+                 }
+            }
+            $voucher->update();
+
+
+            // TRÁMITES POR USUARIO
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'voucher.nro_operacion','voucher.entidad','voucher.fecha_operacion','tipo_tramite_unidad.costo','tramite.exonerado_archivo'
+            ,'tipo_tramite.idTipo_tramite','tramite.comentario as comentario_tramite','voucher.comentario as comentario_voucher'
+            ,'tramite_detalle.idMotivo_certificado','voucher.des_estado_voucher','tramite.sede')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            // ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+            // ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tramite.idusuario',$idUsuario)
+            ->where('tramite.idTramite',$id)
+            ->first();   
+            // foreach ($tramites as $key => $tramite) {
+                //Requisitos
+                $tramite->requisitos=Tramite_Requisito::select('*')
+                ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                ->where('tramite_requisito.idTramite',$tramite->idTramite)
+                ->get();
+                //Datos del usuario al que pertenece el trámite
+                $usuario=User::findOrFail($tramite->idUsuario)->first();
+                // Obtenemos el motivo certificado(en caso lo tengan) de cada trámite 
+                if ($tramite->idTipo_tramite==1) {
+                    $motivo=Motivo_Certificado::Where('idMotivo_certificado',$tramite->idMotivo_certificado)->first();
+                    $tramite->motivo=$motivo->nombre;
+                }
+                // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+                $dependenciaDetalle=null;
+                if ($tramite->idUnidad==1) {
+                    // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                    // if ($personaSuv) {
+                    //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                    // }else {
+                        // $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+                        // if ($personaSga) {
+                            $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                        // }
+                    // }
+                }else if ($tramite->idUnidad==2) {
+                    
+                }else if ($tramite->idUnidad==3) {
+                    
+                }else{
+                    $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+                }
+                $tramite->escuela=$dependenciaDetalle->nombre;
+            // }
+            return response()->json($tramite, 200);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
         }
-        $voucher->update();
     }
 
     /**

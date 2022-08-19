@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Mail\Mailable;
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,7 +23,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::All();
+        $usuarios=User::where('idTipo_usuario','!=',1)->get();
+        return response()->json(['status' => '200', 'data' => $usuarios], 200);
+
     }
 
     /**
@@ -40,45 +46,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
-        try {
-            $usuarioValidate=User::Where('nro_doc',$request->input('nro_doc'))->first();
-            if(isset($usuarioValidate)){
-              return response()->json(['status' => '400', 'message' => 'El usuario ya se encuentra registrado!!'], 400);
-            }else{
-
-                $request->validate([
-                    'password'=>['required','min:8']
-                ]);
-                $usuario = new User;
-                $usuario -> username=$request->input('username');
-                $usuario -> password=md5(md5($request->input('password')));
-                $usuario -> nombres=strtoupper($request->input('nombres'));
-                $usuario -> apellidos=strtoupper($request->input('apellidos'));
-                $usuario -> nro_matricula=$request->input('nro_matricula');
-                $usuario -> tipo_doc=$request->input('tipo_doc');
-                $usuario -> nro_doc=$request->input('nro_doc');
-                $usuario -> correo=$request->input('correo');
-                $usuario -> celular=$request->input('celular');
-                $usuario -> sexo=$request->input('sexo');
-                $usuario -> idTipoUsuario=$request->input('idTipoUsuario');
-                $usuario -> confirmation_code=Str::random(25);
-                $usuario -> save();
-                DB::commit();
-                \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
-                // \Mail::to('kevinkjjuarez@gmail.com')->send(new \App\Mail\NewMail($usuario));
-
-                // PRUEBAS JOB---------------------------------
-                dispatch(new ConfirmacionCorreoJob($usuario));
-
-                //---------------------------------------------
-
-                return response()->json(['status' => '200', 'message' => 'Confirmar correo!!'], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error al registrar usuario'], 400);
-        }
+        
     }
 
     /**
