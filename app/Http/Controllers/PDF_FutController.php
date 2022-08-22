@@ -35,20 +35,31 @@ class PDF_FutController extends Controller
         $tipo_tramite=Tipo_Tramite::Where('idTipo_Tramite',$tipo_tramite_unidad->idTipo_tramite)->first();
         // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
         $dependenciaDetalle="";
-        $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
-        if ($personaSE) {
-            $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+        if ($tramite->idUnidad==1) {
+          $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+        }else if ($tramite->idUnidad==2) {
+            
+        }else if ($tramite->idUnidad==3) {
+            
         }else{
-          $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-          if ($personaSuv) {
-              $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-          }else {
-            $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-            if ($personaSga) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-            }
-          }
+            $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
         }
+        //------------------------------------------------------------------------------------------
+
+        // $personaSE=PersonaSE::Where('alumno.nro_documento',$usuario->nro_documento)->first();
+        // if ($personaSE) {
+        //     $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+        // }else{
+        //   $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+        //   if ($personaSuv) {
+        //       $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+        //   }else {
+        //     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+        //     if ($personaSga) {
+        //         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+        //     }
+        //   }
+        // }
 
         // =========================
         // ==== CREACIÓN DE PDF ====
@@ -85,7 +96,7 @@ class PDF_FutController extends Controller
         // $this->pdf->Cell(110, 4,utf8_decode('Email: ____________________________________________________________  Teléfono: ___________________'),0,0,'C');
         $this->pdf->SetXY(8,55);
         $this->pdf->Cell(50, 4,'Email: '.$usuario->correo,0,0,'L');
-        $this->pdf->Cell(130, 4,utf8_decode('Teléfono: '.$usuario->telefono),0,0,'R');
+        $this->pdf->Cell(130, 4,utf8_decode('Teléfono: '.$usuario->celular),0,0,'R');
         // FACULTAD/OFICINA
         $this->pdf->SetXY(8,65);
         $this->pdf->Cell(110, 4,'De La Facultad/Programa de: '.$dependencia->nombre,0,0,'L');
@@ -123,10 +134,11 @@ class PDF_FutController extends Controller
         $this->pdf->Cell(110, 4,utf8_decode('posterior, que en caso de acreditarse falsedad o fraude, me someto a las sanciones establecidas en la Ley 27444.'),0,0,'L');
         
         // FIRMA
-        $this->pdf->Image( public_path().$tramite->firma_tramite, 70, 185, -200, -250);
         $this->pdf->SetXY(8,205);
-        $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
+        $this->pdf->Image( public_path().$tramite->firma_tramite, 78, 185, -200, -250);
         $this->pdf->SetXY(8,215);
+        $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
+        $this->pdf->SetXY(8,225);
         $this->pdf->Cell(170, 4,utf8_decode('Firma'),0,0,'C');
 
         // // CÓDIGO

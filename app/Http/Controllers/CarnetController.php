@@ -27,7 +27,7 @@ use App\Mencion;
 use App\Escuela;
 use App\PersonaSuv;
 use App\PersonaSga;
-class CertificadoController extends Controller
+class CarnetController extends Controller
 {
     public function __construct()
     {
@@ -41,12 +41,12 @@ class CertificadoController extends Controller
      */
 
     //Data de la primera vista 
-    public function GetCertificados(Request $request)
+    public function GetCarnets(Request $request)
     {
         // TRÁMITES POR USUARIO
         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-        ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -55,10 +55,10 @@ class CertificadoController extends Controller
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-        ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+        // ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-        ->where('tipo_tramite.idTipo_tramite',1)
+        ->where('tipo_tramite.idTipo_tramite',3)
         ->get();
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo')
@@ -97,7 +97,7 @@ class CertificadoController extends Controller
     }
 
 
-    public function GetCertificadosValidados(Request $request)
+    public function GetCarnetsValidados(Request $request)
     {
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
@@ -108,7 +108,7 @@ class CertificadoController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -117,11 +117,10 @@ class CertificadoController extends Controller
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',3)
-            ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->where(function($query) use ($request)
             {
@@ -132,7 +131,6 @@ class CertificadoController extends Controller
                 ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('motivo_certificado.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -141,7 +139,7 @@ class CertificadoController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -150,11 +148,10 @@ class CertificadoController extends Controller
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',3)
-            ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tipo_tramite.idTipo_tramite',3)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -202,12 +199,13 @@ class CertificadoController extends Controller
                 'startIndex'=> $begin,
                 'endIndex'  => $end - 1
             ]], 200);
+        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
 
     }
 
 
     //Data de la primera vista 
-    public function GetCertificadosAsignados(Request $request)
+    public function GetCarnetsAsignados(Request $request)
     {
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
@@ -218,7 +216,7 @@ class CertificadoController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -227,12 +225,11 @@ class CertificadoController extends Controller
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',3)
-            ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where('tipo_tramite.idTipo_tramite',3)
+            // ->where('tramite_detalle.asignado_certificado',$idUsuario)     LOS CARNETS NO SE ASIGNAN
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -242,7 +239,6 @@ class CertificadoController extends Controller
                 ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('motivo_certificado.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -251,7 +247,7 @@ class CertificadoController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -260,12 +256,11 @@ class CertificadoController extends Controller
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',3)
-            ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where('tipo_tramite.idTipo_tramite',3)
+            // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -315,7 +310,7 @@ class CertificadoController extends Controller
             ]], 200);
     }
 
-    public function GetCertificadosAprobados(Request $request)
+    public function GetCarnetsAprobados(Request $request)
     {
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
@@ -326,7 +321,7 @@ class CertificadoController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -335,11 +330,10 @@ class CertificadoController extends Controller
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',8)
-            ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->where(function($query) use ($request)
             {
@@ -350,7 +344,6 @@ class CertificadoController extends Controller
                 ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('motivo_certificado.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -359,7 +352,7 @@ class CertificadoController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -368,11 +361,10 @@ class CertificadoController extends Controller
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',8)
-            ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
