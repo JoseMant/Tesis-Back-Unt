@@ -67,10 +67,10 @@ class CertificadoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo="http://127.0.0.1:8000".$requisito->archivo;
+                $requisito->archivo=$requisito->archivo;
             }
-            $tramite->voucher="http://127.0.0.1:8000".$tramite->voucher;
-            $tramite->fut="http://127.0.0.1:8000/api/fut/".$tramite->idTramite;
+            $tramite->voucher=$tramite->voucher;
+            $tramite->fut=$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -166,10 +166,10 @@ class CertificadoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo="http://127.0.0.1:8000".$requisito->archivo;
+                $requisito->archivo=$requisito->archivo;
             }
-            $tramite->voucher="http://127.0.0.1:8000".$tramite->voucher;
-            $tramite->fut="http://127.0.0.1:8000/api/fut/".$tramite->idTramite;
+            $tramite->voucher=$tramite->voucher;
+            $tramite->fut="/api/fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -278,10 +278,10 @@ class CertificadoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo="http://127.0.0.1:8000".$requisito->archivo;
+                $requisito->archivo=$requisito->archivo;
             }
-            $tramite->voucher="http://127.0.0.1:8000".$tramite->voucher;
-            $tramite->fut="http://127.0.0.1:8000/api/fut/".$tramite->idTramite;
+            $tramite->voucher=$tramite->voucher;
+            $tramite->fut="/api/fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -387,10 +387,10 @@ class CertificadoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo="http://127.0.0.1:8000".$requisito->archivo;
+                $requisito->archivo=$requisito->archivo;
             }
-            $tramite->voucher="http://127.0.0.1:8000".$tramite->voucher;
-            $tramite->fut="http://127.0.0.1:8000/api/fut/".$tramite->idTramite;
+            $tramite->voucher=$tramite->voucher;
+            $tramite->fut="/api/fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA

@@ -180,7 +180,7 @@ class VoucherController extends Controller
                 ->get();
             }
             foreach ($vouchers as $key => $voucher) {
-                $voucher->archivo="http://127.0.0.1:8000".$voucher->archivo;
+                $voucher->archivo=$voucher->archivo;
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
                 }else {
@@ -244,7 +244,7 @@ class VoucherController extends Controller
                 ->get();
             }
             foreach ($vouchers as $key => $voucher) {
-                $voucher->archivo="http://127.0.0.1:8000".$voucher->archivo;
+                $voucher->archivo=$voucher->archivo;
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
                 }else {
@@ -306,7 +306,7 @@ class VoucherController extends Controller
                 ->get();
             }
             foreach ($vouchers as $key => $voucher) {
-                $voucher->archivo="http://127.0.0.1:8000".$voucher->archivo;
+                $voucher->archivo=$voucher->archivo;
                 if ($voucher->exonerado==null) {
                     $voucher->exonerado="NO";
                 }else {
