@@ -61,7 +61,8 @@ class CarnetController extends Controller
         ->where('tipo_tramite.idTipo_tramite',3)
         ->get();
         foreach ($tramites as $key => $tramite) {
-            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo')
+            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
@@ -156,7 +157,8 @@ class CarnetController extends Controller
             ->get();   
         }
         foreach ($tramites as $key => $tramite) {
-            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo')
+            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
@@ -265,7 +267,8 @@ class CarnetController extends Controller
             ->get();   
         }
         foreach ($tramites as $key => $tramite) {
-            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo')
+            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
@@ -370,7 +373,8 @@ class CarnetController extends Controller
             ->get();   
         }
         foreach ($tramites as $key => $tramite) {
-            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo')
+            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
