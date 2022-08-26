@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Alumno extends Model
+class CargaLectiva extends Model
 {
     protected $connection = 'pgsql';
-    protected $table = 'matriculas.alumno';
-    protected $primaryKey = 'idalumno';
+    protected $table = 'asignacion.cargalectiva';
+    protected $primaryKey = 'idcargalectiva';
     public $timestamps = false;
     protected $fillable = [];
     protected $guarded = [];

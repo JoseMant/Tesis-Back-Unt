@@ -90,8 +90,11 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 // E-mail verification
 Route::get('/auth/verify/{code}', 'UserController@verify');
-// Route::post('/auth/forgot-password', 'UserController@forgotPassword');
-// Route::post('/auth/verifyCodePassword', 'UserController@verifyCodePassword');
-// Route::post('/auth/ResetPassword', 'UserController@ResetPassword');
 
-// Route::resource('personasSuv','PersonaSuvController');
+
+//RUTAS DOCENTES
+Route::post('docentes', 'DocenteController@GetDocente');
+Route::post('cargaLectiva', 'DocenteController@getCursosDocentePrincipal');
+Route::get('personasSuv', 'PersonaSuvController@index');
+//RUTAS DESCARGA ZIP
+Route::get('download/fotos', 'ZipController@downloadFotos');

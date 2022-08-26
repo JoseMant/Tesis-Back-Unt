@@ -369,9 +369,9 @@ class TramiteController extends Controller
                         $tramite_requisito->idTramite=$tramite->idTramite;
                         $tramite_requisito->idRequisito=$requisito["idRequisito"];
                         $nombre = $dni.".".$file->guessExtension();
-                        $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"]."/".$nombre;
+                        $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["nombre"]."/".$nombre;
                         if($file->guessExtension()==$requisito["extension"]){
-                          $file->storeAs("/public"."/".$tipo_tramite->descripcion."/".$requisito["descripcion"], $nombre);
+                          $file->storeAs("/public"."/".$tipo_tramite->descripcion."/".$requisito["nombre"], $nombre);
                           $tramite_requisito->archivo = $nombreBD;
                         }
                         $tramite_requisito -> save();

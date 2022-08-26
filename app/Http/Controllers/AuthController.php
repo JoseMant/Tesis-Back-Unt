@@ -104,7 +104,7 @@ class AuthController extends Controller
         $response['correo']=$user->correo;
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
-        $response['idTipoUsuario']=$user->idTipoUsuario;
+        $response['idTipoUsuario']=$user->idTipo_usuario;
         $tipo_usuario=User::select('tipo_usuario.nombre')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idUsuario',$user->idUsuario)
