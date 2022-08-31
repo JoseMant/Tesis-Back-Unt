@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
 use Illuminate\Support\Facades\DB;
-
+use App\Jobs\ActualizacionTramiteJob;
 class TramitesImport implements ToCollection
 {
     private $estado=0;
@@ -71,6 +71,10 @@ class TramitesImport implements ToCollection
                 
                 $tramite_requisito->comentario=$value[16]; 
                 $tramite_requisito->update();
+
+                
+                // mensaje de rechazo de foto
+                dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
 
             }
         }
