@@ -20,7 +20,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
-
+use App\Imports\TramitesImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\PersonaSE;
 
 use App\Mencion;
@@ -331,24 +332,7 @@ class TramiteController extends Controller
                 $tramite -> sede=trim($request->sede);
                 $tramite -> exonerado_archivo=null; //corregir
                 $tramite -> idEstado_tramite=2;
-                // REGISTRAMOS LA FIRMA DEL TRÁMITE(DEBE SER UNA SOLA VEZ EL REGISTRO PARA TODOS LOS TRÁMITES)
-
-
-                // if($request->hasFile("archivo_firma")){
-                //     $file=$request->file("archivo_firma");
-                //     $nombre = $dni.".".$file->guessExtension();
-                //     $nombreBD = "/storage/firmas_tramites/".$nombre;
-                //     // Validamos que no se gaurde la misma firma para otro trámite
-                //     $tramiteValidate=Tramite::where("firma_tramite",$nombreBD)->first();
-                //     if (!$tramiteValidate) {
-                //         if($file->guessExtension()=="jpg"){
-                //             $file->storeAs('public/firmas_tramites', $nombre);
-                //             $tramite->firma_tramite = $nombreBD;
-                //           }
-                //     }
-                // }
-                // $tramite -> save();
-
+                
                 // ---------------------------------------------------
                 if($request->hasFile("archivo_firma")){
                     $file=$request->file("archivo_firma");
@@ -614,6 +598,27 @@ class TramiteController extends Controller
         }
     }
 
+    public function import(Request $request){
+        // $request->file;
+        $importacion = new TramitesImport;
+        Excel::import( $importacion, $request->file);
+        return $importacion->getDato();
+        // return back();
+
+
+        // if(!$request->hasFile('file')){
+        //     exit ('¡El archivo cargado está vacío!');
+        // }
+        // // $file = $_FILES;
+        // // $excel_file_path = $file['file']['tmp_name'];
+        // $res = [];
+        // return Excel::import($request->hasFile('file'));
+        // return $res;
+        // $num_add=0;
+        // for($i = 0;$i<count($res);$i++){
+
+        // }
+    }
     /**
      * Remove the specified resource from storage.
      *

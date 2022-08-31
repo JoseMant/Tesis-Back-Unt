@@ -98,3 +98,5 @@ Route::post('cargaLectiva', 'DocenteController@getCursosDocentePrincipal');
 Route::get('personasSuv', 'PersonaSuvController@index');
 //RUTAS DESCARGA ZIP
 Route::get('download/fotos', 'ZipController@downloadFotos');
+//RUTAS IMPORTAR EXCEL
+Route::post('import', 'TramiteController@import');

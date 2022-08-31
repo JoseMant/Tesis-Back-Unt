@@ -55,13 +55,6 @@ class ZipController extends Controller
                 }
             }
             $zip->close();
-            // return "hola";
-            // $files = File::files(public_path('storage\CARNÉ UNIVERSITARIO\FOTO CARNET'));
-            // foreach ($files as $key => $value) {
-            //     $relativeNameInZipFile = basename($value);
-            //     $zip->addFile($value, $relativeNameInZipFile);
-            // }
-            // $zip->close();
         }
         return response()->download(public_path($fileName));
     }
