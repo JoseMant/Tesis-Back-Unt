@@ -49,7 +49,7 @@ class TramitesImport implements ToCollection
                 // LÓGICA PARA RECHAZAR REQUISITOS
                 //obtener carnets validados
 
-                $tramite=Tramite::select('tramite.idTramite','tramite.nro_matricula','tipo_tramite_unidad.idTipo_tramite_unidad')
+                $tramite=Tramite::select('tramite.idTramite','tramite.nro_matricula','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idEstado_tramite')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -58,7 +58,8 @@ class TramitesImport implements ToCollection
                 ->where('usuario.nro_documento',$value[3])
                 ->first();
 
-                // $this->setDato( $tramite->idTramite);
+                $tramite->idEstado_tramite=17;
+                $tramite->update();
 
 
                 $tramite_requisito=Tramite_Requisito::select('tramite_requisito.idTramite','tramite_requisito.idRequisito','requisito.nombre','tramite_requisito.archivo'
@@ -67,26 +68,9 @@ class TramitesImport implements ToCollection
                 ->where('idTramite',$tramite->idTramite)
                 ->where('requisito.nombre','FOTO CARNET')
                 ->first();
-                // foreach ($tramite_requisito as $key => $value) {
-                    $this->setDato( $tramite_requisito->idTramite);
-                // }
                 
-                
-                // $update=Tramite_Requisito::find($tramite_requisito->idTramite,$tramite_requisito->idRequisito);
-                // // foreach ($tramite->requisitos as $key => $value) {
-                    $tramite_requisito->comentario=$value[16]; 
-                    $tramite_requisito->update();
-                    $this->setDato( $tramite_requisito->nombre);
-                // // }
-                
-                
-                // $tramite->requisitos->comentario=$value[16]; 
-                // $tramite->update();
-                
-                
-                
-                // $tramite_requisito->validado=1;
-                // $this->setDato( $tramite_requisito->comentario);
+                $tramite_requisito->comentario=$value[16]; 
+                $tramite_requisito->update();
 
             }
         }
