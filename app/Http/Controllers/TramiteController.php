@@ -420,15 +420,18 @@ class TramiteController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function AsignacionCertificados(Request $request, $id){
-        
-        foreach ($request->tramites as $key => $tramite) {
-            $tramiteDetalle=Tramite_Detalle::where('idTramite_detalle',$tramite->idTramite_detalle);
-            // $tramite=Tramite::select('tramite_detalle.asignado_certificado')
-            // ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            // ->where('tramite.idTramite',$id)
-            // ->first();
-            $tramiteDetalle->asignado_certificado=$id;
-            $tramiteDetalle->update();
+        DB::beginTransaction();
+        try {
+            foreach ($request->tramites as $key => $tramite) {
+                $tramiteDetalle=Tramite_Detalle::where('idTramite_detalle',$tramite->idTramite_detalle)->first();
+                $tramiteDetalle->asignado_certificado=$id;
+                $tramiteDetalle->update();
+            }
+            DB::commit();
+            return response()->json($tramite, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
         }
     }
     
@@ -500,6 +503,7 @@ class TramiteController extends Controller
                 }
             }
             $tramite->update();
+            DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
             DB::rollback();
@@ -590,6 +594,7 @@ class TramiteController extends Controller
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
+            DB::commit();
             return response()->json($tramite, 200);
             
         } catch (\Exception $e) {
@@ -599,25 +604,16 @@ class TramiteController extends Controller
     }
 
     public function import(Request $request){
-        // $request->file;
-        $importacion = new TramitesImport;
-        Excel::import( $importacion, $request->file);
-        return $importacion->getDato();
-        // return back();
-
-
-        // if(!$request->hasFile('file')){
-        //     exit ('¡El archivo cargado está vacío!');
-        // }
-        // // $file = $_FILES;
-        // // $excel_file_path = $file['file']['tmp_name'];
-        // $res = [];
-        // return Excel::import($request->hasFile('file'));
-        // return $res;
-        // $num_add=0;
-        // for($i = 0;$i<count($res);$i++){
-
-        // }
+        DB::beginTransaction();
+        try {
+            $importacion = new TramitesImport;
+            Excel::import( $importacion, $request->file);
+            DB::commit();
+            return response()->json(['status' => '200', 'message' => 'Datos actualizados correctamente'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
+        }
     }
     /**
      * Remove the specified resource from storage.
