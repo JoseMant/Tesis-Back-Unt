@@ -30,7 +30,16 @@ class UserController extends Controller
         ->get();
         return response()->json($usuarios, 200);
     }
-
+    public function getUsuariosUraa()
+    {
+        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
+        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+        ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+        ->where('usuario.idTipo_usuario',2)
+        ->get();
+        return response()->json($usuarios, 200);
+    }
+    
     public function buscar(Request $request){
         if ($request->query('query')!="") {
             $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',

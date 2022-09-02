@@ -64,7 +64,7 @@ Route::resource('/voucher','VoucherController');
 Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
-Route::put('vouchers/update/{id}','TramiteController@updateVoucher');
+Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::put('certificados/update/{id}','TramiteController@updateTramiteRequisitos');
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 //-------------------------------
@@ -73,6 +73,7 @@ Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::resource('personas','PersonaController');
 Route::resource('usuarios','UserController');
 Route::get('usuario/search','UserController@buscar');
+Route::get('usuario/uraa','UserController@getUsuariosUraa');
 // Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
 //TIPOS DE TRÁMITE

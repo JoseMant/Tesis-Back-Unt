@@ -533,15 +533,28 @@ class TramiteController extends Controller
             $voucher->idUsuario_aprobador=null;
             $voucher->comentario=null;
             if($request->hasFile("archivo")){
-                 $file=$request->file("archivo");
-                 $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
-                 $nombreBD = "/storage/vouchers_tramites/".$nombre;
-                 if($file->guessExtension()=="pdf"){
-                   $file->storeAs('public/vouchers_tramites', $nombre);
-                   $voucher->archivo = $nombreBD;
+                $file=$request->file("archivo");
+                $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                $nombreBD = "/storage/vouchers_tramites/".$nombre;
+                if($file->guessExtension()=="pdf"){
+                    // Storage::delete($nombreBD);
+                    $file->storeAs('public/vouchers_tramites', $nombre);
+                    $voucher->archivo = $nombreBD;
+                    // return $nombre;
                  }
             }
             $voucher->update();
+
+            //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+            $historial_estados=new Historial_Estado;
+            $historial_estados->idTramite=$tramite->idTramite;
+            $historial_estados->idUsuario=$idUsuario;
+            $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+            $historial_estados->idEstado_nuevo=2;
+            $historial_estados->fecha=date('Y-m-d h:i:s');
+            $historial_estados->save();
+
+
             // TRÁMITES POR USUARIO
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
