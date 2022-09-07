@@ -419,16 +419,44 @@ class TramiteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function AsignacionCertificados(Request $request, $id){
+    public function AsignacionCertificados(Request $request){
+        // return $request->tramites;
         DB::beginTransaction();
         try {
-            foreach ($request->tramites as $key => $tramite) {
-                $tramiteDetalle=Tramite_Detalle::where('idTramite_detalle',$tramite->idTramite_detalle)->first();
-                $tramiteDetalle->asignado_certificado=$id;
+            foreach ($request->tramites as $key => $idTramite) {
+                $tramite = Tramite::findOrFail($idTramite);
+                $tramiteDetalle=Tramite_Detalle::findOrFail($tramite->idTramite_detalle);
+                $tramiteDetalle->asignado_certificado=$request->idUsuario;
                 $tramiteDetalle->update();
+
+                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+                $token = JWTAuth::getToken();
+                $apy = JWTAuth::getPayload($token);
+                $idUsuarioToken=$apy['idUsuario'];
+
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuarioToken;
+                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                $historial_estados->idEstado_nuevo=6;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuarioToken;
+                $historial_estados->idEstado_actual=6;
+                $historial_estados->idEstado_nuevo=7;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+                $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                $tramite->update();
+
             }
             DB::commit();
-            return response()->json($tramite, 200);
+            return response()->json($request->tramites, 200);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e], 400);

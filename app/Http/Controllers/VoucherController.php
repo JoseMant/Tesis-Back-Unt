@@ -112,15 +112,25 @@ class VoucherController extends Controller
             $historial_estados->idTramite=$tramite->idTramite;
             $historial_estados->idUsuario=$idUsuario;
             $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+            $historial_estados->fecha=date('Y-m-d h:i:s');
             if (strtoupper($request->des_estado_voucher)=="APROBADO") {
                 $historial_estados->idEstado_nuevo=3;
+                $historial_estados->save();
+
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=$historial_estados->idEstado_nuevo;
+                $historial_estados->idEstado_nuevo=5;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
             }elseif (strtoupper($request->des_estado_voucher)=="RECHAZADO") {
                 $historial_estados->idEstado_nuevo=4;
+                $historial_estados->save();
             }
-            $historial_estados->fecha=date('Y-m-d h:i:s');
-            $historial_estados->save();
             $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
-            $tramite->save();
+            $tramite->update();
             DB::commit();
             // mensaje de validación de voucher
             dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
