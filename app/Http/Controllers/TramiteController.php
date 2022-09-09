@@ -419,7 +419,7 @@ class TramiteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function AsignacionCertificados(Request $request){
+    public function AsignacionTramites(Request $request){
         // return $request->tramites;
         DB::beginTransaction();
         try {

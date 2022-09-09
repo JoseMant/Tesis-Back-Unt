@@ -41,7 +41,7 @@ Route::get('tramite/usuario','TramiteController@GetByUser');
 Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
 Route::get('tramite/certificados','CertificadoController@GetCertificados');
-Route::post('tramite/certificados/asignar','TramiteController@AsignacionCertificados');
+Route::post('tramite/asignar','TramiteController@AsignacionTramites');
 Route::get('tramite/certificados/validados','CertificadoController@GetCertificadosValidados');
 Route::get('tramite/certificados/asignados','CertificadoController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
