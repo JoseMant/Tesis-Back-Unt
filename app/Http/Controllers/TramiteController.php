@@ -316,9 +316,8 @@ class TramiteController extends Controller
                         $tramite_detalle->idMotivo_certificado=null;
                         break;
                 }
-                $tramite_detalle->asignado_certificado=null;
                 $tramite_detalle->save();
-
+                
                 // REGISTRAMOS EL TRÁMITE
                 $tramite -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
                 $tramite -> idTipo_tramite_unidad=trim($request->idTipo_tramite_unidad);
@@ -331,6 +330,7 @@ class TramiteController extends Controller
                 $tramite -> comentario=trim($request->comentario);
                 $tramite -> sede=trim($request->sede);
                 $tramite -> exonerado_archivo=null; //corregir
+                $tramite->idUsuario_asignado=null;
                 $tramite -> idEstado_tramite=2;
                 
                 // ---------------------------------------------------
@@ -425,9 +425,8 @@ class TramiteController extends Controller
         try {
             foreach ($request->tramites as $key => $idTramite) {
                 $tramite = Tramite::findOrFail($idTramite);
-                $tramiteDetalle=Tramite_Detalle::findOrFail($tramite->idTramite_detalle);
-                $tramiteDetalle->asignado_certificado=$request->idUsuario;
-                $tramiteDetalle->update();
+                $tramite->idUsuario_asignado=$request->idUsuario;
+                $tramite->update();
 
                 // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
                 $token = JWTAuth::getToken();
@@ -463,7 +462,7 @@ class TramiteController extends Controller
         }
     }
     
-    public function updateTramiteRequisitos(Request $request, $id){
+    public function updateTramiteRequisitos(Request $request){
         DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -471,71 +470,28 @@ class TramiteController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
-            // TRÁMITES POR USUARIO
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            ,'voucher.nro_operacion','voucher.entidad','voucher.fecha_operacion','tipo_tramite_unidad.costo','tramite.exonerado_archivo'
-            ,'tipo_tramite.idTipo_tramite','tramite.comentario as comentario_tramite','voucher.comentario as comentario_voucher'
-            ,'tramite_detalle.idMotivo_certificado','voucher.des_estado_voucher','tramite.sede')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idusuario',$idUsuario)
-            ->where('tramite.idTramite',$id)
-            ->first(); 
-
-            $tramite->requisitos=Tramite_Requisito::select('*')
-            ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
-            ->where('tramite_requisito.idTramite',$tramite->idTramite)
+            // return $request->requisitos;
+            //Editamos los cada uno de los requisitos que llegan junto al trámite en el request
+            foreach ($request->requisitos as $key => $requisito) {
+                // return $requisito['idRequisito'];
+                $tramite_requisito=Tramite_Requisito::Where('idTramite',$request->idTramite)
+                ->where('idRequisito',$requisito['idRequisito'])->first();
+                $tramite_requisito->idUsuario_aprobador=$idUsuario;
+                $tramite_requisito->validado=$requisito['validado'];
+                $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
+                $tramite_requisito->comentario=$requisito['comentario'];
+                $tramite_requisito->save();
+            }
+            $request['requisitos']=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$request->idTramite)
             ->get();
-            //Datos del usuario al que pertenece el trámite
-            $usuario=User::findOrFail($tramite->idUsuario)->first();
-            // Obtenemos el motivo certificado(en caso lo tengan) de cada trámite 
-            if ($tramite->idTipo_tramite==1) {
-                $motivo=Motivo_Certificado::Where('idMotivo_certificado',$tramite->idMotivo_certificado)->first();
-                $tramite->motivo=$motivo->nombre;
-            }
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
-            }else if ($tramite->idUnidad==2) {
-
-            }else if ($tramite->idUnidad==3) {
-
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->escuela=$dependenciaDetalle->nombre;
-            // Editamos los requisitos
-            foreach ($tramite->requisitos as $key => $tramite_requisito) {
-                foreach ($request->requisitos as $key => $request_requisito) {
-                    if ($tramite_requisito->idRequisito==$request_requisito->idRequisito) {
-                        $tramite_requisito->idUsuario_aprobador=$idUsuario;
-                        $tramite_requisito->validado=$request_requisito->validado;
-                        $tramite_requisito->comentario=$request_requisito->comentario;
-                    }
-                }
-            }
-            $tramite->update();
             DB::commit();
-            return response()->json($tramite, 200);
+            return response()->json($request, 200);
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => $e], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
 
 

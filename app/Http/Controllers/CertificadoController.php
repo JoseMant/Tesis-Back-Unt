@@ -234,7 +234,7 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where('tramite.idUsuario_asignado',$idUsuario)
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -267,13 +267,13 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where('tramite.idUsuario_asignado',$idUsuario)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario')
+            'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();

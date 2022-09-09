@@ -68,7 +68,7 @@ Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
-Route::put('certificados/update/{id}','TramiteController@updateTramiteRequisitos');
+Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 //-------------------------------
 
