@@ -30,7 +30,7 @@ class ZipController extends Controller
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-        ->where('tramite.idEstado_tramite',3)
+        ->where('tramite.idEstado_tramite',7)
         ->where('tipo_tramite.idTipo_tramite',3)
         ->get(); 
         foreach ($tramites as $key => $tramite) {
@@ -43,9 +43,9 @@ class ZipController extends Controller
         }
         // return $tramites;
         $zip = new ZipArchive;
-        $fileName = 'hola.zip';
+        $fileName = 'Fotos_Carnet.zip';
 
-        if ($zip->open(public_path($fileName), ZipArchive::CREATE) === TRUE)
+        if ($zip->open(public_path($fileName),ZipArchive::CREATE) === TRUE)
         {
             foreach ($tramites as $key => $tramite) {
                 foreach ($tramite->requisitos as $key => $requisito) {

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Estructura extends Model
 {
-    protected $connection = 'pgsql2';
+    protected $connection = 'pgsql';
     protected $table = 'patrimonio.estructura';
     protected $primaryKey = 'idestructura';
     public $timestamps = false;

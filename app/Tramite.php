@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tramite extends Model
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'tramite';
     protected $primaryKey = 'idTramite';
     public $timestamps = false;

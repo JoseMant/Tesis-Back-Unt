@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Voucher extends Model
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'voucher';
     protected $primaryKey = 'idVoucher';
     public $timestamps = false;

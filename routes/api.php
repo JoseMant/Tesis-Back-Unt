@@ -45,6 +45,9 @@ Route::post('tramite/asignar','TramiteController@AsignacionTramites');
 Route::get('tramite/certificados/validados','CertificadoController@GetCertificadosValidados');
 Route::get('tramite/certificados/asignados','CertificadoController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
+Route::post('certificados/upload/{id}','CertificadoController@uploadCertificado');
+Route::get('tramite/certificados/firma_uraa','CertificadoController@GetCertificadosFirmaUraa');
+Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertificadosFirmaDecano');
 Route::get('tramite/carnets','CarnetController@GetCarnets');
 Route::get('tramite/carnets/validados','CarnetController@GetCarnetsValidados');
 Route::get('tramite/carnets/asignados','CarnetController@GetCarnetsAsignados');
@@ -68,6 +71,7 @@ Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
+Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
 Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 //-------------------------------

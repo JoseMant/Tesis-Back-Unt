@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class User extends Authenticatable implements JWTSubject
 
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'usuario';
     protected $primaryKey = 'idUsuario';
     public $timestamps = false;

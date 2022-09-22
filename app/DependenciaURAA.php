@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DependenciaURAA extends Model
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'dependencia';
     protected $primaryKey = 'idDependencia';
     public $timestamps = false;

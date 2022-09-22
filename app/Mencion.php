@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mencion extends Model
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'mencion';
     protected $primaryKey = 'idMencion';
     public $timestamps = false;

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 class Tramite_Requisito extends Model
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'tramite_requisito';
     protected $primaryKey = ['idTramite','idRequisito'];
     public $timestamps = false;

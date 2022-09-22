@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Motivo_Certificado extends Model
 {
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql';
     protected $table = 'motivo_certificado';
     protected $primaryKey = 'idMotivo_certificado';
     public $timestamps = false;

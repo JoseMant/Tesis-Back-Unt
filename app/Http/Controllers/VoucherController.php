@@ -116,7 +116,7 @@ class VoucherController extends Controller
             if (strtoupper($request->des_estado_voucher)=="APROBADO") {
                 $historial_estados->idEstado_nuevo=3;
                 $historial_estados->save();
-
+                
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
                 $historial_estados=new Historial_Estado;
                 $historial_estados->idTramite=$tramite->idTramite;
@@ -125,6 +125,30 @@ class VoucherController extends Controller
                 $historial_estados->idEstado_nuevo=5;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
+                // SI EL TRÁMITE ES DE CARNET, SE ASINA AUTOMÁTICAMENTE UN USUARIO
+                if ($tipo_tramite->idTipo_tramite==3) {
+                    $tramite->idUsuario_asignado=1;
+                    $tramite->update();
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuario;
+                    $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                    $historial_estados->idEstado_nuevo=6;
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuario;
+                    $historial_estados->idEstado_actual=6;
+                    $historial_estados->idEstado_nuevo=7;
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+                    $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                    $tramite->update();
+                }
             }elseif (strtoupper($request->des_estado_voucher)=="RECHAZADO") {
                 $historial_estados->idEstado_nuevo=4;
                 $historial_estados->save();
@@ -138,7 +162,7 @@ class VoucherController extends Controller
             return response()->json(['status' => '200', 'message' => "Voucher validado con éxito"], 200);
         } catch (\Exception $e) {
           DB::rollback();
-          return response()->json(['status' => '400', 'message' => $e], 400);
+          return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
 

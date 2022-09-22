@@ -18,11 +18,10 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $this->middleware('jwt', ['except' => ['login','register','forgotPassword','verifyCodePassword','ResetPassword']]);
+        $this->middleware('jwt', ['except' => ['login','register','forgotPassword','verifyCodePassword','ResetPassword','verify']]);
     }
 
-
-    public function Register(Request $request){
+    public function register(Request $request){
         DB::beginTransaction();
         try {
             $dniValidate=User::Where('nro_documento',$request->input('nro_documento'))->first();
@@ -53,9 +52,7 @@ class AuthController extends Controller
                 $usuario -> confirmation_code=Str::random(25);
                 $usuario -> save();
                 DB::commit();
-                // return $usuario;
 
-                // \Mail::to($usuario->correo)->send(new \App\Mail\NewMail($usuario));
 
                 // PRUEBAS JOB---------------------------------
                 dispatch(new ConfirmacionCorreoJob($usuario));
@@ -66,7 +63,7 @@ class AuthController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error al registrar usuario'], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -165,6 +162,21 @@ class AuthController extends Controller
             }
         }else{
             return response()->json(['status' => '400', 'message' => 'Usuario bloqueado'], 400);
+        }
+    }
+
+    public function verify($code)
+    {
+        $user = User::where('confirmation_code', $code)->first();
+        if (!$user)
+            return response()->json(['status' => '400', 'message' => 'Código de verificación inválido o expirado'], 200);
+        else if ($user->confirmed)
+            return response()->json(['status' => '400', 'message' => 'El correo ha sido validado anteriormente'], 200);
+        else {
+          $user->confirmed = 1;
+          // $user->confirmation_code = null;
+          $user->save();
+          return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo'], 200);
         }
     }
 

@@ -40,7 +40,6 @@ class CarnetController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    //Data de la primera vista 
     public function GetCarnets(Request $request)
     {
         // TRÁMITES POR USUARIO
@@ -66,25 +65,27 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
+            // ESTE FOREACH AÑADÍA LA RUTA COMPLETA A CADA ARCHIVO
+            // foreach ($tramite->requisitos as $key => $requisito) {
+            //     $requisito->archivo=$requisito->archivo;
+            // }
             $tramite->voucher=$tramite->voucher;
             $tramite->fut="/api/fut/".$tramite->idTramite;
+            
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
+                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                // if ($personaSuv) {
+                //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                // }else {
                     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
                     if ($personaSga) {
                         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
                     }
-                }
+                // }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -120,7 +121,7 @@ class CarnetController extends Controller
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',3)
+            ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->where(function($query) use ($request)
@@ -151,7 +152,7 @@ class CarnetController extends Controller
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',3)
+            ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',3)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
@@ -172,15 +173,15 @@ class CarnetController extends Controller
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
+                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                // if ($personaSuv) {
+                //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                // }else {
                     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
                     if ($personaSga) {
                         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
                     }
-                }
+                // }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
