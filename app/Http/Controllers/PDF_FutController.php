@@ -135,26 +135,6 @@ class PDF_FutController extends Controller
         $this->pdf->SetXY(8,195);
         $this->pdf->Cell(170, 4,utf8_decode('Firma'),0,0,'C');
       }
-      // $this->pdf->SetXY(8,125);
-      // $this->pdf->Cell(110, 4,utf8_decode('Comentario: '),0,0,'L');
-      // $this->pdf->SetXY(8,135);
-      // $this->pdf->MultiCell(195, 4,utf8_decode($tramite->comentario),0,'L', false);
-
-      // // DESCRIPCIÓN
-      // $this->pdf->SetXY(8,155);
-      // $this->pdf->Cell(110, 4,utf8_decode('Los datos consignados en el presente formulario y la información contenida en los documentos que acompaño'),0,0,'L');
-      // $this->pdf->SetXY(8,160);
-      // $this->pdf->Cell(110, 4,utf8_decode('son verdaderos y tienen el carácter de DECLARACIÓN JURADA, los mismos que están sujetos a fiscalización'),0,0,'L');
-      // $this->pdf->SetXY(8,165);
-      // $this->pdf->Cell(110, 4,utf8_decode('posterior, que en caso de acreditarse falsedad o fraude, me someto a las sanciones establecidas en la Ley 27444.'),0,0,'L');
-      
-      // // FIRMA
-      // $this->pdf->SetXY(8,205);
-      // $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 185, 50, 30); //comentado por ahora porque no existe la imagen que se desea
-      // $this->pdf->SetXY(8,215);
-      // $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
-      // $this->pdf->SetXY(8,225);
-      // $this->pdf->Cell(170, 4,utf8_decode('Firma'),0,0,'C');
 
       $nombre_descarga = utf8_decode("FUT");
       $this->pdf->SetTitle( $nombre_descarga );

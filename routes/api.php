@@ -73,7 +73,9 @@ Route::get('vouchers/rechazados','VoucherController@Rechazados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
 Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
+//-----------------PDFs
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
+Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
 //-------------------------------
 
 // Route::resource('cargos','CargoController');
