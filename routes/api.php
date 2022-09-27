@@ -99,7 +99,7 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 
 // E-mail verification
-Route::get('/auth/verify/{code}', 'UserController@verify');
+Route::get('/auth/verify/{code}', 'AuthController@verify');
 
 
 //RUTAS DOCENTES

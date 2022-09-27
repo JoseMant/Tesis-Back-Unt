@@ -153,7 +153,7 @@
                             </p>
 						</div>
             <hr>
-						<a href="http://127.0.0.1:8000/api/register/verify/{{$usuario['reset_password']}}" target="_blank"><button type="button" class="btn btn-info">Continuar</button></a>
+						<a href="https://tramites-uraa.unitru.edu.pe/confirmation-validated/{{$usuario['reset_password']}}" target="_blank"><button type="button" class="btn btn-info">Continuar</button></a>
         </div>
         <div class="redes">
             <ul>

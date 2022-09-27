@@ -106,23 +106,23 @@ class PersonaController extends Controller
 
         DB::beginTransaction();
         try {
-            $personaPos= Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
-                'dni' => $request->input('dni')
-              ]);
-            // return $personaPos[0]["status"];
-            if ($personaPos[0]["status"]=="200"){
-                    $usuario=new User;
-                    $usuario->nro_matricula=$personaPos[0]["codigo"];
-                    $usuario->nombres=$personaPos[0]["nombres"];
-                    $usuario->apellidos=$personaPos[0]["ape_paterno"]." ".$personaPos[0]["ape_materno"];
-                    $usuario->tipo_documento=1;
-                    $usuario->nro_documento=$personaPos[0]["dni"];
-                    $usuario->correo=$personaPos[0]["alu_email"];
-                    // $usuario->celular=$personaSE->celular;
-                    // $usuario->sexo=$personaSE->sexo;
-                    return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
-                return $personaPos[0];
-            }else{
+            // $personaPos= Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+            //     'dni' => $request->input('dni')
+            //   ]);
+            // // return $personaPos[0]["status"];
+            // if ($personaPos[0]["status"]=="200"){
+            //         $usuario=new User;
+            //         $usuario->nro_matricula=$personaPos[0]["codigo"];
+            //         $usuario->nombres=$personaPos[0]["nombres"];
+            //         $usuario->apellidos=$personaPos[0]["ape_paterno"]." ".$personaPos[0]["ape_materno"];
+            //         $usuario->tipo_documento=1;
+            //         $usuario->nro_documento=$personaPos[0]["dni"];
+            //         $usuario->correo=$personaPos[0]["alu_email"];
+            //         // $usuario->celular=$personaSE->celular;
+            //         // $usuario->sexo=$personaSE->sexo;
+            //         return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+            //     return $personaPos[0];
+            // }else{
                 // verificamos en la bd de SE
                 $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
                 ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo')
@@ -139,27 +139,27 @@ class PersonaController extends Controller
                     $usuario->sexo=$personaSE->sexo;
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                 }else{
-                    // verificamos en la bd del suv
-                    $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
-                    'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
-                    ->join('alumno','persona.idpersona','alumno.idpersona')
-                    ->Where('persona.per_dni',$request->input('dni'))->first();
-                    if($personaSuv){
-                        $usuario=new User;
-                        $usuario->nro_matricula=$personaSuv->idalumno;
-                        $usuario->nombres=$personaSuv->per_nombres;
-                        $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
-                        $usuario->tipo_documento=$personaSuv->per_tipo_documento;
-                        $usuario->nro_documento=$personaSuv->per_dni;
-                        $usuario->correo=$personaSuv->per_email;
-                        $usuario->celular=$personaSuv->per_celular;
-                        if ($personaSuv->per_sexo==0) {
-                            $usuario->sexo="F";
-                        }else{
-                            $usuario->sexo="M";
-                        }
-                        return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
-                    }else{
+                    // // verificamos en la bd del suv
+                    // $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
+                    // 'persona.per_email','persona.per_celular','persona.per_sexo','alumno.idalumno')
+                    // ->join('alumno','persona.idpersona','alumno.idpersona')
+                    // ->Where('persona.per_dni',$request->input('dni'))->first();
+                    // if($personaSuv){
+                    //     $usuario=new User;
+                    //     $usuario->nro_matricula=$personaSuv->idalumno;
+                    //     $usuario->nombres=$personaSuv->per_nombres;
+                    //     $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
+                    //     $usuario->tipo_documento=$personaSuv->per_tipo_documento;
+                    //     $usuario->nro_documento=$personaSuv->per_dni;
+                    //     $usuario->correo=$personaSuv->per_email;
+                    //     $usuario->celular=$personaSuv->per_celular;
+                    //     if ($personaSuv->per_sexo==0) {
+                    //         $usuario->sexo="F";
+                    //     }else{
+                    //         $usuario->sexo="M";
+                    //     }
+                    //     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
+                    // }else{
                         // verificamos en la bd del sga
                         $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
                         ,'per_login')
@@ -178,12 +178,12 @@ class PersonaController extends Controller
                         }else{
                             return response()->json([ 'message' => 'Alumno no encontrado.']);
                         }
-                    }
+                    // }
                 }  
-            }      
+            // }      
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error!!!'], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
             //return redirect()->route('alumno.show', $resolucion->idResolucion) -> with('error', 'Error al registrar alumno');
         }
         
@@ -337,7 +337,7 @@ class PersonaController extends Controller
             } 
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error!!!'], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
             //return redirect()->route('alumno.show', $resolucion->idResolucion) -> with('error', 'Error al registrar alumno');
         }
     }

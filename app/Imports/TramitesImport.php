@@ -63,7 +63,7 @@ class TramitesImport implements ToCollection
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                ->where('tramite.idEstado_tramite',3)
+                ->where('tramite.idEstado_tramite',7)
                 ->where('tipo_tramite.idTipo_tramite',3)
                 ->where('usuario.nro_documento',$value[3])
                 ->first();
@@ -76,7 +76,7 @@ class TramitesImport implements ToCollection
                 $historial_estados->idTramite=$tramite->idTramite;
                 $historial_estados->idUsuario=$idUsuario;
                 $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                $historial_estados->idEstado_nuevo=17;
+                $historial_estados->idEstado_nuevo=9;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
                 $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;

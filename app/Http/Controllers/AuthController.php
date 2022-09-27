@@ -183,7 +183,7 @@ class AuthController extends Controller
     public function forgotPassword(Request $request){
         DB::beginTransaction();
         try {
-            $usuario = User::where('correo', $request->input('correo'))->first();
+            $usuario = User::where('correo', $request->input('email'))->first();
             if($usuario){
                 $usuario->reset_password=Str::random(25);
                 $usuario->update();

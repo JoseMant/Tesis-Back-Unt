@@ -25,7 +25,8 @@ class PDF_Constancia extends Fpdf
         // Arial italic 8
         $this->SetFont('Arial','B', 8);
         // Page number
-        $this->Cell(0,5,utf8_decode('Universidad Nacional de Trujillo | Jr. Juan Pablo II s/n Ciudad Universitaria - Telf. 239239 | Dirección de Registro Técnico - Telf. 205377'),'T',0,'C');
+        $this->Cell(10,5,utf8_decode('Correo: uraa@unitru.edu.pe'),'T',0,'L');
+        $this->Cell(150,5,utf8_decode('Sitio Web: www.unitru.edu.pe'),'T',0,'R');
     }
     function WriteText($text)
     {
@@ -59,8 +60,10 @@ class PDF_Constancia extends Fpdf
             if (strpos($text,'<')!==false)
             {
                 //Este es el if que hace las negritas
-                $this->SetXY(25,110);
+                // $this->SetXY(25,110);
                 $this->SetFont('','');
+                $this->SetLeftMargin(25);
+                $this->SetRightMargin(20);
                 $this->Write(6,substr($text,0,strpos($text,'<')));
                 $intPosIni = strpos($text,'<');
                 $intPosFim = strpos($text,'>');
