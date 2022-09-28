@@ -113,13 +113,6 @@ class AuthController extends Controller
             'user'=>$response,
             'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
-
-
-        // return response()->json([
-        //     'access_token' => JWTAuth::refresh(),
-        //     'token_type' => 'bearer',
-        //     'expires_in' => JWTAuth::factory()->getTTL() * 60
-        // ]);
     }
 
     public function me()
@@ -203,17 +196,15 @@ class AuthController extends Controller
     }
 
 
-    public function verifyCodePassword(Request $request)
+    public function verifyCodePassword($code)
     {
         DB::beginTransaction();
         try {
-            $user = User::where('reset_password', $request->input('code'))->first();
+            $user = User::where('reset_password', $code)->first();
             if (! $user)
-                return redirect('/');
-            $user->reset_password = null;
-            $user->save();
+                return response()->json(['status' => '400', 'message' => 'Enlace de recuperación de contraseña caducado'], 400);
             DB::commit();
-            return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!','data'=>$user], 200);
+            return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!','code'=>$code], 200);
             // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
         } catch (\Exception $e) {
             DB::rollback();
@@ -225,15 +216,17 @@ class AuthController extends Controller
     public function ResetPassword(Request $request){
         DB::beginTransaction();
         try {
-            $user = User::where('username', $request->input('username'))->first();
+            $user = User::where('reset_password', $request->input('code'))->first();
             if ($user){
                 $user->password=Hash::make($request->input('password'));
+                // $user->reset_password = null;
                 $user->update();
                 DB::commit();
                 //loguearlo
 
                 // return $user;
-                $credentials = request(['username', 'password']);
+                $credentials['username'] = $user->username;
+                $credentials['password'] = $user->password;
                 // return $credentials;
                 if (! $token = auth()->attempt($credentials)) {
                     return response()->json(['error' => 'Usuario inválido'], 401);
@@ -249,7 +242,7 @@ class AuthController extends Controller
             // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error!!'], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
 

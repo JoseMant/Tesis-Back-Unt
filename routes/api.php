@@ -27,8 +27,10 @@ Route::group([
     Route::post('refresh', 'AuthController@refresh');
     Route::post('getAlumnoByDocument','PersonaController@DatosAlumno');
     Route::post('forgot-password', 'AuthController@forgotPassword');
-    Route::post('verifyCodePassword', 'AuthController@verifyCodePassword');
-    Route::post('ResetPassword', 'AuthController@ResetPassword');
+    Route::get('verifyCodePassword/{code}', 'AuthController@verifyCodePassword');
+    Route::post('reset-password', 'AuthController@ResetPassword');
+    Route::get('verify/{code}', 'AuthController@verify');
+
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
@@ -46,6 +48,7 @@ Route::get('tramite/certificados/validados','CertificadoController@GetCertificad
 Route::get('tramite/certificados/asignados','CertificadoController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
 Route::post('certificados/upload/{id}','CertificadoController@uploadCertificado');
+Route::get('constancias/enviar/{id}','ConstanciaController@enviarConstancia');
 Route::get('tramite/certificados/firma_uraa','CertificadoController@GetCertificadosFirmaUraa');
 Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertificadosFirmaDecano');
 Route::get('tramite/carnets','CarnetController@GetCarnets');
@@ -54,6 +57,8 @@ Route::get('tramite/carnets/asignados','CarnetController@GetCarnetsAsignados');
 Route::get('tramite/carnets/aprobados','CarnetController@GetCarnetsAprobados');
 Route::get('tramite/constancias','ConstanciaController@GetConstancias');
 Route::get('tramite/constancias/validados','ConstanciaController@GetConstaciasValidados');
+Route::get('tramite/constancias/asignados','ConstanciaController@GetConstaciasAsignados');
+Route::get('tramite/constancias/firma_uraa','ConstanciaController@GetConstanciasFirmaUraa');
 Route::get('bancos','BancoController@index');
 Route::get('tipos_tramites','Tipo_TramiteController@index');
 Route::get('sedes','SedeController@index');
@@ -99,7 +104,7 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 
 // E-mail verification
-Route::get('/auth/verify/{code}', 'AuthController@verify');
+// Route::get('/auth/verify/{code}', 'AuthController@verify');
 
 
 //RUTAS DOCENTES
