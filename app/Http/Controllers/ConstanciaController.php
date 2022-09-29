@@ -16,6 +16,7 @@ use App\User;
 use App\Tramite_Detalle;
 use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
+use App\Jobs\EnvioConstanciaJob;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -484,6 +485,118 @@ class ConstanciaController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function uploadConstancia(Request $request, $id){
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite_detalle.idTramite_detalle','tramite_detalle.constancia_final','tramite.idEstado_tramite',
+            'tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->Find($id); 
+            // Datos de correo
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+            $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')
+            ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
+            ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $tramite->idTipo_tramite_unidad)->first();
+            $usuario = User::findOrFail($tramite->idUsuario);
+
+            $tramite_detalle=Tramite_detalle::find($tramite['idTramite_detalle']);
+            if($request->hasFile("archivo")){
+                $file=$request->file("archivo");
+                if ($tramite->codigo."_firmado.pdf"==$file->getClientOriginalName()) {
+                    $nombre = $tramite->codigo.'.'.$file->guessExtension();
+                    $nombreBD = "/storage/constancias/".$nombre;
+                    if($file->guessExtension()=="pdf"){
+                        $file->storeAs('public/constancias', $nombre);
+                        $tramite_detalle->constancia_final = $nombreBD;
+                    }
+                }else {
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' =>"El Documento no es el correcto"], 400);
+                }
+            }
+            $tramite_detalle->update();
+            
+            $tramite->idEstado_tramite=15;
+            //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+            $historial_estados=new Historial_Estado;
+            $historial_estados->idTramite=$tramite->idTramite;
+            $historial_estados->idUsuario=$idUsuario;
+            $historial_estados->idEstado_actual=11;
+            $historial_estados->idEstado_nuevo=12;
+            $historial_estados->fecha=date('Y-m-d h:i:s');
+            $historial_estados->save();
+            //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+            $historial_estados=new Historial_Estado;
+            $historial_estados->idTramite=$tramite->idTramite;
+            $historial_estados->idUsuario=$idUsuario;
+            $historial_estados->idEstado_actual=12;
+            $historial_estados->idEstado_nuevo=15;
+            $historial_estados->fecha=date('Y-m-d h:i:s');
+            $historial_estados->save();
+
+            $tramite->update();
+            $tramite->constancia_final=$tramite_detalle->constancia_final;
+            $tramite->fut="fut/".$tramite->idTramite;
+            // //Requisitos
+            // $tramite->requisitos=Tramite_Requisito::select('*')
+            // ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+            // ->where('tramite_requisito.idTramite',$tramite->idTramite)
+            // ->get();
+            //Datos del usuario al que pertenece el trámite
+            // $usuario=User::findOrFail($tramite->idUsuario)->first();
+            // // Obtenemos el motivo certificado(en caso lo tengan) de cada trámite 
+            // if ($tramite->idTipo_tramite==1) {
+            //     $motivo=Motivo_Certificado::Where('idMotivo_certificado',$tramite->idMotivo_certificado)->first();
+            //     $tramite->motivo=$motivo->nombre;
+            // }
+            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+            $dependenciaDetalle=null;
+            if ($tramite->idUnidad==1) {
+                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                // if ($personaSuv) {
+                //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                // }else {
+                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
+                    if ($personaSga) {
+                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                    }
+                // }
+            }else if ($tramite->idUnidad==2) {
+                
+            }else if ($tramite->idUnidad==3) {
+                
+            }else{
+                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+            }
+            $tramite->escuela=$dependenciaDetalle->nombre;
+            $ruta=public_path().$tramite->constancia_final;
+            dispatch(new EnvioConstanciaJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,$ruta));
+            DB::commit();
+            return response()->json($tramite, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+
     public function Paginacion($items, $size, $page = null, $options = [])
     {
         // $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);

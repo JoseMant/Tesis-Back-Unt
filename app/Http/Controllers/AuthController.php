@@ -219,22 +219,10 @@ class AuthController extends Controller
             $user = User::where('reset_password', $request->input('code'))->first();
             if ($user){
                 $user->password=Hash::make($request->input('password'));
-                // $user->reset_password = null;
+                $user->reset_password = null;
                 $user->update();
                 DB::commit();
-                //loguearlo
-
-                // return $user;
-                $credentials['username'] = $user->username;
-                $credentials['password'] = $user->password;
-                // return $credentials;
-                if (! $token = auth()->attempt($credentials)) {
-                    return response()->json(['error' => 'Usuario inválido'], 401);
-                }
-
-                return $this->respondWithToken($token);
-
-                // return response()->json(['status' => '200', 'message' => 'Cambio de contraseña con éxito!'], 200);
+                return response()->json(['status' => '200', 'message' => 'Cambio de contraseña con éxito!'], 200);
             }else{
                 return response()->json(['status' => '400', 'message' => 'El nombre de usuario no se encuentra registrado'], 400);
             }

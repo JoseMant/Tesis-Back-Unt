@@ -49,6 +49,7 @@ Route::get('tramite/certificados/asignados','CertificadoController@GetCertificad
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
 Route::post('certificados/upload/{id}','CertificadoController@uploadCertificado');
 Route::get('constancias/enviar/{id}','ConstanciaController@enviarConstancia');
+Route::post('constancias/upload/{id}','ConstanciaController@uploadConstancia');
 Route::get('tramite/certificados/firma_uraa','CertificadoController@GetCertificadosFirmaUraa');
 Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertificadosFirmaDecano');
 Route::get('tramite/carnets','CarnetController@GetCarnets');
@@ -114,4 +115,4 @@ Route::get('personasSuv', 'PersonaSuvController@index');
 //RUTAS DESCARGA ZIP
 Route::get('download/fotos', 'ZipController@downloadFotos');
 //RUTAS IMPORTAR EXCEL
-Route::post('import', 'TramiteController@import');
+Route::post('carnets/import', 'TramiteController@import');

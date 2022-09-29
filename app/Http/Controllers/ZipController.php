@@ -30,8 +30,12 @@ class ZipController extends Controller
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-        ->where('tramite.idEstado_tramite',7)
         ->where('tipo_tramite.idTipo_tramite',3)
+        ->where(function($query)
+        {
+            $query->where('tramite.idEstado_tramite',7)
+            ->orWhere('tramite.idEstado_tramite',16);
+        })
         ->get(); 
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
@@ -43,16 +47,19 @@ class ZipController extends Controller
         }
         // return $tramites;
         $zip = new ZipArchive;
-        $fileName = 'Fotos_Carnet.zip';
+        $date=date('Y-m-d h-i-s');
+        $fileName = 'Fotos_Carnet_'.$date.'.zip';
 
         if ($zip->open(public_path($fileName),ZipArchive::CREATE) === TRUE)
         {
             foreach ($tramites as $key => $tramite) {
+                $usuario=User::findOrFail($tramite->idUsuario);
                 foreach ($tramite->requisitos as $key => $requisito) {
                     $value =public_path($requisito->archivo);
                     $relativeNameInZipFile = basename(public_path($requisito->archivo));
-                    $zip->addFile(public_path($requisito->archivo), $relativeNameInZipFile);
+                    $zip->addFile(public_path($requisito->archivo), $usuario->tipo_documento."_".$relativeNameInZipFile);
                 }
+                  
             }
             $zip->close();
         }
