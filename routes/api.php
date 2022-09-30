@@ -56,6 +56,7 @@ Route::get('tramite/carnets','CarnetController@GetCarnets');
 Route::get('tramite/carnets/validados','CarnetController@GetCarnetsValidados');
 Route::get('tramite/carnets/asignados','CarnetController@GetCarnetsAsignados');
 Route::get('tramite/carnets/aprobados','CarnetController@GetCarnetsAprobados');
+Route::get('carnets/validacion/sunedu','CarnetController@EnvioValidacionSunedu');
 Route::get('tramite/constancias','ConstanciaController@GetConstancias');
 Route::get('tramite/constancias/validados','ConstanciaController@GetConstaciasValidados');
 Route::get('tramite/constancias/asignados','ConstanciaController@GetConstaciasAsignados');

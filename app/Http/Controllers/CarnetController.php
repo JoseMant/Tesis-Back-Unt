@@ -70,7 +70,7 @@ class CarnetController extends Controller
             //     $requisito->archivo=$requisito->archivo;
             // }
             $tramite->voucher=$tramite->voucher;
-            $tramite->fut="/api/fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->idTramite;
             
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
@@ -121,7 +121,7 @@ class CarnetController extends Controller
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
+            // ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->where(function($query) use ($request)
@@ -134,6 +134,11 @@ class CarnetController extends Controller
                 ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+            })
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',7)
+                ->orWhere('tramite.idEstado_tramite',16);
             })
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
@@ -152,8 +157,13 @@ class CarnetController extends Controller
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
+            // ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',3)
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',7)
+                ->orWhere('tramite.idEstado_tramite',16);
+            })
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -167,7 +177,7 @@ class CarnetController extends Controller
                 $requisito->archivo=$requisito->archivo;
             }
             $tramite->voucher=$tramite->voucher;
-            $tramite->fut="/api/fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -420,6 +430,52 @@ class CarnetController extends Controller
             ]], 200);
     }
 
+    public function EnvioValidacionSunedu()
+    {
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            //obtener carnets validados
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tipo_tramite.idTipo_tramite',3)
+            ->where('tramite.idEstado_tramite',7)
+            ->get(); 
+            foreach ($tramites as $key => $tramite) {
+                //CAMBIAMOS EL ESTADO DE CADA TRÁMITE A PENDIENTE DE VALIDACIÓN DE SUNEDU
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                $historial_estados->idEstado_nuevo=16;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+                $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
+                $tramite->save();
+            }
+            DB::commit();
+            return response()->json(['status' => '200'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
+        }
+        
+
+    }
     public function Paginacion($items, $size, $page = null, $options = [])
     {
         $items = $items instanceof Collection ? $items : Collection::make($items);

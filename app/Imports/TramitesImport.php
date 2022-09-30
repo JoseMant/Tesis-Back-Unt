@@ -63,7 +63,7 @@ class TramitesImport implements ToCollection
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                ->where('tramite.idEstado_tramite',7)
+                ->where('tramite.idEstado_tramite',16)
                 ->where('tipo_tramite.idTipo_tramite',3)
                 ->where('usuario.nro_documento',$value[3])
                 ->first();
@@ -90,7 +90,10 @@ class TramitesImport implements ToCollection
                 ->first();
                 
                 $tramite_requisito->comentario=$value[16]; 
+                $tramite_requisito->des_estado_requisito="RECHAZADO"; 
                 $tramite_requisito->update();
+
+
 
                 //Datos para el envío del correo
                 $usuario=User::find($tramite->idUsuario);
