@@ -3,9 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Requisito;
 class RequisitoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -83,7 +89,15 @@ class RequisitoController extends Controller
     }
 
     public function getAllByTipo_tramite_unidad($idTipo_tramite_unidad){
-        $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)->get();
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        // $token = JWTAuth::getToken();
+        // $apy = JWTAuth::getPayload($token);
+        // $idUsuario=$apy['idUsuario'];
+        // $dni=$apy['nro_documento'];
+        // $idTipo_usuario=$apy['idTipo_usuario'];
+        $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+        // ->where('responsable',4)->get();
+        ->get();
         return response()->json(['status' => '200', 'requisitos'=>$requisitos], 200);
     }
 }

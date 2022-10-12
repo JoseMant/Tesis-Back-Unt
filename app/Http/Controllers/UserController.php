@@ -24,7 +24,7 @@ class UserController extends Controller
     public function index()
     {
         $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
         ->get();
@@ -54,7 +54,6 @@ class UserController extends Controller
                 })
             ->get();
         }else{
-            return "hola";
             $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
             'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
@@ -82,7 +81,35 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        
+        DB::beginTransaction();
+        try {
+            $usuario=new User();
+            $usuario->idTipo_usuario=$request->idTipo_usuario;
+            $usuario->username=$request->username;
+            $usuario->password=$request->nro_documento;
+            $usuario->nombres=$request->nombres;
+            $usuario->apellidos=$request->apellidos;
+            $usuario->tipo_documento=$request->tipo_documento;
+            $usuario->nro_documento=$request->nro_documento;
+            $usuario->correo=$request->correo;
+            $usuario->celular=$request->celular;
+            $usuario->sexo=$request->sexo;
+            $usuario->confirmed=1;
+            $usuario->confirmation_code=null;
+            $usuario->reset_password=null;
+            $usuario->estado=1;
+            $usuario->save();
+            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
+            ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+            ->where('usuario.idUsuario',$usuario->idUsuario)
+            ->first();
+            DB::commit();
+            return response()->json($usuario, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
     }
 
     /**
@@ -116,7 +143,27 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $usuario=User::find($id);
+            $usuario->idTipo_usuario=$request->idTipo_usuario;
+            $usuario->username=$request->username;
+            $usuario->nombres=$request->nombres;
+            $usuario->apellidos=$request->apellidos;
+            $usuario->celular=$request->celular;
+            $usuario->estado=$request->estado;
+            $usuario->update();
+            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
+            ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
+            ->where('usuario.idUsuario',$id)
+            ->first();
+            DB::commit();
+            return response()->json($usuario, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
     }
 
     /**
@@ -127,7 +174,6 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
     }
 
 

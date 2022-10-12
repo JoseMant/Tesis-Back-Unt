@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tipo_Usuario extends Model
+class Cronograma extends Model
 {
     protected $connection = 'mysql';
-    protected $table = 'tipo_usuario';
-    protected $primaryKey = 'idTipo_usuario';
+    protected $table = 'cronograma_carpeta';
+    protected $primaryKey = 'idCronograma_carpeta';
     public $timestamps = false;
     protected $fillable = [];
     protected $guarded = [];

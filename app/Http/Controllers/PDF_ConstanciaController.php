@@ -27,7 +27,27 @@ class PDF_ConstanciaController extends Controller
     {
 
         // DATOS
-        $tramite=Tramite::find($idTramite);
+        $tramite=Tramite::findOrFail($idTramite);
+        $usuario=User::findOrFail($tramite->idUsuario);
+        $dni=$usuario->nro_documento;
+        $dependencia=DependenciaURAA::Where('idDependencia',$tramite->idDependencia)->first();
+        $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_Tramite_Unidad',$tramite->idTipo_tramite_unidad)->first();
+        $tipo_tramite=Tipo_Tramite::Where('idTipo_Tramite',$tipo_tramite_unidad->idTipo_tramite)->first();
+        // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+        $dependenciaDetalle="";
+        if ($tramite->idUnidad==1) {
+            $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+        }else if ($tramite->idUnidad==2) {
+            // Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+            //     'dni' => $dni
+            //   ]);
+        }else if ($tramite->idUnidad==3) {
+            // Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+            //     'dni' => $dni
+            //   ]);
+        }else{
+            $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+        }
         // =========================
         // ==== CREACIÓN DE PDF ====
         // =========================
@@ -44,12 +64,12 @@ class PDF_ConstanciaController extends Controller
         $this->pdf->SetFont('Times','BIU', 16);
         $this->pdf->SetRightMargin(23);
         $this->pdf->SetXY(0,50);
-        $this->pdf->Cell(0, 5,utf8_decode('CONSTANCIA N° 001270921'),0,0,'R');
+        $this->pdf->Cell(0, 5,utf8_decode('CONSTANCIA N° '.$tramite->nro_tramite),0,0,'R');
         // $this->pdf->Line(115, 55, 185, 55);
         $this->pdf->SetRightMargin(0);
         $this->pdf->SetFont('Times','B', 22);
         $this->pdf->SetXY(0,63);
-        $this->pdf->Cell(0, 4,utf8_decode('QUINTO SUPERIOR'),0,0,'C');
+        $this->pdf->Cell(0, 4,utf8_decode($tipo_tramite_unidad->descripcion),0,0,'C');
 
         $this->pdf->SetFont('Times','B', 12);
         $this->pdf->SetXY(25,80);
@@ -65,10 +85,16 @@ class PDF_ConstanciaController extends Controller
 
         $this->pdf->SetFont('Times','', 13);        
         $this->pdf->SetXY(36,105);
-        $inicio="Que doña";
-        $nombre="VEREAU RODRIGUEZ VIRGINIA SOLEDAD";
-        $facultad="CIENCIAS ECONOMICAS";
-        $this->pdf->WriteText(utf8_decode($inicio.' <'.$nombre.'> ex alumna de la Facultad de <'.$facultad.'>, Escuela Profesional de <CONTABILIDAD Y FINANZAS>, ha completado las exigencias curriculares estando ubicado de acuerdo al <ORDEN DE MÉRITO en el CUARTO (4°)> puesto en su promoción, con <3202>  puntos,  que es el producto de la sumatoria de las notas por los créditos obtenidos en los 10 ciclos  de estudios Profesionales, comprendidos entre los años <MIL NOVECIENTOS OCHENTA> y <MIL NOVECIENTOS OCHENTA Y CUATRO>, años académicos.'));
+        $inicio="";
+        $alumno="";
+        if ($usuario->sexo=='M') {
+            $inicio="Don";
+            $alumno="alumno";
+        }else {
+            $inicio="Doña";
+            $alumno="alumna";
+        }
+        $this->pdf->WriteText(utf8_decode($inicio.' <'.$usuario->apellidos.' '.$usuario->nombres.'> ex '.$alumno.' de la Facultad de <'.$dependencia->nombre.'>, Escuela Profesional de <'.$dependenciaDetalle->nombre.'>, ha completado las exigencias curriculares estando ubicado de acuerdo al <ORDEN DE MÉRITO en el CUARTO (4°)> puesto en su promoción, con <3202>  puntos,  que es el producto de la sumatoria de las notas por los créditos obtenidos en los 10 ciclos  de estudios Profesionales, comprendidos entre los años <MIL NOVECIENTOS OCHENTA> y <MIL NOVECIENTOS OCHENTA Y CUATRO>, años académicos.'));
  
         $y=$this->pdf->GetY();
 
@@ -80,13 +106,8 @@ class PDF_ConstanciaController extends Controller
         $this->pdf->SetFont('Times','B', 12);
         $this->pdf->SetXY(110,$y+40);
         $this->pdf->MultiCell(76, 6,utf8_decode('Ing. Víctor Miguel Vergara Azabache Jefe de la Unidad de Registro Académico - Administrativo'),0,'C', false);
-        // $this->pdf->SetXY(0,230);
-        // $this->pdf->MultiCell(76, 6,utf8_decode('Jefe de la Unidad de Registro'),1,'C', false);
-        // $this->pdf->SetXY(0,235);
-        // $this->pdf->MultiCell(76, 6,utf8_decode('Académico - Administrativo'),1,'C', false);
 
-
-        $nombre_descarga = utf8_decode("CONSTANCIA");
+        $nombre_descarga = utf8_decode($tramite->nro_tramite);
         $this->pdf->SetTitle( $nombre_descarga );
         return response($this->pdf->Output('i', $nombre_descarga.".pdf", false))
         ->header('Content-Type', 'application/pdf');

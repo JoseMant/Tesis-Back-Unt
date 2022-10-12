@@ -77,10 +77,11 @@ class TramiteController extends Controller
             if ($request->query('search')!="") {
                 // TRÁMITES POR USUARIO
                 $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado')
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado','tramite.idUsuario_asignado')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                // ->join('usuario','usuario.idUsuario','tramite.idUsuario_asignado')
                 ->Where('tramite.idUsuario',$idUsuario)
                 ->where(function($query) use ($request)
                 {
@@ -93,6 +94,9 @@ class TramiteController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
                 foreach ($tramites as $key => $tramite) {
+                    if ($tramite->idUsuario_asignado) {
+                        $tramite['usuario_asignado']=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as usuario'))->findOrFail($tramite->idUsuario_asignado);
+                    }
                     //Obtenemos el historial de cada trámite
                     $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
                     foreach ($tramite->historial as $key => $item) {
@@ -107,7 +111,7 @@ class TramiteController extends Controller
             }else {
                 // TRÁMITES POR USUARIO
                 $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado')
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado','tramite.idUsuario_asignado')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
@@ -115,6 +119,9 @@ class TramiteController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
                 foreach ($tramites as $key => $tramite) {
+                    if ($tramite->idUsuario_asignado) {
+                        $tramite['usuario_asignado']=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as usuario'))->findOrFail($tramite->idUsuario_asignado);
+                    }
                     $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
                     foreach ($tramite->historial as $key => $item) {
                         if($item->idEstado_actual!=null){
@@ -140,7 +147,7 @@ class TramiteController extends Controller
             
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => $e], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }  
     }
 
@@ -283,13 +290,27 @@ class TramiteController extends Controller
                 $voucher->fecha_operacion=trim($request->fecha_operacion);
                 // $voucher->des_estado_voucher=trim($request->des_estado_voucher);
 
+                
                 if($request->hasFile("archivo")){
+                    // return "ingresé al voucher";
                     $file=$request->file("archivo");
                     $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
                     $nombreBD = "/storage/vouchers_tramites/".$nombre;
                     if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/vouchers_tramites', $nombre);
                       $voucher->archivo = $nombreBD;
+                    }
+                }else {
+                    if($request->hasFile("exonerado_archivo")){
+                        $file=$request->file("exonerado_archivo");
+                        $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                        $nombreBD = "/storage/exonerados/".$nombre;
+                        if($file->guessExtension()=="pdf"){
+                          $file->storeAs('public/exonerados', $nombre);
+                          $tramite->exonerado_archivo = $nombreBD;
+                        }
+                    }else {
+                        return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
                     }
                 }
                 $voucher->comentario=null;
@@ -307,8 +328,8 @@ class TramiteController extends Controller
                         $tramite_detalle->idMotivo_certificado=trim($request->idMotivo_certificado);
                         break;
                     case 2:
-                        $tramite_detalle->idCronograma_carpeta = trim($request->idCronograma_carpeta);
-                        $tramite_detalle->idModalidad_titulo_carpeta=trim($request->idModalidad_titulo_carpeta);
+                        // $tramite_detalle->idCronograma_carpeta = trim($request->idCronograma_carpeta);
+                        // $tramite_detalle->idModalidad_titulo_carpeta=1;//trim($request->idModalidad_titulo_carpeta);//por defecto null por ahora
                         $tramite_detalle->idMotivo_certificado=null;
                         break;
                     case 3:
@@ -464,6 +485,7 @@ class TramiteController extends Controller
     }
     
     public function updateTramiteRequisitos(Request $request){
+        // return $request->all();
         DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -473,6 +495,7 @@ class TramiteController extends Controller
             $dni=$apy['nro_documento'];
             //flag de requisitos rechazados o aprobados
             $flag=true;
+            $flag2=true;
             //Editamos los cada uno de los requisitos que llegan junto al trámite en el request
             foreach ($request->requisitos as $key => $requisito) {
                 $tramite_requisito=Tramite_Requisito::Where('idTramite',$request->idTramite)
@@ -482,40 +505,78 @@ class TramiteController extends Controller
                 $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
                 $tramite_requisito->comentario=$requisito['comentario'];
                 $tramite_requisito->save();
-                if ($requisito['des_estado_requisito']=="RECHAZADO") {
+                // se tendría también que verificar que el estado del responsable sea el alumno(4)
+                if ($requisito['des_estado_requisito']=="RECHAZADO" && $requisito['responsable']==4) {
                     $flag=false;
                 }
+                if ($requisito['des_estado_requisito']=="PENDIENTE" && $requisito['responsable']==4) {
+                    $flag2=false;
+                }
             }
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->find($request->idTramite);
-            //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-            $historial_estados=new Historial_Estado;
-            $historial_estados->idTramite=$tramite->idTramite;
-            $historial_estados->idUsuario=$idUsuario;
-            $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-            //Verificamos si todos los requisitos fueron aprobados($flag=true) o no($flag=false) 
-            if ($flag==true) {
-                $historial_estados->idEstado_nuevo=8;
-            }else{
-                $historial_estados->idEstado_nuevo=9;
+            if ($request->idTipo_tramite==1) {
+                $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+                ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+                , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+                ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+                ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+                ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+                ->find($request->idTramite);
+            }else {
+                $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+                /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+                , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+                ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                // ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
+                ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+                ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+                ->find($request->idTramite);
             }
-            $historial_estados->fecha=date('Y-m-d h:i:s');
-            $historial_estados->save();
-            $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
-            $tramite->update();
+            if ($flag2) {
+                
+                
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                //Verificamos si todos los requisitos fueron aprobados($flag=true) o no($flag=false) 
+                if ($flag==true) {
+                    //VALIDAR EL TIPO DE TRÁMITE EL 06/10/22 PARA EL CAMBIO DE ESTADO
+                    if ($tramite->idTipo_tramite==1) {
+                        $historial_estados->idEstado_nuevo=8;
+                    }elseif ($tramite->idTipo_tramite==2) {
+                        $historial_estados->idEstado_nuevo=18;
+                    }
+                    // $historial_estados->idEstado_nuevo=8;
+                }else{
+                    if ($tramite->idTipo_tramite==1) {
+                        $historial_estados->idEstado_nuevo=9;
+                    }elseif ($tramite->idTipo_tramite==2) {
+                        $historial_estados->idEstado_nuevo=19;
+                    }
+                    // $historial_estados->idEstado_nuevo=9;
+                }
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+                $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                $tramite->update();
+
+            }
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')

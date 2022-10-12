@@ -40,7 +40,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 //TRÁMITE
 Route::resource('tramites','TramiteController');
 Route::get('tramite/usuario','TramiteController@GetByUser');
-Route::post('tramite/update/{id}','TramiteController@update');
+// Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
 Route::get('tramite/certificados','CertificadoController@GetCertificados');
 Route::post('tramite/asignar','TramiteController@AsignacionTramites');
@@ -87,9 +87,11 @@ Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
 
 // Route::resource('cargos','CargoController');
 Route::resource('personas','PersonaController');
-Route::resource('usuarios','UserController');
-Route::get('usuario/search','UserController@buscar');
+Route::get('users/all','UserController@index');
+Route::get('users/search','UserController@buscar');
 Route::get('usuario/uraa','UserController@getUsuariosUraa');
+Route::put('users/update/{id}','UserController@update');
+Route::post('users/create','UserController@store');
 // Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
 //TIPOS DE TRÁMITE
@@ -117,3 +119,20 @@ Route::get('personasSuv', 'PersonaSuvController@index');
 Route::get('download/fotos', 'ZipController@downloadFotos');
 //RUTAS IMPORTAR EXCEL
 Route::post('carnets/import', 'TramiteController@import');
+
+
+//Roles
+Route::get('roles', 'Tipo_UsuarioController@GetRoles');
+//Cronograma
+Route::get('cronogramas/all', 'CronogramaController@index');
+Route::get('cronogramas/activos/{idDependencia}/{idTipo_tramite_unidad}', 'CronogramaController@getCronogramasActivos');
+Route::get('cronogramas/search', 'CronogramaController@buscar');
+Route::post('cronogramas/create', 'CronogramaController@store');
+Route::put('cronogramas/update/{id}', 'CronogramaController@update');
+
+//GRADOS Y TITULOS
+Route::get('grados/titulos/validados', 'GradoController@GetGradosValidados');
+Route::get('grados/titulos/aprobados', 'GradoController@GetGradosAprobados');
+
+//DEPENDENCIAS
+Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');

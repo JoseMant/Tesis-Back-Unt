@@ -159,7 +159,7 @@ class CertificadoController extends Controller
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite')
+            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tipo_tramite.idTipo_tramite')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -192,7 +192,7 @@ class CertificadoController extends Controller
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite')
+            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tipo_tramite.idTipo_tramite')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -492,15 +492,15 @@ class CertificadoController extends Controller
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
+                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                // if ($personaSuv) {
+                //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                // }else {
                     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
                     if ($personaSga) {
                         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
                     }
-                }
+                // }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -595,15 +595,15 @@ class CertificadoController extends Controller
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
+                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
+                // if ($personaSuv) {
+                //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                // }else {
                     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
                     if ($personaSga) {
                         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
                     }
-                }
+                // }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {

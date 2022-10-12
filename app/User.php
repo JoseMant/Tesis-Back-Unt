@@ -45,6 +45,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'idUsuario'=> $this->idUsuario,
             'nro_documento'=>$this->nro_documento,
+            'idTipo_usuario'=>$this->idTipo_usuario,
         ];
         // return [
         //     'idUsuario'              => $this->idUsuario,
