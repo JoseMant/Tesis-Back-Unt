@@ -47,6 +47,7 @@ Route::post('tramite/asignar','TramiteController@AsignacionTramites');
 Route::get('tramite/certificados/validados','CertificadoController@GetCertificadosValidados');
 Route::get('tramite/certificados/asignados','CertificadoController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
+Route::get('tramite/certificados/pendientes','CertificadoController@GetCertificadosPendientes');
 Route::post('certificados/upload/{id}','CertificadoController@uploadCertificado');
 Route::get('constancias/enviar/{id}','ConstanciaController@enviarConstancia');
 Route::post('constancias/upload/{id}','ConstanciaController@uploadConstancia');
@@ -92,6 +93,7 @@ Route::get('users/search','UserController@buscar');
 Route::get('usuario/uraa','UserController@getUsuariosUraa');
 Route::put('users/update/{id}','UserController@update');
 Route::post('users/create','UserController@store');
+Route::put('settings','UserController@settings');
 // Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
 //TIPOS DE TRÁMITE

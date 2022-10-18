@@ -68,40 +68,33 @@ class TramitesImport implements ToCollection
                 ->where('usuario.nro_documento',$value[3])
                 ->first();
 
-                // $tramite->idEstado_tramite=17;
-                // $tramite->update();
-                
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$idUsuario;
-                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                $historial_estados->idEstado_nuevo=9;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
-                $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
-                $tramite->save();
-
-                $tramite_requisito=Tramite_Requisito::select('tramite_requisito.idTramite','tramite_requisito.idRequisito','requisito.nombre','tramite_requisito.archivo'
-                ,'tramite_requisito.idUsuario_aprobador','tramite_requisito.validado','tramite_requisito.comentario')
-                ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-                ->where('idTramite',$tramite->idTramite)
-                ->where('requisito.nombre','FOTO CARNET')
-                ->first();
-                
-                $tramite_requisito->comentario=$value[16]; 
-                $tramite_requisito->des_estado_requisito="RECHAZADO"; 
-                $tramite_requisito->update();
-
-
-
-                //Datos para el envío del correo
-                $usuario=User::find($tramite->idUsuario);
-                $tipo_tramite=Tipo_Tramite::Find($tramite->idTipo_tramite);
-                $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
-                // mensaje de rechazo de foto
-                dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
-
+                if ($tramite) {
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuario;
+                    $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                    $historial_estados->idEstado_nuevo=9;
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+                    $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
+                    $tramite->save();
+                    $tramite_requisito=Tramite_Requisito::select('tramite_requisito.idTramite','tramite_requisito.idRequisito','requisito.nombre','tramite_requisito.archivo'
+                    ,'tramite_requisito.idUsuario_aprobador','tramite_requisito.validado','tramite_requisito.comentario')
+                    ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+                    ->where('idTramite',$tramite->idTramite)
+                    ->where('requisito.nombre','FOTO CARNET')
+                    ->first();
+                    $tramite_requisito->comentario=$value[16]; 
+                    $tramite_requisito->des_estado_requisito="RECHAZADO"; 
+                    $tramite_requisito->update();
+                    //Datos para el envío del correo
+                    $usuario=User::find($tramite->idUsuario);
+                    $tipo_tramite=Tipo_Tramite::Find($tramite->idTipo_tramite);
+                    $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
+                    // mensaje de rechazo de foto
+                    dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                }
             }
         }
     }

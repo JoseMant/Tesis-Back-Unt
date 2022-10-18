@@ -42,18 +42,34 @@ class ZipController extends Controller
         ->get(); 
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario')
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->where('requisito.nombre','FOTO CARNET')
+            ->where('tramite_requisito.des_estado_requisito','PENDIENTE')
             ->get();
         }
         // return $tramites;
         $zip = new ZipArchive;
-        $date=date('Y-m-d h-i-s');
-        // $fileName = 'Fotos_Carnet_'.$date.'.zip';
-        $fileName = 'Fotos_Carnet.zip';
+        // $date=date('Y-m-d h-i-s');
+        $dateToday=date('Y-m-d');
+        $fileName = 'Fotos_Carnet_'.$dateToday.'.zip';
+        // $dateYesterday=date('Y-m-d',strtotime("yesterday"));
 
+        // Eliminamos el zip creado con la descarga de días anteriores(si es que existe) para que no se guarde en el proyecto
+        for ($i=1; $i <= 31; $i++) { 
+            $date=date('Y-m-'.$i);
+            if ($zip->open('Fotos_Carnet_'.$date.'.zip')===TRUE) {
+                $zip->close();
+                unlink('Fotos_Carnet_'.$date.'.zip');
+            }
+        }
+
+        //Eliminamos el zip creado de la descarga de hoy(si es que existe) para que al momento de ser creado no se sobreescriba y tenga fotos antiguas
+        if ($zip->open($fileName)===TRUE) {
+            $zip->close();
+            unlink($fileName);
+        }
         if ($zip->open(public_path($fileName),ZipArchive::CREATE) === TRUE)
         {
             foreach ($tramites as $key => $tramite) {
