@@ -150,7 +150,8 @@
 						<hr>
 						<div style="text-align: justify!important;">
 							<p>Se ha finalizado el proceso de tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
-                                virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Recuerda ingresar al sistema para revisar el estado de tus trámites.
+                                virtual. Hemos iniciado el proceso de solicitud ante SUNEDU, se estará notificando por este medio la entrega. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. 
+                                Recuerda ingresar al sistema para revisar el estado de tus trámites.
                             </p>
 						</div>
             <hr>

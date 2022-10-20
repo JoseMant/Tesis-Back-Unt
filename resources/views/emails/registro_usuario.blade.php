@@ -144,13 +144,17 @@
     <div class="contenido">
         <div class="alert alert-info mensaje" role="alert">
 						<div style="text-align: center;">
-							<h4>NOTIFICACIÓN DE FINALIZACIÓN DE TRÁMITE</h4>
+							<h4>NOTIFICACIÓN DE CREACIÓN DE USUARIO</h4>
 							<img class="robot" src="https://i.ibb.co/5RsJVpc/robot-Confirmation.png" width="50%">
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-							<p>Se ha finalizado el proceso de tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
-                                virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Recuerda ingresar al sistema para revisar el estado de tus trámites.
+							<p>Se ha registrado con éxito su usuario. Se recomienda cambiar la contraseña que se asignó por defecto.
+                                <ul>
+                                    <li><b>Usuario:</b> {{$usuario['username']}}</li>
+                                    <li><b>Password:</b> {{$usuario['nro_documento']}}</li>
+                                    <li><b>Rol:</b> {{$rol}}</li>
+                                </ul>
                             </p>
 						</div>
             <hr>

@@ -176,7 +176,8 @@ class PersonaController extends Controller
                             $usuario->sexo=$personaSga->per_sexo;
                             return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                         }else{
-                            return response()->json([ 'message' => 'Alumno no encontrado.']);
+                            // return response()->json([ 'message' => 'Alumno no encontrado.']);
+                            return response()->json(['status' => '400', 'message' => 'Alumno no encontrado.'], 400);
                         }
                     }
                 }  
@@ -271,7 +272,7 @@ class PersonaController extends Controller
                         }
                         return response()->json(['status' => '200', 'dependencias' => $facultades], 200); 
                     }else {
-                        return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado'], 400); 
+                        return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado.'], 400); 
                     }
                 }
             }else if($idUnidad==2){ //doctorado

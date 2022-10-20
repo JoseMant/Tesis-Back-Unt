@@ -144,12 +144,12 @@
     <div class="contenido">
         <div class="alert alert-info mensaje" role="alert">
 						<div style="text-align: center;">
-							<h4>NOTIFICACIÓN DE ACTUALIZACIÓN DEL ESTADO DE TRÁMITE</h4>
+							<h4>NOTIFICACIÓN DE FINALIZACIÓN DE TRÁMITE</h4>
 							<img class="robot" src="https://i.ibb.co/5RsJVpc/robot-Confirmation.png" width="50%">
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-							<p>Se ha actualizado el estado de tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
+							<p>Se ha finalizado el proceso de tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
                                 virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Recuerda ingresar al sistema para revisar el estado de tus trámites.
                             </p>
 						</div>

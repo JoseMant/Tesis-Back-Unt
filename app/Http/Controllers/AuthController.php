@@ -24,9 +24,12 @@ class AuthController extends Controller
     public function register(Request $request){
         DB::beginTransaction();
         try {
-            $dniValidate=User::Where('nro_documento',$request->input('nro_documento'))->first();
-            $correoValidate=User::Where('correo',$request->input('correo'))->first();
-            $usernameValidate=User::Where('username',$request->input('username'))->first();
+            $dniValidate=User::Where('nro_documento',$request->input('nro_documento'))
+            ->where('idTipo_usuario',4)->first();
+            $correoValidate=User::Where('correo',$request->input('correo'))
+            ->where('idTipo_usuario',4)->first();
+            $usernameValidate=User::Where('username',$request->input('username'))
+            ->where('idTipo_usuario',4)->first();
             if($dniValidate){
               return response()->json(['status' => '400', 'message' => 'El dni ya se encuentra registrado!!'], 400);
             }else if(isset($correoValidate)){
@@ -187,7 +190,7 @@ class AuthController extends Controller
                 dispatch(new ResetPasswordJob($usuario));
                 return response()->json(['status' => '200', 'message' => 'Se envió un mensaje al correo electrónico proporcionado para continuar con la recuperación de la contraseña.'], 200);
             }else{
-                return response()->json(['status' => '400', 'message' => 'El correo no se encuentra registrado para ningún usuario'], 400);
+                return response()->json(['status' => '400', 'message' => '¡El correo no se encuentra! ¿Está seguro que ya eres miembro?'], 400);
             }
         } catch (\Exception $e) {
             DB::rollback();

@@ -7,6 +7,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Jobs\ConfirmacionCorreoJob;
+use App\Jobs\RegistroUsuarioJob;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -85,10 +86,21 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $usernameValidate=User::where('username',$request->username)->first();
+            if ($usernameValidate) {
+                return response()->json(['status' => '400', 'message' => 'El nombre de usuario ya se encuentra registrado!!'], 400);
+            }else{
+                $tipoUsuario_dni_validate=User::where('idTipo_usuario',$request->idTipo_usuario)
+                ->where('nro_documento',$request->nro_documento)
+                ->first();
+                if ($tipoUsuario_dni_validate) {
+                    return response()->json(['status' => '400', 'message' => 'El usuario ya se encuentra registrado!!'], 400);
+                }
+            }
             $usuario=new User();
             $usuario->idTipo_usuario=$request->idTipo_usuario;
             $usuario->username=$request->username;
-            $usuario->password=$request->nro_documento;
+            $usuario->password=Hash::make($request->nro_documento);
             $usuario->nombres=$request->nombres;
             $usuario->apellidos=$request->apellidos;
             $usuario->tipo_documento=$request->tipo_documento;
@@ -106,6 +118,9 @@ class UserController extends Controller
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$usuario->idUsuario)
             ->first();
+            $rol=$usuario->rol;
+            //Correo de creación de usuario
+            dispatch(new RegistroUsuarioJob($usuario,$rol));
             DB::commit();
             return response()->json($usuario, 200);
         } catch (\Exception $e) {

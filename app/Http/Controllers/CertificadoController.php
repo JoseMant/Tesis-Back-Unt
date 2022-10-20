@@ -280,6 +280,7 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',8)
             ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite.idUsuario_asignado',$idUsuario)
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -311,6 +312,7 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',8)
             ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite.idUsuario_asignado',$idUsuario)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -482,8 +484,7 @@ class CertificadoController extends Controller
             ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
             ->where('tramite_requisito.idTramite',$tramite->idTramite)
             ->get();
-            //Datos del usuario al que pertenece el trámite
-            $usuario=User::findOrFail($tramite->idUsuario)->first();
+            
             // Obtenemos el motivo certificado(en caso lo tengan) de cada trámite 
             if ($tramite->idTipo_tramite==1) {
                 $motivo=Motivo_Certificado::Where('idMotivo_certificado',$tramite->idMotivo_certificado)->first();
@@ -509,7 +510,7 @@ class CertificadoController extends Controller
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
-            // return $tramite;
+            
             if ($tramite->idEstado_tramite==15) {
                 $ruta=public_path().$tramite->certificado_final;
                 dispatch(new EnvioCertificadoJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,$ruta));
@@ -631,6 +632,9 @@ class CertificadoController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
+        $idDependencia_usuario=$apy['idDependencia'];
+
+
 
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
@@ -650,6 +654,7 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',13)
             ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite.idDependencia',$idDependencia_usuario)
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -681,6 +686,7 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',13)
             ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite.idDependencia',$idDependencia_usuario)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
