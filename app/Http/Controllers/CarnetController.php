@@ -309,7 +309,7 @@ class CarnetController extends Controller
         }
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario')
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','tramite_requisito.idRequisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
@@ -486,7 +486,7 @@ class CarnetController extends Controller
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',8)
+            ->where('tramite.idEstado_tramite',25)
             ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->where(function($query) use ($request)
@@ -517,7 +517,7 @@ class CarnetController extends Controller
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',8)
+            ->where('tramite.idEstado_tramite',25)
             ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -525,15 +525,15 @@ class CarnetController extends Controller
         }
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario')
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','tramite_requisito.idRequisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo="".$requisito->archivo;
-            }
-            $tramite->voucher="".$tramite->voucher;
-            $tramite->fut="/api/fut/".$tramite->idTramite;
+            // foreach ($tramite->requisitos as $key => $requisito) {
+            //     $requisito->archivo="".$requisito->archivo;
+            // }
+            // $tramite->voucher="".$tramite->voucher;
+            $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -594,6 +594,13 @@ class CarnetController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tipo_tramite.idTipo_tramite',3)
             ->where('tramite.idEstado_tramite',7)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',17)
+                ->orWhere('tramite.idTipo_tramite_unidad',19)
+                ->orWhere('tramite.idTipo_tramite_unidad',21)
+                ->orWhere('tramite.idTipo_tramite_unidad',23);
+            })
             ->get(); 
             foreach ($tramites as $key => $tramite) {
                 //CAMBIAMOS EL ESTADO DE CADA TRÁMITE A PENDIENTE DE VALIDACIÓN DE SUNEDU

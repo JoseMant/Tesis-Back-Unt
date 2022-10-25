@@ -30,6 +30,7 @@ class UserController extends Controller
         'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
+        ->orderBy('usuario.apellidos')
         ->get();
         return response()->json($usuarios, 200);
     }

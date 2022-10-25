@@ -23,6 +23,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use App\Imports\TramitesImport;
+use App\Exports\TramitesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\PersonaSE;
 
@@ -35,7 +36,7 @@ class TramiteController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt');
+        $this->middleware('jwt', ['except' => ['export']]);
     }
 
     /**
@@ -255,9 +256,27 @@ class TramiteController extends Controller
             $usuario = User::findOrFail($idUsuario);
 
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
-            // return "hola";
-            // se tiene que validar también el idUsuario
-            // return Str::substr($request->fecha_operacion,0, 10);
+            // $idTipo_tramite_unidad=$request->idTipo_tramite_unidad;
+            // // Verificacion de registro de trámite de carnet por renpvación
+            // if ($idTipo_tramite_unidad==30||$idTipo_tramite_unidad==31||$idTipo_tramite_unidad==32||$idTipo_tramite_unidad==33) {
+            //     $tramites=Tramite::where('idUsuario',$idUsuario)
+            //     ->where('idUnidad',$request->idUnidad)
+            //     ->where(function($query)
+            //     {
+            //         $query->where('idTipo_tramite_unidad',17)
+            //         ->orWhere('idTipo_tramite_unidad',19)
+            //         ->orWhere('idTipo_tramite_unidad',21)
+            //         ->orWhere('idTipo_tramite_unidad',23);
+            //     })
+            //     ->get();
+            //     if (count($tramites)==0) {
+            //         return response()->json(['status' => '400', 'message' => 'No cuenta con un trámite regular registrado. Favor de realizar el trámite regular.'], 400);
+            //     }
+            // }
+            
+
+
+
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->Where('voucher.entidad',trim($request->entidad))->where('voucher.nro_operacion',trim($request->nro_operacion))
             ->where('voucher.fecha_operacion',Str::substr(trim($request->fecha_operacion),0, 10))
@@ -294,8 +313,8 @@ class TramiteController extends Controller
                 // $voucher->des_estado_voucher=trim($request->des_estado_voucher);
 
                 
-                if($request->hasFile("archivo")){
-                    // return "ingresé al voucher";
+                if ($request->hasFile("archivo") && $request->hasFile("archivo_exonerado")) {
+                    // GUARDAMOS EL ARCHIVO DEL VOUCHER
                     $file=$request->file("archivo");
                     $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
                     $nombreBD = "/storage/vouchers_tramites/".$nombre;
@@ -303,17 +322,36 @@ class TramiteController extends Controller
                       $file->storeAs('public/vouchers_tramites', $nombre);
                       $voucher->archivo = $nombreBD;
                     }
+                    // GUARDAMOS EL ARCHIVO DEL EXONERADO
+                    $file=$request->file("archivo_exonerado");
+                    $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                    $nombreBD = "/storage/exonerados/".$nombre;
+                    if($file->guessExtension()=="pdf"){
+                      $file->storeAs('public/exonerados', $nombre);
+                      $tramite->exonerado_archivo = $nombreBD;
+                    }
                 }else {
-                    if($request->hasFile("exonerado_archivo")){
-                        $file=$request->file("exonerado_archivo");
+                    if($request->hasFile("archivo")){
+                        // return "ingresé al voucher";
+                        $file=$request->file("archivo");
                         $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
-                        $nombreBD = "/storage/exonerados/".$nombre;
+                        $nombreBD = "/storage/vouchers_tramites/".$nombre;
                         if($file->guessExtension()=="pdf"){
-                          $file->storeAs('public/exonerados', $nombre);
-                          $tramite->exonerado_archivo = $nombreBD;
+                          $file->storeAs('public/vouchers_tramites', $nombre);
+                          $voucher->archivo = $nombreBD;
                         }
                     }else {
-                        return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
+                        if($request->hasFile("archivo_exonerado")){
+                            $file=$request->file("archivo_exonerado");
+                            $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                            $nombreBD = "/storage/exonerados/".$nombre;
+                            if($file->guessExtension()=="pdf"){
+                              $file->storeAs('public/exonerados', $nombre);
+                              $tramite->exonerado_archivo = $nombreBD;
+                            }
+                        }else {
+                            return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
+                        }
                     }
                 }
                 $voucher->comentario=null;
@@ -354,7 +392,6 @@ class TramiteController extends Controller
                 $tramite -> nro_matricula=trim($request->nro_matricula);
                 $tramite -> comentario=trim($request->comentario);
                 $tramite -> sede=trim($request->sede);
-                $tramite -> exonerado_archivo=null; //corregir
                 $tramite->idUsuario_asignado=null;
                 $tramite -> idEstado_tramite=2;
                 
@@ -367,6 +404,8 @@ class TramiteController extends Controller
                       $file->storeAs('public/firmas_tramites', $nombre);
                       $tramite->firma_tramite = $nombreBD;
                     }
+                }else{
+                    return response()->json(['status' => '400', 'message' =>"Adjuntar firma!!"], 400);
                 }
                 $tramite -> save();
 
@@ -411,7 +450,7 @@ class TramiteController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => $e], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -572,15 +611,25 @@ class TramiteController extends Controller
                         $historial_estados->idUsuario=$idUsuario;
                         $historial_estados->idEstado_actual=18;
                         $historial_estados->idEstado_nuevo=20;
+                    }elseif ($tramite->idTipo_tramite==3) {
+                        $historial_estados->idEstado_nuevo=8;
+                        $historial_estados->fecha=date('Y-m-d h:i:s');
+                        $historial_estados->save();
+                        
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        $historial_estados=new Historial_Estado;
+                        $historial_estados->idTramite=$tramite->idTramite;
+                        $historial_estados->idUsuario=$idUsuario;
+                        $historial_estados->idEstado_actual=8;
+                        $historial_estados->idEstado_nuevo=25;
                     }
                     // $historial_estados->idEstado_nuevo=8;
                 }else{
-                    if ($tramite->idTipo_tramite==1) {
+                    if ($tramite->idTipo_tramite==1 || $tramite->idTipo_tramite==3) {
                         $historial_estados->idEstado_nuevo=9;
                     }elseif ($tramite->idTipo_tramite==2) {
                         $historial_estados->idEstado_nuevo=19;
                     }
-                    // $historial_estados->idEstado_nuevo=9;
                 }
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
@@ -883,7 +932,17 @@ class TramiteController extends Controller
                 $historial_estados->idTramite=$tramite->idTramite;
                 $historial_estados->idUsuario=$idUsuario;
                 $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                $historial_estados->idEstado_nuevo=15;
+                $historial_estados->idEstado_nuevo=23;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+                $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
+                $tramite->save();
+                
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=23;
+                $historial_estados->idEstado_nuevo=25;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
                 $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
@@ -939,10 +998,13 @@ class TramiteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function export()
     {
-        //
+        // $tramitesExports=new TramitesExport;
+        // return $tramitesExports->download('invoices.xlsx');
+        return Excel::download(new TramitesExport, 'users.xlsx');
     }
+    
 
 
     public function Paginacion($items, $size, $page = null, $options = [])

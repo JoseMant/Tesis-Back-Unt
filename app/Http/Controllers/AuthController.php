@@ -31,7 +31,22 @@ class AuthController extends Controller
             $usernameValidate=User::Where('username',$request->input('username'))
             ->where('idTipo_usuario',4)->first();
             if($dniValidate){
-              return response()->json(['status' => '400', 'message' => 'El dni ya se encuentra registrado!!'], 400);
+                if ($dniValidate->confirmed==0) {
+                    $request->validate([
+                        'password'=>['required','min:8']
+                    ]);
+                    $dniValidate -> password=Hash::make($request->input('password'));
+                    $dniValidate -> correo=$request->input('correo');
+                    $dniValidate -> celular=$request->input('celular');
+                    $dniValidate -> sexo=$request->input('sexo');
+                    $dniValidate -> save();
+                    // PRUEBAS JOB---------------------------------
+                    dispatch(new ConfirmacionCorreoJob($dniValidate));
+                    DB::commit();
+                    return response()->json(['status' => '200', 'message' => 'Confirmar correo!!'], 200);
+                }else {
+                    return response()->json(['status' => '400', 'message' => 'El dni ya se encuentra registrado!!'], 400);
+                }
             }else if(isset($correoValidate)){
                 return response()->json(['status' => '400', 'message' => 'El correo ya se encuentra registrado!!'], 400);
             }else if($usernameValidate){
@@ -54,11 +69,11 @@ class AuthController extends Controller
                 $usuario -> sexo=$request->input('sexo');
                 $usuario -> confirmation_code=Str::random(25);
                 $usuario -> save();
-                DB::commit();
-
-
+                
+                
                 // PRUEBAS JOB---------------------------------
                 dispatch(new ConfirmacionCorreoJob($usuario));
+                DB::commit();
 
                 //---------------------------------------------
 

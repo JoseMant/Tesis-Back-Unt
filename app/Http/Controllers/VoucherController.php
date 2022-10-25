@@ -129,14 +129,19 @@ class VoucherController extends Controller
                 }
                 elseif ($tipo_tramite->idTipo_tramite==3) {
                     // SI EL TRÁMITE ES DE CARNET, SE ASIGNA AUTOMÁTICAMENTE UN USUARIO
-                    $tramite->idUsuario_asignado=1;
+                    $tramite->idUsuario_asignado=2;
                     // $tramite->update();
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
                     $historial_estados=new Historial_Estado;
                     $historial_estados->idTramite=$tramite->idTramite;
                     $historial_estados->idUsuario=$idUsuario;
                     $historial_estados->idEstado_actual=3;
-                    $historial_estados->idEstado_nuevo=7;
+                    if ($tramite->idTipo_tramite_unidad==30||$tramite->idTipo_tramite_unidad==31||$tramite->idTipo_tramite_unidad==32||$tramite->idTipo_tramite_unidad==33) {
+                        $historial_estados->idEstado_nuevo=25;
+                    }
+                    else {
+                        $historial_estados->idEstado_nuevo=7;
+                    }
                     $historial_estados->fecha=date('Y-m-d h:i:s');
                     $historial_estados->save();
                     $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
@@ -185,8 +190,8 @@ class VoucherController extends Controller
         try {
             if ($request->query('search')!="") {
                 $vouchers=Voucher::select('voucher.idVoucher','tramite.idTramite','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario')
+                ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -207,8 +212,8 @@ class VoucherController extends Controller
                 ->get();
             }else {
                 $vouchers=Voucher::select('voucher.idVoucher','tramite.idTramite','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                ,'exonerado_archivo as exonerado','voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario')
+                ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -217,14 +222,14 @@ class VoucherController extends Controller
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }
-            foreach ($vouchers as $key => $voucher) {
-                $voucher->archivo=$voucher->archivo;
-                if ($voucher->exonerado==null) {
-                    $voucher->exonerado="NO";
-                }else {
-                    $voucher->exonerado="SI";
-                }
-            }
+            // foreach ($vouchers as $key => $voucher) {
+            //     $voucher->archivo=$voucher->archivo;
+            //     if ($voucher->exonerado==null) {
+            //         $voucher->exonerado="NO";
+            //     }else {
+            //         $voucher->exonerado="SI";
+            //     }
+            // }
             $pagination=$this->Paginacion($vouchers, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
             $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());

@@ -74,7 +74,7 @@ class TramitesImport implements ToCollection
                     $historial_estados->idTramite=$tramite->idTramite;
                     $historial_estados->idUsuario=$idUsuario;
                     $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                    $historial_estados->idEstado_nuevo=9;
+                    $historial_estados->idEstado_nuevo=24;
                     $historial_estados->fecha=date('Y-m-d h:i:s');
                     $historial_estados->save();
                     $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
