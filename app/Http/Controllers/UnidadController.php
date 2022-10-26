@@ -17,7 +17,7 @@ class UnidadController extends Controller
      */
     public function index()
     {
-        return Unidad::all();
+        return Unidad::where('estado',true)->get();
     }
 
     /**

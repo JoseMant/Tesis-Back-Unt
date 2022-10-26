@@ -177,7 +177,8 @@ class PersonaController extends Controller
                             return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                         }else{
                             // return response()->json([ 'message' => 'Alumno no encontrado.']);
-                            return response()->json(['status' => '400', 'message' => 'Alumno no encontrado.'], 400);
+                            return response()->json(['status' => '400', 'message' => 'Alumno no encontrado. Favor de enviar nombres completos, escuela, nro. matricula, dni, direccion
+                            , telefono y unidad(Pregrado, Postgrado o segunda especialidad) al correo um_regtecnico@unitru.edu.pe'], 400);
                         }
                     }
                 }  

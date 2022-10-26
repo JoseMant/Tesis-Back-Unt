@@ -249,4 +249,27 @@ class UserController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
+
+
+    public function resetPassword(Request $request){
+        DB::beginTransaction();
+        try {
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            $usuario=User::find($idUsuario);
+            if (!password_verify($request->currentPassword,$usuario->password)) {
+                return response()->json(['status' => '400', 'message' => "Contraseña actual no coincide"], 400);
+            }else {
+                $usuario->password=Hash::make(trim($request->newPassword));
+                $usuario->update();
+                DB::commit();
+                return response()->json(['status' => '200', 'message' => "Contraseña actualizada correctamente"], 200);
+            }            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
 }
