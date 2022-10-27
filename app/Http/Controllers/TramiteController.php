@@ -984,6 +984,13 @@ class TramiteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',3)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',17)
+                ->orWhere('tramite.idTipo_tramite_unidad',19)
+                ->orWhere('tramite.idTipo_tramite_unidad',21)
+                ->orWhere('tramite.idTipo_tramite_unidad',23);
+            })
             ->get();  
             DB::commit();
             return response()->json($tramites, 200);

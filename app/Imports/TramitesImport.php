@@ -53,7 +53,7 @@ class TramitesImport implements ToCollection
         $numAlumnos_porRegistrar = count($collection)-6;
         $this->setNumFilas( $numAlumnos_porRegistrar );
         foreach ($collection as $key => $value) {
-            if ($key==7) {
+            if ($key>=7) {
                 
                 // LÓGICA PARA RECHAZAR REQUISITOS
                 //obtener carnets validados
