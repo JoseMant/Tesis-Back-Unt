@@ -58,7 +58,12 @@ Route::get('tramite/carnets/regulares','CarnetController@GetCarnetsRegulares');
 Route::get('tramite/carnets/duplicados','CarnetController@GetCarnetsDuplicados');
 Route::get('tramite/carnets/asignados','CarnetController@GetCarnetsAsignados');
 Route::get('tramite/carnets/aprobados','CarnetController@GetCarnetsAprobados');
+Route::get('tramite/carnets/solicitados','CarnetController@GetCarnetsSolicitados');
+Route::get('tramite/carnets/aprobados/refresh','CarnetController@GetCarnetsAprobadosRefresh');
+Route::get('carnets/solicitados/recibidos','CarnetController@setRecibidos');
+Route::get('tramite/carnets/recibidos','CarnetController@GetCarnetsRecibidos');
 Route::get('carnets/validacion/sunedu','CarnetController@EnvioValidacionSunedu');
+Route::put('carnets/recibidos/finalizar','CarnetController@setEntregado');
 Route::get('tramite/constancias','ConstanciaController@GetConstancias');
 Route::get('tramite/constancias/validados','ConstanciaController@GetConstaciasValidados');
 Route::get('tramite/constancias/asignados','ConstanciaController@GetConstaciasAsignados');
@@ -82,6 +87,7 @@ Route::get('vouchers/rechazados','VoucherController@Rechazados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
 Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
+Route::post('tramites/notification','TramiteController@notificacionUpdate');
 //-----------------PDFs
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
@@ -123,7 +129,7 @@ Route::get('personasSuv', 'PersonaSuvController@index');
 Route::get('download/fotos', 'ZipController@downloadFotos');
 //RUTAS IMPORTAR Y EXPORTAR EXCEL
 Route::post('carnets/import', 'TramiteController@import');
-Route::get('tramites/export', 'TramiteController@export');
+Route::get('carnets/export', 'ExcelController@export');
 
 
 //Roles

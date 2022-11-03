@@ -255,7 +255,6 @@ class PersonaController extends Controller
                             $facultad=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
                             array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first());
                         }
-                        return $facultades;
 
                         //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
                         foreach ($facultades as $key => $facultad) {

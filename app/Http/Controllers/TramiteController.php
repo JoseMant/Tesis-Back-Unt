@@ -18,6 +18,7 @@ use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
 use App\Jobs\ActualizacionTramiteJob;
 use App\Jobs\FinalizacionCarnetJob;
+use App\Jobs\NotificacionCertificadoJob;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -36,7 +37,7 @@ class TramiteController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt', ['except' => ['export']]);
+        $this->middleware('jwt');
     }
 
     /**
@@ -256,23 +257,6 @@ class TramiteController extends Controller
             $usuario = User::findOrFail($idUsuario);
 
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
-            // $idTipo_tramite_unidad=$request->idTipo_tramite_unidad;
-            // // Verificacion de registro de trámite de carnet por renpvación
-            // if ($idTipo_tramite_unidad==30||$idTipo_tramite_unidad==31||$idTipo_tramite_unidad==32||$idTipo_tramite_unidad==33) {
-            //     $tramites=Tramite::where('idUsuario',$idUsuario)
-            //     ->where('idUnidad',$request->idUnidad)
-            //     ->where(function($query)
-            //     {
-            //         $query->where('idTipo_tramite_unidad',17)
-            //         ->orWhere('idTipo_tramite_unidad',19)
-            //         ->orWhere('idTipo_tramite_unidad',21)
-            //         ->orWhere('idTipo_tramite_unidad',23);
-            //     })
-            //     ->get();
-            //     if (count($tramites)==0) {
-            //         return response()->json(['status' => '400', 'message' => 'No cuenta con un trámite regular registrado. Favor de realizar el trámite regular.'], 400);
-            //     }
-            // }
             
 
 
@@ -321,6 +305,9 @@ class TramiteController extends Controller
                     if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/vouchers_tramites', $nombre);
                       $voucher->archivo = $nombreBD;
+                    }else {
+                        DB::rollback();
+                        return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
                     }
                     // GUARDAMOS EL ARCHIVO DEL EXONERADO
                     $file=$request->file("archivo_exonerado");
@@ -339,6 +326,9 @@ class TramiteController extends Controller
                         if($file->guessExtension()=="pdf"){
                           $file->storeAs('public/vouchers_tramites', $nombre);
                           $voucher->archivo = $nombreBD;
+                        }else {
+                            DB::rollback();
+                            return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
                         }
                     }else {
                         if($request->hasFile("archivo_exonerado")){
@@ -348,6 +338,9 @@ class TramiteController extends Controller
                             if($file->guessExtension()=="pdf"){
                               $file->storeAs('public/exonerados', $nombre);
                               $tramite->exonerado_archivo = $nombreBD;
+                            }else {
+                                DB::rollback();
+                                return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
                             }
                         }else {
                             return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
@@ -358,7 +351,7 @@ class TramiteController extends Controller
                 $voucher->save();
 
                 // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
-                $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
+                $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
                 ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $request->idTipo_tramite_unidad)->first();
                 $tramite_detalle=new Tramite_Detalle();
 
@@ -405,7 +398,7 @@ class TramiteController extends Controller
                       $tramite->firma_tramite = $nombreBD;
                     }
                 }else{
-                    return response()->json(['status' => '400', 'message' =>"Adjuntar firma!!"], 400);
+                    return response()->json(['status' => '400', 'message' =>"¡Adjuntar firma!"], 400);
                 }
                 $tramite -> save();
 
@@ -417,9 +410,9 @@ class TramiteController extends Controller
                         $tramite_requisito->idTramite=$tramite->idTramite;
                         $tramite_requisito->idRequisito=$requisito["idRequisito"];
                         $nombre = $dni.".".$file->guessExtension();
-                        $nombreBD = "/storage"."/".$tipo_tramite->descripcion."/".$requisito["nombre"]."/".$nombre;
+                        $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
                         if($file->guessExtension()==$requisito["extension"]){
-                          $file->storeAs("/public"."/".$tipo_tramite->descripcion."/".$requisito["nombre"], $nombre);
+                          $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
                           $tramite_requisito->archivo = $nombreBD;
                         }
                         $tramite_requisito -> save();
@@ -795,7 +788,7 @@ class TramiteController extends Controller
             $dni=$apy['nro_documento'];
             // TRÁMITES A EDITAR LOS REQUISITOS
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.descripcion as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','unidad.idUnidad','tipo_tramite.filename as tipo_tramite','tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             ,'voucher.nro_operacion','voucher.entidad','voucher.fecha_operacion','tipo_tramite_unidad.costo','tramite.exonerado_archivo'
             ,'tipo_tramite.idTipo_tramite','tramite.comentario as comentario_tramite','voucher.comentario as comentario_voucher'
@@ -1005,11 +998,39 @@ class TramiteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function export()
+    public function notificacionUpdate(Request $request)
     {
-        // $tramitesExports=new TramitesExport;
-        // return $tramitesExports->download('invoices.xlsx');
-        return Excel::download(new TramitesExport, 'users.xlsx');
+        DB::beginTransaction();
+        try {
+            $tramite=Tramite::find($request->idTramite);
+            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
+            $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+            $tramite_detalle->mensaje_observacion=trim($request->body);
+            $tramite_detalle->update();
+            //Envío de correo
+            $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
+            $tipo_tramite=Tipo_Tramite::Find($tipo_tramite_unidad->idTipo_tramite);
+            $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->first();
+            $secretaria=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->first();
+            $usuario=User::find($tramite->idUsuario);
+            if ($request->cc) {
+                $copias=[$secretaria->correo,$usuario->correo,trim($request->cc)];
+            }else {
+                $copias=[$secretaria->correo,$usuario->correo];
+            }
+
+            dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+            DB::commit();
+            return response()->json($tramite, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
     }
     
 

@@ -190,8 +190,9 @@ class VoucherController extends Controller
         try {
             if ($request->query('search')!="") {
                 $vouchers=Voucher::select('voucher.idVoucher','tramite.idTramite','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo')
+                ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','usuario.nro_documento','tramite.nro_matricula',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo',
+                'tipo_tramite_unidad.costo')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -201,6 +202,7 @@ class VoucherController extends Controller
                 {
                     $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
                     ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('tipo_tramite_unidad.costo','LIKE', '%'.$request->query('search').'%')
                     ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
                     ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
                     ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
@@ -212,8 +214,9 @@ class VoucherController extends Controller
                 ->get();
             }else {
                 $vouchers=Voucher::select('voucher.idVoucher','tramite.idTramite','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
-                ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo',
-                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo')
+                ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','usuario.nro_documento','tramite.nro_matricula',
+                DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo',
+                'tipo_tramite_unidad.costo')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
