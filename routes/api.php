@@ -100,7 +100,7 @@ Route::get('users/search','UserController@buscar');
 Route::get('usuario/uraa','UserController@getUsuariosUraa');
 Route::put('users/update/{id}','UserController@update');
 Route::post('users/create','UserController@store');
-Route::put('settings/users','UserController@settings');
+Route::put('settings/user','UserController@settings');
 Route::put('settings/password','UserController@resetPassword');
 // Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
 
