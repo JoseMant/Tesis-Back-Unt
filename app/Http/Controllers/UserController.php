@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use App\Jobs\ConfirmacionCorreoJob;
 use App\Jobs\RegistroUsuarioJob;
 use App\User;
+use App\Tramite;
+use App\Historial_Estado;
 use Illuminate\Support\Facades\Hash;
 
 
@@ -222,10 +224,29 @@ class UserController extends Controller
             $usuario->celular=trim($request->celular);
             if ($usuario->correo!==$request->correo) {
                 $usuario->correo=trim($request->correo);
-                dispatch(new ConfirmacionCorreoJob($usuario));
+                $usuario->confirmed=0;
+                $usuario->confirmation_code=Str::random(25);
+                $usuario->update();
+                dispatch(new ConfirmacionCorreoJob($usuario,false));
+                // Cambiar todos los trámites no finalizados al estado 28
+                $tramites=Tramite::where('idEstado_tramite','!=',15)
+                ->where('idEstado_tramite','!=',29)
+                ->where('idUsuario',$idUsuario)
+                ->get();
+                foreach ($tramites as $key => $tramite) {
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuario;
+                    $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                    $historial_estados->idEstado_nuevo=28;
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+                    $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                    $tramite->update();
+                }
+                //--------------------------
             }
-            $usuario->update();
-
             $response['idUsuario']=$usuario->idUsuario;
             $response['username']=$usuario->username;
             $response['estado']=$usuario->estado;

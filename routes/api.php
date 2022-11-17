@@ -48,11 +48,13 @@ Route::get('tramite/certificados/validados','CertificadoController@GetCertificad
 Route::get('tramite/certificados/asignados','CertificadoController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
 Route::get('tramite/certificados/pendientes','CertificadoController@GetCertificadosPendientes');
+Route::get('tramite/certificados/firma_uraa','CertificadoController@GetCertificadosFirmaUraa');
+Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertificadosFirmaDecano');
+Route::get('tramite/certificados/reasignados','CertificadoController@GetCertificadosReasignados');
+Route::get('tramite/certificados/finalizados','CertificadoController@GetCertificadosFinalizados');
 Route::post('certificados/upload/{id}','CertificadoController@uploadCertificado');
 Route::get('constancias/enviar/{id}','ConstanciaController@enviarConstancia');
 Route::post('constancias/upload/{id}','ConstanciaController@uploadConstancia');
-Route::get('tramite/certificados/firma_uraa','CertificadoController@GetCertificadosFirmaUraa');
-Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertificadosFirmaDecano');
 Route::get('tramite/carnets','CarnetController@GetCarnets');
 Route::get('tramite/carnets/regulares','CarnetController@GetCarnetsRegulares');
 Route::get('tramite/carnets/duplicados','CarnetController@GetCarnetsDuplicados');
@@ -128,7 +130,8 @@ Route::get('personasSuv', 'PersonaSuvController@index');
 //RUTAS DESCARGA ZIP
 Route::get('download/fotos', 'ZipController@downloadFotos');
 //RUTAS IMPORTAR Y EXPORTAR EXCEL
-Route::post('carnets/import', 'TramiteController@import');
+Route::post('carnets/import/observados', 'CarnetController@import');
+Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::get('carnets/export', 'ExcelController@export');
 
 
@@ -140,10 +143,17 @@ Route::get('cronogramas/activos/{idDependencia}/{idTipo_tramite_unidad}', 'Crono
 Route::get('cronogramas/search', 'CronogramaController@buscar');
 Route::post('cronogramas/create', 'CronogramaController@store');
 Route::put('cronogramas/update/{id}', 'CronogramaController@update');
+Route::get('cronogramas/unidad/dependencia', 'CronogramaController@GetUnidadDependencia');
 
 //GRADOS Y TITULOS
-Route::get('grados/titulos/validados', 'GradoController@GetGradosValidados');
-Route::get('grados/titulos/aprobados', 'GradoController@GetGradosAprobados');
+Route::get('grados/titulos/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
+Route::get('grados/titulos/aprobados/escuela', 'GradoController@GetGradosAprobadosEscuela');
+Route::get('grados/titulos/revalidados/escuela', 'GradoController@GetGradosRevalidadosEscuela');
+Route::get('grados/titulos/validados/facultad', 'GradoController@GetGradosValidadosFacultad');
+Route::get('grados/titulos/aprobados/facultad', 'GradoController@GetGradosAprobadosFacultad');
+Route::get('grados/titulos/revalidados/facultad', 'GradoController@GetGradosRevalidadosFacultad');
+Route::put('grados/correccion', 'GradoController@cambiarEstado');
+Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');

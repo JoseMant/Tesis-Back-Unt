@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Cronograma;
+use App\DependenciaURAA;
+use App\Unidad;
 
 class CronogramaController extends Controller
 {
@@ -210,6 +213,21 @@ class CronogramaController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }  
+
+    public function GetUnidadDependencia(){
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $dni=$apy['nro_documento'];
+        $idDependencia=$apy['idDependencia'];
+
+        $dependencia=DependenciaURAA::find($idDependencia);
+        $unidad=Unidad::find($dependencia->idUnidad);
+        $response=$unidad;
+        $response->dependencia=$dependencia;
+        return response()->json($response, 200);
+    }
 }
 
 

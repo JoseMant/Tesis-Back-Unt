@@ -101,7 +101,7 @@ class TramiteController extends Controller
                         $tramite['usuario_asignado']=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as usuario'))->findOrFail($tramite->idUsuario_asignado);
                     }
                     //Obtenemos el historial de cada trámite
-                    $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
+                    $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->where('estado',true)->get();
                     foreach ($tramite->historial as $key => $item) {
                         if($item->idEstado_actual!=null){
                             $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->first();
@@ -125,7 +125,7 @@ class TramiteController extends Controller
                     if ($tramite->idUsuario_asignado) {
                         $tramite['usuario_asignado']=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as usuario'))->findOrFail($tramite->idUsuario_asignado);
                     }
-                    $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->get();
+                    $tramite->historial=Historial_Estado::Where('idTramite',$tramite->idTramite)->where('estado',true)->get();
                     foreach ($tramite->historial as $key => $item) {
                         if($item->idEstado_actual!=null){
                             $item->estado_actual=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_actual)->first();
@@ -307,7 +307,7 @@ class TramiteController extends Controller
                       $voucher->archivo = $nombreBD;
                     }else {
                         DB::rollback();
-                        return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
+                        return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
                     }
                     // GUARDAMOS EL ARCHIVO DEL EXONERADO
                     $file=$request->file("archivo_exonerado");
@@ -328,7 +328,7 @@ class TramiteController extends Controller
                           $voucher->archivo = $nombreBD;
                         }else {
                             DB::rollback();
-                            return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
+                            return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
                         }
                     }else {
                         if($request->hasFile("archivo_exonerado")){
@@ -340,7 +340,7 @@ class TramiteController extends Controller
                               $tramite->exonerado_archivo = $nombreBD;
                             }else {
                                 DB::rollback();
-                                return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
+                                return response()->json(['status' => '400', 'message' => "Subir archivo de exonerado en pdf"], 400);
                             }
                         }else {
                             return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
@@ -396,6 +396,9 @@ class TramiteController extends Controller
                     if($file->guessExtension()=="jpg"){
                       $file->storeAs('public/firmas_tramites', $nombre);
                       $tramite->firma_tramite = $nombreBD;
+                    }else{
+                        DB::rollback();
+                        return response()->json(['status' => '400', 'message' => "Subir archivo jpg o revisar que no esté dañado"], 400);
                     }
                 }else{
                     return response()->json(['status' => '400', 'message' =>"¡Adjuntar firma!"], 400);
@@ -411,9 +414,15 @@ class TramiteController extends Controller
                         $tramite_requisito->idRequisito=$requisito["idRequisito"];
                         $nombre = $dni.".".$file->guessExtension();
                         $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
-                        if($file->guessExtension()==$requisito["extension"]){
-                          $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
-                          $tramite_requisito->archivo = $nombreBD;
+                        if ($file->getClientOriginalName()!=="vacio.kj") {
+                            if($file->guessExtension()==$requisito["extension"]){
+                              $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
+                              $tramite_requisito->archivo = $nombreBD;
+                            }else {
+                                DB::rollback();
+                                // return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
+                                return response()->json(['status' => '400', 'message' => "Subir ".$requisito["nombre"]." en ".$requisito["extension"]], 400);
+                            }
                         }
                         $tramite_requisito -> save();
                     }
@@ -437,8 +446,8 @@ class TramiteController extends Controller
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
 
-                DB::commit();
                 dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                DB::commit();
                 return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente!!'], 200);
             }
         } catch (\Exception $e) {
@@ -482,32 +491,35 @@ class TramiteController extends Controller
         try {
             foreach ($request->tramites as $key => $idTramite) {
                 $tramite = Tramite::findOrFail($idTramite);
+                
+                if ($tramite->idUsuario_asignado==null) {
+                    // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+                    $token = JWTAuth::getToken();
+                    $apy = JWTAuth::getPayload($token);
+                    $idUsuarioToken=$apy['idUsuario'];
+    
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuarioToken;
+                    $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                    $historial_estados->idEstado_nuevo=6;
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+    
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuarioToken;
+                    $historial_estados->idEstado_actual=6;
+                    $historial_estados->idEstado_nuevo=7;
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+                    $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                    $tramite->update();
+                }
+
                 $tramite->idUsuario_asignado=$request->idUsuario;
-                $tramite->update();
-
-                // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-                $token = JWTAuth::getToken();
-                $apy = JWTAuth::getPayload($token);
-                $idUsuarioToken=$apy['idUsuario'];
-
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$idUsuarioToken;
-                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                $historial_estados->idEstado_nuevo=6;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
-
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$idUsuarioToken;
-                $historial_estados->idEstado_actual=6;
-                $historial_estados->idEstado_nuevo=7;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
-                $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                 $tramite->update();
 
             }
@@ -531,23 +543,7 @@ class TramiteController extends Controller
             //flag de requisitos rechazados o aprobados
             $flag=true;
             $flag2=true;
-            //Editamos los cada uno de los requisitos que llegan junto al trámite en el request
-            foreach ($request->requisitos as $key => $requisito) {
-                $tramite_requisito=Tramite_Requisito::Where('idTramite',$request->idTramite)
-                ->where('idRequisito',$requisito['idRequisito'])->first();
-                $tramite_requisito->idUsuario_aprobador=$idUsuario;
-                $tramite_requisito->validado=$requisito['validado'];
-                $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
-                $tramite_requisito->comentario=$requisito['comentario'];
-                $tramite_requisito->save();
-                // se tendría también que verificar que el estado del responsable sea el alumno(4)
-                if ($requisito['des_estado_requisito']=="RECHAZADO" && $requisito['responsable']==4) {
-                    $flag=false;
-                }
-                if ($requisito['des_estado_requisito']=="PENDIENTE" && $requisito['responsable']==4) {
-                    $flag2=false;
-                }
-            }
+            
             if ($request->idTipo_tramite==1) {
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
                 ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
@@ -581,35 +577,82 @@ class TramiteController extends Controller
                 ->join('voucher','tramite.idVoucher','voucher.idVoucher')
                 ->find($request->idTramite);
             }
+
+
+            //Editamos los cada uno de los requisitos que llegan junto al trámite en el request
+            foreach ($request->requisitos as $key => $requisito) {
+                $tramite_requisito=Tramite_Requisito::Where('idTramite',$request->idTramite)
+                ->where('idRequisito',$requisito['idRequisito'])->first();
+                $tramite_requisito->idUsuario_aprobador=$idUsuario;
+                $tramite_requisito->validado=$requisito['validado'];
+                $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
+                $tramite_requisito->comentario=$requisito['comentario'];
+                $tramite_requisito->save();
+                // VERIFICANDO SI SE APRUEBA O RECHAZA POR PARTE DE LA ESCUELA O FACULTAD
+                if ($tramite->idEstado_tramite==17) {
+                    // Verificando que el estado del responsable sea el alumno(4)
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && $requisito['responsable']==4 ) {
+                        $flag=false;
+                    }
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && $requisito['responsable']==4) {
+                        $flag2=false;
+                    }
+                }else {
+                    // Verificando que el estado del responsable sea el alumno(4) o escuela(5)
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                        $flag=false;
+                    }
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                        $flag2=false;
+                    }
+                }
+            }
+
+
             if ($flag2) {
                 
                 
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE
                 $historial_estados=new Historial_Estado;
                 $historial_estados->idTramite=$tramite->idTramite;
                 $historial_estados->idUsuario=$idUsuario;
                 $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
                 //Verificamos si todos los requisitos fueron aprobados($flag=true) o no($flag=false) 
-                if ($flag==true) {
+                if ($flag) {
                     if ($tramite->idTipo_tramite==1) {
                         $historial_estados->idEstado_nuevo=8;
                     }elseif ($tramite->idTipo_tramite==2) {
-                        $historial_estados->idEstado_nuevo=18;
-                        $historial_estados->fecha=date('Y-m-d h:i:s');
-                        $historial_estados->save();
+                        // VERIFICANDO SI LA APROBACIÓN SE ESTÁ HACIENDO DESDE ESCUELA O FACULTAD MEDIANTE EL ESTADO DEL TRÁMITE
+                        if ($tramite->idEstado_tramite==17) {
+                            $historial_estados->idEstado_nuevo=18;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            
+                            //REGISTRAMOS EL ESTADO DEL TRÁMITE 
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=18;
+                            $historial_estados->idEstado_nuevo=30;
+                        }else {
+                            $historial_estados->idEstado_nuevo=21;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            
+                            //REGISTRAMOS EL ESTADO DEL TRÁMITE 
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=21;
+                            $historial_estados->idEstado_nuevo=32;
+                        }
                         
-                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                        $historial_estados=new Historial_Estado;
-                        $historial_estados->idTramite=$tramite->idTramite;
-                        $historial_estados->idUsuario=$idUsuario;
-                        $historial_estados->idEstado_actual=18;
-                        $historial_estados->idEstado_nuevo=20;
                     }elseif ($tramite->idTipo_tramite==3) {
                         $historial_estados->idEstado_nuevo=8;
                         $historial_estados->fecha=date('Y-m-d h:i:s');
                         $historial_estados->save();
                         
-                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE 
                         $historial_estados=new Historial_Estado;
                         $historial_estados->idTramite=$tramite->idTramite;
                         $historial_estados->idUsuario=$idUsuario;
@@ -621,7 +664,12 @@ class TramiteController extends Controller
                     if ($tramite->idTipo_tramite==1 || $tramite->idTipo_tramite==3) {
                         $historial_estados->idEstado_nuevo=9;
                     }elseif ($tramite->idTipo_tramite==2) {
-                        $historial_estados->idEstado_nuevo=19;
+                        // VERIFICANDO SI EL RECHAZO SE ESTÁ HACIENDO DESDE ESCUELA O FACULTAD MEDIANTE EL ESTADO DEL TRÁMITE
+                        if ($tramite->idEstado_tramite==17) {
+                            $historial_estados->idEstado_nuevo=19;
+                        }else {
+                            $historial_estados->idEstado_nuevo=22;
+                        }
                     }
                 }
                 $historial_estados->fecha=date('Y-m-d h:i:s');
@@ -629,6 +677,25 @@ class TramiteController extends Controller
                 $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                 $tramite->update();
 
+            }else {
+                if ($flag==false) {
+                    //REGISTRAMOS EL ESTADO DEL TRÁMITE
+                    $historial_estados=new Historial_Estado;
+                    $historial_estados->idTramite=$tramite->idTramite;
+                    $historial_estados->idUsuario=$idUsuario;
+                    $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                    // VERIFICANDO SI EL RECHAZO SE ESTÁ HACIENDO DESDE ESCUELA O FACULTAD MEDIANTE EL ESTADO DEL TRÁMITE
+                    if ($tramite->idEstado_tramite==17) {
+                        $historial_estados->idEstado_nuevo=19;
+                    }else {
+                        $historial_estados->idEstado_nuevo=22;
+                    }
+                    $historial_estados->fecha=date('Y-m-d h:i:s');
+                    $historial_estados->save();
+
+                    $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                    $tramite->update();
+                }
             }
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -819,21 +886,40 @@ class TramiteController extends Controller
                     }
                     $nombre = $dni.".".$file->guessExtension();
                     $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
-                    if($file->guessExtension()==$requisito["extension"]){
-                    $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
-                    $tramite_requisito->archivo = $nombreBD;
+                    // if($file->guessExtension()==$requisito["extension"]){
+                    //     $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
+                    //     $tramite_requisito->archivo = $nombreBD;
+                    // }
+                    if ($file->getClientOriginalName()!=="vacio.kj") {
+                        if($file->guessExtension()==$requisito["extension"]){
+                          $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
+                          $tramite_requisito->archivo = $nombreBD;
+                        }else {
+                            DB::rollback();
+                            // return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
+                            return response()->json(['status' => '400', 'message' => "Subir ".$requisito["nombre"]." en ".$requisito["extension"]], 400);
+                        }
                     }
                     $tramite_requisito -> save();
                 }
 
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE
                 $historial_estados=new Historial_Estado;
                 $historial_estados->idTramite=$tramite->idTramite;
                 $historial_estados->idUsuario=$idUsuario;
                 $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
                 if ($tramite->idTipo_tramite==2) {
-                    $tramite-> idEstado_tramite=17;
-                    $historial_estados->idEstado_nuevo=17;
+                    if ($tramite->idEstado_tramite==30) {
+                        $tramite-> idEstado_tramite=31;
+                        $historial_estados->idEstado_nuevo=31;
+                    }elseif ($tramite->idEstado_tramite==32) {
+                        $tramite-> idEstado_tramite=33;
+                        $historial_estados->idEstado_nuevo=33;
+                    }
+                    else {
+                        $tramite-> idEstado_tramite=17;
+                        $historial_estados->idEstado_nuevo=17;
+                    }
                 }else {
                     $historial_estados->idEstado_nuevo=7;
                     $tramite-> idEstado_tramite=7;
@@ -889,109 +975,7 @@ class TramiteController extends Controller
 
     }
 
-    public function import(Request $request){
-        DB::beginTransaction();
-        try {
-
-            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-            $token = JWTAuth::getToken();
-            $apy = JWTAuth::getPayload($token);
-            $idUsuario=$apy['idUsuario'];
-            $dni=$apy['nro_documento'];
-
-            $importacion = new TramitesImport;
-            Excel::import( $importacion, $request->file);
-
-            //CAMBIAR DE ESTADO TODOS LOS CARNETS QUE SIGAN CON ESTADO 16
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',16)
-            ->where('tipo_tramite.idTipo_tramite',3)
-            ->get();  
-            foreach ($tramites as $key => $tramite) {
-                //CAMBIAMOS EL ESTADO DE CADA TRÁMITE A PENDIENTE DE VALIDACIÓN DE SUNEDU
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$idUsuario;
-                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                $historial_estados->idEstado_nuevo=23;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
-                $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
-                $tramite->save();
-                
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$idUsuario;
-                $historial_estados->idEstado_actual=23;
-                $historial_estados->idEstado_nuevo=25;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
-                $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
-                $tramite->save();
-
-
-                $tramite_requisito=Tramite_Requisito::select('tramite_requisito.idTramite','tramite_requisito.idRequisito','requisito.nombre','tramite_requisito.archivo'
-                ,'tramite_requisito.idUsuario_aprobador','tramite_requisito.validado','tramite_requisito.comentario')
-                ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-                ->where('idTramite',$tramite->idTramite)
-                ->where('requisito.nombre','FOTO CARNET')
-                ->first();
-                
-                $tramite_requisito->idUsuario_aprobador=$idUsuario; 
-                $tramite_requisito->des_estado_requisito="APROBADO"; 
-                $tramite_requisito->update();
-
-
-                //Datos para el envío del correo
-                $usuario=User::find($tramite->idUsuario);
-                $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
-                $tipo_tramite=Tipo_Tramite::Find($tramite->idTipo_tramite);
-                // mensaje de finalización de trámite
-                dispatch(new FinalizacionCarnetJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
-            }
-
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
-            ->where('tipo_tramite.idTipo_tramite',3)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',17)
-                ->orWhere('tramite.idTipo_tramite_unidad',19)
-                ->orWhere('tramite.idTipo_tramite_unidad',21)
-                ->orWhere('tramite.idTipo_tramite_unidad',23);
-            })
-            ->get();  
-            DB::commit();
-            return response()->json($tramites, 200);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
-        }
-    }
+    
     /**
      * Remove the specified resource from storage.
      *

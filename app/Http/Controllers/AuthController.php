@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use App\User;
+use App\Tramite;
+use App\Historial_Estado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Mail\Mailable;
@@ -41,7 +43,7 @@ class AuthController extends Controller
                     $dniValidate -> sexo=$request->input('sexo');
                     $dniValidate -> save();
                     // PRUEBAS JOB---------------------------------
-                    dispatch(new ConfirmacionCorreoJob($dniValidate));
+                    dispatch(new ConfirmacionCorreoJob($dniValidate,"el registro de tu usuario"));
                     DB::commit();
                     return response()->json(['status' => '200', 'message' => 'Confirmar correo!!'], 200);
                 }else {
@@ -72,7 +74,7 @@ class AuthController extends Controller
                 
                 
                 // PRUEBAS JOB---------------------------------
-                dispatch(new ConfirmacionCorreoJob($usuario));
+                dispatch(new ConfirmacionCorreoJob($usuario,true));
                 DB::commit();
 
                 //---------------------------------------------
@@ -184,9 +186,27 @@ class AuthController extends Controller
         else if ($user->confirmed)
             return response()->json(['status' => '400', 'message' => 'El correo ha sido validado anteriormente'], 200);
         else {
-          $user->confirmed = 1;
-          // $user->confirmation_code = null;
-          $user->save();
+            $user->confirmed = 1;
+            $user->save();
+            // regresar los trámites a su estado original en caso existan
+            $tramites=Tramite::where('idEstado_tramite',28)
+            ->where('idUsuario',$user->idUsuario)
+            ->get();
+            foreach ($tramites as $key => $tramite) {
+                // Obtenemos el último registro del historial de cada trámite
+                $historial_estado=Historial_Estado::where('idTramite',$tramite->idTramite)->orderBy('idHistorial_estado', 'desc')->first();
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$user->idUsuario;
+                $historial_estados->idEstado_actual=28;
+                $historial_estados->idEstado_nuevo=$historial_estado->idEstado_actual;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+                $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                $tramite->update();
+            }
+            // ----------------------------------------------------------
           return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo'], 200);
         }
     }

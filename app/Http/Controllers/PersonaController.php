@@ -203,24 +203,35 @@ class PersonaController extends Controller
             $dni=$apy['nro_documento'];
             // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
+                $facultadesTotales=[];
                 //Obtenemos escuela(s) de la persona que inicia sesión
-                $alumnoEscuelas=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
+                $alumnoEscuelasSGA=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
                 ,'per_login','sga_sede.sed_nombre','dependencia.dep_id','dependencia.dep_nombre','dependencia.sdep_id')
                 ->join('perfil','persona.per_id','perfil.per_id')
                 ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
                 ->join('dependencia','dependencia.dep_id','perfil.dep_id')
                 ->Where('per_dni',$dni)->get();
-                if (count($alumnoEscuelas)>0) {
+                if (count($alumnoEscuelasSGA)>0) {
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
                     $facultades=[];
-                    foreach ($alumnoEscuelas as $key => $escuela) {
+                    foreach ($alumnoEscuelasSGA as $key => $escuela) {
                         $facultad=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
-                        array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first());
+                        $existe= false;
+                        foreach ($facultades as $value) {
+                            if (strtoupper($value->nombre)==strtoupper($facultad->dep_nombre)) {
+                                $existe = true;
+                                break;
+                            } 
+                        }
+                        if(!$existe) {
+                            // redirect(base_url()."bienvenidos");
+                            array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first());
+                        }
                     }
                     //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
                     foreach ($facultades as $key => $facultad) {
                         $escuelas=[];
-                        foreach ($alumnoEscuelas as $key => $escuela) {
+                        foreach ($alumnoEscuelasSGA as $key => $escuela) {
                             $facultadEscuela=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
                                 
@@ -231,50 +242,62 @@ class PersonaController extends Controller
                             }
                         }
                         $facultad->subdependencias=$escuelas;
+                        array_push($facultadesTotales,$facultad);
                     }
-                    
-                    return response()->json(['status' => '200', 'dependencias' => $facultades], 200); 
                 }
-                else{
-                    //Obtenemos datos de la persona que inicia sesión
-                    $personaSuv=PersonaSuv::select('persona.idpersona')->Where('persona.per_dni',$dni)->first();
-                    if ($personaSuv) {
-                       //Obtenemos las escuela(s) a la(s) que pertenece dicha persona
-                        $alumnoEscuelas=Alumno::select('alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura','patrimonio.estructura.estr_descripcion'
-                        ,'patrimonio.estructura.iddependencia')
-                        ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
-                        ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
-                        ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
-                        ->Where('alumno.idpersona',$personaSuv['idpersona'])
-                        // Obtener la escuela activa para el trámite de carné
-                        // ->Where('alumno.alu_estado',1)
-                        ->get();
-                        //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
-                        $facultades=[];
-                        foreach ($alumnoEscuelas as $key => $escuela) {
-                            $facultad=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
+                //Obtenemos datos de la persona que inicia sesión
+                $personaSuv=PersonaSuv::select('persona.idpersona')->Where('persona.per_dni',$dni)->first();
+                if ($personaSuv) {
+                   //Obtenemos las escuela(s) a la(s) que pertenece dicha persona
+                    $alumnoEscuelasSUV=Alumno::select('alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura','patrimonio.estructura.estr_descripcion'
+                    ,'patrimonio.estructura.iddependencia')
+                    ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
+                    ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
+                    ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
+                    ->Where('alumno.idpersona',$personaSuv['idpersona'])
+                    // Obtener la escuela activa para el trámite de carné
+                    // ->Where('alumno.alu_estado',1)
+                    ->get();
+                    //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
+                    $facultades=[];
+                    foreach ($alumnoEscuelasSUV as $key => $escuela) {
+                        $facultad=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
+                        $existe= false;
+                        foreach ($facultades as $value) {
+                            if (strtoupper($value->nombre)==strtoupper($facultad->estr_descripcion)) {
+                                $existe = true;
+                                break;
+                            } 
+                        }
+                        if(!$existe) {
+                            // redirect(base_url()."bienvenidos");
                             array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first());
                         }
+                        // array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first());
+                    }
 
-                        //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
-                        foreach ($facultades as $key => $facultad) {
-                            $escuelas=[];
-                            foreach ($alumnoEscuelas as $key => $escuela) {
-                                $facultadEscuela=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
-                                if ($facultad['nombre']===strtoupper($facultadEscuela['estr_descripcion'])) {
-                                    $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
-                                    $escuelaSede->nro_matricula=$escuela->idalumno;
-                                    $escuelaSede->sede=$escuela->sed_descripcion;
-                                    array_push($escuelas, $escuelaSede);
-                                }
+                    //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
+                    foreach ($facultades as $key => $facultad) {
+                        $escuelas=[];
+                        foreach ($alumnoEscuelasSUV as $key => $escuela) {
+                            $facultadEscuela=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
+                            if ($facultad['nombre']===strtoupper($facultadEscuela['estr_descripcion'])) {
+                                $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
+                                $escuelaSede->nro_matricula=$escuela->idalumno;
+                                $escuelaSede->sede=$escuela->sed_descripcion;
+                                array_push($escuelas, $escuelaSede);
                             }
-                            $facultad->subdependencias=$escuelas;
                         }
-                        return response()->json(['status' => '200', 'dependencias' => $facultades], 200); 
-                    }else {
-                        return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado.'], 400); 
+                        $facultad->subdependencias=$escuelas;
+                        array_push($facultadesTotales,$facultad);
                     }
                 }
+                if (count($facultadesTotales)>0) {
+                    return response()->json(['status' => '200', 'dependencias' => $facultadesTotales], 200); 
+                }else {
+                    return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado.'], 400); 
+                }
+                
             }else if($idUnidad==2){ //doctorado
                 // dónde?
                 return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [

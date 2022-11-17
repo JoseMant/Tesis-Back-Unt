@@ -21,12 +21,12 @@ class JwtMiddleware
             $user=JWTAuth::parseToken()->authenticate();
         }catch(Exception $e){
             if($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){
-                return response()->json(["msg"=>"Token Invalido"]);
+                return response()->json(["msg"=>"Token Inválido"], 401);
             }
             if($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException){
-                return response()->json(["msg"=>"El Token está caducado"]);
+                return response()->json(["msg"=>"Token caducado"], 401);
             }
-            return response()->json(["msg"=>"Token no encontrado"]);
+            return response()->json(["msg"=>"Token no encontrado"], 401);
         }
         return $next($request);
     }

@@ -144,13 +144,12 @@
     <div class="contenido">
         <div class="alert alert-info mensaje" role="alert">
 						<div style="text-align: center;">
-							<h4>NOTIFICACIÓN DE REGISTRO DE USUARIO</h4>
+							<h4>{{$cabecera}}</h4>
 							<img class="robot" src="https://i.ibb.co/5RsJVpc/robot-Confirmation.png" width="50%">
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-							<p>Hola {{$usuario['nombres']}} {{$usuario['apellidos']}}, por favor confirma tu correo electrónico para continuar con el registro de 
-                                tu usuario. Para ello simplemente debes hacer click en el siguiente enlace:
+							<p>Hola {{$usuario['nombres']}} {{$usuario['apellidos']}}, por favor confirma tu correo electrónico para continuar con {{$mensaje}}. Para ello simplemente debes hacer click en el siguiente enlace:
                             </p>
 						</div>
             <hr>

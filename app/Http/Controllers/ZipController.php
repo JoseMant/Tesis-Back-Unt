@@ -78,8 +78,11 @@ class ZipController extends Controller
                     $usuario=User::findOrFail($tramite->idUsuario);
                     foreach ($tramite->requisitos as $key => $requisito) {
                         $value =public_path($requisito->archivo);
-                        $relativeNameInZipFile = basename(public_path($requisito->archivo));
-                        $zip->addFile(public_path($requisito->archivo), $usuario->tipo_documento."_".$relativeNameInZipFile);
+                        if ($requisito->archivo!=null) {
+                            # code...
+                            $relativeNameInZipFile = basename(public_path($requisito->archivo));
+                            $zip->addFile(public_path($requisito->archivo), $usuario->tipo_documento."_".$relativeNameInZipFile);
+                        }
                     }
                     
                 }

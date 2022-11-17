@@ -13,14 +13,16 @@ class ConfirmacionCorreoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $usuario;
+    public $bandera;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($usuario)
+    public function __construct($usuario,$bandera)
     {
         $this->usuario = $usuario;
+        $this->bandera = $bandera;
     }
 
     /**
@@ -32,7 +34,7 @@ class ConfirmacionCorreoJob implements ShouldQueue
     {
         Mail::to($this->usuario->correo)
         // ->cc($this->correoUsuario)
-        ->send(new \App\Mail\NewMail($this->usuario));
+        ->send(new \App\Mail\NewMail($this->usuario,$this->bandera));
     
     }
 }
