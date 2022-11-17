@@ -933,9 +933,14 @@ class GradoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
+            foreach ($tramite->requisitos as $key => $requisito) {
+                if ($requisito->responsable==5) {
+                    $tramite_requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)->where('idRequisito',$requisito->idRequisito)->first();
+                    $tramite_requisito->archivo=null;
+                    $tramite_requisito->save();
+                }
+            }
             $tramite->fut="fut/".$tramite->idTramite;
-            //Datos del usuario al que pertenece el trámite
-            $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
