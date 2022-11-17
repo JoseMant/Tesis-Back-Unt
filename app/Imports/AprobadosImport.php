@@ -9,7 +9,7 @@ use App\Tramite;
 use App\Tramite_Requisito;
 use App\User;
 use App\Tipo_Tramite;
-use App\Tipo_tramite_Unidad;
+use App\Tipo_Tramite_Unidad;
 use App\Historial_Estado;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
@@ -106,12 +106,12 @@ class AprobadosImport implements ToCollection
                         $tramite_requisito->update();
     
     
-                        //Datos para el envío del correo
-                        $usuario=User::find($tramite->idUsuario);
-                        $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
-                        $tipo_tramite=Tipo_Tramite::Find($tramite->idTipo_tramite);
-                        // mensaje de finalización de trámite
-                        dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                        // //Datos para el envío del correo
+                        // $usuario=User::find($tramite->idUsuario);
+                        // $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
+                        // $tipo_tramite=Tipo_Tramite::Find($tramite->idTipo_tramite);
+                        // // mensaje de finalización de trámite
+                        // dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                     }
                 }
             }

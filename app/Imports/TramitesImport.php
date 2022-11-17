@@ -8,7 +8,7 @@ use App\Tramite;
 use App\Tramite_Requisito;
 use App\User;
 use App\Tipo_Tramite;
-use App\Tipo_tramite_Unidad;
+use App\Tipo_Tramite_Unidad;
 use App\Historial_Estado;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
