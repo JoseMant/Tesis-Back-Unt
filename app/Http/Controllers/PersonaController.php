@@ -210,6 +210,7 @@ class PersonaController extends Controller
                 ->join('perfil','persona.per_id','perfil.per_id')
                 ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
                 ->join('dependencia','dependencia.dep_id','perfil.dep_id')
+                ->Where('perfil.pfl_cond','AL')
                 ->Where('per_dni',$dni)->get();
                 if (count($alumnoEscuelasSGA)>0) {
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
@@ -246,7 +247,10 @@ class PersonaController extends Controller
                     }
                 }
                 //Obtenemos datos de la persona que inicia sesión
-                $personaSuv=PersonaSuv::select('persona.idpersona')->Where('persona.per_dni',$dni)->first();
+                $personaSuv=PersonaSuv::select('persona.idpersona')
+                ->join('sistema.roles_usuario','sistema.roles_usuario.idpersona','persona.idpersona')
+                ->where('sistema.roles_usuario.rol_id',25)
+                ->Where('persona.per_dni',$dni)->first();
                 if ($personaSuv) {
                    //Obtenemos las escuela(s) a la(s) que pertenece dicha persona
                     $alumnoEscuelasSUV=Alumno::select('alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura','patrimonio.estructura.estr_descripcion'
