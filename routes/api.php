@@ -81,7 +81,7 @@ Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
 
-//VOUCHERS
+//VOUCHERS Y TRÁMITES
 Route::resource('/voucher','VoucherController');
 Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
@@ -90,6 +90,7 @@ Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
 Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
+Route::post('tramites/anular','TramiteController@anularTramite');
 //-----------------PDFs
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
@@ -152,8 +153,10 @@ Route::get('grados/titulos/revalidados/escuela', 'GradoController@GetGradosReval
 Route::get('grados/titulos/validados/facultad', 'GradoController@GetGradosValidadosFacultad');
 Route::get('grados/titulos/aprobados/facultad', 'GradoController@GetGradosAprobadosFacultad');
 Route::get('grados/titulos/revalidados/facultad', 'GradoController@GetGradosRevalidadosFacultad');
+Route::get('grados/titulos/validacion/ura', 'GradoController@GetGradosValidadosUra');
 Route::put('grados/correccion', 'GradoController@cambiarEstado');
 Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');
+Route::put('grados/envio/ura', 'GradoController@enviarUraa');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
