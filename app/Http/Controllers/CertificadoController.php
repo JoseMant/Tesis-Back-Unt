@@ -403,6 +403,9 @@ class CertificadoController extends Controller
                         $file->storeAs('public/certificados', $nombre);
                         $tramite_detalle->certificado_final = $nombreBD;
                     }
+                }else {
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' =>"Adjuntar el certificado."], 400);
                 }
             }else {
                 if($request->hasFile("archivo")){
@@ -417,6 +420,9 @@ class CertificadoController extends Controller
                     }else {
                         return response()->json(['status' => '400', 'message' =>"El Documento no es el correcto"], 400);
                     }
+                }else {
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' =>"Adjuntar el certificado firmado."], 400);
                 }
             }
             $tramite_detalle->update();
