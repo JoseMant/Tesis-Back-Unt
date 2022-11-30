@@ -53,6 +53,7 @@ Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertifi
 Route::get('tramite/certificados/reasignados','CertificadoController@GetCertificadosReasignados');
 Route::get('tramite/certificados/finalizados','CertificadoController@GetCertificadosFinalizados');
 Route::post('certificados/upload/{id}','CertificadoController@uploadCertificado');
+Route::get('certificados/download/foto/{id}','CertificadoController@downloadFoto');
 Route::get('constancias/enviar/{id}','ConstanciaController@enviarConstancia');
 Route::post('constancias/upload/{id}','ConstanciaController@uploadConstancia');
 Route::get('tramite/carnets','CarnetController@GetCarnets');
@@ -147,16 +148,19 @@ Route::put('cronogramas/update/{id}', 'CronogramaController@update');
 Route::get('cronogramas/unidad/dependencia', 'CronogramaController@GetUnidadDependencia');
 
 //GRADOS Y TITULOS
-Route::get('grados/titulos/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
-Route::get('grados/titulos/aprobados/escuela', 'GradoController@GetGradosAprobadosEscuela');
-Route::get('grados/titulos/revalidados/escuela', 'GradoController@GetGradosRevalidadosEscuela');
-Route::get('grados/titulos/validados/facultad', 'GradoController@GetGradosValidadosFacultad');
-Route::get('grados/titulos/aprobados/facultad', 'GradoController@GetGradosAprobadosFacultad');
-Route::get('grados/titulos/revalidados/facultad', 'GradoController@GetGradosRevalidadosFacultad');
-Route::get('grados/titulos/validacion/ura', 'GradoController@GetGradosValidadosUra');
+Route::get('grados/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
+Route::get('grados/aprobados/escuela', 'GradoController@GetGradosAprobadosEscuela');
+Route::get('grados/revalidados/escuela', 'GradoController@GetGradosRevalidadosEscuela');
+Route::get('grados/validados/facultad', 'GradoController@GetGradosValidadosFacultad');
+Route::get('grados/aprobados/facultad', 'GradoController@GetGradosAprobadosFacultad');
+Route::get('grados/revalidados/facultad', 'GradoController@GetGradosRevalidadosFacultad');
+Route::get('grados/diplomas/escuela', 'GradoController@GetGradosDatosDiploma');
+Route::get('grados/validacion/ura', 'GradoController@GetGradosValidadosUra');
 Route::put('grados/correccion', 'GradoController@cambiarEstado');
 Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');
 Route::put('grados/envio/ura', 'GradoController@enviarUraa');
+Route::put('grados/envio/escuela', 'GradoController@enviarEscuela');
+Route::get('modalidad/carpeta', 'Modalidad_CarpetaController@getModalidadGrado');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
