@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
-
+use Response;
 use App\PersonaSE;
 
 use App\Mencion;
@@ -32,7 +32,7 @@ class CertificadoController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt');
+        $this->middleware('jwt', ['except' => ['downloadFoto']]);
     }
 
     public function GetCertificadosValidados(Request $request)
@@ -1081,6 +1081,24 @@ class CertificadoController extends Controller
             DB::commit();
             // return $historiales;
             return response()->json($tramite, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }  
+    }
+
+    public function downloadFoto($id){
+        try {
+            $tramite=Tramite::find($id);
+            $requisito=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+            ->where('idTramite', $tramite->idTramite)->where('requisito.nombre','FOTO CARNET')->first();
+            //PDF file is stored under project/public/download/info.pdf
+            $file= public_path(). $requisito->archivo;
+            $headers = array(
+              'Content-Type: application/pdf',
+            );
+            return Response::download($file, $tramite->nro_tramite.'.'.$requisito->extension, $headers);
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
