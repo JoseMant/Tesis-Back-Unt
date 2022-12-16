@@ -17,6 +17,7 @@ use App\Tramite_Detalle;
 use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
 use App\Jobs\ActualizacionTramiteJob;
+use App\Jobs\ObservacionTramiteJob;
 use App\Jobs\FinalizacionCarnetJob;
 use App\Jobs\NotificacionCertificadoJob;
 use Illuminate\Support\Str;
@@ -86,8 +87,6 @@ class TramiteController extends Controller
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
-                    ->Where('tramite.idEstado_tramite','!=',29)
-                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -105,8 +104,6 @@ class TramiteController extends Controller
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
-                    ->Where('tramite.idEstado_tramite','!=',29)
-                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where('tipo_tramite.idTipo_tramite',1)
                     ->where(function($query) use ($request)
                     {
@@ -159,6 +156,18 @@ class TramiteController extends Controller
                     ->Where('tramite.idEstado_tramite','!=',29)
                     ->Where('tramite.idEstado_tramite','!=',15)
                     ->where('tipo_tramite.idTipo_tramite',1)
+                    ->orderBy($request->query('sort'), $request->query('order'))
+                    ->get();
+                }elseif($idTipo_usuario==9){
+                    // TRÁMITES POR USUARIO
+                    $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
+                    DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado','tramite.idUsuario_asignado')
+                    ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                    ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                    ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
+                    ->where('tipo_tramite.idTipo_tramite',2)
                     ->orderBy($request->query('sort'), $request->query('order'))
                     ->get();
                 }
@@ -309,11 +318,33 @@ class TramiteController extends Controller
             $dni=$apy['nro_documento'];
             $usuario = User::findOrFail($idUsuario);
 
-            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
             
-
-
-
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
+            // VERIFICAR QUE LA PERSONA QUE REGISTRA UN TRÁMITE DE GRADO SEA EGRESADO
+            if ($tipo_tramite_unidad->idTipo_tramite==2) {
+     
+     
+                if ($request->idUnidad==1) {
+                    $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('alu_estado',6)->Where('per_dni',$dni)->first();
+                    if (!$alumnoSUV) {
+                        $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
+                        ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
+                        ->Where('sga_datos_alumno.con_id',6)
+                        ->Where('per_dni',$dni)
+                        ->first();
+                        if (!$alumnoSGA) {
+                            return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+                        }
+                    }
+                }elseif ($request->idUnidad==2) {
+                    
+                }elseif ($request->idUnidad==3) {
+                    
+                }else {
+                   
+                }
+            }
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->Where('voucher.entidad',trim($request->entidad))->where('voucher.nro_operacion',trim($request->nro_operacion))
             ->where('voucher.fecha_operacion',Str::substr(trim($request->fecha_operacion),0, 10))
@@ -412,17 +443,22 @@ class TramiteController extends Controller
                 switch ($tipo_tramite->idTipo_tramite) {
                     case 1:
                         $tramite_detalle->idCronograma_carpeta = null;
-                        $tramite_detalle->idModalidad_titulo_carpeta=null;
+                        $tramite_detalle->idModalidad_carpeta=null;
                         $tramite_detalle->idMotivo_certificado=2;//trim($request->idMotivo_certificado);
                         break;
                     case 2:
-                        $tramite_detalle->idCronograma_carpeta = trim($request->idCronograma_carpeta);
+                        if ($request->idCronograma_carpeta!=null) {
+                            $tramite_detalle->idCronograma_carpeta = trim($request->idCronograma_carpeta);
+                        }else {
+                            DB::rollback();
+                            return response()->json(['status' => '400', 'message' => "Seleccionar una fecha de colación"], 400);
+                        }
                         // $tramite_detalle->idModalidad_titulo_carpeta=1;//trim($request->idModalidad_titulo_carpeta);//por defecto null por ahora
                         $tramite_detalle->idMotivo_certificado=null;
                         break;
                     case 3:
                         $tramite_detalle->idCronograma_carpeta = null;
-                        $tramite_detalle->idModalidad_titulo_carpeta=null;
+                        $tramite_detalle->idModalidad_carpeta=null;
                         $tramite_detalle->idMotivo_certificado=null;
                         break;
                 }
@@ -599,6 +635,7 @@ class TramiteController extends Controller
             $flag2=true;
             $flagAlumno=false;
             $flagEscuela=false;
+            $flagFacultad=false;
             // $flagEscuela=false;
             
             if ($request->idTipo_tramite==1) {
@@ -635,7 +672,10 @@ class TramiteController extends Controller
                 ->find($request->idTramite);
             }
 
-
+            // DATOS PARA EL CORREO 
+            $usuario=User::find($tramite->idUsuario);
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite->idTipo_tramite_unidad);
+            $tipo_tramite=Tipo_Tramite::find($tramite->idTipo_tramite);
             //Editamos los cada uno de los requisitos que llegan junto al trámite en el request
             foreach ($request->requisitos as $key => $requisito) {
                 $tramite_requisito=Tramite_Requisito::Where('idTramite',$request->idTramite)
@@ -660,30 +700,39 @@ class TramiteController extends Controller
                         $flag=false;
                         if ($requisito['responsable']==4) {
                             $flagAlumno=true;
+                        } else if ($requisito['responsable']==5) {
+                            $flagEscuela = true;
                         }
                     }
                     if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                        
                         $flag2=false;
                     }
+                    
                 }else {
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5)|| $requisito['responsable']==8) {
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8)) {
                         $flag=false;
                         if ($requisito['responsable']==4) {
                             $flagAlumno=true;
                         }elseif($requisito['responsable']==5){
                             $flagEscuela=true;
+                        }elseif($requisito['responsable']==8) {
+                            $flagFacultad=true;
                         }
                     }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5)|| $requisito['responsable']==8) {
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8)) {
                         $flag2=false;
                     }
                 }
             }
-
-
+            // var_dump($flag); //false = hay rechazados
+            // var_dump($flag2); //false = hay pendientes
+            // var_dump($flagAlumno); // true = sí hay rechazado de alumno
+            // var_dump($flagEscuela); // true = sí hay rechazado de escuela
+            // var_dump($flagFacultad); // true = sí hay rechazado de facultad
+            // return "hola";
+            // SI NO HAY PENDIENTES 
             if ($flag2) {
-                
-                
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
                 $historial_estados=new Historial_Estado;
                 $historial_estados->idTramite=$tramite->idTramite;
@@ -705,7 +754,7 @@ class TramiteController extends Controller
                             $historial_estados->idTramite=$tramite->idTramite;
                             $historial_estados->idUsuario=$idUsuario;
                             $historial_estados->idEstado_actual=8;
-                            $historial_estados->idEstado_nuevo=15;
+                            $historial_estados->idEstado_nuevo=39;
                         }
                         elseif ($tramite->idEstado_tramite==17) {
                             $historial_estados->idEstado_nuevo=18;
@@ -753,36 +802,46 @@ class TramiteController extends Controller
                             $historial_estados->idEstado_nuevo=9;
                             $historial_estados->fecha=date('Y-m-d h:i:s');
                             $historial_estados->save();
+                            // SI HAY REQUISITO DE ALUMNO 
                             if ($flagAlumno) {
-                                if ($flagEscuela) {
-                                    // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
-                                    $historial_estados=new Historial_Estado;
-                                    $historial_estados->idTramite=$tramite->idTramite;
-                                    $historial_estados->idUsuario=$idUsuario;
-                                    $historial_estados->idEstado_actual=9;
-                                    $historial_estados->idEstado_nuevo=20;
-                                }else{
-                                    // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
-                                    $historial_estados=new Historial_Estado;
-                                    $historial_estados->idTramite=$tramite->idTramite;
-                                    $historial_estados->idUsuario=$idUsuario;
-                                    $historial_estados->idEstado_actual=9;
-                                    $historial_estados->idEstado_nuevo=17;
-                                }   
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                            }elseif ($flagEscuela) {
+                                // SI HAY REQUISITO DE LA ESCUELA
+                                // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=30;
+                            }elseif ($flagFacultad) {
+                                // SI HAY REQUISITO DE LA FACULTAD
+                                // PASAMOS A ESTADO DE ADJUNTAR DE LA FACULTAD
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=32;
                             }
                         }elseif ($tramite->idEstado_tramite==17) {
                             $historial_estados->idEstado_nuevo=19;
+                            // CORREO DE TRÁMITE OBSERVADO
+                            dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                         }else{
                             $historial_estados->idEstado_nuevo=22;
                             $historial_estados->fecha=date('Y-m-d h:i:s');
                             $historial_estados->save();
-                            if (!$flagAlumno) {
+                            if ($flagAlumno) {
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad)); 
+                            }elseif ($flagEscuela) {
+                                // SI HAY REQUISITO DE LA ESCUELA
                                 // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
                                 $historial_estados=new Historial_Estado;
                                 $historial_estados->idTramite=$tramite->idTramite;
                                 $historial_estados->idUsuario=$idUsuario;
                                 $historial_estados->idEstado_actual=22;
-                                $historial_estados->idEstado_nuevo=17;
+                                $historial_estados->idEstado_nuevo=30;
                             }
                         }
                     }
@@ -793,47 +852,60 @@ class TramiteController extends Controller
                 $tramite->update();
 
             }else {
+                // SI HAY PENDIENTES
                 if ($flag==false) {
+                    // SI HAY RECHAZADOS
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE
                     $historial_estados=new Historial_Estado;
                     $historial_estados->idTramite=$tramite->idTramite;
                     $historial_estados->idUsuario=$idUsuario;
                     $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
                     // VERIFICANDO SI EL RECHAZO SE ESTÁ HACIENDO DESDE ESCUELA, FACULTAD O URA MEDIANTE EL ESTADO DEL TRÁMITE
+                    // SI URA OBSERVA
                     if ($tramite->idEstado_tramite==7) {
                         $historial_estados->idEstado_nuevo=9;
                         $historial_estados->fecha=date('Y-m-d h:i:s');
                         $historial_estados->save();
+                        // SI HAY REQUISITO DE ALUMNO 
                         if ($flagAlumno) {
-                            if ($flagEscuela) {
-                                // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
-                                $historial_estados=new Historial_Estado;
-                                $historial_estados->idTramite=$tramite->idTramite;
-                                $historial_estados->idUsuario=$idUsuario;
-                                $historial_estados->idEstado_actual=9;
-                                $historial_estados->idEstado_nuevo=20;
-                            }else{
-                                // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
-                                $historial_estados=new Historial_Estado;
-                                $historial_estados->idTramite=$tramite->idTramite;
-                                $historial_estados->idUsuario=$idUsuario;
-                                $historial_estados->idEstado_actual=9;
-                                $historial_estados->idEstado_nuevo=17;
-                            }   
-                        }
-                    }elseif ($tramite->idEstado_tramite==17) {
-                        $historial_estados->idEstado_nuevo=19;
-                    }else{
-                        $historial_estados->idEstado_nuevo=22;
-                        $historial_estados->fecha=date('Y-m-d h:i:s');
-                        $historial_estados->save();
-                        if (!$flagAlumno) {
+                            // ENVIAR CORREO AL ALUMNO
+                            dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                        }elseif ($flagEscuela) {
+                            // SI HAY REQUISITO DE LA ESCUELA
                             // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
                             $historial_estados=new Historial_Estado;
                             $historial_estados->idTramite=$tramite->idTramite;
                             $historial_estados->idUsuario=$idUsuario;
-                            $historial_estados->idEstado_actual=22;
-                            $historial_estados->idEstado_nuevo=17;
+                            $historial_estados->idEstado_actual=9;
+                            $historial_estados->idEstado_nuevo=30;
+                        }elseif ($flagFacultad) {
+                            // SI HAY REQUISITO DE LA FACULTAD
+                            // PASAMOS A ESTADO DE ADJUNTAR DE LA FACULTAD
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=9;
+                            $historial_estados->idEstado_nuevo=32;
+                        }
+                    }elseif ($tramite->idEstado_tramite==17) {
+                        $historial_estados->idEstado_nuevo=19;
+                        // CORREO DE TRÁMITE OBSERVADO
+                        dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                    }else{
+                        $historial_estados->idEstado_nuevo=22;
+                        $historial_estados->fecha=date('Y-m-d h:i:s');
+                        $historial_estados->save();
+                        if ($flagAlumno) {
+                            // ENVIAR CORREO AL ALUMNO
+                            dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                        }elseif ($flagEscuela) {
+                            // SI HAY REQUISITO DE LA ESCUELA
+                            // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=9;
+                            $historial_estados->idEstado_nuevo=30;
                         }
                     }
                     $historial_estados->fecha=date('Y-m-d h:i:s');
@@ -852,15 +924,7 @@ class TramiteController extends Controller
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             // $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                // if ($personaSuv) {
                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                // }else {
-                //     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                //     if ($personaSga) {
-                //         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                //     }
-                // }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -875,7 +939,7 @@ class TramiteController extends Controller
             ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
             ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $tramite->idTipo_tramite_unidad)->first();
             $usuario = User::findOrFail($tramite->idUsuario);
-            dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+            // dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -1023,18 +1087,15 @@ class TramiteController extends Controller
                     $tramite_requisito=Tramite_Requisito::Where('idTramite',$requisito["idTramite"])
                     ->where('idRequisito',$requisito['idRequisito'])->first();
                     $tramite_requisito->idUsuario_aprobador=null;
-                    $tramite_requisito->comentario=null;
-                    if ($requisito['des_estado_requisito']=="RECHAZADO") {
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && $file->getClientOriginalName()!=="vacio.kj") {
+                        $tramite_requisito->comentario=null;
                         $tramite_requisito->des_estado_requisito="PENDIENTE";
                     }else {
                         $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
                     }
                     $nombre = $dni.".".$file->guessExtension();
                     $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
-                    // if($file->guessExtension()==$requisito["extension"]){
-                    //     $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
-                    //     $tramite_requisito->archivo = $nombreBD;
-                    // }
+
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
                           $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
@@ -1054,18 +1115,104 @@ class TramiteController extends Controller
                 $historial_estados->idUsuario=$idUsuario;
                 $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
                 if ($tramite->idTipo_tramite==2) {
+                    // obetener historial
+                    $ultimo_historial=Historial_Estado::where('idTramite',$tramite->idTramite)->where('estado',1)->orderBy('idHistorial_estado','desc')->first();
                     if ($tramite->idEstado_tramite==30) {
-                        $tramite-> idEstado_tramite=31;
-                        $historial_estados->idEstado_nuevo=31;
+                        if ($ultimo_historial->idEstado_actual==18) {
+                            // flujo regular
+                            $tramite-> idEstado_tramite=31;
+                            $historial_estados->idEstado_nuevo=31;
+                        }elseif ($ultimo_historial->idEstado_actual==22||$ultimo_historial->idEstado_actual==40){
+                            // la facultad observa un documento a la escuela
+                            $historial_estados->idEstado_nuevo=34;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=34;
+                            $historial_estados->idEstado_nuevo=20;
+                            $tramite-> idEstado_tramite=20;
+                        }elseif ($ultimo_historial->idEstado_actual==9) {
+                            // Rechazados por ura
+                            $rechazados_facultad=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                            ->where('tramite_requisito.idTramite',$tramite->idTramite)->where('tramite_requisito.des_estado_requisito','RECHAZADO')
+                            ->where('requisito.responsable',8)->first();
+                            // SI ES QUE RECHAZÓ A ESCUELA Y FACULTAD, UNA VEZ QUE LA ESCUELA SUBSANA, LO PASA A FACULTAD, SINO LO PASA A URA
+                            if($rechazados_facultad){
+                                // la facultad observa un documento a la escuela
+                                $historial_estados->idEstado_nuevo=34;
+                                $historial_estados->fecha=date('Y-m-d h:i:s');
+                                $historial_estados->save();
+
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=34;
+                                $historial_estados->idEstado_nuevo=32;
+                                $tramite-> idEstado_tramite=32;
+                            }else {
+                                // la facultad observa un documento a la escuela
+                                $historial_estados->idEstado_nuevo=35;
+                                $historial_estados->fecha=date('Y-m-d h:i:s');
+                                $historial_estados->save();
+
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=35;
+                                $historial_estados->idEstado_nuevo=7;
+                                $tramite-> idEstado_tramite=7;
+                            }
+                        }
                     }elseif ($tramite->idEstado_tramite==32) {
-                        $tramite-> idEstado_tramite=33;
-                        $historial_estados->idEstado_nuevo=33;
+                        if ($ultimo_historial->idEstado_actual==21) {
+                            // flujo regular
+                            $tramite-> idEstado_tramite=33;
+                            $historial_estados->idEstado_nuevo=33;
+                        }elseif ($ultimo_historial->idEstado_actual==9||$ultimo_historial->idEstado_actual==34) {
+                            // la facultad observa un documento a la escuela
+                            $historial_estados->idEstado_nuevo=35;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=35;
+                            $historial_estados->idEstado_nuevo=7;
+                            $tramite-> idEstado_tramite=7;
+                        } 
                     }
                     else {
-                        $tramite-> idEstado_tramite=17;
-                        $historial_estados->idEstado_nuevo=17;
+                        // FACULTAD O URA RECHAZA DOCUMENTOS DEL ALUMNO
+                        $rechazados_escuela=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                        ->where('tramite_requisito.idTramite',$tramite->idTramite)->where('tramite_requisito.des_estado_requisito','RECHAZADO')
+                        ->where('requisito.responsable',5)->first();
+                        // SI ES QUE RECHAZÓ A ALUMNO Y A ESCUELA, UNA VEZ QUE EL ALUMNO SUBSANA, LO PASA A ESCUELA, SINO LO PASA A FACULTAD
+                        if($rechazados_escuela){
+                            // la facultad observa un documento a la escuela
+                            $historial_estados->idEstado_nuevo=30;
+                            $tramite-> idEstado_tramite=30;
+                        }else {
+                            // Rechazados por ura
+                            $rechazados_facultad=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                            ->where('tramite_requisito.idTramite',$tramite->idTramite)->where('tramite_requisito.des_estado_requisito','RECHAZADO')
+                            ->where('requisito.responsable',8)->first();
+                            // SI ES QUE RECHAZÓ A ESCUELA Y FACULTAD, UNA VEZ QUE LA ESCUELA SUBSANA, LO PASA A FACULTAD, SINO LO PASA A URA
+                            if($rechazados_facultad){
+                                // la facultad observa un documento a la escuela
+                                $historial_estados->idEstado_nuevo=32;
+                                $tramite-> idEstado_tramite=32;
+                            }else {
+                                $tramite-> idEstado_tramite=$ultimo_historial->idEstado_actual;
+                                $historial_estados->idEstado_nuevo=$ultimo_historial->idEstado_actual;
+                            }
+                        }
+                        
                     }
-                }else {
+                } else {
                     $historial_estados->idEstado_nuevo=7;
                     $tramite-> idEstado_tramite=7;
                 }
@@ -1092,15 +1239,7 @@ class TramiteController extends Controller
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
+                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -1160,7 +1299,7 @@ class TramiteController extends Controller
                 $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo];
             }
 
-            dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+            // dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             DB::commit();
             return response()->json(true, 200);
         } catch (\Exception $e) {

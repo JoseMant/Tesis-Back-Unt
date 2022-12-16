@@ -39,6 +39,8 @@ class AuthController extends Controller
                     ]);
                     $dniValidate -> password=Hash::make($request->input('password'));
                     $dniValidate -> correo=$request->input('correo');
+                    $dniValidate -> direccion=$request->input('direccion');
+                    $dniValidate -> fecha_nacimiento=$request->input('fecha_nacimiento');
                     $dniValidate -> celular=$request->input('celular');
                     $dniValidate -> sexo=$request->input('sexo');
                     $dniValidate -> save();
@@ -67,6 +69,8 @@ class AuthController extends Controller
                 $usuario -> tipo_documento=$request->input('tipo_documento');
                 $usuario -> nro_documento=$request->input('nro_documento');
                 $usuario -> correo=$request->input('correo');
+                $usuario -> direccion=$request->input('direccion');
+                $usuario -> fecha_nacimiento=$request->input('fecha_nacimiento');
                 $usuario -> celular=$request->input('celular');
                 $usuario -> sexo=$request->input('sexo');
                 $usuario -> confirmation_code=Str::random(25);
@@ -119,6 +123,8 @@ class AuthController extends Controller
         $response['tipo_documento']=$user->tipo_documento;
         $response['nro_documento']=$user->nro_documento;
         $response['correo']=$user->correo;
+        $response['direccion']=$user->direccion;
+        $response['fecha_nacimiento']=$user->fecha_nacimiento;
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
         $response['idTipoUsuario']=$user->idTipo_usuario;
@@ -154,6 +160,8 @@ class AuthController extends Controller
         $response['tipo_documento']=$user->tipo_documento;
         $response['nro_documento']=$user->nro_documento;
         $response['correo']=$user->correo;
+        $response['direccion']=$user->direccion;
+        $response['fecha_nacimiento']=$user->fecha_nacimiento;
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
         $response['idTipoUsuario']=$user->idTipo_usuario;

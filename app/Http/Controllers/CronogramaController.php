@@ -193,6 +193,7 @@ class CronogramaController extends Controller
             $cronograma->idDependencia=$request->idDependencia;
             $cronograma->idUnidad=$request->idUnidad;
             $cronograma->idTipo_tramite_unidad=$request->idTipo_tramite_unidad;
+            $cronograma->idResolucion= $request->idResolucion;
             $cronograma->fecha_cierre_alumno=$request->fecha_cierre_alumno;
             $cronograma->fecha_cierre_secretaria=$request->fecha_cierre_secretaria;
             $cronograma->fecha_cierre_decanato=$request->fecha_cierre_decanato;
@@ -222,11 +223,15 @@ class CronogramaController extends Controller
         $dni=$apy['nro_documento'];
         $idDependencia=$apy['idDependencia'];
 
-        $dependencia=DependenciaURAA::find($idDependencia);
-        $unidad=Unidad::find($dependencia->idUnidad);
-        $response=$unidad;
-        $response->dependencia=$dependencia;
-        return response()->json($response, 200);
+        if ($idDependencia) {
+            $dependencia=DependenciaURAA::find($idDependencia);
+            $unidad=Unidad::find($dependencia->idUnidad);
+            $response=$unidad;
+            $response->dependencia=$dependencia;
+            return response()->json($response, 200);
+        }else {
+            return response()->json(["idDependencia"=>"","idUnidad"=>""], 200);
+        }
     }
 }
 

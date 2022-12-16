@@ -68,11 +68,7 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            // ESTE FOREACH AÑADÍA LA RUTA COMPLETA A CADA ARCHIVO
-            // foreach ($tramite->requisitos as $key => $requisito) {
-            //     $requisito->archivo=$requisito->archivo;
-            // }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             
             //Datos del usuario al que pertenece el trámite
@@ -80,15 +76,7 @@ class CarnetController extends Controller
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
+                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -188,25 +176,14 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
                     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -316,25 +293,14 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
+                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -426,25 +392,14 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="/api/fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
+                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -532,25 +487,13 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            // foreach ($tramite->requisitos as $key => $requisito) {
-            //     $requisito->archivo="".$requisito->archivo;
-            // }
-            // $tramite->voucher="".$tramite->voucher;
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                if ($personaSuv) {
-                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                }else {
-                    $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                    if ($personaSga) {
-                        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                    }
-                }
+                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -607,25 +550,13 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            // foreach ($tramite->requisitos as $key => $requisito) {
-            //     $requisito->archivo="".$requisito->archivo;
-            // }
-            // $tramite->voucher="".$tramite->voucher;
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
-                // $personaSuv=PersonaSuv::Where('per_dni',$usuario->nro_documento)->first();
-                // if ($personaSuv) {
                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                // }else {
-                //     $personaSga=PersonaSga::Where('per_dni',$usuario->nro_documento)->first();
-                //     if ($personaSga) {
-                //         $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-                //     }
-                // }
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -706,10 +637,6 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            // foreach ($tramite->requisitos as $key => $requisito) {
-            //     $requisito->archivo="".$requisito->archivo;
-            // }
-            // $tramite->voucher="".$tramite->voucher;
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
@@ -885,10 +812,6 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            // foreach ($tramite->requisitos as $key => $requisito) {
-            //     $requisito->archivo="".$requisito->archivo;
-            // }
-            // $tramite->voucher="".$tramite->voucher;
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
@@ -1047,6 +970,13 @@ class CarnetController extends Controller
                 ->orWhere('tramite.idEstado_tramite',16);
             })
             ->where('tipo_tramite.idTipo_tramite',3)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',17)
+                ->orWhere('tramite.idTipo_tramite_unidad',19)
+                ->orWhere('tramite.idTipo_tramite_unidad',21)
+                ->orWhere('tramite.idTipo_tramite_unidad',23);
+            })
             ->get();  
             DB::commit();
             return response()->json($tramites, 200);
@@ -1091,6 +1021,13 @@ class CarnetController extends Controller
                 ->orWhere('tramite.idEstado_tramite',16);
             })
             ->where('tipo_tramite.idTipo_tramite',3)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',17)
+                ->orWhere('tramite.idTipo_tramite_unidad',19)
+                ->orWhere('tramite.idTipo_tramite_unidad',21)
+                ->orWhere('tramite.idTipo_tramite_unidad',23);
+            })
             ->get();  
             DB::commit();
             return response()->json($tramites, 200);

@@ -95,6 +95,7 @@ Route::post('tramites/anular','TramiteController@anularTramite');
 //-----------------PDFs
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
+Route::get('libro','PDF_LibroController@pdf_libro');
 //-------------------------------
 
 // Route::resource('cargos','CargoController');
@@ -154,13 +155,34 @@ Route::get('grados/revalidados/escuela', 'GradoController@GetGradosRevalidadosEs
 Route::get('grados/validados/facultad', 'GradoController@GetGradosValidadosFacultad');
 Route::get('grados/aprobados/facultad', 'GradoController@GetGradosAprobadosFacultad');
 Route::get('grados/revalidados/facultad', 'GradoController@GetGradosRevalidadosFacultad');
-Route::get('grados/diplomas/escuela', 'GradoController@GetGradosDatosDiploma');
+Route::get('grados/diplomas/escuela', 'GradoController@GetGradosDatosDiplomaEscuela');
+Route::get('grados/diplomas/facultad', 'GradoController@GetGradosDatosDiplomaFacultad');
+Route::get('grados/diplomas/ura', 'GradoController@GetGradosDatosDiplomaUra');
 Route::get('grados/validacion/ura', 'GradoController@GetGradosValidadosUra');
 Route::put('grados/correccion', 'GradoController@cambiarEstado');
 Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');
 Route::put('grados/envio/ura', 'GradoController@enviarUraa');
 Route::put('grados/envio/escuela', 'GradoController@enviarEscuela');
+Route::put('grados/registrar/libro', 'GradoController@registrarEnLibro');
+
+// Route::get('grados/validados/secretaria', 'GradoController@GetGradosValidadosSecretaria');
+Route::get('grados/validados/secretaria/{nro_resolucion}', 'GradoController@GetGradosResolucion');
+Route::get('grados/aprobados/secretaria', 'GradoController@GetGradosAprobadosSecretaria');
 Route::get('modalidad/carpeta', 'Modalidad_CarpetaController@getModalidadGrado');
+Route::get('programas_estudios/carpeta', 'Programa_Estudios_CarpetaController@getProgramaEstudios');
+Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idDependencia_detalle}', 'Diploma_CarpetaController@getDiplomaCarpetas');
+Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');
+Route::get('dependencia/escuelas/{id}', 'DependenciaController@getEscuelas');
+
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
+
+// ACREDITACIONES
+Route::get('acreditadas/all', 'AcreditacionController@index');
+Route::post('acreditadas/create', 'AcreditacionController@store');
+// RESOLUCIONES
+Route::get('resoluciones/all', 'ResolucionController@index');
+Route::post('resoluciones/create', 'ResolucionController@store');
+Route::put('resoluciones/update/{id}', 'ResolucionController@update');
+

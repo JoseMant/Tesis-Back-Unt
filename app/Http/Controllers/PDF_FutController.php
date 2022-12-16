@@ -76,21 +76,32 @@ class PDF_FutController extends Controller
       $this->pdf->Cell(130, 4,utf8_decode('Teléfono: '.$usuario->celular),0,0,'R');
       // FACULTAD/OFICINA
       $this->pdf->SetXY(8,65);
-      $this->pdf->Cell(110, 4,'De La Facultad/Programa de: '.$dependencia->nombre,0,0,'L');
+      $this->pdf->Cell(110, 4,'Facultad/Programa: '.$dependencia->nombre,0,0,'L');
       // ESCUELA/DEPARTAMENTO
       $this->pdf->SetXY(8,75);
       $this->pdf->Cell(110, 4,utf8_decode('Escuela/Sección/Mención: '.$dependenciaDetalle->denominacion),0,0,'L');
+
+      // NÚMERO DE MATRÍCULA
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(8,$y+10);
+      $this->pdf->Cell(110, 4,utf8_decode('Nro. matrícula: '.$tramite->nro_matricula),0,0,'L');
+
       // SEDE
-      $this->pdf->SetXY(8,85);
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(8,$y+10);
       $this->pdf->Cell(110, 4,utf8_decode('Sede: '.$tramite->sede),0,0,'L');
       // INFORMACIÓN BANCO
-      $this->pdf->SetXY(8,95);
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(8,$y+10);
       $this->pdf->Cell(12, 4,utf8_decode('Banco:    '.$voucher->entidad),0,0,'L');
-      $this->pdf->SetXY(8,105);
+      
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(8,$y+10);
       $this->pdf->Cell(125, 4,utf8_decode('N° Operación:    '.$voucher->nro_operacion),0,0,'L');
       $this->pdf->Cell(10, 4,utf8_decode('Fecha Operación:    '.$voucher->fecha_operacion),0,0,'C');
       // OBJETO DE LA SOLICITUD
-      $this->pdf->SetXY(8,115);
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(8,$y+10);
       if ($tipo_tramite_unidad->idTipo_tramite==3) {
         $this->pdf->Cell(110, 4,utf8_decode('Objeto de la Solicitud: '.$tipo_tramite->descripcion.'-'.$tipo_tramite_unidad->descripcion),0,0,'L');
       }else {
@@ -98,41 +109,55 @@ class PDF_FutController extends Controller
       }
       // COMENTARIO
       if ($tramite->comentario!=null) {
-        $this->pdf->SetXY(8,125);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+10);
         $this->pdf->Cell(110, 4,utf8_decode('Comentario: '),0,0,'L');
-        $this->pdf->SetXY(8,135);
-        $this->pdf->MultiCell(195, 4,utf8_decode($tramite->comentario),0,'L', false);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+10);
+        $this->pdf->MultiCell(0, 4,utf8_decode($tramite->comentario),0,'L', false);
         
         // DESCRIPCIÓN
-        $this->pdf->SetXY(8,155);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+10);
         $this->pdf->Cell(110, 4,utf8_decode('Los datos consignados en el presente formulario y la información contenida en los documentos que acompaño'),0,0,'L');
-        $this->pdf->SetXY(8,160);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+5);
         $this->pdf->Cell(110, 4,utf8_decode('son verdaderos y tienen el carácter de DECLARACIÓN JURADA, los mismos que están sujetos a fiscalización'),0,0,'L');
-        $this->pdf->SetXY(8,165);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+5);
         $this->pdf->Cell(110, 4,utf8_decode('posterior, que en caso de acreditarse falsedad o fraude, me someto a las sanciones establecidas en la Ley 27444.'),0,0,'L');
         
         // FIRMA
-        $this->pdf->SetXY(8,205);
-        $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 185, 50, 30); //comentado por ahora porque no existe la imagen que se desea
-        $this->pdf->SetXY(8,215);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+40);
+        $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 185, 50, 30); 
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y);
         $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
-        $this->pdf->SetXY(8,225);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+10); 
         $this->pdf->Cell(170, 4,utf8_decode('Firma'),0,0,'C');
       }else {
         // DESCRIPCIÓN
-        $this->pdf->SetXY(8,125);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+10);
         $this->pdf->Cell(110, 4,utf8_decode('Los datos consignados en el presente formulario y la información contenida en los documentos que acompaño'),0,0,'L');
-        $this->pdf->SetXY(8,130);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+5);
         $this->pdf->Cell(110, 4,utf8_decode('son verdaderos y tienen el carácter de DECLARACIÓN JURADA, los mismos que están sujetos a fiscalización'),0,0,'L');
-        $this->pdf->SetXY(8,135);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+5);
         $this->pdf->Cell(110, 4,utf8_decode('posterior, que en caso de acreditarse falsedad o fraude, me someto a las sanciones establecidas en la Ley 27444.'),0,0,'L');
         
         // FIRMA
-        $this->pdf->SetXY(8,175);
-        $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 155, 50, 30); //comentado por ahora porque no existe la imagen que se desea
-        $this->pdf->SetXY(8,185);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+40);
+        $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 155, 50, 30); 
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y-5);
         $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
-        $this->pdf->SetXY(8,195);
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(8,$y+10);
         $this->pdf->Cell(170, 4,utf8_decode('Firma'),0,0,'C');
       }
 

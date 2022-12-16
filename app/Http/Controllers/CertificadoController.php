@@ -101,10 +101,7 @@ class CertificadoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
@@ -204,10 +201,7 @@ class CertificadoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
@@ -303,10 +297,7 @@ class CertificadoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            // $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();
@@ -989,10 +980,7 @@ class CertificadoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            foreach ($tramite->requisitos as $key => $requisito) {
-                $requisito->archivo=$requisito->archivo;
-            }
-            $tramite->voucher=$tramite->voucher;
+            
             $tramite->fut="fut/".$tramite->idTramite;
             //Datos del usuario al que pertenece el trámite
             $usuario=User::findOrFail($tramite->idUsuario)->first();

@@ -11,6 +11,7 @@ use App\Jobs\RegistroUsuarioJob;
 use App\User;
 use App\Tramite;
 use App\Historial_Estado;
+use App\Escuela;
 use Illuminate\Support\Facades\Hash;
 
 
@@ -29,11 +30,17 @@ class UserController extends Controller
     public function index()
     {
         $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
+        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
         ->orderBy('usuario.apellidos')
         ->get();
+        foreach ($usuarios as $key => $usuario) {
+            if ($usuario->idTipo_usuario==5) {
+                $escuela=Escuela::find($usuario->idDependencia);
+                $usuario->idFacultad=$escuela->idDependencia;
+            }
+        }
         return response()->json($usuarios, 200);
     }
     public function getUsuariosUraa()
@@ -49,7 +56,7 @@ class UserController extends Controller
     public function buscar(Request $request){
         if ($request->query('query')!="") {
             $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idTipo_usuario','!=',1)
             ->where(function($query) use ($request)
@@ -58,13 +65,27 @@ class UserController extends Controller
                     ->orWhere('tipo_usuario.nombre','LIKE', '%'.$request->query('query').'%')
                     ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('query').'%');
                 })
+            ->orderBy('usuario.apellidos')
             ->get();
+            foreach ($usuarios as $key => $usuario) {
+                if ($usuario->idTipo_usuario==5) {
+                    $escuela=Escuela::find($usuario->idDependencia);
+                    $usuario->idFacultad=$escuela->idDependencia;
+                }
+            }
         }else{
             $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idTipo_usuario','!=',1)
+            ->orderBy('usuario.apellidos')
             ->get();
+            foreach ($usuarios as $key => $usuario) {
+                if ($usuario->idTipo_usuario==5) {
+                    $escuela=Escuela::find($usuario->idDependencia);
+                    $usuario->idFacultad=$escuela->idDependencia;
+                }
+            }
         }
         return response()->json($usuarios, 200);
     }
@@ -107,6 +128,9 @@ class UserController extends Controller
             $usuario->nombres=$request->nombres;
             $usuario->apellidos=$request->apellidos;
             $usuario->tipo_documento=$request->tipo_documento;
+            if ($request->idDependencia) {
+                $usuario->idDependencia=$request->idDependencia;
+            }
             $usuario->nro_documento=$request->nro_documento;
             $usuario->correo=$request->correo;
             $usuario->celular=$request->celular;
@@ -117,11 +141,16 @@ class UserController extends Controller
             $usuario->estado=1;
             $usuario->save();
             $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$usuario->idUsuario)
             ->first();
             $rol=$usuario->rol;
+
+            if ($usuario->idTipo_usuario==5) {
+                $escuela=Escuela::find($usuario->idDependencia);
+                $usuario->idFacultad=$escuela->idDependencia;
+            }
             //Correo de creación de usuario
             dispatch(new RegistroUsuarioJob($usuario,$rol));
             DB::commit();
@@ -170,14 +199,21 @@ class UserController extends Controller
             $usuario->username=$request->username;
             $usuario->nombres=$request->nombres;
             $usuario->apellidos=$request->apellidos;
+            if ($request->idDependencia) {
+                $usuario->idDependencia=$request->idDependencia;
+            }
             $usuario->celular=$request->celular;
             $usuario->estado=$request->estado;
             $usuario->update();
             $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado')
+            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$id)
             ->first();
+            if ($usuario->idTipo_usuario==5) {
+                $escuela=Escuela::find($usuario->idDependencia);
+                $usuario->idFacultad=$escuela->idDependencia;
+            }
             DB::commit();
             return response()->json($usuario, 200);
         } catch (\Exception $e) {
@@ -226,7 +262,7 @@ class UserController extends Controller
                 $usuario->correo=trim($request->correo);
                 $usuario->confirmed=0;
                 $usuario->confirmation_code=Str::random(25);
-                $usuario->update();
+                // $usuario->update();
                 dispatch(new ConfirmacionCorreoJob($usuario,false));
                 // Cambiar todos los trámites no finalizados al estado 28
                 $tramites=Tramite::where('idEstado_tramite','!=',15)
@@ -245,8 +281,11 @@ class UserController extends Controller
                     $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                     $tramite->update();
                 }
-                //--------------------------
             }
+            $usuario->direccion=trim($request->direccion);
+            $usuario->fecha_nacimiento=trim($request->fecha_nacimiento);
+            $usuario->update();
+            
             $response['idUsuario']=$usuario->idUsuario;
             $response['username']=$usuario->username;
             $response['estado']=$usuario->estado;
