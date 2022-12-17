@@ -27,7 +27,7 @@ use App\PersonaSE;
 use App\Mencion;
 use App\Escuela;
 use App\PersonaSuv;
-use App\PersonaSga;
+use App\Motivo_Certificado;
 class CertificadoController extends Controller
 {
     public function __construct()
