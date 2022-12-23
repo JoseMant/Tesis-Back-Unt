@@ -96,7 +96,7 @@ Route::post('tramites/anular','TramiteController@anularTramite');
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
 Route::get('libro','PDF_LibroController@pdf_libro');
-Route::get('diploma','PDF_DiplomaController@Diploma');
+Route::get('diploma/{idTramite}','PDF_DiplomaController@Diploma');
 //-------------------------------
 
 // Route::resource('cargos','CargoController');
