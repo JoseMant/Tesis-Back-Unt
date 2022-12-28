@@ -207,6 +207,7 @@ class PersonaController extends Controller
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $dni=$apy['nro_documento'];
+            // $dni='74660603';
             // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
                 $facultadesTotales=[];
@@ -235,23 +236,29 @@ class PersonaController extends Controller
                             array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first());
                         }
                     }
+                    // return $facultades;
                     //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
                     foreach ($facultades as $key => $facultad) {
                         $escuelas=[];
                         foreach ($alumnoEscuelasSGA as $key => $escuela) {
                             $facultadEscuela=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
+                            // echo $facultad['nombre'];
+                            // echo strtoupper($facultadEscuela['dep_nombre']);
+                            // echo '----------------------------------------------------------------';
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
-                                
                                 $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
                                 $escuelaSede->nro_matricula=$escuela->per_login;
-                                $escuelaSede->sede=$escuela->sed_nombre;
+                                if ($escuela->sed_nombre == 'Trujillo') $escuelaSede->sede='SEDE TRUJILLO';
+                                else $escuelaSede->sede=$escuela->sed_nombre;
                                 array_push($escuelas,$escuelaSede);
                             }
+                            // echo $escuela;
                         }
                         $facultad->subdependencias=$escuelas;
                         array_push($facultadesTotales,$facultad);
                     }
                 }
+                // return $facultadesTotales;
                 //Obtenemos datos de la persona que inicia sesión
                 $personaSuv=PersonaSuv::select('persona.idpersona')
                 ->join('sistema.roles_usuario','sistema.roles_usuario.idpersona','persona.idpersona')
@@ -285,7 +292,7 @@ class PersonaController extends Controller
                         }
                         // array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first());
                     }
-
+                    
                     //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
                     foreach ($facultades as $key => $facultad) {
                         $escuelas=[];
@@ -299,7 +306,23 @@ class PersonaController extends Controller
                             }
                         }
                         $facultad->subdependencias=$escuelas;
-                        array_push($facultadesTotales,$facultad);
+                        
+                        if ($facultadesTotales) {
+                            foreach ($facultadesTotales as $key => $value) {
+                                if ($value->idDependencia!=$facultad->idDependencia) {
+                                    array_push($facultadesTotales,$facultad);
+                                }else {
+                                    foreach ($value->subdependencias as $key => $subdependencia) {
+                                        array_push($escuelas, $subdependencia);
+                                        
+                                    }
+                                    $value->subdependencias=$escuelas;
+                                }
+                            }
+                        } else {
+                            array_push($facultadesTotales,$facultad);
+                        }
+                        // return $facultadesTotales;
                     }
                 }
                 if (count($facultadesTotales)>0) {
