@@ -25,7 +25,7 @@ $cadena_de_texto = $denominacion;
 $cadena_buscada   = ' MENCIÓN :';
 $posicion_coincidencia = strpos($cadena_de_texto, $cadena_buscada);
 
-$fecha = DATE('YY:mm:d');
+$fecha = DATE('Y-m-d');
 $año = substr($fecha, 0, 4);
 $mes = (int)substr($fecha, 5, 2);
 $dia = substr($fecha, 8, 2);
@@ -105,6 +105,7 @@ if ($tramite->idUnidad==1) {
     $escuela=$tramite->escuela;
 }elseif ($tramite->idUnidad==4) {
     $escuela=$tramite->facultad;
+    // consulta con el idDependencia2
     if ($tramite->idDependencia==17) {
         $facultad="FACULTAD DE ENFERMERIA";
     }elseif ($tramite->idDependencia==18) {
@@ -559,23 +560,23 @@ switch ($escuela) {
             <td style="width: 30%; text-align: center;margin-top: 8px">
                 <hr style=" width:80%;border-bottom: 0px dashed #ccc; background: #999;">
                 SECRETARIA GENERAL (E)<br>
-                <b><?php echo $decano?></b>
+                <b><?php echo $secretaria?></b>
             </td>
             <td style="width: 5%; text-align: center;margin-top: 8px">
                &nbsp; 
             </td>
             <td style="width: 30%; text-align: center;">
                 <hr style="width:80%; margin-bottom: 5px; border-bottom: 0px dashed #ccc; background: #999;">
-                RECTOR<br>
-                <b><?php echo $secretario?></b>
+                RECTOR(A)<br>
+                <b><?php echo $rector?></b>
             </td>
             <td style="width: 5%; text-align: center;margin-top: 8px">
                 &nbsp;
             </td>
             <td style="width: 30%; text-align: center;">
                 <hr style="margin-bottom: 5px; border-bottom: 0px dashed #ccc; background: #999;">
-                <?php echo $rectorCargo?><br>
-                <b><?php echo $rector?></b>
+                DECANO(A)<br>
+                <b><?php echo $decano?></b>
             </td>
         </tr>
     </table>

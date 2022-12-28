@@ -9,6 +9,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Tramite;
 use App\Escuela;
 use App\Mencion;
+use App\User;
 
 class PDF_DiplomaController extends Controller
 {
@@ -47,7 +48,13 @@ class PDF_DiplomaController extends Controller
             $tramite->escuela=$dependenciaDetalle->nombre;
 
 
-
+            $rector=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))->where('idTipo_usuario',12)->first();
+            $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))
+            ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->first();
+            $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))
+            ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->first();
+            $secretaria=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))
+            ->where('idTipo_usuario',10)->first();
             // $tramite->escuela="RESIDENTADO MÉDICO";
             // return $tramite;
 
@@ -56,7 +63,7 @@ class PDF_DiplomaController extends Controller
             $html2pdf->writeHTML(view('emails.diploma', ['opcFoto' => 1, 'diploma' => 'T110','ficha' => 'PREGRADO','fotoAlumno'=>'foto',
                                                         'denominacion'=>'BACHILLER EN CIENCIAS DE LA COMUNICACIÓN','nombreComp'=>
                                                     'KEVIN JOEL','facultad'=>' FACULTAD DE INGENIERIA','idFicha'=>$tramite->idUnidad,'escuela'=>'INGENIERIA DE SISTEMAS',
-                                                'decano'=>'DECANO DE INGENIERIA','secretario'=>'SECRETARIO DE INGENIERIA','rectorCargo'=>'RECTOR','rector'=>'RECTOR',
+                                                'decano'=>$decano->nombres,'secretaria'=>'SECRETARIO DE INGENIERIA','rectorCargo'=>'RECTOR(A)','rector'=>$rector->nombres,
                                             'nrolibro'=>1,'folio'=>1,'nroRegistro'=>12,'tipoDocumento'=>'DNI','nroDoc'=>'75411199','tipoFicha'=>'Bachiller','tipoActo'=>'tesis',
                                         'numResolucionUniv'=>'123-2022','fechaResolucionCU'=>'23/03/2022','diplomasEstado'=>'original','tramite'=>$tramite]));
             $html2pdf->output('diploma.pdf');
