@@ -180,7 +180,7 @@ Route::get('programas_estudios/carpeta', 'Programa_Estudios_CarpetaController@ge
 Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idDependencia_detalle}', 'Diploma_CarpetaController@getDiplomaCarpetas');
 Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');
 Route::get('dependencia/escuelas/{id}', 'DependenciaController@getEscuelas');
-Route::put('crear/codigo', 'GradoController@createCodeDiploma');
+Route::put('create/codigo', 'GradoController@createCodeDiploma');
 
 
 //DEPENDENCIAS

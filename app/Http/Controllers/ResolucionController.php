@@ -24,6 +24,10 @@ class ResolucionController extends Controller
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
            
+            $resolucionValidate=Resolucion::where('nro_resolucion',$request->nro_resolucion);
+            if ($resolucionValidate) {
+                return response()->json( ['status'=>400,'message'=>'La resolución ya se encuentra registrada'],400);
+            }
             $resolucion=new Resolucion;
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
             $resolucion->fecha=trim($request->fecha);

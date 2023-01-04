@@ -33,7 +33,7 @@ class DependenciaController extends Controller
     public function getEscuelas($id){
         $dependencia=DependenciaURAA::find($id);
         if ($dependencia->idUnidad==1) {
-            $escuelas =Escuela::where('idDependencia',$id)->get();
+            $escuelas =Escuela::where('idDependencia',$id)->where('estado',true)->get();
         }else if ($dependencia->idUnidad==2) {
             
         }else if ($dependencia->idUnidad==3) {

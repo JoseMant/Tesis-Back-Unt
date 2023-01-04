@@ -721,7 +721,20 @@ class CarnetController extends Controller
                 ->join('voucher','tramite.idVoucher','voucher.idVoucher')
                 ->where('tramite.idEstado_tramite',27)
                 ->where('tipo_tramite.idTipo_tramite',3)
-                ->where('tramite.idDependencia_detalle',$idDependencia)
+                ->where(function($query) use ($idDependencia)
+                {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
+                })
+                // ->where('tramite.idDependencia_detalle',$idDependencia)
                 ->where(function($query) use ($request)
                 {
                     $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -752,7 +765,20 @@ class CarnetController extends Controller
                 ->join('voucher','tramite.idVoucher','voucher.idVoucher')
                 ->where('tramite.idEstado_tramite',27)
                 ->where('tipo_tramite.idTipo_tramite',3)
-                ->where('tramite.idDependencia_detalle',$idDependencia)
+                ->where(function($query) use ($idDependencia)
+                {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
+                })
+                // ->where('tramite.idDependencia_detalle',$idDependencia)
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();   
             }

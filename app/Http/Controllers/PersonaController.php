@@ -331,11 +331,57 @@ class PersonaController extends Controller
                     return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado.'], 400); 
                 }
                 
-            }else if($idUnidad==2){ //doctorado
+            }else if($idUnidad==2){ //postgrado
                 // dónde?
-                return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
-                    'dni' => $dni
-                  ]);
+                $facultadesTotales=array(
+                    array(
+                        'idDependencia'=>13,
+                        'idUnidad'=>2,
+                        'nombre'=>'MAESTRÍA',
+                        'idDependencia2'=>null,
+                        'estado'=>1,
+                        'subdependencias'=>array(
+                            array(
+                                'idPrograma'=>29,
+                                'idDependencia'=>13,
+                                'idUnidad'=>2,
+                                // 'idSGA_PREG'=>73,
+                                // 'idSUV_PREG'=>21,
+                                'nombre'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
+                                // 'denominacion'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
+                                // 'descripcion_grado'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
+                                // 'descripcion_titulo'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
+                                'estado'=>1,
+                                'nro_matricula'=>'1023300217',
+                                'sede'=>'SEDE TRUJILLO'
+                            )
+                        )
+                    ),
+                    array(
+                        'idDependencia'=>14,
+                        'idUnidad'=>2,
+                        'nombre'=>'DOCTORADO',
+                        'idDependencia2'=>null,
+                        'estado'=>1,
+                        'subdependencias'=>array(
+                            array(
+                                'idPrograma'=>29,
+                                'idDependencia'=>14,
+                                'idUnidad'=>2,
+                                // 'idSGA_PREG'=>73,
+                                // 'idSUV_PREG'=>21,
+                                'nombre'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                                // 'denominacion'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                                // 'descripcion_grado'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                                // 'descripcion_titulo'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                                'estado'=>1,
+                                'nro_matricula'=>'1023300217',
+                                'sede'=>'SEDE TRUJILLO'
+                            )
+                        )
+                    )
+                );
+                return response()->json(['status' => '200', 'dependencias' => $facultadesTotales], 200); 
             }else if($idUnidad==3){ //maestría
                 // donde
                 return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
