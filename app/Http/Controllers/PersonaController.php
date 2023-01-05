@@ -207,7 +207,7 @@ class PersonaController extends Controller
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $dni=$apy['nro_documento'];
-            // $dni='74660603';
+            // $dni='71914102';
             // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
                 $facultadesTotales=[];
@@ -267,7 +267,8 @@ class PersonaController extends Controller
                 if ($personaSuv) {
                    //Obtenemos las escuela(s) a la(s) que pertenece dicha persona
                     $alumnoEscuelasSUV=Alumno::select('alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura','patrimonio.estructura.estr_descripcion'
-                    ,'patrimonio.estructura.iddependencia')
+                    ,'patrimonio.estructura.iddependencia', 'curricula.curr_mencion')
+                    ->join('matriculas.curricula','alumno.alu_curricula','curricula.idcurricula')
                     ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
                     ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
                     ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
@@ -275,6 +276,20 @@ class PersonaController extends Controller
                     // Obtener la escuela activa para el trámite de carné
                     // ->Where('alumno.alu_estado',1)
                     ->get();
+                    // actualizamos los nombres de las menciones de educacion secundaria
+                    foreach ($alumnoEscuelasSUV as $key => $value) {
+                        if ($value->curr_mencion=='1') {
+                            $value->estr_descripcion="ESCUELA PROFESIONAL DE EDUCACION SECUNDARIA ESPECIALIDAD IDIOMAS";
+                        }elseif ($value->curr_mencion=='2') {
+                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  HISTORIA Y GEOGRAFIA";
+                        }elseif ($value->curr_mencion=='3') {
+                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  FILOSOFIA, PSICOLOGIA Y CIENCIAS SOCIALES";
+                        }elseif ($value->curr_mencion=='4') {
+                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  LENGUA Y LITERATURA";
+                        }elseif ($value->curr_mencion=='5') {
+                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  CIENCIAS DE LA MATEMATICA";
+                        }
+                    }
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
                     $facultades=[];
                     foreach ($alumnoEscuelasSUV as $key => $escuela) {
@@ -299,7 +314,24 @@ class PersonaController extends Controller
                         foreach ($alumnoEscuelasSUV as $key => $escuela) {
                             $facultadEscuela=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['estr_descripcion'])) {
-                                $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
+                                if ($value->curr_mencion=='1') {
+                                    $escuelaSede=Escuela::where('idEscuela',41)->first();
+                                    // $value->estr_descripcion="ESCUELA PROFESIONAL DE EDUCACION SECUNDARIA ESPECIALIDAD IDIOMAS";
+                                }elseif ($value->curr_mencion=='2') {
+                                    $escuelaSede=Escuela::where('idEscuela',42)->first();
+                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  HISTORIA Y GEOGRAFIA";
+                                }elseif ($value->curr_mencion=='3') {
+                                    $escuelaSede=Escuela::where('idEscuela',45)->first();
+                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  FILOSOFIA, PSICOLOGIA Y CIENCIAS SOCIALES";
+                                }elseif ($value->curr_mencion=='4') {
+                                    $escuelaSede=Escuela::where('idEscuela',46)->first();
+                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  LENGUA Y LITERATURA";
+                                }elseif ($value->curr_mencion=='5') {
+                                    $escuelaSede=Escuela::where('idEscuela',44)->first();
+                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  CIENCIAS DE LA MATEMATICA";
+                                }else {
+                                    $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
+                                }
                                 $escuelaSede->nro_matricula=$escuela->idalumno;
                                 $escuelaSede->sede=$escuela->sed_descripcion;
                                 array_push($escuelas, $escuelaSede);

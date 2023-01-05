@@ -24,7 +24,7 @@ class ResolucionController extends Controller
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
            
-            $resolucionValidate=Resolucion::where('nro_resolucion',$request->nro_resolucion);
+            $resolucionValidate=Resolucion::where('nro_resolucion',$request->nro_resolucion)->first();
             if ($resolucionValidate) {
                 return response()->json( ['status'=>400,'message'=>'La resolución ya se encuentra registrada'],400);
             }
@@ -32,20 +32,20 @@ class ResolucionController extends Controller
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
             $resolucion->fecha=trim($request->fecha);
             
-            // if($request->hasFile("archivo")){
-            //     // return "ingresé al voucher";
-            //     $file=$request->file("archivo");
-            //     $nombre = $file->getClientOriginalName();
-            //     $nombreBD = "/storage/resoluciones/".$nombre;
-            //     if($file->guessExtension()=="pdf"){
-            //       $file->storeAs('public/resoluciones', $nombre);
-            //       $resolucion->archivo = $nombreBD;
-            //     }else {
-            //         DB::rollback();
-            //         return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
-            //     }
-            // }
-            $resolucion->archivo = "archivo";
+            if($request->hasFile("archivoPdf")){
+                $file=$request->file("archivoPdf");
+                // $nombre = $file->getClientOriginalName();
+                $nombre = $request->nro_resolucion;
+                $nombreBD = "/storage/resoluciones/".$nombre;
+                if($file->guessExtension()=="pdf"){
+                  $file->storeAs('public/resoluciones', $nombre);
+                  $resolucion->archivo = $nombreBD;
+                }else {
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
+                }
+            }
+            // $resolucion->archivo = "archivo";
             $resolucion->estado =true;
             $resolucion->save();
             

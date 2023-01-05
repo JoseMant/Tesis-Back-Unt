@@ -724,7 +724,8 @@ class CarnetController extends Controller
                 ->where(function($query) use ($idDependencia)
                 {
                     if ($idDependencia==15) {
-                        $query->where('tramite.idDependencia_detalle',41)
+                        $query->where('tramite.idDependencia_detalle',15)
+                        ->orWhere('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
@@ -768,7 +769,8 @@ class CarnetController extends Controller
                 ->where(function($query) use ($idDependencia)
                 {
                     if ($idDependencia==15) {
-                        $query->where('tramite.idDependencia_detalle',41)
+                        $query->where('tramite.idDependencia_detalle',15)
+                        ->orWhere('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)

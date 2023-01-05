@@ -33,6 +33,7 @@ use App\Escuela;
 use App\PersonaSuv;
 use App\PersonaSga;
 use App\Alumno;
+use App\Acreditacion;
 class GradoController extends Controller
 {
     public function __construct()
@@ -1388,6 +1389,7 @@ class GradoController extends Controller
                     }
                     $tramite->nro_creditos_carpeta=$total_cred_ap;
                 }
+                
             }elseif ($tramite->idUnidad==2) {
                 # code...
             }elseif ($tramite->idUnidad==3) {
@@ -1426,6 +1428,19 @@ class GradoController extends Controller
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
+            // Verificación de escuela acreditada
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            if ($acreditacion) {
+                $tramite->dependencia_acreditado="SÍ";
+                $tramite->fecha_inicio=$acreditacion->fecha_inicio;
+                $tramite->fecha_fin=$acreditacion->fecha_fin;
+                $tramite->idAcreditacion=$acreditacion->idAcreditacion;
+            }else {
+                $tramite->dependencia_acreditado="NO";
+                $tramite->fecha_inicio=null;
+                $tramite->fecha_fin=null;
+                $tramite->idAcreditacion=null;
+            }
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
@@ -1461,7 +1476,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1507,7 +1523,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1546,6 +1563,19 @@ class GradoController extends Controller
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
+            // Verificación de escuela acreditada
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            if ($acreditacion) {
+                $tramite->dependencia_acreditado="SÍ";
+                $tramite->fecha_inicio=$acreditacion->fecha_inicio;
+                $tramite->fecha_fin=$acreditacion->fecha_fin;
+                $tramite->idAcreditacion=$acreditacion->idAcreditacion;
+            }else {
+                $tramite->dependencia_acreditado="NO";
+                $tramite->fecha_inicio=null;
+                $tramite->fecha_fin=null;
+                $tramite->idAcreditacion=null;
+            }
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
@@ -1579,7 +1609,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1619,7 +1650,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1651,6 +1683,19 @@ class GradoController extends Controller
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
+            // Verificación de escuela acreditada
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            if ($acreditacion) {
+                $tramite->dependencia_acreditado="SÍ";
+                $tramite->fecha_inicio=$acreditacion->fecha_inicio;
+                $tramite->fecha_fin=$acreditacion->fecha_fin;
+                $tramite->idAcreditacion=$acreditacion->idAcreditacion;
+            }else {
+                $tramite->dependencia_acreditado="NO";
+                $tramite->fecha_inicio=null;
+                $tramite->fecha_fin=null;
+                $tramite->idAcreditacion=null;
+            }
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
@@ -1675,20 +1720,35 @@ class GradoController extends Controller
 
             // RETORNANDO EL GRADO EDITADO
             $tramite=Tramite::find($request->idTramite);
+            // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
+            $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+            $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
+            $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
+            $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
+            $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
+            $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
+            $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
+            $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
+            $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
+            $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
+            $tramite_detalle->idAcreditacion=$request->idAcreditacion;
+            $tramite_detalle->update();
 
+            // Cambiando el estado
             if ($tramite->idEstado_tramite==36) {
-                // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
-                $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
-                $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
-                $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
-                $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
-                $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
-                $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
-                $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
-                $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
-                $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
-                $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
-                $tramite_detalle->update();
+                // // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
+                // $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                // $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
+                // $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
+                // $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
+                // $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
+                // $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
+                // $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
+                // $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
+                // $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
+                // $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
+                // $tramite_detalle->idAcreditacion=$request->idAcreditacion;
+                // $tramite_detalle->update();
     
     
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
@@ -1712,18 +1772,19 @@ class GradoController extends Controller
                 // Nuevo estado del trámite
                 $tramite->idEstado_tramite=38;
             }elseif($tramite->idEstado_tramite==38) {
-                // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
-                $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
-                $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
-                $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
-                $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
-                $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
-                $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
-                $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
-                $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
-                $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
-                $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
-                $tramite_detalle->update();
+                // // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
+                // $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                // $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
+                // $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
+                // $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
+                // $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
+                // $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
+                // $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
+                // $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
+                // $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
+                // $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
+                // $tramite_detalle->idAcreditacion=$request->idAcreditacion;
+                // $tramite_detalle->update();
     
     
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
@@ -1738,18 +1799,19 @@ class GradoController extends Controller
                 // Nuevo estado del trámite
                 $tramite->idEstado_tramite=7;
             }else {
-                // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
-                $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
-                $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
-                $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
-                $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
-                $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
-                $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
-                $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
-                $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
-                $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
-                $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
-                $tramite_detalle->update();
+                // // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
+                // $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                // $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
+                // $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
+                // $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
+                // $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
+                // $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
+                // $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
+                // $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
+                // $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
+                // $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
+                // $tramite_detalle->idAcreditacion=$request->idAcreditacion;
+                // $tramite_detalle->update();
     
     
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
@@ -2673,7 +2735,7 @@ class GradoController extends Controller
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato',
             'cronograma_carpeta.fecha_colacion','tramite_detalle.diploma_final','tramite_detalle.codigo_diploma',
             'tramite_detalle.impresion','resolucion.nro_resolucion','tramite_detalle.nro_libro','tramite_detalle.folio'
-            ,'tramite_detalle.nro_registro')
+            ,'tramite_detalle.nro_registro','tramite_detalle.observacion_diploma')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -2713,7 +2775,7 @@ class GradoController extends Controller
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato',
             'cronograma_carpeta.fecha_colacion','tramite_detalle.diploma_final','tramite_detalle.codigo_diploma',
             'tramite_detalle.impresion','resolucion.nro_resolucion','tramite_detalle.nro_libro','tramite_detalle.folio'
-            ,'tramite_detalle.nro_registro')
+            ,'tramite_detalle.nro_registro','tramite_detalle.observacion_diploma')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -2892,7 +2954,7 @@ class GradoController extends Controller
                 $historial_estados->save();
             }
             $tramite->update();
-            $tramite->certificado_final=$tramite_detalle->certificado_final;
+            $tramite->diploma_final=$tramite_detalle->diploma_final;
             $tramite->fut="fut/".$tramite->idTramite;
             //Requisitos
             $tramite->requisitos=Tramite_Requisito::select('*')
@@ -2944,6 +3006,7 @@ class GradoController extends Controller
                 $tramite=Tramite::find($request->grado['idTramite']);
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
                 $tramite_detalle->codigo_diploma=$request->grado['codigo_diploma'];
+                $tramite_detalle->observacion_diploma=trim($request->grado['observacion_diploma']);
                 $tramite_detalle->save();
 
                 // Obtenemos todos los trámites pendientes de impresión que sean diferentes al primer trámite que ya se registró
@@ -2957,7 +3020,7 @@ class GradoController extends Controller
                 'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','diploma_carpeta.codigo as diploma',
                 'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro','tramite_detalle.folio'
                 ,'tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','tramite.sede'
-                ,'tramite_detalle.codigo_diploma')
+                ,'tramite_detalle.codigo_diploma','tramite_detalle.observacion_diploma')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -3027,7 +3090,7 @@ class GradoController extends Controller
                 'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','diploma_carpeta.codigo as diploma',
                 'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro','tramite_detalle.folio'
                 ,'tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','tramite.sede'
-                ,'tramite_detalle.codigo_diploma')
+                ,'tramite_detalle.codigo_diploma','tramite_detalle.observacion_diploma')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -3059,6 +3122,7 @@ class GradoController extends Controller
                 $tramite=Tramite::find($request->grado['idTramite']);
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
                 $tramite_detalle->codigo_diploma=$request->grado['codigo_diploma'];
+                $tramite_detalle->observacion_diploma=trim($request->grado['observacion_diploma']);
                 $tramite_detalle->save();
                 
 
@@ -3072,7 +3136,7 @@ class GradoController extends Controller
                 'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','diploma_carpeta.codigo as diploma',
                 'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro','tramite_detalle.folio'
                 ,'tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','tramite.sede'
-                ,'tramite_detalle.codigo_diploma')
+                ,'tramite_detalle.codigo_diploma','tramite_detalle.observacion_diploma')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('unidad','unidad.idUnidad','tramite.idUnidad')
