@@ -2461,6 +2461,7 @@ class GradoController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->diploma_final="diploma/".$tramite->idTramite;
 
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
