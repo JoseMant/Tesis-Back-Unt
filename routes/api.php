@@ -42,6 +42,9 @@ Route::resource('tramites','TramiteController');
 Route::get('tramite/usuario','TramiteController@GetByUser');
 // Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+//tramite fisico
+Route::post('tramites_fisicos','Tramite_FisicoController@PostTramiteFisicoByUser');
+//
 Route::get('tramite/certificados','CertificadoController@GetCertificados');
 Route::post('tramite/asignar','TramiteController@AsignacionTramites');
 Route::get('tramite/certificados/validados','CertificadoController@GetCertificadosValidados');
@@ -94,9 +97,9 @@ Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
 //-----------------PDFs
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
+Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
 Route::get('libro','PDF_LibroController@pdf_libro');
-Route::get('diploma/{idTramite}','PDF_DiplomaController@Diploma');
 //-------------------------------
 
 // Route::resource('cargos','CargoController');
