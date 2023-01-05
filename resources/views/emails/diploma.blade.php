@@ -25,7 +25,7 @@ $cadena_de_texto = $denominacion;
 $cadena_buscada   = ' MENCIÓN :';
 $posicion_coincidencia = strpos($cadena_de_texto, $cadena_buscada);
 
-$fecha = DATE('YY:mm:d');
+$fecha = DATE('Y-m-d');
 $año = substr($fecha, 0, 4);
 $mes = (int)substr($fecha, 5, 2);
 $dia = substr($fecha, 8, 2);
@@ -105,21 +105,25 @@ if ($tramite->idUnidad==1) {
     $escuela=$tramite->escuela;
 }elseif ($tramite->idUnidad==4) {
     $escuela=$tramite->facultad;
-    if ($tramite->idDependencia==17) {
-        $facultad="FACULTAD DE ENFERMERIA";
-    }elseif ($tramite->idDependencia==18) {
-        $facultad="FACULTAD DE CIENCIAS BIOLOGICAS";
-    }elseif ($tramite->idDependencia==19) {
-        $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
-    }elseif ($tramite->idDependencia==20) {
-        $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
-    }elseif ($tramite->idDependencia==21) {
-        $facultad="FACULTAD DE FARMACIA Y BIOQUIMICA";
-    }elseif ($tramite->idDependencia==22) {
-        $facultad="FACULTAD DE MEDICINA";
-    }elseif ($tramite->idDependencia==23) {
-        $facultad="FACULTAD DE ESTOMATOLOGIA";
-    }
+    // consulta con el idDependencia2
+    $dependencia=Dependencia::find($tramite->idDependencia);
+    $dependencia2=Dependencia::find($tramite->idDependencia2);
+    $facultad=$dependencia2->nombre;
+    // if ($tramite->idDependencia==17) {
+    //     $facultad="FACULTAD DE ENFERMERIA";
+    // }elseif ($tramite->idDependencia==18) {
+    //     $facultad="FACULTAD DE CIENCIAS BIOLOGICAS";
+    // }elseif ($tramite->idDependencia==19) {
+    //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
+    // }elseif ($tramite->idDependencia==20) {
+    //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
+    // }elseif ($tramite->idDependencia==21) {
+    //     $facultad="FACULTAD DE FARMACIA Y BIOQUIMICA";
+    // }elseif ($tramite->idDependencia==22) {
+    //     $facultad="FACULTAD DE MEDICINA";
+    // }elseif ($tramite->idDependencia==23) {
+    //     $facultad="FACULTAD DE ESTOMATOLOGIA";
+    // }
 }
 // LÓGICA DE DENOMINACIONES
 $r = '';
@@ -456,6 +460,15 @@ switch ($escuela) {
 }
 // ----------------------------------------
 
+// LÓGICA PARA EL TIPO DE DOCUMENTO
+$tipoDocumento="";
+if ($tramite->tipo_documento==1) {
+    $tipoDocumento="DNI";
+}if ($tramite->tipo_documento==2) {
+    $tipoDocumento="";
+}if ($tramite->tipo_documento==3) {
+    $tipoDocumento="CARNET DE EXTRANJERÍA";
+}
 
 
 
@@ -558,24 +571,24 @@ switch ($escuela) {
         <tr style="margin-bottom: -5px;" valign="top">
             <td style="width: 30%; text-align: center;margin-top: 8px">
                 <hr style=" width:80%;border-bottom: 0px dashed #ccc; background: #999;">
-                SECRETARIA GENERAL (E)<br>
-                <b><?php echo $decano?></b>
+                SECRETARIA GENERAL <br>
+                <b><?php echo $secretaria?></b>
             </td>
             <td style="width: 5%; text-align: center;margin-top: 8px">
                &nbsp; 
             </td>
             <td style="width: 30%; text-align: center;">
                 <hr style="width:80%; margin-bottom: 5px; border-bottom: 0px dashed #ccc; background: #999;">
-                RECTOR<br>
-                <b><?php echo $secretario?></b>
+                RECTOR(A)<br>
+                <b><?php echo $rector?></b>
             </td>
             <td style="width: 5%; text-align: center;margin-top: 8px">
                 &nbsp;
             </td>
             <td style="width: 30%; text-align: center;">
                 <hr style="margin-bottom: 5px; border-bottom: 0px dashed #ccc; background: #999;">
-                <?php echo $rectorCargo?><br>
-                <b><?php echo $rector?></b>
+                DECANO <?php echo $decano->cargo?><br>
+                <b><?php echo $decano->nombres?></b>
             </td>
         </tr>
     </table>
@@ -600,10 +613,10 @@ switch ($escuela) {
                             echo " TÍTULOS ";
                         }
                         ?>
-                        Nº:<b> <?php echo $nrolibro?> </b> <br>
-                        EN EL FOLIO Nº:<b> <?php echo $folio;?></b> <br>
-                        REGISTRO Nº: <b><?php echo $nroRegistro; ?> </b> DE SECRETARIA GENERAL <br>
-                        TIPO DOCUMENTO:<b> <?php echo $tipoDocumento; ?></b> N° DOCUMENTO: <b> <?php echo $nroDoc?></b> <br>
+                        Nº:<b> <?php echo $tramite->nro_libro?> </b> <br>
+                        EN EL FOLIO Nº:<b> <?php echo $tramite->folio;?></b> <br>
+                        REGISTRO Nº: <b><?php echo $tramite->nro_registro; ?> </b> DE SECRETARIA GENERAL <br>
+                        TIPO DOCUMENTO:<b> <?php echo $tipoDocumento; ?></b> N° DOCUMENTO: <b> <?php echo $tramite->nro_documento?></b> <br>
                         DIPLOMA OBTENIDO: <b><?php echo $tipoFicha; ?></b> <br>
                         OBTENIDO POR: <b><?php echo $tipoActo;?></b><br>
                         MODALIDAD DE ESTUDIOS: <b> PRESENCIAL</b>
@@ -612,8 +625,8 @@ switch ($escuela) {
             </td>
             <td>
                 <p  style="font-size: 11px; margin-top: -60px;">
-                    RESOLUCIÓN <?php if(isset($_POST['idgraduadoDup'])) { echo "RECTORAL"; }else{ echo "DE CONSEJO UNIVERSITARIO"; } ?> Nº :<b> <?php echo $numResolucionUniv; ?></b><br>
-                    FECHA RESOLUCIÓN <?php if(isset($_POST['idgraduadoDup'])) { echo "RECTORAL"; }else{ echo "DEL CONSEJO UNIVERSITARIO"; } ?>: <b> <?php echo $fechaResolucionCU; ?></b><br>
+                    RESOLUCIÓN <?php if(isset($_POST['idgraduadoDup'])) { echo "RECTORAL"; }else{ echo "DE CONSEJO UNIVERSITARIO"; } ?> Nº :<b> <?php echo $tramite->nro_resolucion; ?></b><br>
+                    FECHA RESOLUCIÓN <?php if(isset($_POST['idgraduadoDup'])) { echo "RECTORAL"; }else{ echo "DEL CONSEJO UNIVERSITARIO"; } ?>: <b> <?php echo $tramite->fecha_resolucion; ?></b><br>
                     EMISIÓN DE DIPLOMA:  <b><?php echo $diplomasEstado; ?></b><br>
                     <?php if($diplomasEstado=='DUPLICADO') {
                         $date = date_create($fechaEmision);

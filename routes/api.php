@@ -68,6 +68,7 @@ Route::get('tramite/carnets/solicitados','CarnetController@GetCarnetsSolicitados
 Route::get('tramite/carnets/aprobados/refresh','CarnetController@GetCarnetsAprobadosRefresh');
 Route::get('carnets/solicitados/recibidos','CarnetController@setRecibidos');
 Route::get('tramite/carnets/recibidos','CarnetController@GetCarnetsRecibidos');
+Route::get('tramite/carnets/entregados','CarnetController@GetCarnetsEntregados');
 Route::get('carnets/validacion/sunedu','CarnetController@EnvioValidacionSunedu');
 Route::put('carnets/recibidos/finalizar','CarnetController@setEntregado');
 Route::get('tramite/constancias','ConstanciaController@GetConstancias');
@@ -100,6 +101,8 @@ Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
 Route::get('libro','PDF_LibroController@pdf_libro');
+Route::get('diploma/{idTramite}','PDF_DiplomaController@Diploma');
+Route::get('enviados/impresion/{idResolucion}','PDF_Enviados_ImpresionController@pdf_enviados_impresion');
 //-------------------------------
 
 // Route::resource('cargos','CargoController');
@@ -171,7 +174,7 @@ Route::put('grados/registrar/libro', 'GradoController@registrarEnLibro');
 Route::get('grados/firma/decano', 'GradoController@GetGradosFirmaDecano');
 Route::get('grados/firma/secretaria', 'GradoController@GetGradosFirmaSecretaria');
 Route::get('grados/firma/rector', 'GradoController@GetGradosFirmaRector');
-Route::get('grados/pendientes/impresion', 'GradoController@GetGradosPendientesImpresion');
+Route::get('grados/pendientes/impresion/{nro_resolucion}', 'GradoController@GetGradosPendientesImpresion');
 Route::post('grados/upload/{id}','GradoController@uploadDiploma');
 // Route::get('grados/validados/secretaria', 'GradoController@GetGradosValidadosSecretaria');
 Route::get('grados/validados/secretaria/{nro_resolucion}', 'GradoController@GetGradosResolucion');
@@ -181,6 +184,7 @@ Route::get('programas_estudios/carpeta', 'Programa_Estudios_CarpetaController@ge
 Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idDependencia_detalle}', 'Diploma_CarpetaController@getDiplomaCarpetas');
 Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');
 Route::get('dependencia/escuelas/{id}', 'DependenciaController@getEscuelas');
+Route::put('create/codigo', 'GradoController@createCodeDiploma');
 
 
 //DEPENDENCIAS
