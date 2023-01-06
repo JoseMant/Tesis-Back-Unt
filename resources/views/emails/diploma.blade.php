@@ -617,8 +617,8 @@ if ($tramite->tipo_documento==1) {
                         EN EL FOLIO Nº:<b> <?php echo $tramite->folio;?></b> <br>
                         REGISTRO Nº: <b><?php echo $tramite->nro_registro; ?> </b> DE SECRETARIA GENERAL <br>
                         TIPO DOCUMENTO:<b> <?php echo $tipoDocumento; ?></b> N° DOCUMENTO: <b> <?php echo $tramite->nro_documento?></b> <br>
-                        DIPLOMA OBTENIDO: <b><?php echo $tipoFicha; ?></b> <br>
-                        OBTENIDO POR: <b><?php echo $tipoActo;?></b><br>
+                        DIPLOMA OBTENIDO: <b><?php echo $tramite->diploma_obtenido; ?></b> <br>
+                        OBTENIDO POR: <b><?php echo $tramite->acto_academico;?></b><br>
                         MODALIDAD DE ESTUDIOS: <b> PRESENCIAL</b>
                     </p>
                 </div>
