@@ -485,7 +485,8 @@ if ($tramite->tipo_documento==1) {
         <tr border="0">
             <td style="width: 100%; text-align: left;" colspan="5">
                 <?php if ($opcFoto == 1){ ?>
-                    <img src="C:\xampp\htdocs\DRT-ApiTramites\public\storage\firmas_tramites\001111022.jpg" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
+                    /* <img src="C:\xampp\htdocs\DRT-ApiTramites\public\storage\firmas_tramites\001111022.jpg" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;"> */
+                    <img src=<?php echo  public_path().'/img/logo_unt.png' ?> align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
                 <?php }else{ ?>
                     <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
                 <?php } ?>
