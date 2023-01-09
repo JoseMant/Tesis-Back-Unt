@@ -480,13 +480,13 @@ if ($tramite->tipo_documento==1) {
     table.page_header {width: 100%; border: none; background-color: #DDDDFF; border-bottom: solid 1mm #AAAADD; padding: 2mm }
     table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
     table.page_content {width: 100%;border: none; padding: 2mm }
-    #cara1{margin-top: 0px;margin-left: 0px;
-        background-image: url(fondo_degradado.png);
-        height: 793px;
+    #cara1{margin-top: -20px;margin-left: -20px; padding-right:20px ;
+        background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);
+        height: 100%;
     }
-    #cara2{margin-top: 0px;margin-left: 0px;
-        background-image: url(fondo_degradado.png);
-        height: 793px;
+    #cara2{margin-top: -1px;margin-left: -20px; padding-right:10px ;
+        background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);
+        height: 100%;
     }
 -->
 </style>
@@ -497,7 +497,7 @@ if ($tramite->tipo_documento==1) {
         <tr border="0">
             <td style="width: 100%; text-align: left;" colspan="5">
                 <?php if ($opcFoto == 1){ ?>
-                    <img src="<?php echo public_path('\storage')."\ELABORACIÓN DE CARPETA\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
+                    <img src="<?php echo public_path('\storage')."\ELABORACIÓN DE CARPETA\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
                 <?php }else{ ?>
                     <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:27px; padding: 5px; width: 129px; height: 170px;">
                 <?php } ?>
@@ -539,7 +539,7 @@ if ($tramite->tipo_documento==1) {
                 <?php } ?>     
                 <div style="float:right; margin-left: -532mm; ">a:&nbsp;&nbsp;&nbsp;&nbsp;</div>
                 <!--<font style="font-size:45px; font-family: brushib; margin-top:-10mm; "><b><?php //echo $nombreComp;?></b></font>-->
-                <font style="font-size:31px; font-family: coopblb; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
+                <font style="font-size:31px; /*font-family: coopblb;*/ font-family: arial; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
                 </p>
                 <p style="text-align: justify; text-indent: 0px; margin-bottom: 18px; margin-top: -35px; font-size:18px">
                     De la <b><?php echo $facultad ?></b>,
@@ -576,7 +576,6 @@ if ($tramite->tipo_documento==1) {
         </tr>
         <tr style="margin-bottom: -5px;" valign="top">
             <td style="width: 30%; text-align: center;margin-top: 8px">
-                <hr style=" width:80%;border-bottom: 0px dashed #ccc; background: #999;">
                 SECRETARIA GENERAL <br>
                 <b><?php echo $secretaria?></b>
             </td>
@@ -584,7 +583,6 @@ if ($tramite->tipo_documento==1) {
                &nbsp; 
             </td>
             <td style="width: 30%; text-align: center;">
-                <hr style="width:80%; margin-bottom: 5px; border-bottom: 0px dashed #ccc; background: #999;">
                 RECTOR(A)<br>
                 <b><?php echo $rector?></b>
             </td>
@@ -592,7 +590,6 @@ if ($tramite->tipo_documento==1) {
                 &nbsp;
             </td>
             <td style="width: 30%; text-align: center;">
-                <hr style="margin-bottom: 5px; border-bottom: 0px dashed #ccc; background: #999;">
                 DECANO <?php echo $decano->cargo?><br>
                 <b><?php echo $decano->nombres?></b>
             </td>
@@ -611,7 +608,7 @@ if ($tramite->tipo_documento==1) {
             </td>
             <td style="width: 130mm;">
                 <div style="margin-top: -5px; margin-left: -40px;">
-                    <p  style="font-size: 11px; margin-top: -0px; line-height: 15px;">
+                    <p  style="font-size: 11px; margin-top: 0px; line-height: 15px;">
                         CÓDIGO DE UNIVERSIDAD :<b> 004</b><br>
                         REGISTRADO EN EL LIBRO DE
                         <?php 
@@ -632,7 +629,7 @@ if ($tramite->tipo_documento==1) {
                 </div>
             </td>
             <td>
-                <p  style="font-size: 11px; margin-top: -60px;">
+                <p  style="font-size: 11px; margin-top: 0px;">
                     RESOLUCIÓN <?php if(isset($_POST['idgraduadoDup'])) { echo "RECTORAL"; }else{ echo "DE CONSEJO UNIVERSITARIO"; } ?> Nº :<b> <?php echo $tramite->nro_resolucion; ?></b><br>
                     FECHA RESOLUCIÓN <?php if(isset($_POST['idgraduadoDup'])) { echo "RECTORAL"; }else{ echo "DEL CONSEJO UNIVERSITARIO"; } ?>: <b> <?php echo $tramite->fecha_resolucion; ?></b><br>
                     EMISIÓN DE DIPLOMA:  <b><?php echo $diplomasEstado; ?></b><br>
