@@ -474,19 +474,16 @@ if ($tramite->tipo_documento==1) {
 
 ?>
 <style type="text/css">
-<!--
-    table.page_header {width: 100%; border: none; background-color: #DDDDFF; border-bottom: solid 1mm #AAAADD; padding: 2mm }
-    table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
-    table.page_content {width: 100%;border: none; padding: 2mm }
--->
+
 </style>
+
+<img src=<?php echo public_path('\img')."\cabecera_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
 <page backtop="14mm" backbottom="0mm" backleft="10mm" backright="10mm">
     <table class="page_content" border="0">
         <tr border="0">
             <td style="width: 100%; text-align: left;" colspan="5">
                 <?php if ($opcFoto == 1){ ?>
-                    /* <img src="C:\xampp\htdocs\DRT-ApiTramites\public\storage\firmas_tramites\001111022.jpg" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;"> */
-                    <img src=<?php echo  public_path().'/img/logo_unt.png' ?> align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
+                    <img src="<?php echo public_path('\storage')."\ELABORACIÓN DE CARPETA\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
                 <?php }else{ ?>
                     <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
                 <?php } ?>
