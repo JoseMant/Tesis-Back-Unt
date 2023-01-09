@@ -473,28 +473,35 @@ if ($tramite->tipo_documento==1) {
 
 
 ?>
+
+
 <style type="text/css">
-
+<!--
+    table.page_header {width: 100%; border: none; background-color: #DDDDFF; border-bottom: solid 1mm #AAAADD; padding: 2mm }
+    table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
+    table.page_content {width: 100%;border: none; padding: 2mm }
+    #cara1{margin-top: 0px;margin-left: 0px;
+        background-image: url(fondo_degradado.png);
+        height: 793px;
+    }
+    #cara2{margin-top: 0px;margin-left: 0px;
+        background-image: url(fondo_degradado.png);
+        height: 793px;
+    }
+-->
 </style>
-
+<div id="cara1">
 <img src=<?php echo public_path('\img')."\cabecera_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
-<page backtop="14mm" backbottom="0mm" backleft="10mm" backright="10mm">
+<div style="margin-top: 0mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
     <table class="page_content" border="0">
         <tr border="0">
             <td style="width: 100%; text-align: left;" colspan="5">
                 <?php if ($opcFoto == 1){ ?>
                     <img src="<?php echo public_path('\storage')."\ELABORACIÓN DE CARPETA\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
                 <?php }else{ ?>
-                    <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:115px; padding: 5px; width: 129px; height: 170px;">
+                    <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:27px; padding: 5px; width: 129px; height: 170px;">
                 <?php } ?>
-                <p style="text-indent: 70px; text-align: justify; font-size:16px">
-                    &nbsp;<br>
-                    &nbsp;<br>
-                    &nbsp;<br>
-                    &nbsp;<br>
-                    &nbsp;<br>
-                    &nbsp;<br>
-                </p>
+                <p style="text-align: center; font-family: Times; font-size: 25px; font-weight: bold; margin-top: 5px; margin-bottom: 15px; margin-left: 214px">A NOMBRE DE LA NACIÓN</p>
                 <p style="text-align: justify; margin-left: 2px; margin-top: 6px; margin-bottom: 1px; font-size:22px;"><b>El Rector de la Universidad Nacional de Trujillo</b></p>
                 <p style="text-indent: 50px; text-align: justify;  font-family: Times; font-size:18px; margin-bottom: -5px;">
                     Por cuanto:</p>
@@ -532,18 +539,18 @@ if ($tramite->tipo_documento==1) {
                 <?php } ?>     
                 <div style="float:right; margin-left: -532mm; ">a:&nbsp;&nbsp;&nbsp;&nbsp;</div>
                 <!--<font style="font-size:45px; font-family: brushib; margin-top:-10mm; "><b><?php //echo $nombreComp;?></b></font>-->
-                <font style="font-size:31px; /*font-family: coopblb;*/ font-family: arial; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
+                <font style="font-size:31px; font-family: coopblb; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
                 </p>
                 <p style="text-align: justify; text-indent: 0px; margin-bottom: 18px; margin-top: -35px; font-size:18px">
                     De la <b><?php echo $facultad ?></b>,
                     <b>
                         <?php if ($idFicha==1 || $idFicha==2){?>ESCUELA PROFESIONAL DE <?php }?>
                         <?php
-                            if ($escuela=='RESIDENTADO MÉDICO' || $escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $escuela=='TECNOLOGÍA EDUCATIVA' || $escuela=='ESTIMULACIÓN TEMPRANA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $escuela=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $escuela=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
-                                echo buscarDenominaciones($escuela, $diploma);
-                            }else{
-                                echo $escuela;
-                            }
+                        if ($escuela=='RESIDENTADO MÉDICO' || $escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $escuela=='TECNOLOGÍA EDUCATIVA' || $escuela=='ESTIMULACIÓN TEMPRANA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $escuela=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $escuela=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
+                            echo buscarDenominaciones($escuela, $diploma);
+                        }else{
+                            echo $escuela;
+                        }
                         ?>
                     </b>
                     <?php if ($idFicha==7){?> - <b>EDUCACIÓN <?php echo $nombre_escuela_preford ?></b> <?php }?>
@@ -561,6 +568,7 @@ if ($tramite->tipo_documento==1) {
         </tr>
         <tr>
             <td style="width: 100%; text-align: left;" colspan="5">
+                &nbsp;<br>
                 &nbsp;<br>
                 &nbsp;<br>
                 &nbsp;<br>
@@ -590,8 +598,10 @@ if ($tramite->tipo_documento==1) {
             </td>
         </tr>
     </table>
-</page>
-<page pageset="old">
+</div>
+</div>
+<div id="cara2">
+<div style="margin-top: 14mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
     <br>
     <table>
         <tr>
@@ -600,7 +610,7 @@ if ($tramite->tipo_documento==1) {
                 <!--<span style="margin-left: -60px;"> C&oacute;digo para verificar validez del Documento </span>   251e9b-->
             </td>
             <td style="width: 130mm;">
-                <div style="margin-top: -20px; margin-left: -40px;">
+                <div style="margin-top: -5px; margin-left: -40px;">
                     <p  style="font-size: 11px; margin-top: -0px; line-height: 15px;">
                         CÓDIGO DE UNIVERSIDAD :<b> 004</b><br>
                         REGISTRADO EN EL LIBRO DE
@@ -661,4 +671,5 @@ if ($tramite->tipo_documento==1) {
         </tr>
     </table>
     <br>
-</page>
+</div>
+</div>
