@@ -70,7 +70,7 @@ class PDF_DiplomaController extends Controller
                                                 'decano'=>$decano,'secretaria'=>'SECRETARIO DE INGENIERIA','rectorCargo'=>'RECTOR(A)','rector'=>$rector->nombres,
                                             'nrolibro'=>1,'folio'=>1,'nroRegistro'=>12,'nroDoc'=>'75411199','tipoFicha'=>'Bachiller','tipoActo'=>'tesis',
                                         'numResolucionUniv'=>'123-2022','fechaResolucionCU'=>'23/03/2022','diplomasEstado'=>'original','tramite'=>$tramite]));
-            $html2pdf->output('diploma.pdf');
+            $html2pdf->output($tramite->codigo.'.pdf');
         }catch(Html2PdfException $e) {
             echo $e;
             exit;

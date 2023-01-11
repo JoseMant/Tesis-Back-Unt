@@ -3040,7 +3040,7 @@ class GradoController extends Controller
                 ->where('tramite_detalle.nro_registro','!=',null)
                 ->where('tramite.idEstado_tramite',44)
                 ->where('tramite.idTramite','!=',$request->grado['idTramite'])
-                ->where('tramite.idTramite','>',$tramite_detalle->nro_registro)
+                ->where('tramite_detalle.nro_registro','>',$tramite_detalle->nro_registro)
                 ->orderBy('tramite_detalle.nro_libro', 'asc')
                 ->orderBy('tramite_detalle.folio', 'asc')
                 ->orderBy('tramite_detalle.nro_registro', 'asc')
