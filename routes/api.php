@@ -178,6 +178,7 @@ Route::get('grados/pendientes/impresion/{nro_resolucion}', 'GradoController@GetG
 Route::get('grados/finalizados', 'GradoController@GetGradosFinalizados');
 Route::post('grados/upload/{id}','GradoController@uploadDiploma');
 // Route::get('grados/validados/secretaria', 'GradoController@GetGradosValidadosSecretaria');
+Route::get('grados/secretaria/observados', 'GradoController@GetGradosRechazadosSecretaria');
 Route::get('grados/validados/secretaria/{nro_resolucion}', 'GradoController@GetGradosResolucion');
 Route::get('grados/aprobados/secretaria', 'GradoController@GetGradosAprobadosSecretaria');
 Route::get('modalidad/carpeta', 'Modalidad_CarpetaController@getModalidadGrado');

@@ -20,6 +20,7 @@ use App\Jobs\ActualizacionTramiteJob;
 use App\Jobs\ObservacionTramiteJob;
 use App\Jobs\FinalizacionCarnetJob;
 use App\Jobs\NotificacionCertificadoJob;
+use App\Jobs\NotificacionCarpetaJob;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -454,7 +455,7 @@ class TramiteController extends Controller
                             return response()->json(['status' => '400', 'message' => "Seleccionar una fecha de colación"], 400);
                         }
                         // $tramite_detalle->idModalidad_titulo_carpeta=1;//trim($request->idModalidad_titulo_carpeta);//por defecto null por ahora
-                        $tramite_detalle->idMotivo_certificado=null;
+                        $tramite_detalle->idMotivo_certificado=1;
                         break;
                     case 3:
                         $tramite_detalle->idCronograma_carpeta = null;
@@ -535,6 +536,77 @@ class TramiteController extends Controller
                 $historial_estados->idEstado_nuevo=2;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
+
+                // REGISTRAMOS EL CERTIFICADO EN PARALELO CASO EL TRÁMITE SEA ELABORACIÓN DE CARPETA
+                // if ($tipo_tramite_unidad->idTipo_tramite==2) {
+                //     if ($tipo_tramite_unidad->idTipo_tramite_unidad==15 || $tipo_tramite_unidad->idTipo_tramite_unidad==34 
+                //     || ($tipo_tramite_unidad->idTipo_tramite_unidad==16 && $request->idDependencia_detalle==11)) {
+                        
+                //         $tramiteCertificado=new Tramite;
+                //         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
+                //         // REGISTRAMOS EL TRÁMITE
+                //         $tramiteCertificado -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
+                //         $tramiteCertificado -> idTipo_tramite_unidad=37;
+                //         $tramiteCertificado -> idVoucher=$voucher->idVoucher;
+                //         $tramiteCertificado -> idUsuario=$idUsuario;
+                //         $tramiteCertificado -> idUnidad=trim($request->idUnidad);
+                //         $tramiteCertificado -> idDependencia=trim($request->idDependencia);
+                //         $tramiteCertificado -> idDependencia_detalle=trim($request->idDependencia_detalle);
+                //         $tramiteCertificado -> nro_matricula=trim($request->nro_matricula);
+                //         $tramiteCertificado -> comentario=trim($request->comentario);
+                //         $tramiteCertificado -> sede=trim($request->sede);
+                //         $tramiteCertificado->idUsuario_asignado=null;
+                //         $tramiteCertificado -> idEstado_tramite=2;
+                //         $tramiteCertificado->firma_tramite = $tramite->firma_tramite;
+                //         $tramiteCertificado -> save();
+    
+
+                //         // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
+                //         if($request->hasFile("files")){
+                //             foreach ($request->file("files") as $key => $file) {
+                //                 $requisito=json_decode($request->requisitos[$key],true);
+                //                 if ($requisito["idRequisito"]==15||$requisito["idRequisito"]==23) {
+                //                     $tramite_requisito=new Tramite_Requisito;
+                //                     $tramite_requisito->idTramite=$tramiteCertificado->idTramite;
+                //                     $tramite_requisito->idRequisito=$requisito["idRequisito"];
+                //                     $nombre = $dni.".".$file->guessExtension();
+                //                     $nombreBD = "/storage/certificado_estudios/".$requisito["nombre"]."/".$nombre;
+                //                     if ($file->getClientOriginalName()!=="vacio.kj") {
+                //                         if($file->guessExtension()==$requisito["extension"]){
+                //                         $file->storeAs("/public/certificado_estudios/".$requisito["nombre"], $nombre);
+                //                         $tramite_requisito->archivo = $nombreBD;
+                //                         }else {
+                //                             DB::rollback();
+                //                             // return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
+                //                             return response()->json(['status' => '400', 'message' => "Subir ".$requisito["nombre"]." en ".$requisito["extension"]], 400);
+                //                         }
+                //                     }
+                //                     $tramite_requisito -> save();
+                //                 }
+                //             }
+                //         }
+
+                //         //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                //         $historial_estados=new Historial_Estado;
+                //         $historial_estados->idTramite=$tramiteCertificado->idTramite;
+                //         $historial_estados->idUsuario=$idUsuario;
+                //         $historial_estados->idEstado_actual=null;
+                //         $historial_estados->idEstado_nuevo=1;
+                //         $historial_estados->fecha=date('Y-m-d h:i:s');
+                //         $historial_estados->save();
+    
+                //         //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                //         $historial_estados=new Historial_Estado;
+                //         $historial_estados->idTramite=$tramiteCertificado->idTramite;
+                //         $historial_estados->idUsuario=$idUsuario;
+                //         $historial_estados->idEstado_actual=1;
+                //         $historial_estados->idEstado_nuevo=2;
+                //         $historial_estados->fecha=date('Y-m-d h:i:s');
+                //         $historial_estados->save();
+                //     }
+
+                // }
+
 
                 dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                 DB::commit();
@@ -659,7 +731,8 @@ class TramiteController extends Controller
                 ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-                ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite')
+                ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite'
+                ,'tramite_detalle.certificado_final')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1277,29 +1350,42 @@ class TramiteController extends Controller
             $idUsuario=$apy['idUsuario'];
             $uraa=User::find($idUsuario);
             $tramite=Tramite::find($request->idTramite);
-            $tramite->fut="fut/".$tramite->idTramite;
-            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
-            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-            ->where('idTramite',$tramite->idTramite)
-            ->get();
+            // $tramite->fut="fut/".$tramite->idTramite;
+            // $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            // 'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
+            // ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            // ->where('idTramite',$tramite->idTramite)
+            // ->get();
             $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
             $tramite_detalle->mensaje_observacion=trim($request->body);
             $tramite_detalle->update();
             //Envío de correo
             $tipo_tramite_unidad=Tipo_tramite_Unidad::Find($tramite->idTipo_tramite_unidad);
             $tipo_tramite=Tipo_Tramite::Find($tipo_tramite_unidad->idTipo_tramite);
-            $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->first();
-            $secretariaFacultad=User::where('idTipo_usuario',8)->where('idDependencia',$tramite->idDependencia)->first();
-            $secretariaEscuela=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->first();
             $usuario=User::find($tramite->idUsuario);
-            if ($request->cc) {
-                $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo,trim($request->cc)];
-            }else {
-                $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo];
+            if ($tipo_tramite->idTipo_tramite==1) {
+                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->first();
+                $secretariaFacultad=User::where('idTipo_usuario',8)->where('idDependencia',$tramite->idDependencia)->first();
+                $secretariaEscuela=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->first();
+                if ($request->cc) {
+                    $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo,trim($request->cc)];
+                }else {
+                    $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo];
+                }
+                // dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+            }elseif ($tipo_tramite->idTipo_tramite==2) {
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                $historial_estados->idEstado_nuevo=50;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
+                $tramite->idEstado_tramite=50;
+                $tramite->save();
+                dispatch(new NotificacionCarpetaJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             }
-
-            // dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             DB::commit();
             return response()->json(true, 200);
         } catch (\Exception $e) {

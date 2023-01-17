@@ -96,8 +96,8 @@ class RequisitoController extends Controller
         // $dni=$apy['nro_documento'];
         // $idTipo_usuario=$apy['idTipo_usuario'];
         $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
-        // ->where('responsable',4)->get();
-        ->get();
+        ->where('estado',true)->get();
+        // ->get();
         return response()->json(['status' => '200', 'requisitos'=>$requisitos], 200);
     }
 }

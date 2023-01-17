@@ -207,7 +207,7 @@ class PersonaController extends Controller
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $dni=$apy['nro_documento'];
-            // $dni='71914102';
+            // $dni='74043559';
             // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
                 $facultadesTotales=[];
@@ -263,7 +263,9 @@ class PersonaController extends Controller
                 $personaSuv=PersonaSuv::select('persona.idpersona')
                 ->join('sistema.roles_usuario','sistema.roles_usuario.idpersona','persona.idpersona')
                 ->where('sistema.roles_usuario.rol_id',25)
-                ->Where('persona.per_dni',$dni)->first();
+                ->Where('persona.per_dni',$dni)
+                //->Where('persona.per_estado',true)
+                ->first();
                 if ($personaSuv) {
                    //Obtenemos las escuela(s) a la(s) que pertenece dicha persona
                     $alumnoEscuelasSUV=Alumno::select('alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura','patrimonio.estructura.estr_descripcion'
@@ -369,7 +371,7 @@ class PersonaController extends Controller
                     array(
                         'idDependencia'=>13,
                         'idUnidad'=>2,
-                        'nombre'=>'MAESTRÍA',
+                        'nombre'=>'UNIDAD DE CIENCIAS MÉDICAS',
                         'idDependencia2'=>null,
                         'estado'=>1,
                         'subdependencias'=>array(
@@ -386,32 +388,47 @@ class PersonaController extends Controller
                                 'estado'=>1,
                                 'nro_matricula'=>'1023300217',
                                 'sede'=>'SEDE TRUJILLO'
-                            )
-                        )
-                    ),
-                    array(
-                        'idDependencia'=>14,
-                        'idUnidad'=>2,
-                        'nombre'=>'DOCTORADO',
-                        'idDependencia2'=>null,
-                        'estado'=>1,
-                        'subdependencias'=>array(
+                            ),
                             array(
                                 'idPrograma'=>29,
-                                'idDependencia'=>14,
+                                'idDependencia'=>13,
                                 'idUnidad'=>2,
                                 // 'idSGA_PREG'=>73,
                                 // 'idSUV_PREG'=>21,
-                                'nombre'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                                // 'denominacion'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                                // 'descripcion_grado'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                                // 'descripcion_titulo'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                                'nombre'=>'DOCTORADO EN MEDICINA',
+                                // 'denominacion'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
+                                // 'descripcion_grado'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
+                                // 'descripcion_titulo'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
                                 'estado'=>1,
                                 'nro_matricula'=>'1023300217',
                                 'sede'=>'SEDE TRUJILLO'
                             )
                         )
                     )
+                    // ,
+                    // array(
+                    //     'idDependencia'=>14,
+                    //     'idUnidad'=>2,
+                    //     'nombre'=>'DOCTORADO',
+                    //     'idDependencia2'=>null,
+                    //     'estado'=>1,
+                    //     'subdependencias'=>array(
+                    //         array(
+                    //             'idPrograma'=>29,
+                    //             'idDependencia'=>14,
+                    //             'idUnidad'=>2,
+                    //             // 'idSGA_PREG'=>73,
+                    //             // 'idSUV_PREG'=>21,
+                    //             'nombre'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                    //             // 'denominacion'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                    //             // 'descripcion_grado'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                    //             // 'descripcion_titulo'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
+                    //             'estado'=>1,
+                    //             'nro_matricula'=>'1023300217',
+                    //             'sede'=>'SEDE TRUJILLO'
+                    //         )
+                    //     )
+                    // )
                 );
                 return response()->json(['status' => '200', 'dependencias' => $facultadesTotales], 200); 
             }else if($idUnidad==3){ //maestría

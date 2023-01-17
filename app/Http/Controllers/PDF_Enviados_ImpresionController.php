@@ -44,6 +44,7 @@ class PDF_Enviados_ImpresionController extends Controller
       ->join('voucher','tramite.idVoucher','voucher.idVoucher')
       ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
       ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+      ->where('tramite.idEstado_tramite',13)
       ->where('tramite_detalle.nro_libro','!=',null)
       ->where('tramite_detalle.folio','!=',null)
       ->where('tramite_detalle.nro_registro','!=',null)

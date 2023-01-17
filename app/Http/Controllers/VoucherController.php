@@ -12,6 +12,7 @@ use App\Tipo_Tramite_Unidad;
 use App\Tipo_Tramite;
 use App\User;
 use App\Historial_Estado;
+use App\Tramite_Requisito;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -159,6 +160,71 @@ class VoucherController extends Controller
                     $historial_estados->save();
                     $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                     $tramite->update();
+
+                    // REGISTRAMOS EL CERTIFICADO EN PARALELO
+                    if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==34 
+                    || ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==11)) {
+                        $tramiteCertificado=new Tramite;
+                        $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
+                        // REGISTRAMOS EL TRÁMITE
+                        $tramiteCertificado -> idTramite_detalle=$tramite->idTramite_detalle;
+                        $tramiteCertificado -> idTipo_tramite_unidad=37;
+                        $tramiteCertificado -> idVoucher=$tramite->idVoucher;
+                        $tramiteCertificado -> idUsuario=$tramite->idUsuario;
+                        $tramiteCertificado -> idUnidad=$tramite->idUnidad;
+                        $tramiteCertificado -> idDependencia=$tramite->idDependencia;
+                        $tramiteCertificado -> idDependencia_detalle=$tramite->idDependencia_detalle;
+                        $tramiteCertificado -> nro_matricula=$tramite->nro_matricula;
+                        $tramiteCertificado -> comentario=$tramite->comentario;
+                        $tramiteCertificado -> sede=$tramite->sede;
+                        $tramiteCertificado->idUsuario_asignado=null;
+                        $tramiteCertificado -> idEstado_tramite=5;
+                        $tramiteCertificado->firma_tramite = $tramite->firma_tramite;
+                        $tramiteCertificado -> save();
+    
+
+                        // obtenemos el requisito de la foto pasaporte para el certificado paralelo
+                        $requisito_foto=Tramite_Requisito::where('idTramite',$tramite->idTramite)
+                        ->where(function($query) use ($request)
+                        {
+                            $query->where('idRequisito',15)
+                            ->orWhere('idRequisito',23);
+                        })->first();
+
+                        //agregamos ese mismo requisito como parte del certificado paralelo
+                        $tramite_requisito=new Tramite_Requisito;
+                        $tramite_requisito->idTramite=$tramiteCertificado->idTramite;
+                        $tramite_requisito->idRequisito=$requisito_foto->idRequisito;
+                        $tramite_requisito->archivo = $requisito_foto->archivo;
+                        $tramite_requisito -> save();
+
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        $historial_estados_certificado=new Historial_Estado;
+                        $historial_estados_certificado->idTramite=$tramiteCertificado->idTramite;
+                        $historial_estados_certificado->idUsuario=$idUsuario;
+                        $historial_estados_certificado->idEstado_actual=null;
+                        $historial_estados_certificado->idEstado_nuevo=1;
+                        $historial_estados_certificado->fecha=date('Y-m-d h:i:s');
+                        $historial_estados_certificado->save();
+    
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        $historial_estados_certificado=new Historial_Estado;
+                        $historial_estados_certificado->idTramite=$tramiteCertificado->idTramite;
+                        $historial_estados_certificado->idUsuario=$idUsuario;
+                        $historial_estados_certificado->idEstado_actual=1;
+                        $historial_estados_certificado->idEstado_nuevo=2;
+                        $historial_estados_certificado->fecha=date('Y-m-d h:i:s');
+                        $historial_estados_certificado->save();
+
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        $historial_estados_certificado=new Historial_Estado;
+                        $historial_estados_certificado->idTramite=$tramiteCertificado->idTramite;
+                        $historial_estados_certificado->idUsuario=$idUsuario;
+                        $historial_estados_certificado->idEstado_actual=2;
+                        $historial_estados_certificado->idEstado_nuevo=5;
+                        $historial_estados_certificado->fecha=date('Y-m-d h:i:s');
+                        $historial_estados_certificado->save();
+                    }
                 }
             }elseif (strtoupper($request->des_estado_voucher)=="RECHAZADO") {
                 $historial_estados->idEstado_nuevo=4;

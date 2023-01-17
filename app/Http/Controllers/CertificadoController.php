@@ -445,6 +445,8 @@ class CertificadoController extends Controller
                 $historial_estados->idEstado_nuevo=15;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
+                // Envío de correo notificando a decanato
+                
             }
             $tramite->update();
             $tramite->certificado_final=$tramite_detalle->certificado_final;
@@ -473,7 +475,7 @@ class CertificadoController extends Controller
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
             
-            if ($tramite->idEstado_tramite==15) {
+            if ($tramite->idEstado_tramite==15 && $tramite->idTipo_tramite_unidad!=37) {
                 $ruta=public_path().$tramite->certificado_final;
                 dispatch(new EnvioCertificadoJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,$ruta));
             }
@@ -929,7 +931,7 @@ class CertificadoController extends Controller
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tipo_tramite.idTipo_tramite')
+            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tipo_tramite.idTipo_tramite','tramite_detalle.certificado_final')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -959,7 +961,7 @@ class CertificadoController extends Controller
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tipo_tramite.idTipo_tramite')
+            ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tipo_tramite.idTipo_tramite','tramite_detalle.certificado_final')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1076,7 +1078,15 @@ class CertificadoController extends Controller
         try {
             $tramite=Tramite::find($id);
             $requisito=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
-            ->where('idTramite', $tramite->idTramite)->where('requisito.nombre','FOTO CARNET')->first();
+            ->where('idTramite', $tramite->idTramite)
+            // ->where('requisito.nombre','FOTO CARNET')
+            ->where(function($query)
+            {
+                $query->where('requisito.nombre','FOTO CARNET')
+                ->orWhere('requisito.idRequisito',15)
+                ->orWhere('requisito.idRequisito',23);
+            })
+            ->first();
             //PDF file is stored under project/public/download/info.pdf
             $file= public_path(). $requisito->archivo;
             $headers = array(
