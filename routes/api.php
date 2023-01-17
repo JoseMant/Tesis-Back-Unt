@@ -155,7 +155,7 @@ Route::post('cronogramas/create', 'CronogramaController@store');
 Route::put('cronogramas/update/{id}', 'CronogramaController@update');
 Route::get('cronogramas/unidad/dependencia', 'CronogramaController@GetUnidadDependencia');
 
-//GRADOS Y TITULOS
+//GRADOS
 Route::get('grados/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
 Route::get('grados/aprobados/escuela', 'GradoController@GetGradosAprobadosEscuela');
 Route::get('grados/revalidados/escuela', 'GradoController@GetGradosRevalidadosEscuela');
@@ -187,7 +187,33 @@ Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idDependencia_d
 Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');
 Route::get('dependencia/escuelas/{id}', 'DependenciaController@getEscuelas');
 Route::put('create/codigo', 'GradoController@createCodeDiploma');
-
+//TITULOS
+Route::get('titulos/validados/escuela', 'TituloController@GetTitulosValidadosEscuela');
+Route::get('titulos/aprobados/escuela', 'TituloController@GetTitulosAprobadosEscuela');
+Route::get('titulos/revalidados/escuela', 'TituloController@GetTitulosRevalidadosEscuela');
+Route::get('titulos/validados/facultad', 'TituloController@GetTitulosValidadosFacultad');
+Route::get('titulos/aprobados/facultad', 'TituloController@GetTitulosAprobadosFacultad');
+Route::get('titulos/revalidados/facultad', 'TituloController@GetTitulosRevalidadosFacultad');
+Route::get('titulos/diplomas/escuela', 'TituloController@GetTitulosDatosDiplomaEscuela');
+Route::get('titulos/diplomas/facultad', 'TituloController@GetTitulosDatosDiplomaFacultad');
+Route::get('titulos/diplomas/ura', 'TituloController@GetTitulosDatosDiplomaUra');
+Route::get('titulos/validacion/ura', 'TituloController@GetTitulosValidadosUra');
+Route::put('titulos/correccion', 'TituloController@cambiarEstado');
+Route::put('titulos/envio/facultad', 'TituloController@enviarFacultad');
+Route::put('titulos/envio/ura', 'TituloController@enviarUraa');
+Route::put('titulos/envio/escuela', 'TituloController@enviarEscuela');
+Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
+Route::get('titulos/firma/decano', 'TituloController@GetTitulosFirmaDecano');
+Route::get('titulos/firma/secretaria', 'TituloController@GetTitulosFirmaSecretaria');
+Route::get('titulos/firma/rector', 'TituloController@GetTitulosFirmaRector');
+Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
+Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
+Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
+Route::get('titulos/secretaria/observados', 'TituloController@GetTitulosRechazadosSecretaria');
+Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
+Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
+Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
+Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
