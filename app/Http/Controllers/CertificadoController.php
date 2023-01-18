@@ -17,6 +17,7 @@ use App\Tramite_Detalle;
 use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
 use App\Jobs\EnvioCertificadoJob;
+use App\Jobs\NotificacionDecanatoJob;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -339,7 +340,7 @@ class CertificadoController extends Controller
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tramite_detalle.idTramite_detalle','tramite_detalle.certificado_final','tramite.idEstado_tramite',
-            'tramite.idTipo_tramite_unidad')
+            'tramite.idTipo_tramite_unidad','tramite.idDependencia')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -427,6 +428,11 @@ class CertificadoController extends Controller
                 $historial_estados->idEstado_nuevo=13;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
+                
+                /*---------------------- ENVIAR CORREO A DECANATO -------------*/
+                // Datos de correo
+                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->first();
+                dispatch(new NotificacionDecanatoJob($decano,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             }elseif ($tramite->idEstado_tramite==13) {
                 $tramite->idEstado_tramite=15;
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
@@ -445,8 +451,6 @@ class CertificadoController extends Controller
                 $historial_estados->idEstado_nuevo=15;
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
-                // Envío de correo notificando a decanato
-                
             }
             $tramite->update();
             $tramite->certificado_final=$tramite_detalle->certificado_final;
