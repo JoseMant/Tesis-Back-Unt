@@ -2376,7 +2376,7 @@ class GradoController extends Controller
             
             foreach ($tramites as $key => $tramite) {
                 // obtenemos datos del último registro del libro
-                $ultimoRegistro=Libro::orderBy('nro_libro','desc')
+                $ultimoRegistro=Libro::orderBy('nro_registro','desc')
                 ->limit(1)
                 ->first();
                 

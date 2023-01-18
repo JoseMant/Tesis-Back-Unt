@@ -1372,7 +1372,7 @@ class TramiteController extends Controller
                 }else {
                     $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo];
                 }
-                // dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+                dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             }elseif ($tipo_tramite->idTipo_tramite==2) {
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
                 $historial_estados=new Historial_Estado;
