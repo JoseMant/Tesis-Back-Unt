@@ -1407,7 +1407,7 @@ class TituloController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion')
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1453,7 +1453,7 @@ class TituloController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion')
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1537,7 +1537,7 @@ class TituloController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion')
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1578,7 +1578,7 @@ class TituloController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion')
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1657,6 +1657,7 @@ class TituloController extends Controller
             $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
             $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
             $tramite_detalle->idAcreditacion=$request->idAcreditacion;
+            $tramite_detalle->fecha_inicio_acto_academico=$request->fecha_inicio_acto_academico;
             $tramite_detalle->update();
 
             // Cambiando el estado
@@ -1744,7 +1745,8 @@ class TituloController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion'
+            ,'tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')

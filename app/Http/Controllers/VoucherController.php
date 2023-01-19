@@ -119,6 +119,9 @@ class VoucherController extends Controller
                 $historial_estados->save();
                 
                 if ($tipo_tramite->idTipo_tramite==1 || $tipo_tramite->idTipo_tramite==4) {
+                    if ($tipo_tramite->idTipo_tramite==1) {
+                        $tramite->idUsuario_asignado=88;
+                    }
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
                     $historial_estados=new Historial_Estado;
                     $historial_estados->idTramite=$tramite->idTramite;

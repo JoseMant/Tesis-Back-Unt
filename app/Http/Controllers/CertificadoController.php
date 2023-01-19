@@ -714,7 +714,7 @@ class CertificadoController extends Controller
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tramite_detalle.certificado_final','tramite.idEstado_tramite','tramite.idUsuario_asignado',
-            DB::raw('CONCAT(asignado.nombres," ",asignado.apellidos) as usuario_asignado'))
+            DB::raw('CONCAT(asignado.nombres," ",asignado.apellidos) as usuario_asignado'),'estado_tramite.descripcion as estado_tramite')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -725,7 +725,13 @@ class CertificadoController extends Controller
             ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
+            //->where('tramite.idEstado_tramite',7)
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',5)
+                ->orWhere('tramite.idEstado_tramite',7)
+                ->orWhere('tramite.idEstado_tramite',8);
+            })
             ->where('tipo_tramite.idTipo_tramite',1)
             ->where(function($query) use ($request)
             {
@@ -748,7 +754,7 @@ class CertificadoController extends Controller
             ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tramite_detalle.certificado_final','tramite.idEstado_tramite','tramite.idUsuario_asignado',
-            DB::raw('CONCAT(asignado.nombres," ",asignado.apellidos) as usuario_asignado'))
+            DB::raw('CONCAT(asignado.nombres," ",asignado.apellidos) as usuario_asignado'),'estado_tramite.descripcion as estado_tramite')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -759,7 +765,13 @@ class CertificadoController extends Controller
             ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
+            //->where('tramite.idEstado_tramite',7)
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',5)
+                ->orWhere('tramite.idEstado_tramite',7)
+                ->orWhere('tramite.idEstado_tramite',8);
+            })
             ->where('tipo_tramite.idTipo_tramite',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
@@ -769,13 +781,13 @@ class CertificadoController extends Controller
         foreach ($tramites as $key => $tramite) {
             // OBTENER LA CANTIDAD DE DÍAS QUE LLEVA ASIGNADO CADA TRÁMITE
             $hoy=date('y-m-d h:i:s a');
-            $fecha_asignado=Historial_Estado::select('fecha')->where('idTramite',$tramite->idTramite)
-            ->where('idEstado_nuevo',7)
+            $fecha_cambio_estado=Historial_Estado::select('fecha')->where('idTramite',$tramite->idTramite)
+            ->where('idEstado_nuevo',$tramite->idEstado_tramite)
             ->latest('fecha')->first();
-            $tramite->fecha_asignado=$fecha_asignado->fecha;
+            $tramite->fecha_cambio_estado=$fecha_cambio_estado->fecha;
 
             $d1 = date_create($hoy);
-            $d2 = date_create($tramite->fecha_asignado);
+            $d2 = date_create($tramite->fecha_cambio_estado);
 
             $diferencia=$d1->diff($d2);
             $tramite->tiempo=$diferencia->d;

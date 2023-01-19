@@ -11,7 +11,8 @@ class Modalidad_CarpetaController extends Controller
         $this->middleware('jwt');
     }
 
-    public function getModalidadGrado(){
-        return Modalidad_Carpeta::where('estado',1)->get();
+    public function getModalidadGrado($idTipo_tramite_unidad){
+        return Modalidad_Carpeta::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+        ->where('estado',1)->get();
     }
 }

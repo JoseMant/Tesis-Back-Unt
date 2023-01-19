@@ -654,7 +654,7 @@ class TramiteController extends Controller
             foreach ($request->tramites as $key => $idTramite) {
                 $tramite = Tramite::findOrFail($idTramite);
                 
-                if ($tramite->idUsuario_asignado==null) {
+                //if ($tramite->idUsuario_asignado==null) {
                     // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
                     $token = JWTAuth::getToken();
                     $apy = JWTAuth::getPayload($token);
@@ -679,7 +679,7 @@ class TramiteController extends Controller
                     $historial_estados->save();
                     $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                     $tramite->update();
-                }
+                //}
 
                 $tramite->idUsuario_asignado=$request->idUsuario;
                 $tramite->update();
