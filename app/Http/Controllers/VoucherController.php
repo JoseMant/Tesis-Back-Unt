@@ -148,8 +148,13 @@ class VoucherController extends Controller
                     $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                     $tramite->update();
                 }elseif ($tipo_tramite->idTipo_tramite==2) {
-                    // SI EL TRÁMITE ES DE GRADO, SE ASIGNA AUTOMÁTICAMENTE UN USUARIO
-                    $tramite->idUsuario_asignado=67;
+                    // SI EL TRÁMITE ES DE GRADO o TITULO, SE ASIGNA AUTOMÁTICAMENTE UN USUARIO
+                    if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==35 || $tramite->idTipo_tramite_unidad==36) {
+                        $tramite->idUsuario_asignado=67;
+                    }else {
+                        //$tramite->idTipo_tramite_unidad==16 || $tramite->idTipo_tramite_unidad==34
+                        $tramite->idUsuario_asignado=68;
+                    }
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
                     $historial_estados=new Historial_Estado;
                     $historial_estados->idTramite=$tramite->idTramite;
