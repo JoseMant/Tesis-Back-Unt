@@ -659,26 +659,28 @@ class TramiteController extends Controller
                     $token = JWTAuth::getToken();
                     $apy = JWTAuth::getPayload($token);
                     $idUsuarioToken=$apy['idUsuario'];
-    
-                    //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                    $historial_estados=new Historial_Estado;
-                    $historial_estados->idTramite=$tramite->idTramite;
-                    $historial_estados->idUsuario=$idUsuarioToken;
-                    $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                    $historial_estados->idEstado_nuevo=6;
-                    $historial_estados->fecha=date('Y-m-d h:i:s');
-                    $historial_estados->save();
-    
-                    //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                    $historial_estados=new Historial_Estado;
-                    $historial_estados->idTramite=$tramite->idTramite;
-                    $historial_estados->idUsuario=$idUsuarioToken;
-                    $historial_estados->idEstado_actual=6;
-                    $historial_estados->idEstado_nuevo=7;
-                    $historial_estados->fecha=date('Y-m-d h:i:s');
-                    $historial_estados->save();
-                    $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
-                    $tramite->update();
+
+                    if ($tramite->idEstado_tramite==5) {
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        $historial_estados=new Historial_Estado;
+                        $historial_estados->idTramite=$tramite->idTramite;
+                        $historial_estados->idUsuario=$idUsuarioToken;
+                        $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                        $historial_estados->idEstado_nuevo=6;
+                        $historial_estados->fecha=date('Y-m-d h:i:s');
+                        $historial_estados->save();
+        
+                        //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                        $historial_estados=new Historial_Estado;
+                        $historial_estados->idTramite=$tramite->idTramite;
+                        $historial_estados->idUsuario=$idUsuarioToken;
+                        $historial_estados->idEstado_actual=6;
+                        $historial_estados->idEstado_nuevo=7;
+                        $historial_estados->fecha=date('Y-m-d h:i:s');
+                        $historial_estados->save();
+                        $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                        $tramite->update();
+                    }
                 //}
 
                 $tramite->idUsuario_asignado=$request->idUsuario;

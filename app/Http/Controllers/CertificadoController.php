@@ -854,7 +854,12 @@ class CertificadoController extends Controller
             ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
+            //->where('tramite.idEstado_tramite',7)
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',7)
+                ->orWhere('tramite.idEstado_tramite',8);
+            })
             ->where('tipo_tramite.idTipo_tramite',1)
             ->where('tramite.idUsuario_asignado','!=',null)
             ->where(function($query) use ($request)
@@ -889,7 +894,12 @@ class CertificadoController extends Controller
             ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idEstado_tramite',7)
+            //->where('tramite.idEstado_tramite',7)
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',7)
+                ->orWhere('tramite.idEstado_tramite',8);
+            })
             ->where('tipo_tramite.idTipo_tramite',1)
             ->where('tramite.idUsuario_asignado','!=',null)
             ->orderBy($request->query('sort'), $request->query('order'))
