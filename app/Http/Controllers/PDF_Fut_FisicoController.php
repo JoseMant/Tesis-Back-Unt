@@ -14,6 +14,7 @@ use App\PersonaSuv;
 use App\PersonaSga;
 use App\Tipo_Tramite_Unidad;
 use App\Tipo_Tramite;
+use App\Requisito;
 
 class PDF_Fut_FisicoController extends Controller
 {
@@ -29,6 +30,7 @@ class PDF_Fut_FisicoController extends Controller
       $tramite=Tramite_Fisico::findOrFail($idTramite);
       $usuario=User::findOrFail($tramite->idUsuario);
       $dependencia=DependenciaURAA::Where('idDependencia',$tramite->idDependencia)->first();
+      $requisitos = Requisito::where('idTipo_Tramite_Unidad',$tramite->idTipo_tramite_unidad)->where('responsable', 4)->get();
       $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_Tramite_Unidad',$tramite->idTipo_tramite_unidad)->first();
       $tipo_tramite=Tipo_Tramite::Where('idTipo_Tramite',$tipo_tramite_unidad->idTipo_tramite)->first();
       // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -150,6 +152,20 @@ class PDF_Fut_FisicoController extends Controller
         $this->pdf->SetXY(20,$y+10);
         $this->pdf->Cell(170, 4,utf8_decode('Firma'),0,0,'C');
       }
+      $this->pdf->SetFont('times', 'B', 12);
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(8,$y+50);
+      $this->pdf->Cell(110, 4,utf8_decode('NO OLVIDAR ADJUNTAR LOS SIGUIENTES REQUISITOS EN FÍSICO:'),0,0,'L');
+      $this->pdf->SetFont('times', '', 11);
+      $y=$this->pdf->GetY();
+      $this->pdf->SetXY(14,$y+8);
+      $this->pdf->Cell(110, 4,utf8_decode('*COMPROBANTE DE PAGO '.$tipo_tramite_unidad->costo.' SOLES'),0,0,'L');
+      foreach ($requisitos as $key => $requisito) {
+        $y=$this->pdf->GetY();
+        $this->pdf->SetXY(14,$y+8);
+        $this->pdf->Cell(110, 4,utf8_decode('*'.$requisito->nombre),0,0,'L');
+      }
+      
 
       $nombre_descarga = utf8_decode("FUT");
       $this->pdf->SetTitle( $nombre_descarga );
