@@ -207,7 +207,7 @@ class PersonaController extends Controller
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $dni=$apy['nro_documento'];
-            // $dni='74043559';
+            // $dni='71914102';
             // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
                 $facultadesTotales=[];
@@ -248,7 +248,7 @@ class PersonaController extends Controller
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
                                 $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
                                 $escuelaSede->nro_matricula=$escuela->per_login;
-                                if ($escuela->sed_nombre == 'Trujillo') $escuelaSede->sede='SEDE TRUJILLO';
+                                if ($escuela->sed_nombre == 'Trujillo') $escuelaSede->sede='TRUJILLO';
                                 else $escuelaSede->sede=$escuela->sed_nombre;
                                 array_push($escuelas,$escuelaSede);
                             }
@@ -335,7 +335,11 @@ class PersonaController extends Controller
                                     $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
                                 }
                                 $escuelaSede->nro_matricula=$escuela->idalumno;
-                                $escuelaSede->sede=$escuela->sed_descripcion;
+                                if ($escuela->sed_descripcion=="SEDE TRUJILLO") {
+                                    $escuelaSede->sede="TRUJILLO";
+                                }else {
+                                    $escuelaSede->sede=$escuela->sed_descripcion;
+                                }
                                 array_push($escuelas, $escuelaSede);
                             }
                         }
@@ -438,7 +442,7 @@ class PersonaController extends Controller
                   ]);
             }else{
                 // Obtenemos las menciones a las que pertenece el alumno
-                $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','idSegunda_Especialidad')
+                $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','mencion.idSegunda_Especialidad')
                 ->join('mencion','alumno.idMencion','mencion.idMencion')
                 ->Where('alumno.nro_documento',$dni)
                 ->get();
@@ -479,7 +483,11 @@ class PersonaController extends Controller
                         if ($facultad['nombre']===strtoupper($facultadMencion['nombre'])) {
                             $mencionSede=Mencion::where('idSGA_SE',$mencion->idMencion)->first();
                             $mencionSede->nro_matricula=$mencion->codigo;
-                            $mencionSede->sede=$sede->nombre;
+                            if (!$sede) {
+                                $mencionSede->sede="TRUJILLO";
+                            }else {
+                                $mencionSede->sede=$sede->nombre;
+                            }
                             array_push($menciones, $mencionSede);
                         }
                     }
