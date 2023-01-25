@@ -360,7 +360,8 @@ class TramiteController extends Controller
                 //AÑADIMOS EL NÚMERO DE TRÁMITE
                 $inicio=date('Y-m-d')." 00:00:00";
                 $fin=date('Y-m-d')." 23:59:59";
-                $last_tramite=Tramite::whereBetween('created_at', [$inicio , $fin])->orderBy("created_at","DESC")->first();
+                $last_tramite=Tramite::whereBetween('created_at', [$inicio , $fin])->where('idTipo_tramite_unidad','!=',37)
+                ->orderBy("created_at","DESC")->first();
                 
                 if ($last_tramite) {
                     $correlativo=(int)(substr($last_tramite->nro_tramite,0,3));
@@ -609,8 +610,8 @@ class TramiteController extends Controller
                 // }
 
 
-                dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                 DB::commit();
+                dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                 return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente!!'], 200);
             }
         } catch (\Exception $e) {
