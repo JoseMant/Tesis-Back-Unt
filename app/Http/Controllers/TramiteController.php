@@ -361,6 +361,7 @@ class TramiteController extends Controller
                 $inicio=date('Y-m-d')." 00:00:00";
                 $fin=date('Y-m-d')." 23:59:59";
                 $last_tramite=Tramite::whereBetween('created_at', [$inicio , $fin])->orderBy("created_at","DESC")->first();
+                
                 if ($last_tramite) {
                     $correlativo=(int)(substr($last_tramite->nro_tramite,0,3));
                     $correlativo++;
@@ -1000,14 +1001,16 @@ class TramiteController extends Controller
             // $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                $tramite->escuela=$dependenciaDetalle->nombre;
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
                 
             }else{
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+                $tramite->mencion=$dependenciaDetalle->nombre;
             }
-            $tramite->escuela=$dependenciaDetalle->nombre;
+            // $tramite->escuela=$dependenciaDetalle->nombre;
             // mensaje de validación de voucher
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
             $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')
@@ -1168,7 +1171,7 @@ class TramiteController extends Controller
                     }else {
                         $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
                     }
-                    $nombre = $dni.".".$file->guessExtension();
+                    $nombre = $tramite->nro_documento.".".$file->guessExtension();
                     $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
 
                     if ($file->getClientOriginalName()!=="vacio.kj") {
