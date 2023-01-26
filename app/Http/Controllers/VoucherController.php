@@ -196,7 +196,8 @@ class VoucherController extends Controller
                         ->where(function($query) use ($request)
                         {
                             $query->where('idRequisito',15)
-                            ->orWhere('idRequisito',23);
+                            ->orWhere('idRequisito',23)
+                            ->orWhere('idRequisito',61);
                         })->first();
 
                         //agregamos ese mismo requisito como parte del certificado paralelo
