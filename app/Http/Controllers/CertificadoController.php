@@ -431,7 +431,12 @@ class CertificadoController extends Controller
                 
                 /*---------------------- ENVIAR CORREO A DECANATO -------------*/
                 // Datos de correo
-                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->first();
+                $decano=User::join('dependencia','usuario.idDependencia','dependencia.idDependencia')->where('idTipo_usuario',6)
+                ->where('usuario.idDependencia',$tramite->idDependencia)->first();
+                if (!$decano) {
+                    $decano=User::join('dependencia','usuario.idDependencia','dependencia.idDependencia2')->where('idTipo_usuario',6)
+                    ->where('dependencia.idDependencia',$tramite->idDependencia)->first();
+                }
                 dispatch(new NotificacionDecanatoJob($decano,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             }elseif ($tramite->idEstado_tramite==13) {
                 $tramite->idEstado_tramite=15;
