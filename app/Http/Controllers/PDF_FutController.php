@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Tramite;
 use App\User;
@@ -61,11 +61,13 @@ class PDF_FutController extends Controller
       $this->pdf->Cell(129, 4,'FORMATO UNICO DE TRAMITE - F.U.T.',0,0,'C');
 
       // FECHA
+      $fecha = Carbon::parse($tramite->created_at);
+      // return $fecha->day;
       $this->pdf->SetFont('times', '', 12);
       $this->pdf->SetXY(50,35);
       $diassemana = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
       $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
-      $this->pdf->Cell(150, 4,'Fecha: Trujillo, '.date('d')." de ".$meses[date('n')-1]. " del ".date('Y'),0,0,'R');
+      $this->pdf->Cell(150, 4,'Fecha: Trujillo, '.$fecha->day." de ".$meses[($fecha->month)-1]. " del ".$fecha->year,0,0,'R');
       // NOMBRES
       $this->pdf->SetXY(8,45);
       $this->pdf->Cell(50, 4,'Apellidos y Nombres: '.$usuario->apellidos.' '.$usuario->nombres,0,0,'L');
