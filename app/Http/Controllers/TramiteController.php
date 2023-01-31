@@ -1319,14 +1319,17 @@ class TramiteController extends Controller
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
+                $tramite->escuela=$dependenciaDetalle->nombre;
+
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
                 
             }else{
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+                $tramite->mencion=$dependenciaDetalle->nombre;
             }
-            $tramite->escuela=$dependenciaDetalle->nombre;
+            // $tramite->escuela=$dependenciaDetalle->nombre;
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
