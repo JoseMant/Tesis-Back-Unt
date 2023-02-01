@@ -1373,9 +1373,9 @@ class TramiteController extends Controller
             $tipo_tramite=Tipo_Tramite::Find($tipo_tramite_unidad->idTipo_tramite);
             $usuario=User::find($tramite->idUsuario);
             if ($tipo_tramite->idTipo_tramite==1) {
-                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->first();
-                $secretariaFacultad=User::where('idTipo_usuario',8)->where('idDependencia',$tramite->idDependencia)->first();
-                $secretariaEscuela=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->first();
+                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',true)->first();
+                $secretariaFacultad=User::where('idTipo_usuario',8)->where('idDependencia',$tramite->idDependencia)->where('estado',true)->first();
+                $secretariaEscuela=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->where('estado',true)->first();
                 if ($request->cc) {
                     $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo,trim($request->cc)];
                 }else {
