@@ -1274,7 +1274,7 @@ class TituloController extends Controller
                     $matriculaUltima=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->orderBy('mat_fecha','desc')
                     ->limit(1)
                     ->first();
-                    $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
+                    // $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
                     // NUMERO DE CRÉDITOS
                     $nro_creditos=Alumno::select('alu_nrocrdsaprob')->where('idalumno',$tramite->nro_matricula)->first();
                     $tramite->nro_creditos_carpeta=$nro_creditos->alu_nrocrdsaprob;
@@ -1291,7 +1291,7 @@ class TituloController extends Controller
                     ->orderBy('mat_fecha','desc')
                     ->limit(1)
                     ->first();
-                    $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
+                    // $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
                     // Número de créditos SGA
                     $sql=PersonaSga::select('cur.cur_id', 'dma.dma_vez', 'cur.cur_creditos', 'n.not_pr', 'n.not_ap')
                     ->join('perfil','persona.per_id','perfil.per_id')
@@ -1343,7 +1343,7 @@ class TituloController extends Controller
                 ->orderBy('fecha_hora','desc')
                 ->limit(1)
                 ->first();
-                $tramite->fecha_ultima_matricula=$matriculaUltima->fecha_hora;
+                // $tramite->fecha_ultima_matricula=$matriculaUltima->fecha_hora;
 
             }
             // --------------
