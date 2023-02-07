@@ -97,7 +97,21 @@ class TramiteController extends Controller
                         ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
                     })
                     ->orderBy($request->query('sort'), $request->query('order'))
+                    ->take($request->query('size'))
+                    ->skip($request->query('page')*$request->query('size'))
                     ->get();
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                    ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                    ->where(function($query) use ($request)
+                    {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    })
+                    ->count();
                 }elseif($idTipo_usuario==13){
                     // TRÁMITES POR USUARIO
                     $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
@@ -116,6 +130,19 @@ class TramiteController extends Controller
                     })
                     ->orderBy($request->query('sort'), $request->query('order'))
                     ->get();
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                    ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                    ->where('tipo_tramite.idTipo_tramite',1)
+                    ->where(function($query) use ($request)
+                    {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    })
+                    ->count();
                 }else {
                     // TRÁMITES POR USUARIO
                     $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
@@ -134,6 +161,20 @@ class TramiteController extends Controller
                     })
                     ->orderBy($request->query('sort'), $request->query('order'))
                     ->get();
+
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                    ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                    ->Where('tramite.idUsuario',$idUsuario)
+                    ->where(function($query) use ($request)
+                    {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    })
+                    ->count();
                 }
             }else {
                 if ($idTipo_usuario==1) {
@@ -146,7 +187,13 @@ class TramiteController extends Controller
                     ->Where('tramite.idEstado_tramite','!=',29)
                     ->Where('tramite.idEstado_tramite','!=',15)
                     ->orderBy($request->query('sort'), $request->query('order'))
+                    ->take($request->query('size'))
+                    ->skip($request->query('page')*$request->query('size'))
                     ->get();
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
+                    ->count();
                 }elseif($idTipo_usuario==13){
                     // TRÁMITES POR USUARIO
                     $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
@@ -158,7 +205,13 @@ class TramiteController extends Controller
                     ->Where('tramite.idEstado_tramite','!=',15)
                     ->where('tipo_tramite.idTipo_tramite',1)
                     ->orderBy($request->query('sort'), $request->query('order'))
+                    ->take($request->query('size'))
+                    ->skip($request->query('page')*$request->query('size'))
                     ->get();
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
+                    ->count();
                 }elseif($idTipo_usuario==9){
                     // TRÁMITES POR USUARIO
                     $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
@@ -170,7 +223,13 @@ class TramiteController extends Controller
                     ->Where('tramite.idEstado_tramite','!=',15)
                     ->where('tipo_tramite.idTipo_tramite',2)
                     ->orderBy($request->query('sort'), $request->query('order'))
+                    ->take($request->query('size'))
+                    ->skip($request->query('page')*$request->query('size'))
                     ->get();
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
+                    ->count();
                 }
                 else {
                     
@@ -182,7 +241,13 @@ class TramiteController extends Controller
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                     ->Where('tramite.idUsuario',$idUsuario)
                     ->orderBy($request->query('sort'), $request->query('order'))
+                    ->take($request->query('size'))
+                    ->skip($request->query('page')*$request->query('size'))
                     ->get();
+                    $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
+                    ->count();
                 }
             }
             foreach ($tramites as $key => $tramite) {
@@ -199,16 +264,16 @@ class TramiteController extends Controller
                     $item->estado_nuevo=Estado_Tramite::Where('idEstado_tramite',$item->idEstado_nuevo)->first();
                 }
             }
-            $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
+            // $pagination=$this->Paginacion($total, $tramites, $request->query('size'), $request->query('page')+1);
+            $begin = $request->query('page')*$request->query('size');
+            $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+            return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+                'length'    => $total,
+                'size'      => $request->query('size'),
+                'page'      => $request->query('page'),
+                'lastPage'  => (int)($total/$request->query('size')),
                 'startIndex'=> $begin,
-                'endIndex'  => $end - 1
+                'endIndex'  => $end
             ]], 200);
             
         } catch (\Exception $e) {
@@ -216,6 +281,14 @@ class TramiteController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }  
     }
+
+    // public function Paginacion($total, $items, $size, $page = null)
+    // {
+    //     $items = $items instanceof Collection ? $items : Collection::make($items);
+    //     return $response=new LengthAwarePaginator($items->forPage($page, $size), $items->count(), $size, $page, $options);
+
+    //     return response()->json([ => '400', 'message' => $e->getMessage()], 400);
+    // }
 
     public function GetTramitesByUser(Request $request)
     {
@@ -1432,9 +1505,5 @@ class TramiteController extends Controller
         }
     }
 
-    public function Paginacion($items, $size, $page = null, $options = [])
-    {
-        $items = $items instanceof Collection ? $items : Collection::make($items);
-        return $response=new LengthAwarePaginator($items->forPage($page, $size), $items->count(), $size, $page, $options);
-    }
+    
 }
