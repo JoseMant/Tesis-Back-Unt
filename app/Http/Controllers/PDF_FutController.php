@@ -70,7 +70,7 @@ class PDF_FutController extends Controller
       $this->pdf->Cell(150, 4,'Fecha: Trujillo, '.$fecha->day." de ".$meses[($fecha->month)-1]. " del ".$fecha->year,0,0,'R');
       // NOMBRES
       $this->pdf->SetXY(8,45);
-      $this->pdf->Cell(50, 4,'Apellidos y Nombres: '.$usuario->apellidos.' '.$usuario->nombres,0,0,'L');
+      $this->pdf->Cell(50, 4,utf8_decode('Apellidos y Nombres: '.$usuario->apellidos.' '.$usuario->nombres),0,0,'L');
       $this->pdf->Cell(130, 4,'DNI: '.$usuario->nro_documento,0,0,'R');
       // EMAIL
       $this->pdf->SetXY(8,55);
