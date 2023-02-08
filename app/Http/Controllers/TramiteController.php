@@ -405,6 +405,7 @@ class TramiteController extends Controller
                         $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
                         ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
                         ->Where('sga_datos_alumno.con_id',6)
+                        ->Where('perfil.pfl_estado',true)
                         ->Where('per_dni',$dni)
                         ->first();
                         if (!$alumnoSGA) {
@@ -564,7 +565,7 @@ class TramiteController extends Controller
                       $tramite->firma_tramite = $nombreBD;
                     }else{
                         DB::rollback();
-                        return response()->json(['status' => '400', 'message' => "Subir archivo jpg o revisar que no esté dañado"], 400);
+                        return response()->json(['status' => '400', 'message' => "Subir archivo de la firma en jpg o revisar que no esté dañado"], 400);
                     }
                 }else{
                     return response()->json(['status' => '400', 'message' =>"¡Adjuntar firma!"], 400);
