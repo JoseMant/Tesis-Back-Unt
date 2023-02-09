@@ -68,7 +68,7 @@ class TituloController extends Controller
             ->where('tramite.idTipo_tramite_unidad',16)
             ->where(function($query) use ($idDependencia)
             {
-                if ($dependencia) {
+                if ($idDependencia) {
                     if ($idDependencia==15) {
                         $query->where('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
@@ -117,7 +117,7 @@ class TituloController extends Controller
             ->where('tramite.idTipo_tramite_unidad',16)
             ->where(function($query) use ($idDependencia)
             {
-                if ($dependencia) {
+                if ($idDependencia) {
                     if ($idDependencia==15) {
                         $query->where('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
@@ -198,7 +198,7 @@ class TituloController extends Controller
             ->where('tramite.idTipo_tramite_unidad',16)
             ->where(function($query) use ($idDependencia)
             {
-                if ($dependencia) {
+                if ($idDependencia) {
                     if ($idDependencia==15) {
                         $query->where('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
@@ -248,7 +248,7 @@ class TituloController extends Controller
             ->where('tramite.idTipo_tramite_unidad',16)
             ->where(function($query) use ($idDependencia)
             {
-                if ($dependencia) {
+                if ($idDependencia) {
                     if ($idDependencia==15) {
                         $query->where('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
@@ -330,7 +330,7 @@ class TituloController extends Controller
             ->where('tramite.idTipo_tramite_unidad',16)
             ->where(function($query) use ($idDependencia)
             {
-                if ($dependencia) {
+                if ($idDependencia) {
                     if ($idDependencia==15) {
                         $query->where('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
@@ -380,7 +380,7 @@ class TituloController extends Controller
             ->where('tramite.idTipo_tramite_unidad',16)
             ->where(function($query) use ($idDependencia)
             {
-                if ($dependencia) {
+                if ($idDependencia) {
                     if ($idDependencia==15) {
                         $query->where('tramite.idDependencia_detalle',41)
                         ->orWhere('tramite.idDependencia_detalle',42)
@@ -1337,9 +1337,9 @@ class TituloController extends Controller
                 $matriculaPrimera=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->first();
                 if ($matriculaPrimera) {
                     $tramite->fecha_primera_matricula=$matriculaPrimera->mat_fecha;
-                    $matriculaUltima=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->orderBy('mat_fecha','desc')
-                    ->limit(1)
-                    ->first();
+                    // $matriculaUltima=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->orderBy('mat_fecha','desc')
+                    // ->limit(1)
+                    // ->first();
                     // $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
                     // NUMERO DE CRÉDITOS
                     $nro_creditos=Alumno::select('alu_nrocrdsaprob')->where('idalumno',$tramite->nro_matricula)->first();
@@ -1349,14 +1349,18 @@ class TituloController extends Controller
                     $matriculaPrimera=PersonaSga::select('mat_fecha')->join('perfil','persona.per_id','perfil.per_id')
                     ->join('sga_matricula','sga_matricula.pfl_id','perfil.pfl_id')
                     ->where('persona.per_login',$tramite->nro_matricula)->first();
-                    $tramite->fecha_primera_matricula=$matriculaPrimera->mat_fecha;
+                    if ($matriculaPrimera) {
+                        $tramite->fecha_primera_matricula=$matriculaPrimera->mat_fecha;
+                    }else {
+                        $tramite->fecha_primera_matricula=null;
+                    }
                     // ----------------------------------------------------------------
-                    $matriculaUltima=PersonaSga::select('mat_fecha')->join('perfil','persona.per_id','perfil.per_id')
-                    ->join('sga_matricula','sga_matricula.pfl_id','perfil.pfl_id')
-                    ->where('persona.per_login',$tramite->nro_matricula)
-                    ->orderBy('mat_fecha','desc')
-                    ->limit(1)
-                    ->first();
+                    // $matriculaUltima=PersonaSga::select('mat_fecha')->join('perfil','persona.per_id','perfil.per_id')
+                    // ->join('sga_matricula','sga_matricula.pfl_id','perfil.pfl_id')
+                    // ->where('persona.per_login',$tramite->nro_matricula)
+                    // ->orderBy('mat_fecha','desc')
+                    // ->limit(1)
+                    // ->first();
                     // $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
                     // Número de créditos SGA
                     $sql=PersonaSga::select('cur.cur_id', 'dma.dma_vez', 'cur.cur_creditos', 'n.not_pr', 'n.not_ap')
@@ -1382,7 +1386,16 @@ class TituloController extends Controller
                     ;
 
                     $rows_cursos = $sql;
+                    $prom_temporal = 0;
+                    $vez_temporal = 0;
+                    $cod_temporal = 0;
+                    $cred_temporal = 0;
+                    $creditos = 0;
+                    $total_cred = 0;
+                    $total_cur = 0;
                     $total_cred_ap = 0;
+                    $total_cur_ap = 0;
+                    $total_prom = 0;
                     
                     for( $i = 0, $n = count( $rows_cursos ); $i < $n; $i++ ){
                         $obj_cursos = $rows_cursos[$i];
@@ -1402,18 +1415,28 @@ class TituloController extends Controller
                 // Verificando SGA 
                 $matriculaPrimera=PersonaSE::select('matricula.fecha_hora')->join('matricula','alumno.idAlumno','matricula.idAlumno')
                 ->where('alumno.codigo',$tramite->nro_matricula)->first();
-                $tramite->fecha_primera_matricula=$matriculaPrimera->fecha_hora;
+                if ($matriculaPrimera) {
+                    $tramite->fecha_primera_matricula=$matriculaPrimera->fecha_hora;
+                }else {
+                    $tramite->fecha_primera_matricula=null;
+                }
                 // ----------------------------------------------------------------
-                $matriculaUltima=PersonaSE::select('matricula.fecha_hora')->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                ->where('alumno.codigo',$tramite->nro_matricula)
-                ->orderBy('fecha_hora','desc')
-                ->limit(1)
-                ->first();
+                // $matriculaUltima=PersonaSE::select('matricula.fecha_hora')->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                // ->where('alumno.codigo',$tramite->nro_matricula)
+                // ->orderBy('fecha_hora','desc')
+                // ->limit(1)
+                // ->first();
                 // $tramite->fecha_ultima_matricula=$matriculaUltima->fecha_hora;
 
             }
+            // // numero de años
+            // $fechaUltima = Carbon::parse($tramite->fecha_ultima_matricula);
+            // $fechaPrimera = Carbon::parse($tramite->fecha_primera_matricula);
+            // $tramite->nro_años=($fechaUltima->year-$fechaPrimera->year)+1;
             // --------------
             $tramite->fut="fut/".$tramite->idTramite;
+            //Datos del usuario al que pertenece el trámite
+            $usuario=User::findOrFail($tramite->idUsuario)->first();
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {

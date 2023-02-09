@@ -1271,9 +1271,9 @@ class SegundaEspecialidadController extends Controller
                 $matriculaPrimera=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->first();
                 if ($matriculaPrimera) {
                     $tramite->fecha_primera_matricula=$matriculaPrimera->mat_fecha;
-                    $matriculaUltima=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->orderBy('mat_fecha','desc')
-                    ->limit(1)
-                    ->first();
+                    // $matriculaUltima=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->orderBy('mat_fecha','desc')
+                    // ->limit(1)
+                    // ->first();
                     // $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
                     // NUMERO DE CRÉDITOS
                     $nro_creditos=Alumno::select('alu_nrocrdsaprob')->where('idalumno',$tramite->nro_matricula)->first();
@@ -1283,14 +1283,18 @@ class SegundaEspecialidadController extends Controller
                     $matriculaPrimera=PersonaSga::select('mat_fecha')->join('perfil','persona.per_id','perfil.per_id')
                     ->join('sga_matricula','sga_matricula.pfl_id','perfil.pfl_id')
                     ->where('persona.per_login',$tramite->nro_matricula)->first();
-                    $tramite->fecha_primera_matricula=$matriculaPrimera->mat_fecha;
+                    if ($matriculaPrimera) {
+                        $tramite->fecha_primera_matricula=$matriculaPrimera->mat_fecha;
+                    }else {
+                        $tramite->fecha_primera_matricula=null;
+                    }
                     // ----------------------------------------------------------------
-                    $matriculaUltima=PersonaSga::select('mat_fecha')->join('perfil','persona.per_id','perfil.per_id')
-                    ->join('sga_matricula','sga_matricula.pfl_id','perfil.pfl_id')
-                    ->where('persona.per_login',$tramite->nro_matricula)
-                    ->orderBy('mat_fecha','desc')
-                    ->limit(1)
-                    ->first();
+                    // $matriculaUltima=PersonaSga::select('mat_fecha')->join('perfil','persona.per_id','perfil.per_id')
+                    // ->join('sga_matricula','sga_matricula.pfl_id','perfil.pfl_id')
+                    // ->where('persona.per_login',$tramite->nro_matricula)
+                    // ->orderBy('mat_fecha','desc')
+                    // ->limit(1)
+                    // ->first();
                     // $tramite->fecha_ultima_matricula=$matriculaUltima->mat_fecha;
                     // Número de créditos SGA
                     $sql=PersonaSga::select('cur.cur_id', 'dma.dma_vez', 'cur.cur_creditos', 'n.not_pr', 'n.not_ap')
@@ -1336,13 +1340,17 @@ class SegundaEspecialidadController extends Controller
                 // Verificando SGA 
                 $matriculaPrimera=PersonaSE::select('matricula.fecha_hora')->join('matricula','alumno.idAlumno','matricula.idAlumno')
                 ->where('alumno.codigo',$tramite->nro_matricula)->first();
-                $tramite->fecha_primera_matricula=$matriculaPrimera->fecha_hora;
+                if ($matriculaPrimera) {
+                    $tramite->fecha_primera_matricula=$matriculaPrimera->fecha_hora;
+                }else {
+                    $tramite->fecha_primera_matricula=null;
+                }
                 // ----------------------------------------------------------------
-                $matriculaUltima=PersonaSE::select('matricula.fecha_hora')->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                ->where('alumno.codigo',$tramite->nro_matricula)
-                ->orderBy('fecha_hora','desc')
-                ->limit(1)
-                ->first();
+                // $matriculaUltima=PersonaSE::select('matricula.fecha_hora')->join('matricula','alumno.idAlumno','matricula.idAlumno')
+                // ->where('alumno.codigo',$tramite->nro_matricula)
+                // ->orderBy('fecha_hora','desc')
+                // ->limit(1)
+                // ->first();
                 // $tramite->fecha_ultima_matricula=$matriculaUltima->fecha_hora;
 
             }
