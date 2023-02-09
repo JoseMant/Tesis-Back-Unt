@@ -478,6 +478,9 @@ class TramiteController extends Controller
                     if($file->guessExtension()=="pdf"){
                       $file->storeAs('public/exonerados', $nombre);
                       $tramite->exonerado_archivo = $nombreBD;
+                    }else {
+                        DB::rollback();
+                        return response()->json(['status' => '400', 'message' => "Subir archivo de exonerado en pdf"], 400);
                     }
                 }else {
                     if($request->hasFile("archivo")){
@@ -580,10 +583,20 @@ class TramiteController extends Controller
                         $tramite_requisito->idTramite=$tramite->idTramite;
                         $tramite_requisito->idRequisito=$requisito["idRequisito"];
                         $nombre = $dni.".".$file->guessExtension();
-                        $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
+                        if ($tipo_tramite->idTipo_tramite==2) {
+                            $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
+                        }else {
+                            $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
+                        }
+                        // $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
                         if ($file->getClientOriginalName()!=="vacio.kj") {
                             if($file->guessExtension()==$requisito["extension"]){
-                              $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
+                                if ($tipo_tramite->idTipo_tramite==2) {
+                                    $file->storeAs("/public"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"], $nombre);
+                                }else {
+                                    $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
+                                }
+                            //   $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
                               $tramite_requisito->archivo = $nombreBD;
                             }else {
                                 DB::rollback();
@@ -1247,11 +1260,21 @@ class TramiteController extends Controller
                         $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
                     }
                     $nombre = $tramite->nro_documento.".".$file->guessExtension();
-                    $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                    if ($tramite->idTipo_tramite==2) {
+                        $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
+                    }else {
+                        $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                    }
+                    // $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
 
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
-                          $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
+                            if ($tramite->idTipo_tramite==2) {
+                                $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
+                            }else {
+                                $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                            }
+                        //   $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
                           $tramite_requisito->archivo = $nombreBD;
                         }else {
                             DB::rollback();
@@ -1525,7 +1548,7 @@ class TramiteController extends Controller
             
             if ($request->idTipo_tramite==1) {
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
                 ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite')
@@ -1541,7 +1564,7 @@ class TramiteController extends Controller
                 ->find($request->idTramite);
             }else {
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
                 /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite'
@@ -1738,6 +1761,8 @@ class TramiteController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
+    
 
     public function Paginacion($items, $size, $page = null, $options = [])
     {
