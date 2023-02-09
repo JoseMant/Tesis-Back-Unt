@@ -69,11 +69,24 @@ class GradoController extends Controller
             ->where('tramite.idTipo_tramite_unidad',15)
             ->where(function($query) use ($idDependencia)
             {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                if ($dependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
+                // if ($idDependencia) {
+                //     $query->where('tramite.idDependencia_detalle',$idDependencia);
+                // }
             })
-            // ->where('tramite.idDependencia_detalle',$idDependencia)
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -109,8 +122,19 @@ class GradoController extends Controller
             ->where('tramite.idTipo_tramite_unidad',15)
             ->where(function($query) use ($idDependencia)
             {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                if ($dependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -181,8 +205,19 @@ class GradoController extends Controller
             ->where('tramite.idTipo_tramite_unidad',15)
             ->where(function($query) use ($idDependencia)
             {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                if ($dependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->where(function($query) use ($request)
@@ -220,8 +255,19 @@ class GradoController extends Controller
             ->where('tramite.idTipo_tramite_unidad',15)
             ->where(function($query) use ($idDependencia)
             {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                if ($dependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -294,8 +340,19 @@ class GradoController extends Controller
             ->where('tramite.idTipo_tramite_unidad',15)
             ->where(function($query) use ($idDependencia)
             {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                if ($dependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->where(function($query) use ($request)
@@ -333,8 +390,19 @@ class GradoController extends Controller
             ->where('tramite.idTipo_tramite_unidad',15)
             ->where(function($query) use ($idDependencia)
             {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                if ($dependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->orderBy($request->query('sort'), $request->query('order'))
@@ -2237,7 +2305,13 @@ class GradoController extends Controller
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',42)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            // ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             ->where('resolucion.idResolucion',$resolucion->idResolucion)
             ->where(function($query) use ($request)
             {
@@ -2279,9 +2353,19 @@ class GradoController extends Controller
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',42)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             ->where('resolucion.idResolucion',$resolucion->idResolucion)
-            ->orderBy($request->query('sort'), $request->query('order'))
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('tramite.idDependencia_detalle','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
+            // ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
         foreach ($tramites as $key => $tramite) {
@@ -2326,15 +2410,24 @@ class GradoController extends Controller
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',42)
-            ->where('tramite.idTipo_tramite_unidad',15)
             ->where('tipo_tramite_unidad.idTipo_tramite',2)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
+            
             ->where('resolucion.idResolucion',$request->idResolucion)
-            ->orderBy('cronograma_carpeta.fecha_colacion','asc')
-            ->orderBy('usuario.nombres','asc')
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('tramite.idDependencia_detalle','asc')
             ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
             ->get();  
             
             foreach ($tramites as $key => $tramite) {
@@ -2417,11 +2510,18 @@ class GradoController extends Controller
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',44)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             ->where('resolucion.idResolucion',$request->idResolucion)
-            ->orderBy('cronograma_carpeta.fecha_colacion','asc')
-            ->orderBy('usuario.nombres','asc')
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('tramite.idDependencia_detalle','asc')
             ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
             ->get();  
 
             DB::commit();
@@ -2871,7 +2971,12 @@ class GradoController extends Controller
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',44)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             ->where('resolucion.nro_resolucion',$nro_resolucion)
             ->where(function($query) use ($request)
             {
@@ -2911,7 +3016,12 @@ class GradoController extends Controller
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',44)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             ->where('resolucion.nro_resolucion','like','%'.$nro_resolucion.'%')
             ->orderBy('tramite_detalle.nro_libro', 'asc')
             ->orderBy('tramite_detalle.folio', 'asc')
