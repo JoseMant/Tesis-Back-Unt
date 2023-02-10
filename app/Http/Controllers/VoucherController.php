@@ -275,6 +275,7 @@ class VoucherController extends Controller
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite','tipo_tramite.descripcion')
                 ->where('des_estado_voucher','PENDIENTE')
+                ->where('tramite.idEstado_tramite','!=',29)
                 ->where(function($query) use ($request)
                 {
                     $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -299,17 +300,10 @@ class VoucherController extends Controller
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->where('des_estado_voucher','PENDIENTE')
+                ->where('tramite.idEstado_tramite','!=',29)
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }
-            // foreach ($vouchers as $key => $voucher) {
-            //     $voucher->archivo=$voucher->archivo;
-            //     if ($voucher->exonerado==null) {
-            //         $voucher->exonerado="NO";
-            //     }else {
-            //         $voucher->exonerado="SI";
-            //     }
-            // }
             $pagination=$this->Paginacion($vouchers, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
             $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
