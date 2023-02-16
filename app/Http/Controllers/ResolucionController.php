@@ -9,10 +9,16 @@ use App\Resolucion;
 
 class ResolucionController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('jwt');
+    }
+
     public function index(){
-        $cronogramas=Resolucion::where('estado',1)
+        $resoluciones=Resolucion::where('estado',1)
         ->get();
-        return response()->json($cronogramas, 200);
+        return response()->json($resoluciones, 200);
     }
 
     public function store(Request $request){
@@ -32,19 +38,19 @@ class ResolucionController extends Controller
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
             $resolucion->fecha=trim($request->fecha);
             
-            if($request->hasFile("archivoPdf")){
-                $file=$request->file("archivoPdf");
-                // $nombre = $file->getClientOriginalName();
-                $nombre = $request->nro_resolucion;
-                $nombreBD = "/storage/resoluciones/".$nombre;
-                if($file->guessExtension()=="pdf"){
-                  $file->storeAs('public/resoluciones', $nombre);
-                  $resolucion->archivo = $nombreBD;
-                }else {
-                    DB::rollback();
-                    return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
-                }
-            }
+            // if($request->hasFile("archivoPdf")){
+            //     $file=$request->file("archivoPdf");
+            //     // $nombre = $file->getClientOriginalName();
+            //     $nombre = $request->nro_resolucion;
+            //     $nombreBD = "/storage/resoluciones/".$nombre;
+            //     if($file->guessExtension()=="pdf"){
+            //       $file->storeAs('public/resoluciones', $nombre);
+            //       $resolucion->archivo = $nombreBD;
+            //     }else {
+            //         DB::rollback();
+            //         return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
+            //     }
+            // }
             // $resolucion->archivo = "archivo";
             $resolucion->estado =true;
             $resolucion->save();
@@ -84,7 +90,7 @@ class ResolucionController extends Controller
             //     }
             // }
 
-            $resolucion->archivo = "archivo editado";
+            // $resolucion->archivo = "archivo editado";
             $resolucion->estado =trim($request->estado);
             $resolucion->update();
             
