@@ -93,7 +93,9 @@ Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
+Route::post('chancar','TramiteController@chancarExonerado');
 Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
+Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
 //-----------------PDFs
@@ -143,6 +145,7 @@ Route::get('download/fotos', 'ZipController@downloadFotos');
 Route::post('carnets/import/observados', 'CarnetController@import');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::get('carnets/export', 'ExcelController@export');
+Route::get('padron_sunedu', 'PadronController@padron');
 
 
 //Roles
@@ -206,14 +209,14 @@ Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
 Route::get('titulos/firma/decano', 'TituloController@GetTitulosFirmaDecano');
 Route::get('titulos/firma/secretaria', 'TituloController@GetTitulosFirmaSecretaria');
 Route::get('titulos/firma/rector', 'TituloController@GetTitulosFirmaRector');
-Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
+//Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
 Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
 Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::get('titulos/secretaria/observados', 'TituloController@GetTitulosRechazadosSecretaria');
-Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
+//Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
 Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
 Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
-Route::put('create/codigo', 'TituloController@createCodeDiploma');
+//Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 //TITULOS segunda especialidad
 Route::get('titulos/validados/especialidad', 'SegundaEspecialidadController@GetTitulosValidadosEscuela');
@@ -224,9 +227,9 @@ Route::get('titulos/aprobados/facultadSE', 'SegundaEspecialidadController@GetTit
 Route::get('titulos/revalidados/facultadSE', 'SegundaEspecialidadController@GetTitulosRevalidadosFacultad');
 Route::get('titulos/diplomas/especialidad', 'SegundaEspecialidadController@GetTitulosDatosDiplomaEscuela');
 Route::get('titulos/diplomas/facultadSE', 'SegundaEspecialidadController@GetTitulosDatosDiplomaFacultad');
-Route::get('titulos/diplomas/ura', 'SegundaEspecialidadController@GetTitulosDatosDiplomaUra');
-Route::get('titulos/validacion/ura', 'TituloController@GetTitulosValidadosUra');
-Route::put('titulos/correccion', 'TituloController@cambiarEstado');
+Route::get('titulos/diplomas/uraSE', 'SegundaEspecialidadController@GetTitulosDatosDiplomaUra');
+Route::get('titulos/validacion/uraSE', 'SegundaEspecialidadController@GetTitulosValidadosUra');
+Route::put('titulos/correccionSE', 'SegundaEspecialidadController@cambiarEstado');
 Route::put('titulos/envio/facultadSE', 'SegundaEspecialidadController@enviarFacultad');
 Route::put('titulos/envio/ura', 'TituloController@enviarUraa');
 Route::put('titulos/envio/especialidad', 'SegundaEspecialidadController@enviarEscuela');
@@ -240,7 +243,7 @@ Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::get('titulos/secretaria/observados', 'TituloController@GetTitulosRechazadosSecretaria');
 Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
 Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
-Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
+Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 
@@ -254,4 +257,11 @@ Route::post('acreditadas/create', 'AcreditacionController@store');
 Route::get('resoluciones/all', 'ResolucionController@index');
 Route::post('resoluciones/create', 'ResolucionController@store');
 Route::put('resoluciones/update/{id}', 'ResolucionController@update');
-
+// OFICIOS
+Route::get('oficios/all', 'OficioController@index');
+Route::post('oficios/create', 'OficioController@store');
+Route::put('oficios/update/{id}', 'OficioController@update');
+//Reportes
+Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
+Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
+Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGeneral');

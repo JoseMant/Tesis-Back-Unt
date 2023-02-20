@@ -22,6 +22,7 @@ class CronogramaController extends Controller
             ->join('dependencia','cronograma_carpeta.idDependencia','dependencia.idDependencia')
             ->join('tipo_tramite_unidad','cronograma_carpeta.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
             ->join('unidad','cronograma_carpeta.idUnidad','unidad.idUnidad')
+            ->where('cronograma_carpeta.estado',true)
             ->get();
             DB::commit();
             return response()->json($cronogramas, 200);
@@ -38,6 +39,7 @@ class CronogramaController extends Controller
             ->where('cronograma_carpeta.idDependencia',$idDependencia)
             ->where('cronograma_carpeta.idTipo_tramite_unidad',$idTipo_tramite_unidad)
             ->where('cronograma_carpeta.fecha_cierre_alumno','>=',date('Y-m-d'))
+            ->where('cronograma_carpeta.estado',true)
             ->get();
             DB::commit();
             return response()->json($cronogramas, 200);
@@ -63,12 +65,14 @@ class CronogramaController extends Controller
                         ->orWhere('dependencia.nombre','LIKE', '%'.$request->query('query').'%')
                         ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('query').'%');
                     })
+                ->where('cronograma_carpeta.estado',true)                    
                 ->get();
             }else{
                 $cronogramas=Cronograma::select('cronograma_carpeta.*','dependencia.nombre as dependencia','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite')
                 ->join('dependencia','cronograma_carpeta.idDependencia','dependencia.idDependencia')
                 ->join('tipo_tramite_unidad','cronograma_carpeta.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
                 ->join('unidad','cronograma_carpeta.idUnidad','unidad.idUnidad')
+                ->where('cronograma_carpeta.estado',true)
                 ->get();
             }
             DB::commit();

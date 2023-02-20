@@ -1219,7 +1219,7 @@ class SegundaEspecialidadController extends Controller
             ->where(function($query) use ($idDependencia)
             {
                 if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    $query->where('tramite.idDependencia',$idDependencia);
                 }
             })
             ->where(function($query) use ($request)
@@ -1258,7 +1258,7 @@ class SegundaEspecialidadController extends Controller
             ->where(function($query) use ($idDependencia)
             {
                 if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    $query->where('tramite.idDependencia',$idDependencia);
                 }
             })
             ->orderBy($request->query('sort'), $request->query('order'))

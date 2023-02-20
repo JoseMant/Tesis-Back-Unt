@@ -20,7 +20,6 @@
 // $id = $_POST['codigoAlumno'];
 // $diploma = $_POST['diploma'];//cod. diploma
 // $denominacion = $_POST['denominacion'];
-
 $cadena_de_texto =$tramite->denominacion;
 $cadena_buscada   = ' MENCIÓN :';
 $posicion_coincidencia = strpos($cadena_de_texto, $cadena_buscada);
@@ -98,33 +97,33 @@ $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto"
 
 
 // LÓGICA PARA SACAR LA FACULTAD DE LAS SEGUNDAS ESPECIALIDADES
-$facultad='';
-$escuela='';
-if ($tramite->idUnidad==1) {
-    $facultad=$tramite->facultad;
-    $escuela=$tramite->escuela;
-}elseif ($tramite->idUnidad==4) {
-    $escuela=$tramite->facultad;
-    // consulta con el idDependencia2
-    $dependencia=Dependencia::find($tramite->idDependencia);
-    $dependencia2=Dependencia::find($tramite->idDependencia2);
-    $facultad=$dependencia2->nombre;
-    // if ($tramite->idDependencia==17) {
-    //     $facultad="FACULTAD DE ENFERMERIA";
-    // }elseif ($tramite->idDependencia==18) {
-    //     $facultad="FACULTAD DE CIENCIAS BIOLOGICAS";
-    // }elseif ($tramite->idDependencia==19) {
-    //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
-    // }elseif ($tramite->idDependencia==20) {
-    //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
-    // }elseif ($tramite->idDependencia==21) {
-    //     $facultad="FACULTAD DE FARMACIA Y BIOQUIMICA";
-    // }elseif ($tramite->idDependencia==22) {
-    //     $facultad="FACULTAD DE MEDICINA";
-    // }elseif ($tramite->idDependencia==23) {
-    //     $facultad="FACULTAD DE ESTOMATOLOGIA";
-    // }
-}
+$facultad=$tramite->facultad;
+$escuela=$tramite->escuela;
+// if ($tramite->idUnidad==1) {
+//     $facultad=$tramite->facultad;
+//     $escuela=$tramite->escuela;
+// }elseif ($tramite->idUnidad==4) {
+//     $escuela=$tramite->facultad;
+//     // consulta con el idDependencia2
+//     $dependencia=Dependencia::find($tramite->idDependencia);
+//     $dependencia2=Dependencia::find($dependencia->idDependencia2);
+//     $facultad=$dependencia2->nombre;
+//     // if ($tramite->idDependencia==17) {
+//     //     $facultad="FACULTAD DE ENFERMERIA";
+//     // }elseif ($tramite->idDependencia==18) {
+//     //     $facultad="FACULTAD DE CIENCIAS BIOLOGICAS";
+//     // }elseif ($tramite->idDependencia==19) {
+//     //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
+//     // }elseif ($tramite->idDependencia==20) {
+//     //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
+//     // }elseif ($tramite->idDependencia==21) {
+//     //     $facultad="FACULTAD DE FARMACIA Y BIOQUIMICA";
+//     // }elseif ($tramite->idDependencia==22) {
+//     //     $facultad="FACULTAD DE MEDICINA";
+//     // }elseif ($tramite->idDependencia==23) {
+//     //     $facultad="FACULTAD DE ESTOMATOLOGIA";
+//     // }
+// }
 // LÓGICA DE DENOMINACIONES
 $r = '';
 switch ($escuela) {
@@ -498,7 +497,11 @@ if ($tramite->tipo_documento==1) {
             <tr border="0">
                 <td style="width: 100%; text-align: left;" colspan="5">
                     <?php if ($opcFoto == 1){ ?>
-                        <img src="<?php echo public_path('\storage')."\ELABORACIÓN DE CARPETA\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                        <?php if ($tramite->idTipo_tramite_unidad == 34){ ?>
+                            <img src="<?php echo public_path('\storage')."\\elaboracion_carpeta\FOTO ACTUAL TAMAÑO PASAPORTE A COLOR CON EL LOGO DE LA UNT FONDO BLANCO\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                        <?php }else{ ?>
+                            <img src="<?php echo public_path('\storage')."\\elaboracion_carpeta\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                        <?php } ?>
                     <?php }else{ ?>
                         <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:27px; padding: 5px; width: 129px; height: 170px;">
                     <?php } ?>
@@ -577,24 +580,30 @@ if ($tramite->tipo_documento==1) {
             </tr>
             <tr style="margin-bottom: -5px;" valign="top">
                 <td style="width: 30%; text-align: center;margin-top: 8px">
-                
-                    SECRETARIA GENERAL <br>
-                    <b><?php echo $secretaria?></b>
+                    <?php if ($secretaria->sexo=='M'){?>SECRETARIO GENERAL<?php }?>  
+                    <?php if ($secretaria->sexo=='F'){?>SECRETARIA GENERAL<?php }?>  
+                    <?php echo $secretaria->cargo?>
+                    <br>
+                    <b><?php  if ($secretaria->grado){echo $secretaria->grado.". ";} echo $secretaria->nombres?></b>
                 </td>
                 <td style="width: 5%; text-align: center;margin-top: 8px">
                 &nbsp; 
                 </td>
                 <td style="width: 30%; text-align: center;">
-                
-                    RECTOR(A)<br>
-                    <b><?php echo $rector?></b>
+                    <?php if ($rector->sexo=='M'){?>RECTOR<?php }?>    
+                    <?php if ($rector->sexo=='F'){?>RECTORA<?php }?>  
+                    <!-- RECTOR(A) -->
+                    <br>
+                    <b><?php if ($rector->grado){echo $rector->grado.". ";} echo $rector->nombres?></b>
                 </td>
                 <td style="width: 5%; text-align: center;margin-top: 8px">
                     &nbsp;
                 </td>
                 <td style="width: 30%; text-align: center;">
-                    DECANO <?php echo $decano->cargo?><br>
-                    <b><?php echo $decano->nombres?></b>
+                    <?php if ($decano->sexo=='M'){?>DECANO<?php }?>    
+                    <?php if ($decano->sexo=='F'){?>DECANA<?php }?>    
+                    <?php echo $decano->cargo?><br>
+                    <b><?php  if ($decano->grado){echo $decano->grado.". ";} echo $decano->nombres?></b>
                 </td>
             </tr>
         </table>
