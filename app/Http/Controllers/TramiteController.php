@@ -39,7 +39,7 @@ class TramiteController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt');
+        $this->middleware('jwt',['except' => ['chancarExonerado']]);
     }
 
     /**
@@ -394,30 +394,41 @@ class TramiteController extends Controller
 
             
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
+            
+            
+            
             // VERIFICAR QUE LA PERSONA QUE REGISTRA UN TRÁMITE DE GRADO SEA EGRESADO
             if ($tipo_tramite_unidad->idTipo_tramite==2) {
-     
-     
-                if ($request->idUnidad==1) {
-                    $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
-                    ->where('alu_estado',6)->Where('per_dni',$dni)->first();
-                    if (!$alumnoSUV) {
-                        $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
-                        ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
-                        ->Where('sga_datos_alumno.con_id',6)
-                        ->Where('perfil.pfl_estado',true)
-                        ->Where('per_dni',$dni)
-                        ->first();
-                        if (!$alumnoSGA) {
-                            return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+                // VALIDACION DE REPETICIÓN DE TRÁMITES
+                $tramite_validate=Tramite::where('idUsuario',$idUsuario)->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
+                if ($tramite_validate) {
+                    return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
+                }
+
+                // Verificando que sea alumno de universidad no licenciada
+                $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')->where('idmodalidadingreso',8)->Where('per_dni',$dni)->first();
+                if (!$alumnoSUV) {
+                    if ($request->idUnidad==1) {
+                        $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                        ->where('alu_estado',6)->Where('per_dni',$dni)->first();
+                        if (!$alumnoSUV) {
+                            $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
+                            ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
+                            ->Where('sga_datos_alumno.con_id',6)
+                            ->Where('perfil.pfl_estado',true)
+                            ->Where('per_dni',$dni)
+                            ->first();
+                            if (!$alumnoSGA) {
+                                return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+                            }
                         }
+                    }elseif ($request->idUnidad==2) {
+                        
+                    }elseif ($request->idUnidad==3) {
+                        
+                    }else {
+                       
                     }
-                }elseif ($request->idUnidad==2) {
-                    
-                }elseif ($request->idUnidad==3) {
-                    
-                }else {
-                   
                 }
             }
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
@@ -1548,7 +1559,7 @@ class TramiteController extends Controller
             
             if ($request->idTipo_tramite==1) {
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'motivo_certificado.nombre as motivo','tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite')
@@ -1564,7 +1575,7 @@ class TramiteController extends Controller
                 ->find($request->idTramite);
             }else {
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 /*,'motivo_certificado.nombre as motivo'*/,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','tramite.idTipo_tramite_unidad','tipo_tramite.idTipo_tramite'
@@ -1762,7 +1773,18 @@ class TramiteController extends Controller
         }
     }
 
-    
+    public function chancarExonerado(Request $request){
+        if ($request->hasFile("archivo")) {
+            // GUARDAMOS EL ARCHIVO DEL EXONERADO
+            $file=$request->file("archivo");
+            $nombre = $file->getClientOriginalName();
+            // $nombreBD = "/storage/exonerados/".$nombre;
+            if($file->guessExtension()=="pdf"){
+              $file->storeAs('public/elaboracion_carpeta/TÍTULO PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
+            //   $tramite->exonerado_archivo = $nombreBD;
+            }
+        }
+    }
 
     public function Paginacion($items, $size, $page = null, $options = [])
     {

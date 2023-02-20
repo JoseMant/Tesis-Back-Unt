@@ -7,6 +7,7 @@ use Codedge\Fpdf\Fpdf\Fpdf;
 
 class PDF_Enviados_Impresion extends Fpdf
 {
+    
     // public  function __construct(){
     //     $this->FPDF('P', 'mm', array(100,150));
     // }

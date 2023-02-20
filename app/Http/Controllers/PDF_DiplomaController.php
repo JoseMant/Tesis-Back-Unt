@@ -10,6 +10,7 @@ use App\Tramite;
 use App\Escuela;
 use App\Mencion;
 use App\User;
+use App\DependenciaURAA;
 
 class PDF_DiplomaController extends Controller
 {
@@ -42,23 +43,27 @@ class PDF_DiplomaController extends Controller
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
+                $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
+                ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
                 
             }else{
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+                $dependencia=DependenciaURAA::find($tramite->idDependencia);
+                $dependencia2=DependenciaURAA::find($dependencia->idDependencia2);
+                $tramite->facultad=$dependencia2->nombre;
+                // ----------------------------------------
+                $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
+                ->where('idDependencia',$dependencia2->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
 
 
-            $rector=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))->where('idTipo_usuario',12)->first();
-            // $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))
-            // ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->first();
-            $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo')
-            ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->first();
-            $secretaria=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'))
-            ->where('idTipo_usuario',10)->first();
+            $rector=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')->where('idTipo_usuario',12)->where('estado',true)->first();
+            $secretaria=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
+            ->where('idTipo_usuario',10)->where('estado',true)->first();
             // $tramite->escuela="RESIDENTADO MÉDICO";
             // return $tramite;
 
@@ -67,7 +72,7 @@ class PDF_DiplomaController extends Controller
             $html2pdf->writeHTML(view('emails.diploma', ['opcFoto' => 1, 'diploma' => 'T110','ficha' => 'PREGRADO','fotoAlumno'=>'foto',
                                                         'denominacion'=>'BACHILLER EN CIENCIAS DE LA COMUNICACIÓN','nombreComp'=>
                                                     'KEVIN JOEL','facultad'=>' FACULTAD DE INGENIERIA','idFicha'=>$tramite->idUnidad,'escuela'=>'INGENIERIA DE SISTEMAS',
-                                                'decano'=>$decano,'secretaria'=>'SECRETARIO DE INGENIERIA','rectorCargo'=>'RECTOR(A)','rector'=>$rector->nombres,
+                                                'decano'=>$decano,'secretaria'=>$secretaria,'rectorCargo'=>'RECTOR(A)','rector'=>$rector,
                                             'nrolibro'=>1,'folio'=>1,'nroRegistro'=>12,'nroDoc'=>'75411199','tipoFicha'=>'Bachiller','tipoActo'=>'tesis',
                                         'numResolucionUniv'=>'123-2022','fechaResolucionCU'=>'23/03/2022','diplomasEstado'=>'original','tramite'=>$tramite]));
             $html2pdf->output($tramite->codigo.'.pdf');

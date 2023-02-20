@@ -44,7 +44,7 @@ class PDF_Enviados_ImpresionController extends Controller
       ->join('voucher','tramite.idVoucher','voucher.idVoucher')
       ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
       ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-      ->where('tramite.idEstado_tramite',13)
+      ->where('tramite.idEstado_tramite',44)
       ->where('tramite_detalle.nro_libro','!=',null)
       ->where('tramite_detalle.folio','!=',null)
       ->where('tramite_detalle.nro_registro','!=',null)
@@ -113,8 +113,10 @@ class PDF_Enviados_ImpresionController extends Controller
 
 
     foreach ($tramites as $key => $tramite) {
-        
 
+      if ($this->pdf->GetY()>190) {
+        $this->pdf->AddPage('O');
+      }
 
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y);
@@ -176,17 +178,29 @@ class PDF_Enviados_ImpresionController extends Controller
           $this->pdf->MultiCell(34,8,utf8_decode($tramite->escuela),0,'C');
         }
 
-        $this->pdf->SetFont('times', '', 9);
+
+        $this->pdf->SetFont('times', '', 8);
         $tamSede=strlen($tramite->sede);
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+262,$y);
-        if ($tamSede>=16) {
+        if ($tamSede>=12) {
             $this->pdf->MultiCell(25,4,utf8_decode($tramite->sede),0,'C');
-
         }else {
-            $this->pdf->MultiCell(25,8,utf8_decode($tramite->sede),0,'C');
+          $this->pdf->MultiCell(25,8,utf8_decode($tramite->sede),0,'C');
         }
+
+        // $this->pdf->SetFont('times', '', 9);
+        // $tamSede=strlen($tramite->sede);
+        // $x=$this->pdf->GetX();
+        // $this->pdf->SetXY($x+262,$y);
+        // if ($tamSede>=16) {
+        //     $this->pdf->MultiCell(25,4,utf8_decode($tramite->sede),0,'C');
+
+        // }else {
+        //     $this->pdf->MultiCell(25,8,utf8_decode($tramite->sede),0,'C');
+        // }
         
+
     }
 
       $nombre_descarga = utf8_decode("ALUMNOS ENVIADOS A IMPRESIÓN");
