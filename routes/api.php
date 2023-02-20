@@ -243,6 +243,7 @@ Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobados
 Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
+Route::get('carpeta/{id}', 'Carpeta@getDataPersona');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
@@ -254,4 +255,7 @@ Route::post('acreditadas/create', 'AcreditacionController@store');
 Route::get('resoluciones/all', 'ResolucionController@index');
 Route::post('resoluciones/create', 'ResolucionController@store');
 Route::put('resoluciones/update/{id}', 'ResolucionController@update');
-
+// Oficio
+Route::get('oficios/all', 'OficioController@index');
+Route::post('oficios/create', 'OficioController@store');
+Route::put('oficios/update/{id}', 'OficioController@update');
