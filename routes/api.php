@@ -76,6 +76,7 @@ Route::get('tramite/constancias/validados','ConstanciaController@GetConstaciasVa
 Route::get('tramite/constancias/asignados','ConstanciaController@GetConstaciasAsignados');
 Route::get('tramite/constancias/firma_uraa','ConstanciaController@GetConstanciasFirmaUraa');
 Route::get('bancos','BancoController@index');
+Route::get('respuesta','BancoController@respuesta');
 Route::get('tipos_tramites','Tipo_TramiteController@index');
 Route::get('sedes','SedeController@index');
 Route::get('unidades','UnidadController@index');
@@ -181,8 +182,9 @@ Route::get('grados/pendientes/impresion/{nro_resolucion}', 'GradoController@GetG
 Route::get('grados/finalizados', 'GradoController@GetGradosFinalizados');
 Route::post('grados/upload/{id}','GradoController@uploadDiploma');
 // Route::get('grados/validados/secretaria', 'GradoController@GetGradosValidadosSecretaria');
-Route::get('grados/secretaria/observados', 'GradoController@GetGradosRechazadosSecretaria');
-Route::get('grados/validados/secretaria/{nro_resolucion}', 'GradoController@GetGradosResolucion');
+Route::get('secretaria/observados', 'GradoController@GetGradosRechazadosSecretaria');
+Route::get('grados/validados/secretaria/{idResolucion}', 'GradoController@GetGradosResolucion');
+Route::get('resolucion/secretaria/{nro_resolucion}', 'GradoController@GetResolucion');
 Route::get('grados/aprobados/secretaria', 'GradoController@GetGradosAprobadosSecretaria');
 Route::get('modalidad/carpeta/{idTipo_tramite_unidad}', 'Modalidad_CarpetaController@getModalidadGrado');
 Route::get('programas_estudios/carpeta', 'Programa_Estudios_CarpetaController@getProgramaEstudios');
