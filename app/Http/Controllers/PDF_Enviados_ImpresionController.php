@@ -105,11 +105,11 @@ class PDF_Enviados_ImpresionController extends Controller
 
       $x=$this->pdf->GetX();
       $this->pdf->SetXY($x+228,$y+15);
-      $this->pdf->MultiCell(34,8,utf8_decode("ESCUELA"),1,'C');
+      $this->pdf->MultiCell(59,8,utf8_decode("ESCUELA"),1,'C');
 
-      $x=$this->pdf->GetX();
-      $this->pdf->SetXY($x+262,$y+15);
-      $this->pdf->MultiCell(25,8,utf8_decode("SEDE"),1,'C');
+      // $x=$this->pdf->GetX();
+      // $this->pdf->SetXY($x+262,$y+15);
+      // $this->pdf->MultiCell(25,8,utf8_decode("SEDE"),1,'C');
 
 
     foreach ($tramites as $key => $tramite) {
@@ -173,22 +173,23 @@ class PDF_Enviados_ImpresionController extends Controller
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+228,$y);
         if ($tamEscuela>=16) {
-            $this->pdf->MultiCell(34,4,utf8_decode($tramite->escuela),0,'C');
+            $this->pdf->MultiCell(59,4,utf8_decode($tramite->escuela),0,'C');
         }else {
-          $this->pdf->MultiCell(34,8,utf8_decode($tramite->escuela),0,'C');
+          $this->pdf->MultiCell(59,8,utf8_decode($tramite->escuela),0,'C');
         }
 
 
-        $this->pdf->SetFont('times', '', 8);
-        $tamSede=strlen($tramite->sede);
-        $x=$this->pdf->GetX();
-        $this->pdf->SetXY($x+262,$y);
-        if ($tamSede>=12) {
-            $this->pdf->MultiCell(25,4,utf8_decode($tramite->sede),0,'C');
-        }else {
-          $this->pdf->MultiCell(25,8,utf8_decode($tramite->sede),0,'C');
-        }
+        // $this->pdf->SetFont('times', '', 8);
+        // $tamSede=strlen($tramite->sede);
+        // $x=$this->pdf->GetX();
+        // $this->pdf->SetXY($x+262,$y);
+        // if ($tamSede>=12) {
+        //     $this->pdf->MultiCell(25,4,utf8_decode($tramite->sede),0,'C');
+        // }else {
+        //   $this->pdf->MultiCell(25,8,utf8_decode($tramite->sede),0,'C');
+        // }
 
+        $this->pdf->SetY($y+10);
         // $this->pdf->SetFont('times', '', 9);
         // $tamSede=strlen($tramite->sede);
         // $x=$this->pdf->GetX();

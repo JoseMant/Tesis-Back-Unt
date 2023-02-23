@@ -2071,7 +2071,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -2083,7 +2084,12 @@ class GradoController extends Controller
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tramite.idEstado_tramite',50)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
             ->where(function($query) use ($request)
             {
@@ -2111,7 +2117,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -2123,7 +2130,12 @@ class GradoController extends Controller
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tramite.idEstado_tramite',50)
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -2275,7 +2287,7 @@ class GradoController extends Controller
             ]], 200);
     }
 
-    public function GetGradosResolucion(Request $request,$nro_resolucion){
+    public function GetResolucion($nro_resolucion){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
@@ -2285,6 +2297,24 @@ class GradoController extends Controller
         $resolucion=Resolucion::where('nro_resolucion','LIKE','%'.$nro_resolucion.'%')->orderBy('fecha','desc')
         ->limit(1)
         ->first();
+
+        if ($resolucion) {
+            return response()->json(['status' => '200','resolucion'=>$resolucion], 200);
+        }else {
+            return response()->json(['status' => '400','message'=>"Resolución no encontrada"], 400);
+        }
+
+    }
+
+
+    public function GetGradosResolucion(Request $request,$idResolucion){
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+
+
+        $resolucion=Resolucion::find($idResolucion);
 
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
@@ -2299,8 +2329,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite_detalle.nro_libro',
-            'tramite_detalle.folio','tramite_detalle.nro_registro')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico','resolucion.idResolucion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -2347,8 +2377,8 @@ class GradoController extends Controller
             'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite_detalle.nro_libro',
-            'tramite_detalle.folio','tramite_detalle.nro_registro')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico','resolucion.idResolucion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -2391,7 +2421,20 @@ class GradoController extends Controller
             }else{
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
-            $tramite->escuela=$dependenciaDetalle->nombre;
+            $tramite->dependenciaDetalle=$dependenciaDetalle->nombre;
+            // Verificación de escuela acreditada
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            if ($acreditacion) {
+                $tramite->dependencia_acreditado="SÍ";
+                $tramite->fecha_inicio=$acreditacion->fecha_inicio;
+                $tramite->fecha_fin=$acreditacion->fecha_fin;
+                $tramite->idAcreditacion=$acreditacion->idAcreditacion;
+            }else {
+                $tramite->dependencia_acreditado="NO";
+                $tramite->fecha_inicio=null;
+                $tramite->fecha_fin=null;
+                $tramite->idAcreditacion=null;
+            }
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();

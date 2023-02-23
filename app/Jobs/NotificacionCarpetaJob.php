@@ -13,6 +13,7 @@ class NotificacionCarpetaJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $usuario;
+    public $secretariaEscuela;
     public $tramite;
     public $tipo_tramite;
     public $tipo_tramite_unidad;
@@ -22,9 +23,10 @@ class NotificacionCarpetaJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,$notificacion)
+    public function __construct($usuario,$secretariaEscuela,$tramite,$tipo_tramite,$tipo_tramite_unidad,$notificacion)
     {
         $this->usuario = $usuario;
+        $this->secretariaEscuela = $secretariaEscuela;
         $this->tramite = $tramite;
         $this->tipo_tramite = $tipo_tramite;
         $this->tipo_tramite_unidad = $tipo_tramite_unidad;
@@ -38,7 +40,8 @@ class NotificacionCarpetaJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->usuario->correo)
+        Mail::to($this->secretariaEscuela->correo)
+            ->cc($this->usuario->correo)
         ->send(new \App\Mail\NotificacionCarpetaMail($this->usuario,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad,$this->notificacion));
     }
 }

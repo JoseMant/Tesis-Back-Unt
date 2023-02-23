@@ -1501,7 +1501,9 @@ class TramiteController extends Controller
                 $historial_estados->save();
                 $tramite->idEstado_tramite=50;
                 $tramite->save();
-                dispatch(new NotificacionCarpetaJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+                //Correo
+                $secretariaEscuela=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->where('estado',true)->first();
+                dispatch(new NotificacionCarpetaJob($usuario,$secretariaEscuela,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             }
             DB::commit();
             return response()->json(true, 200);

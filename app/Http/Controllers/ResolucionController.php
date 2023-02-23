@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Resolucion;
+use App\Cronograma;
 
 class ResolucionController extends Controller
 {
@@ -18,6 +19,12 @@ class ResolucionController extends Controller
     public function index(){
         $resoluciones=Resolucion::where('estado',1)
         ->get();
+        foreach ($resoluciones as $key => $resolucion) {
+            $resolucion->cronogramas=Cronograma::select('cronograma_carpeta.*','dependencia.nombre','unidad.descripcion')
+            ->join('dependencia','dependencia.idDependencia','cronograma_carpeta.idDependencia')
+            ->join('unidad','unidad.idUnidad','cronograma_carpeta.idUnidad')
+            ->where('idResolucion',$resolucion->idResolucion)->where('cronograma_carpeta.estado',1)->get();
+        }
         return response()->json($resoluciones, 200);
     }
 
