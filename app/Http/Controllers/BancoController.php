@@ -12,6 +12,10 @@ class BancoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function respuesta(){
+        return "hola";
+     }
     public function index()
     {
         return Banco::All();
