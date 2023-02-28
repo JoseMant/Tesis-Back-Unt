@@ -2483,7 +2483,7 @@ class GradoController extends Controller
             
             foreach ($tramites as $key => $tramite) {
                 // obtenemos datos del último registro del libro
-                $ultimoRegistro=Libro::orderBy('nro_registro','desc')
+                $ultimoRegistro=Libro::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->orderBy('nro_registro','desc')
                 ->limit(1)
                 ->first();
                 
@@ -2505,12 +2505,14 @@ class GradoController extends Controller
                     $newRegistro->nro_registro=$ultimoRegistro->nro_registro+1;
                     $newRegistro->contador=$ultimoRegistro->contador+1;
                 }
+                $newRegistro->idTipo_tramite_unidad=$tramite->idTipo_tramite_unidad;
                 $newRegistro->save();
                 //Obtenemos el detalle de cada uno de los trámites Y ACTUALIZAMOS LOS DATOS QUE VAN EN EL LIBRO
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
                 $tramite_detalle->nro_libro=$newRegistro->nro_libro;
                 $tramite_detalle->folio=$newRegistro->folio;
                 $tramite_detalle->nro_registro=$newRegistro->nro_registro;
+                $tramite_detalle->idTipo_tramite_unidad=$newRegistro->idTipo_tramite_unidad;
                 $tramite_detalle->save();
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
