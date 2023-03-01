@@ -153,7 +153,7 @@
                             </p>
 						</div>
             <hr>
-						<a href="https://tramites-uraa.unitru.edu.pe/confirmation-validated/{{$usuario['confirmation_code']}}" target="_blank"><button type="button" class="btn btn-info">Confirmar Correo</button></a>
+						<a href="http://tramites-uraa.unitru.edu.pe/confirmation-validated/{{$usuario['confirmation_code']}}" target="_blank"><button type="button" class="btn btn-info">Confirmar Correo</button></a>
         </div>
         <div class="redes">
             <ul>
