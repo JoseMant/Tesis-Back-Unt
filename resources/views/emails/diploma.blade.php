@@ -480,11 +480,11 @@ if ($tramite->tipo_documento==1) {
         table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
         table.page_content {width: 100%;border: none; padding: 2mm }
         #cara1{margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:50px ;
-            background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);
+            /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
             height: 100%;
         }
         .cara2{margin-top: -1px;margin-left: -20px; padding-right:10px ;
-            background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);
+            /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
             height: 100%;
             
         }
