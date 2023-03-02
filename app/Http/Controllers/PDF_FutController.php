@@ -132,7 +132,7 @@ class PDF_FutController extends Controller
         // FIRMA
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y+40);
-        $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 185, 50, 30); 
+        // $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 185, 50, 30); 
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y);
         $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
@@ -154,7 +154,7 @@ class PDF_FutController extends Controller
         // FIRMA
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y+40);
-        $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 155, 50, 30); 
+        // $this->pdf->Image( public_path().$tramite->firma_tramite, 68, 155, 50, 30); 
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y-5);
         $this->pdf->Cell(110, 4,utf8_decode('_______________________'),0,0,'R');
