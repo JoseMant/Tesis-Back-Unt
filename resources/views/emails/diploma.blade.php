@@ -610,7 +610,7 @@ if ($tramite->tipo_documento==1) {
     </div>
 </div>
 
-<div  style="background-image:url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); width: 100%; height: auto; position:  absolute; margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:160px ;">
+<div  style=" width: 100%; height: auto; position:  absolute; margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:160px ;">
     <div style="margin-top: 14mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
         <br>
         <table >
