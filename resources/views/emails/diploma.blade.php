@@ -480,11 +480,11 @@ if ($tramite->tipo_documento==1) {
         table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
         table.page_content {width: 100%;border: none; padding: 2mm }
         #cara1{margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:50px ;
-            background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);
+            /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
             height: 100%;
         }
         .cara2{margin-top: -1px;margin-left: -20px; padding-right:10px ;
-            background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);
+            /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
             height: 100%;
             
         }
@@ -610,7 +610,7 @@ if ($tramite->tipo_documento==1) {
     </div>
 </div>
 
-<div  style="background-image:url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); width: 100%; height: auto; position:  absolute; margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:160px ;">
+<div  style=" width: 100%; height: auto; position:  absolute; margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:160px ;">
     <div style="margin-top: 14mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
         <br>
         <table >
