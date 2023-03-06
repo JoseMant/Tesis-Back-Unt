@@ -11,6 +11,7 @@ use App\Escuela;
 use App\Mencion;
 use App\User;
 use App\DependenciaURAA;
+use App\Tramite_Requisito;
 
 class PDF_DiplomaController extends Controller
 {
@@ -59,7 +60,13 @@ class PDF_DiplomaController extends Controller
                 ->where('idDependencia',$dependencia2->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
             }
             $tramite->escuela=$dependenciaDetalle->nombre;
-
+            $requisito_foto=Tramite_Requisito::where('idTramite',$tramite->idTramite)
+            ->where(function($query)
+            {
+                $query->where('idRequisito',15)
+                ->orWhere('idRequisito',23)
+                ->orWhere('idRequisito',61);
+            })->first();
 
             $rector=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')->where('idTipo_usuario',12)->where('estado',true)->first();
             $secretaria=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
@@ -69,7 +76,7 @@ class PDF_DiplomaController extends Controller
 
 
             $html2pdf = new Html2Pdf('L', 'A4', 'es', true, 'UTF-8');
-            $html2pdf->writeHTML(view('emails.diploma', ['opcFoto' => 1, 'diploma' => 'T110','ficha' => 'PREGRADO','fotoAlumno'=>'foto',
+            $html2pdf->writeHTML(view('emails.diploma', ['opcFoto' => 1, 'diploma' => 'T110','ficha' => 'PREGRADO','fotoAlumno'=>$requisito_foto->archivo,
                                                         'denominacion'=>'BACHILLER EN CIENCIAS DE LA COMUNICACIÓN','nombreComp'=>
                                                     'KEVIN JOEL','facultad'=>' FACULTAD DE INGENIERIA','idFicha'=>$tramite->idUnidad,'escuela'=>'INGENIERIA DE SISTEMAS',
                                                 'decano'=>$decano,'secretaria'=>$secretaria,'rectorCargo'=>'RECTOR(A)','rector'=>$rector,

@@ -405,8 +405,15 @@ class TramiteController extends Controller
                     return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
                 }
 
-                // Verificando que sea alumno de universidad no licenciada
-                $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')->where('idmodalidadingreso',8)->Where('per_dni',$dni)->first();
+                // Verificando que sea alumno de universidad no licenciada o amnistiados
+                $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                // ->where('idmodalidadingreso',8)
+                ->where(function($query)
+                {
+                    $query->where('idmodalidadingreso',8)
+                    ->orWhere('idmodalidadingreso',9);
+                })
+                ->Where('per_dni',$dni)->first();
                 if (!$alumnoSUV) {
                     if ($request->idUnidad==1) {
                         $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
