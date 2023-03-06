@@ -500,9 +500,9 @@ if ($tramite->tipo_documento==1) {
                 <td style="width: 100%; text-align: left;" colspan="5">
                     <?php if ($opcFoto == 1){ ?>
                         <?php if ($tramite->idTipo_tramite_unidad == 34){ ?>
-                            <img src="<?php echo public_path('\storage')."\\elaboracion_carpeta\FOTO ACTUAL TAMAÑO PASAPORTE A COLOR CON EL LOGO DE LA UNT FONDO BLANCO\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                            <img src="<?php echo public_path().$fotoAlumno?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
                         <?php }else{ ?>
-                            <img src="<?php echo public_path('\storage')."\\elaboracion_carpeta\FOTO PASAPORTE\\".$tramite->nro_documento.".jpg"?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                            <img src="<?php echo public_path().$fotoAlumno?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
                         <?php } ?>
                     <?php }else{ ?>
                         <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:27px; padding: 5px; width: 129px; height: 170px;">
