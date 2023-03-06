@@ -81,7 +81,7 @@ class PDF_DiplomaController extends Controller
                                                     'KEVIN JOEL','facultad'=>' FACULTAD DE INGENIERIA','idFicha'=>$tramite->idUnidad,'escuela'=>'INGENIERIA DE SISTEMAS',
                                                 'decano'=>$decano,'secretaria'=>$secretaria,'rectorCargo'=>'RECTOR(A)','rector'=>$rector,
                                             'nrolibro'=>1,'folio'=>1,'nroRegistro'=>12,'nroDoc'=>'75411199','tipoFicha'=>'Bachiller','tipoActo'=>'tesis',
-                                        'numResolucionUniv'=>'123-2022','fechaResolucionCU'=>'23/03/2022','diplomasEstado'=>'original','tramite'=>$tramite]));
+                                        'numResolucionUniv'=>'123-2022','fechaResolucionCU'=>'23/03/2022','diplomasEstado'=>'ORIGINAL','tramite'=>$tramite]));
             $html2pdf->output($tramite->codigo.'.pdf');
         }catch(Html2PdfException $e) {
             echo $e;

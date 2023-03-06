@@ -24,7 +24,7 @@ $cadena_de_texto =$tramite->denominacion;
 $cadena_buscada   = ' MENCIÓN :';
 $posicion_coincidencia = strpos($cadena_de_texto, $cadena_buscada);
 
-$fecha = DATE('Y-m-d');
+$fecha = DATE($tramite->fecha_colacion);
 $año = substr($fecha, 0, 4);
 $mes = (int)substr($fecha, 5, 2);
 $dia = substr($fecha, 8, 2);
@@ -90,7 +90,7 @@ $dia = substr($fecha, 8, 2);
 // }
 
 // ob_start();
-$msg = "www.diplomas.unitru.edu.pe/consulta.php?id=1";
+$msg = "tramites-uraa.unitru.edu.pe/carpeta/".$tramite->idTramite;
 // $dias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
 $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 
@@ -483,15 +483,17 @@ if ($tramite->tipo_documento==1) {
             /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
             height: 100%;
         }
-        .cara2{margin-top: -1px;margin-left: -20px; padding-right:10px ;
-            /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
-            height: 100%;
+        #cara2{
+            /* background-image:url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);  */
+            width: 100%; 
+            height: auto; position:  absolute; 
+            margin-top: -20px;margin-left: -20px; padding-right:23px ;padding-bottom:160px ;
             
         }
     
 </style>
 <div id="cara1">
-    <img src=<?php echo public_path('\img')."\cabecera_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
+    <img src=<?php echo public_path('\img')."\cabecera_vacia_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
     <div style="margin-top: 0mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
         <table class="page_content" border="0">
             <tr border="0">
@@ -505,7 +507,8 @@ if ($tramite->tipo_documento==1) {
                     <?php }else{ ?>
                         <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:27px; padding: 5px; width: 129px; height: 170px;">
                     <?php } ?>
-                    <p style="text-align: center; font-family: Times; font-size: 25px; font-weight: bold; margin-top: 5px; margin-bottom: 15px; margin-left: 214px">A NOMBRE DE LA NACIÓN</p>
+                    <!-- <p style="text-align: center; font-family: Times; font-size: 25px; font-weight: bold; margin-top: 5px; margin-bottom: 15px; margin-left: 214px">A NOMBRE DE LA NACIÓN</p> -->
+                    <p style="text-align: center; font-family: Times; font-size: 25px; font-weight: bold; margin-top: 5px; margin-bottom: 15px; margin-left: 214px">&nbsp;</p>
                     <p style="text-align: justify; margin-left: 2px; margin-top: 6px; margin-bottom: 1px; font-size:22px;"><b>El Rector de la Universidad Nacional de Trujillo</b></p>
                     <p style="text-indent: 50px; text-align: justify;  font-family: Times; font-size:18px; margin-bottom: -5px;">
                         Por cuanto:</p>
@@ -610,7 +613,7 @@ if ($tramite->tipo_documento==1) {
     </div>
 </div>
 
-<div  style=" width: 100%; height: auto; position:  absolute; margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:160px ;">
+<div id="cara2">
     <div style="margin-top: 14mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
         <br>
         <table >
