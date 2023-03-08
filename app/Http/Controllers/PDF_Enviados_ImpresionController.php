@@ -105,7 +105,7 @@ class PDF_Enviados_ImpresionController extends Controller
 
       $x=$this->pdf->GetX();
       $this->pdf->SetXY($x+228,$y+15);
-      $this->pdf->MultiCell(59,8,utf8_decode("ESCUELA"),1,'C');
+      $this->pdf->MultiCell(59,8,utf8_decode("PROGRAMA"),1,'C');
 
       // $x=$this->pdf->GetX();
       // $this->pdf->SetXY($x+262,$y+15);

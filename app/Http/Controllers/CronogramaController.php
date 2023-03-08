@@ -237,6 +237,27 @@ class CronogramaController extends Controller
             return response()->json(["idDependencia"=>"","idUnidad"=>""], 200);
         }
     }
+
+    public function getCronogramasLibres($idResolucion){
+        $cronogramas=Cronograma::select('cronograma_carpeta.*','unidad.descripcion as unidad','dependencia.nombre as dependencia')
+        ->join('dependencia','dependencia.idDependencia','cronograma_carpeta.idDependencia')
+        ->join('unidad','unidad.idUnidad','cronograma_carpeta.idUnidad')
+        ->where(function($query) use ($idResolucion)
+        {
+            if ($idResolucion!=0) {
+                $query->where('idResolucion',null)
+                ->orWhere('idResolucion',$idResolucion);
+            }else {
+                $query->where('idResolucion',null);
+            }
+            
+        })
+        ->where('cronograma_carpeta.estado',1)
+        ->orderBy('cronograma_carpeta.fecha_colacion')
+        ->get();
+        return response()->json($cronogramas, 200);
+
+    }
 }
 
 
