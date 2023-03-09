@@ -158,6 +158,7 @@ Route::get('cronogramas/search', 'CronogramaController@buscar');
 Route::post('cronogramas/create', 'CronogramaController@store');
 Route::put('cronogramas/update/{id}', 'CronogramaController@update');
 Route::get('cronogramas/unidad/dependencia', 'CronogramaController@GetUnidadDependencia');
+Route::get('resolucion/cronogramas/{idResolucion}', 'CronogramaController@getCronogramasLibres');
 
 //GRADOS
 Route::get('grados/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
