@@ -239,7 +239,13 @@ class CronogramaController extends Controller
     }
 
     public function getCronogramasLibres($idResolucion){
-        $cronogramas=Cronograma::select('cronograma_carpeta.*','unidad.descripcion as unidad','dependencia.nombre as dependencia')
+        $cronogramas=Cronograma::select('cronograma_carpeta.*',
+        DB::raw("(case 
+                    when cronograma_carpeta.idTipo_tramite_unidad = 15 then CONCAT(unidad.descripcion,'-','BACHILLER') 
+                    when cronograma_carpeta.idTipo_tramite_unidad = 16 then CONCAT(unidad.descripcion,'-','TITULO PROFESIONAL') 
+                    when cronograma_carpeta.idTipo_tramite_unidad = 34 then CONCAT(unidad.descripcion,'-','TITULO DE SEGUNDA ESPECIALIDAD PROFESIONAL') 
+                end) as unidad"),
+        'dependencia.nombre as dependencia')
         ->join('dependencia','dependencia.idDependencia','cronograma_carpeta.idDependencia')
         ->join('unidad','unidad.idUnidad','cronograma_carpeta.idUnidad')
         ->where(function($query) use ($idResolucion)

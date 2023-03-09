@@ -20,7 +20,12 @@ class ResolucionController extends Controller
         $resoluciones=Resolucion::where('estado',1)
         ->get();
         foreach ($resoluciones as $key => $resolucion) {
-            $resolucion->cronogramas=Cronograma::select('cronograma_carpeta.*','dependencia.nombre','unidad.descripcion')
+            $resolucion->cronogramas=Cronograma::select('cronograma_carpeta.*','dependencia.nombre as dependencia',
+            DB::raw("(case 
+                    when cronograma_carpeta.idTipo_tramite_unidad = 15 then CONCAT(unidad.descripcion,'-','BACHILLER') 
+                    when cronograma_carpeta.idTipo_tramite_unidad = 16 then CONCAT(unidad.descripcion,'-','TITULO PROFESIONAL') 
+                    when cronograma_carpeta.idTipo_tramite_unidad = 34 then CONCAT(unidad.descripcion,'-','TITULO DE SEGUNDA ESPECIALIDAD PROFESIONAL') 
+                end) as unidad"))
             ->join('dependencia','dependencia.idDependencia','cronograma_carpeta.idDependencia')
             ->join('unidad','unidad.idUnidad','cronograma_carpeta.idUnidad')
             ->where('idResolucion',$resolucion->idResolucion)->where('cronograma_carpeta.estado',1)->get();
@@ -44,24 +49,17 @@ class ResolucionController extends Controller
             $resolucion=new Resolucion;
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
             $resolucion->fecha=trim($request->fecha);
-            
-            // if($request->hasFile("archivoPdf")){
-            //     $file=$request->file("archivoPdf");
-            //     // $nombre = $file->getClientOriginalName();
-            //     $nombre = $request->nro_resolucion;
-            //     $nombreBD = "/storage/resoluciones/".$nombre;
-            //     if($file->guessExtension()=="pdf"){
-            //       $file->storeAs('public/resoluciones', $nombre);
-            //       $resolucion->archivo = $nombreBD;
-            //     }else {
-            //         DB::rollback();
-            //         return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
-            //     }
-            // }
-            // $resolucion->archivo = "archivo";
             $resolucion->estado =true;
             $resolucion->save();
-            
+
+            foreach ($request->cronogramas as $key => $value) {
+                // return $value;
+                $cronograma=Cronograma::find($value['idCronograma_carpeta']);
+                $cronograma->idResolucion=$resolucion->idResolucion;
+                $cronograma->update();
+            }
+            $resolucion->cronogramas=$request->cronogramas;
+            // return $resolucion;
             DB::commit();
             return response()->json($resolucion, 200);
         } catch (\Exception $e) {
@@ -73,6 +71,7 @@ class ResolucionController extends Controller
     public function update(Request $request,$id){
         DB::beginTransaction();
         try {
+            // return $request->all();
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
@@ -82,25 +81,25 @@ class ResolucionController extends Controller
             $resolucion=Resolucion::find($id);
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
             $resolucion->fecha=trim($request->fecha);
-            
-            // if($request->hasFile("archivo")){
-            //     // return "ingresé al voucher";
-            //     $file=$request->file("archivo");
-            //     $nombre = $file->getClientOriginalName();
-            //     $nombreBD = "/storage/resoluciones/".$nombre;
-            //     if($file->guessExtension()=="pdf"){
-            //       $file->storeAs('public/resoluciones', $nombre);
-            //       $resolucion->archivo = $nombreBD;
-            //     }else {
-            //         DB::rollback();
-            //         return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
-            //     }
-            // }
-
-            // $resolucion->archivo = "archivo editado";
             $resolucion->estado =trim($request->estado);
             $resolucion->update();
-            
+
+            //Eliminamos todas las relaciones de los cronogramas que pertenecen a esa resolucion
+            $cronogramas=Cronograma::where('idResolucion',$id)->get();
+            foreach ($cronogramas as $key => $value) {
+                $value->idResolucion=null;
+                $value->update();
+            }
+            // return $cronogramas;
+            //agregamos las nuevas relaciones de cronogramas
+            foreach ($request->cronogramas as $key => $value) {
+                // return $value;
+                $cronograma=Cronograma::find($value['idCronograma_carpeta']);
+                $cronograma->idResolucion=$resolucion->idResolucion;
+                $cronograma->update();
+            }
+            $resolucion->cronogramas=$request->cronogramas;
+            // return $resolucion;
             DB::commit();
             return response()->json($resolucion, 200);
         } catch (\Exception $e) {
