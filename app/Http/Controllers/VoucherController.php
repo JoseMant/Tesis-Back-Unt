@@ -447,6 +447,123 @@ class VoucherController extends Controller
             return response()->json(['status' => '400', 'message' => $e], 400);
         }   
     }
+
+    public function vouchersAprobados(Request $request){
+        if ($request->query('search')!="") {
+            $vouchers=Voucher::select(DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento','tramite.nro_matricula',
+            DB::raw("(case 
+                when tramite.idUnidad = 1 then CONCAT(tipo_tramite_unidad.descripcion) 
+                when tramite.idUnidad = 2 then CONCAT(tipo_tramite_unidad.descripcion) 
+                when tramite.idUnidad = 3 then CONCAT(tipo_tramite_unidad.descripcion,'-',tipo_tramite.descripcion) 
+            end) as tipo_tramite"),
+            DB::raw("(case 
+                when tramite.idUnidad = 1 then (select nombre from escuela where idEscuela=tramite.idDependencia_detalle)  
+                when tramite.idUnidad = 4 then  (select denominacion from mencion where idMencion=tramite.idDependencia_detalle)
+            end) as programa"),
+            'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','tipo_tramite_unidad.costo'
+            )
+            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+            ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+            ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->where('voucher.des_estado_voucher','APROBADO')
+            ->whereMonth('voucher.fecha_operacion',02)
+            ->whereYear('voucher.fecha_operacion',2023)
+            ->where('tramite.idTipo_tramite_unidad','!=',37)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.nro_documento','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('voucher.entidad','LIKE','%'.$request->query('search').'%')
+                ->orWhere('voucher.nro_operacion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('voucher.fecha_operacion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.costo','LIKE','%'.$request->query('search').'%');
+            })
+            ->orderBy($request->query('sort'), $request->query('order'))
+            ->take($request->query('size'))
+            ->skip($request->query('page')*$request->query('size'))
+            ->get();
+
+            $total=Voucher::join('tramite','tramite.idVoucher','voucher.idVoucher')
+            ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+            ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->where('voucher.des_estado_voucher','APROBADO')
+            ->whereMonth('voucher.fecha_operacion',02)
+            ->whereYear('voucher.fecha_operacion',2023)
+            ->where('tramite.idTipo_tramite_unidad','!=',37)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.nro_documento','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('voucher.entidad','LIKE','%'.$request->query('search').'%')
+                ->orWhere('voucher.nro_operacion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('voucher.fecha_operacion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.costo','LIKE','%'.$request->query('search').'%');
+            })
+            ->count();
+        }else {
+            $vouchers=Voucher::select(DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento','tramite.nro_matricula',
+            DB::raw("(case 
+                when tramite.idUnidad = 1 then CONCAT(tipo_tramite_unidad.descripcion) 
+                when tramite.idUnidad = 2 then CONCAT(tipo_tramite_unidad.descripcion) 
+                when tramite.idUnidad = 3 then CONCAT(tipo_tramite_unidad.descripcion,'-',tipo_tramite.descripcion) 
+            end) as tipo_tramite"),
+            DB::raw("(case 
+                when tramite.idUnidad = 1 then (select nombre from escuela where idEscuela=tramite.idDependencia_detalle)  
+                when tramite.idUnidad = 4 then  (select denominacion from mencion where idMencion=tramite.idDependencia_detalle)
+            end) as programa"),
+            'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','tipo_tramite_unidad.costo'
+            )
+            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+            ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+            ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->where('voucher.des_estado_voucher','APROBADO')
+            ->whereMonth('voucher.fecha_operacion',02)
+            ->whereYear('voucher.fecha_operacion',2023)
+            ->where('tramite.idTipo_tramite_unidad','!=',37)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->orderBy($request->query('sort'), $request->query('order'))
+            ->get();
+            
+            $total =Voucher::join('tramite','tramite.idVoucher','voucher.idVoucher')
+            ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+            ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->where('voucher.des_estado_voucher','APROBADO')
+            ->whereMonth('voucher.fecha_operacion',02)
+            ->whereYear('voucher.fecha_operacion',2023)
+            ->where('tramite.idTipo_tramite_unidad','!=',37)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->count();
+        }
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$vouchers,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
+
+    }
     public function Paginacion($items, $size, $page = null, $options = [])
     {
         // $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);

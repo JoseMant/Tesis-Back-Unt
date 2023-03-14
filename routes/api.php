@@ -92,6 +92,7 @@ Route::resource('/voucher','VoucherController');
 Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
+Route::get('vouchers/reporte/aprobados','VoucherController@vouchersAprobados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
 Route::post('chancar','TramiteController@chancarExonerado');
@@ -146,7 +147,7 @@ Route::get('download/fotos', 'ZipController@downloadFotos');
 Route::post('carnets/import/observados', 'CarnetController@import');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::get('carnets/export', 'ExcelController@export');
-Route::get('padron_sunedu', 'PadronController@padron');
+Route::get('padron_sunedu/{idOficio}', 'PadronController@padron');
 
 
 //Roles
@@ -261,6 +262,8 @@ Route::post('acreditadas/create', 'AcreditacionController@store');
 Route::get('resoluciones/all', 'ResolucionController@index');
 Route::post('resoluciones/create', 'ResolucionController@store');
 Route::put('resoluciones/update/{id}', 'ResolucionController@update');
+Route::get('oficio/resoluciones/{idOficio}', 'ResolucionController@getResolucionesLibres');
+
 // OFICIOS
 Route::get('oficios/all', 'OficioController@index');
 Route::post('oficios/create', 'OficioController@store');
