@@ -12,9 +12,13 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, WithEvents
 {
+    public $idOficio;
     /**
     * @return \Illuminate\Support\Collection
     */
+    public function __construct($idOficio){
+        $this->idOficio = $idOficio;
+    }
     public function registerEvents(): array
     {
         return [
@@ -154,7 +158,8 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         ->join('diploma_carpeta','diploma_carpeta.idDiploma_carpeta','tramite_detalle.idDiploma_carpeta')
         ->join('programa_estudios_carpeta','programa_estudios_carpeta.idPrograma_estudios_carpeta','tramite_detalle.idPrograma_estudios_carpeta')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-        ->leftJoin('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion') //cambiar a join
+        ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+        ->join('oficio','resolucion.idOficio','oficio.idOficio')
         ->leftJoin('acreditacion','acreditacion.idAcreditacion','tramite_detalle.idAcreditacion')
         ->where(function($query)
             {
@@ -162,8 +167,17 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
                 ->orWhere('tramite.idTipo_tramite_unidad',16)
                 ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
-        ->where('tramite.idEstado_tramite',42)
+        ->where('tramite.idEstado_tramite',44)
+        // ->where('tramite.idDependencia',8)
+        // ->where(function($query)
+        //     {
+        //         $query->where('tramite.idDependencia_detalle',9)
+        //         ->orWhere('tramite.idDependencia_detalle',11)
+        //         ->orWhere('tramite.idDependencia_detalle',47);
+        //     })
+        ->where('oficio.idOficio',$this->idOficio)
         ->orderBy('tramite.idTipo_tramite_unidad','asc')
+        ->orderBy('tramite.idDependencia_detalle','asc')
         ->orderBy('usuario.apellidos','asc')
         ->orderBy('usuario.nombres','asc')
         // ->selectRaw("case 

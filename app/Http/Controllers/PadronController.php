@@ -12,10 +12,10 @@ class PadronController extends Controller
     {
         $this->middleware('jwt', ['except' => ['padron']]);
     }
-    public function padron(){
+    public function padron($idOficio){
         DB::beginTransaction();
         try {
-            $descarga=Excel::download(new PadronSuneduExport, 'PADRON_SUNEDU.xlsx');
+            $descarga=Excel::download(new PadronSuneduExport($idOficio), 'PADRON_SUNEDU.xlsx');
             return $descarga;
         } catch (\Exception $e) {
             DB::rollback();

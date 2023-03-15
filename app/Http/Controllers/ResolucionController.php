@@ -107,4 +107,23 @@ class ResolucionController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function getResolucionesLibres($idOficio){
+        $resoluciones=Resolucion::
+        where(function($query) use ($idOficio)
+        {
+            if ($idOficio!=0) {
+                $query->where('idOficio',null)
+                ->orWhere('idOficio',$idOficio);
+            }else {
+                $query->where('idOficio',null);
+            }
+            
+        })
+        ->where('estado',1)
+        ->orderBy('resolucion.nro_resolucion')
+        ->get();
+        return response()->json($resoluciones, 200);
+
+    }
 }

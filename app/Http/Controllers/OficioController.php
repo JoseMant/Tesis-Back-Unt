@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Oficio;
+use App\Resolucion;
 
 class OficioController extends Controller
 {
@@ -17,6 +18,9 @@ class OficioController extends Controller
     public function index(){
         $oficios=Oficio::where('estado',1)
         ->get();
+        foreach ($oficios as $key => $oficio) {
+            $oficio->resoluciones=Resolucion::where('idOficio',$oficio->idOficio)->where('estado',1)->get();
+        }
         return response()->json($oficios, 200);
     }
 
@@ -36,24 +40,17 @@ class OficioController extends Controller
             $oficio=new Oficio;
             $oficio->nro_oficio=trim($request->nro_oficio);
             $oficio->fecha=trim($request->fecha);
-            
-            if($request->hasFile("archivoPdf")){
-                $file=$request->file("archivoPdf");
-                // $nombre = $file->getClientOriginalName();
-                $nombre = $request->nro_oficio.'.'.$file->guessExtension();
-                $nombreBD = "/storage/oficios/".$nombre;
-                if($file->guessExtension()=="pdf"){
-                  $file->storeAs('public/oficios', $nombre);
-                  $oficio->archivo = $nombreBD;
-                }else {
-                    DB::rollback();
-                    return response()->json(['status' => '400', 'message' => "Subir archivo del oficio en pdf"], 400);
-                }
-            }
-            // $resolucion->archivo = "archivo";
             $oficio->estado =true;
             $oficio->save();
             
+            foreach ($request->resoluciones as $key => $value) {
+                // return $value;
+                $resolucion=Resolucion::find($value['idResolucion']);
+                $resolucion->idOficio=$oficio->idOficio;
+                $resolucion->update();
+            }
+            $oficio->resoluciones=$request->resoluciones;
+
             DB::commit();
             return response()->json($oficio, 200);
         } catch (\Exception $e) {
@@ -74,21 +71,23 @@ class OficioController extends Controller
             $oficio=Oficio::find($id);
             $oficio->nro_oficio=trim($request->nro_oficio);
             $oficio->fecha=trim($request->fecha);
-            
-            if($request->hasFile("archivo")){
-                $file=$request->file("archivo");
-                $nombre = $request->nro_oficio.'.'.$file->guessExtension();
-                $nombreBD = "/storage/oficios/".$nombre;
-                if($file->guessExtension()=="pdf"){
-                  $file->storeAs('public/oficios', $nombre);
-                  $oficio->archivo = $nombreBD;
-                }else {
-                    DB::rollback();
-                    return response()->json(['status' => '400', 'message' => "Subir archivo del oficio en pdf"], 400);
-                }
-            }
             $oficio->estado =trim($request->estado);
             $oficio->update();
+            
+            //Eliminamos todas las relaciones de los resoluciones que pertenecen a ese oficio
+            $resoluciones=Resolucion::where('idOficio',$id)->get();
+            foreach ($resoluciones as $key => $value) {
+                $value->idOficio=null;
+                $value->update();
+            }
+            //agregamos las nuevas relaciones de resoluciones
+            foreach ($request->resoluciones as $key => $value) {
+                // return $value;
+                $resolucion=Resolucion::find($value['idResolucion']);
+                $resolucion->idOficio=$oficio->idOficio;
+                $resolucion->update();
+            }
+            $oficio->resoluciones=$request->resoluciones;
             
             DB::commit();
             return response()->json($oficio, 200);
