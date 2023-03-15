@@ -450,7 +450,7 @@ class VoucherController extends Controller
 
     public function vouchersAprobados(Request $request){
         if ($request->query('search')!="") {
-            $vouchers=Voucher::select(DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento','tramite.nro_matricula',
+            $vouchers=Tramite::select(DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento','tramite.nro_matricula',
             DB::raw("(case 
                 when tramite.idUnidad = 1 then CONCAT(tipo_tramite_unidad.descripcion) 
                 when tramite.idUnidad = 2 then CONCAT(tipo_tramite_unidad.descripcion) 
@@ -462,7 +462,7 @@ class VoucherController extends Controller
             end) as programa"),
             'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','tipo_tramite_unidad.costo'
             )
-            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('usuario','tramite.idUsuario','usuario.idUsuario')
             ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
@@ -490,7 +490,7 @@ class VoucherController extends Controller
             ->skip($request->query('page')*$request->query('size'))
             ->get();
 
-            $total=Voucher::join('tramite','tramite.idVoucher','voucher.idVoucher')
+            $total=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('usuario','tramite.idUsuario','usuario.idUsuario')
             ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
@@ -515,7 +515,7 @@ class VoucherController extends Controller
             })
             ->count();
         }else {
-            $vouchers=Voucher::select(DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento','tramite.nro_matricula',
+            $vouchers=Tramite::select(DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento','tramite.nro_matricula',
             DB::raw("(case 
                 when tramite.idUnidad = 1 then CONCAT(tipo_tramite_unidad.descripcion) 
                 when tramite.idUnidad = 2 then CONCAT(tipo_tramite_unidad.descripcion) 
@@ -527,7 +527,7 @@ class VoucherController extends Controller
             end) as programa"),
             'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','tipo_tramite_unidad.costo'
             )
-            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('usuario','tramite.idUsuario','usuario.idUsuario')
             ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
@@ -540,7 +540,7 @@ class VoucherController extends Controller
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
             
-            $total =Voucher::join('tramite','tramite.idVoucher','voucher.idVoucher')
+            $total =Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('usuario','tramite.idUsuario','usuario.idUsuario')
             ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
