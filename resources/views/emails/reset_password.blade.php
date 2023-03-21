@@ -153,7 +153,7 @@
                             </p>
 						</div>
             <hr>
-						<a href="http://tramites-uraa.unitru.edu.pe/reset-password/{{$usuario['reset_password']}}" target="_blank"><button type="button" class="btn btn-info">Continuar</button></a>
+						<a href="https://tramites-uraa.unitru.edu.pe/reset-password/{{$usuario['reset_password']}}" target="_blank"><button type="button" class="btn btn-info">Continuar</button></a>
         </div>
         <div class="redes">
             <ul>

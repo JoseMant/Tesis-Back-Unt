@@ -155,7 +155,7 @@
                             </p>
 						</div>
             <hr>
-						<a href="http://tramites-uraa.unitru.edu.pe/" target="_blank"><button type="button" class="btn btn-info">Ingresar al sistema</button></a>
+						<a href="https://tramites-uraa.unitru.edu.pe/" target="_blank"><button type="button" class="btn btn-info">Ingresar al sistema</button></a>
         </div>
         <div class="redes">
             <ul>
