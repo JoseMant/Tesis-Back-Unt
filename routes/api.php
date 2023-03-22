@@ -272,3 +272,6 @@ Route::put('oficios/update/{id}', 'OficioController@update');
 Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
 Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGeneral');
+Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
+Route::get('dependencias_detalle/{idDependencia}', 'ReporteController@getDependencias_Detalle');
+Route::post('eliminar', 'AdicionalController@eliminarHistorial');

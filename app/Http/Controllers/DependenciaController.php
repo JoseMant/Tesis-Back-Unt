@@ -17,9 +17,24 @@ class DependenciaController extends Controller
         $this->middleware('jwt');
     }
     public function getDependenciasByUnidad($idUnidad){
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $idDependencia=$apy['idDependencia'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
         DB::beginTransaction();
         try {
-            $dependencias=DependenciaURAA::where('idUnidad',$idUnidad)->get();
+            if ($idTipo_usuario==8) {
+                if ($idUnidad==1) {
+                    $dependencias=DependenciaURAA::where('idDependencia',$idDependencia)->get();
+                }elseif ($idUnidad==4) {
+                    $dependencias=DependenciaURAA::where('idDependencia2',$idDependencia)->get();
+                }
+                // $dependencias=DependenciaURAA::where('idDependencia',$idDependencia)->get();
+            }else {
+                $dependencias=DependenciaURAA::where('idUnidad',$idUnidad)->get();
+            }
             DB::commit();
             return response()->json($dependencias, 200);
         } catch (\Exception $e) {
