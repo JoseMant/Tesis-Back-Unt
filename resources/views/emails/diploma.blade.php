@@ -493,7 +493,7 @@ if ($tramite->tipo_documento==1) {
     
 </style>
 <div id="cara1">
-    <img src=<?php echo public_path('\img')."\cabecera_vacia_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
+    <img src=<?php echo public_path()."/img/cabecera_vacia_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
     <div style="margin-top: 0mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
         <table class="page_content" border="0">
             <tr border="0">
