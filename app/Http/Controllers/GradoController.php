@@ -1322,8 +1322,22 @@ class GradoController extends Controller
             ->where(function($query) use ($idDependencia)
             {
                 if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
+                // if ($idDependencia) {
+                //     $query->where('tramite.idDependencia_detalle',$idDependencia);
+                // }
             })
             ->where(function($query) use ($request)
             {
@@ -1361,8 +1375,22 @@ class GradoController extends Controller
             ->where(function($query) use ($idDependencia)
             {
                 if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
+                // if ($idDependencia) {
+                //     $query->where('tramite.idDependencia_detalle',$idDependencia);
+                // }
             })
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
