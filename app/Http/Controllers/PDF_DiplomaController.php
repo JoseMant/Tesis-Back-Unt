@@ -46,6 +46,7 @@ class PDF_DiplomaController extends Controller
                 $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
                 $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
                 ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
+                $tramite->escuela=$dependenciaDetalle->nombre;
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
@@ -58,8 +59,9 @@ class PDF_DiplomaController extends Controller
                 // ----------------------------------------
                 $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
                 ->where('idDependencia',$dependencia2->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
+                $tramite->escuela=$dependenciaDetalle->denominacion;
             }
-            $tramite->escuela=$dependenciaDetalle->nombre;
+            
             $requisito_foto=Tramite_Requisito::where('idTramite',$tramite->idTramite)
             ->where(function($query)
             {
