@@ -129,22 +129,35 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
                 end)"),
         // DB::raw('CONCAT("RECTOR")'),
         DB::raw('(select CONCAT(apellidos," ",nombres) from usuario where idTipo_usuario=12 and estado=1) as rector'),
-        DB::raw('CONCAT("SECRETARIA GENERAL (E)")'),
+        DB::raw('CONCAT("SECRETARIA GENERAL"," ",(case when (select cargo from usuario where idTipo_usuario=10 and estado=1) IS NULL then ""
+                                                        else (select cargo from usuario where idTipo_usuario=10 and estado=1)
+                                                  end)
+                        )'),
         DB::raw('(select CONCAT(apellidos," ",nombres) from usuario where idTipo_usuario=10 and estado=1) as secretaria_general'),
         DB::raw("(case 
-                    when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) = \"M\" then 'DECANO' 
-                    else 'DECANA'
+                    when tramite.idUnidad = 1 then (case 
+                                                        when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) = \"M\" then 'DECANO' 
+                                                        else 'DECANA'
+                                                    end) 
+                    when tramite.idUnidad = 4 then  (case 
+                                                        when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=dependencia.idDependencia2 and estado=1) = \"M\" then 'DECANO' 
+                                                        else 'DECANA'
+                                                    end) 
                 end)"),
+        // DB::raw("(case 
+        //             when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) = \"M\" then 'DECANO' 
+        //             else 'DECANA'
+        //         end)"),
         // DB::raw('CONCAT("DECANA")'),
         DB::raw("(case 
                     when tramite.idUnidad = 1 then (select CONCAT(apellidos,' ',nombres) from usuario where idTipo_usuario=6 and idDependencia=tramite.idDependencia and estado=1) 
-                    when tramite.idUnidad = 4 then  (select dp.nombre from dependencia d inner join dependencia dp on d.idDependencia2=dp.idDependencia where d.idDependencia=tramite.idDependencia)
+                    when tramite.idUnidad = 4 then  (select CONCAT(apellidos,' ',nombres) from usuario where idTipo_usuario=6 and idDependencia=dependencia.idDependencia2 and estado=1)
                 end)"),
         // DB::raw('(select CONCAT(apellidos," ",nombres) from usuario where idTipo_usuario=6 and idDependencia=tramite.idDependencia and estado=1) as decano_a'),
         DB::raw('CONCAT("") as PROC_PAIS_EXT'),
         DB::raw('CONCAT("") as PROC_UNIV_EXT'),
         DB::raw('CONCAT("") as PROC_GRADO_EXT'),
-        DB::raw('CONCAT("0689-2022/UNT") as REG_OFICIO'),
+        DB::raw('oficio.nro_oficio as REG_OFICIO'),
         DB::raw('CONCAT("") as FEC_MAT_PROG'),
         DB::raw('CONCAT("") as FEC_INICIO_PROG'),
         DB::raw('CONCAT("") as FEC_FIN_PROG'),
