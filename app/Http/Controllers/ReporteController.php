@@ -521,16 +521,17 @@ class ReporteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tipo_tramite.idTipo_tramite',2)
-            ->where(function($query) use($request)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where(function($query) use($request, $idDependencia)
             {
                 if ($request->idTipo_tramite_unidad!=0) {
                     $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
                 }
-            })
-            ->where(function($query) use($idDependencia)
-            {
                 if ($idDependencia) {
                     $query->where('tramite.idDependencia_detalle',$idDependencia);
+                }
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
             ->take($request->query('size'))
@@ -557,6 +558,7 @@ class ReporteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use($request, $idDependencia)
             {
                 if ($request->idTipo_tramite_unidad!=0) {
@@ -564,6 +566,9 @@ class ReporteController extends Controller
                 }
                 if ($idDependencia) {
                     $query->where('tramite.idDependencia_detalle',$idDependencia);
+                }
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
             ->take($request->query('size'))
@@ -590,6 +595,7 @@ class ReporteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use($request, $idDependencia)
             {
                 if ($request->idTipo_tramite_unidad!=0) {
@@ -598,7 +604,9 @@ class ReporteController extends Controller
                 if ($request->idDependencia_detalle!=0) {
                     $query->where('tramite.idDependencia_detalle',$request->idDependencia_detalle);
                 }
-
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
+                }
                 if ($request->idUnidad!=0) {
                     if ($request->idUnidad==1) {
                         $query->where('tramite.idDependencia',$idDependencia);
@@ -635,6 +643,7 @@ class ReporteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use($request, $idDependencia)
             {
                 if ($request->idTipo_tramite_unidad!=0) {
@@ -643,8 +652,19 @@ class ReporteController extends Controller
                 if ($request->idDependencia_detalle!=0) {
                     $query->where('tramite.idDependencia_detalle',$request->idDependencia_detalle);
                 }
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
+                }
+                if ($request->idUnidad!=0) {
+                    if ($request->idUnidad==1) {
+                        $query->where('tramite.idDependencia',$idDependencia);
+                    }elseif ($request->idUnidad==4) {
+                        $query->where('dependencia.idDependencia2',$idDependencia);
+                        
+                    }
+                }else {
+                    $query->where('tramite.idDependencia',$idDependencia)
+                    ->orWhere('dependencia.idDependencia2',$idDependencia);
                 }
             })
             ->take($request->query('size'))
@@ -671,6 +691,7 @@ class ReporteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use($request)
             {
                 if ($request->idUnidad!=0) {
@@ -684,6 +705,9 @@ class ReporteController extends Controller
                 }
                 if ($request->idTipo_tramite_unidad!=0) {
                     $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
+                }
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
             ->take($request->query('size'))
@@ -711,6 +735,7 @@ class ReporteController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use($request)
             {
                 if ($request->idUnidad!=0) {
@@ -724,6 +749,9 @@ class ReporteController extends Controller
                 }
                 if ($request->idTipo_tramite_unidad!=0) {
                     $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
+                }
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
             ->take($request->query('size'))

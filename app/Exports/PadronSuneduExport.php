@@ -98,8 +98,8 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
     {
         $tramites = Tramite::select( DB::raw('CONCAT("004")'),DB::raw('CONCAT("UNIVERSIDAD NACIONAL DE TRUJILLO")'),'tramite_detalle.fecha_primera_matricula',
         DB::raw("(case 
-                    when tramite.idUnidad = 1 then dependencia.nombre  
-                    when tramite.idUnidad = 4 then  (select nombre from dependencia d where d.idDependencia=dependencia.idDependencia2)
+                    when tramite.idUnidad = 1 then dependencia.denominacion  
+                    when tramite.idUnidad = 4 then  (select denominacion from dependencia d where d.idDependencia=dependencia.idDependencia2)
                 end)"),
         // 'dependencia.nombre',
         DB::raw("(case 

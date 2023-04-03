@@ -264,6 +264,30 @@ class CronogramaController extends Controller
         return response()->json($cronogramas, 200);
 
     }
+
+    public function cronogramasByDependencia($idDependencia,$idTipo_tramite_unidad){
+        DB::beginTransaction();
+        try {
+            $cronogramas=Cronograma::select('cronograma_carpeta.fecha_colacion')
+            ->where('cronograma_carpeta.estado',true)
+            ->where('cronograma_carpeta.idDependencia',$idDependencia)
+            ->where(function($query) use($idTipo_tramite_unidad)
+            {
+                if ($idTipo_tramite_unidad!=0) {
+                    $query->where('cronograma_carpeta.idTipo_tramite_unidad',$idTipo_tramite_unidad);
+                }
+                
+            })
+            ->distinct()
+            ->get();
+            DB::commit();
+            return response()->json($cronogramas, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+        
+    }
 }
 
 
