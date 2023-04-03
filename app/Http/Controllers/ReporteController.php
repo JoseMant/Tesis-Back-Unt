@@ -534,6 +534,7 @@ class ReporteController extends Controller
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
+            ->orderBy('usuario.apellidos','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->get();
@@ -571,6 +572,7 @@ class ReporteController extends Controller
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
+            ->orderBy('usuario.apellidos','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->count();
@@ -619,6 +621,7 @@ class ReporteController extends Controller
                     ->orWhere('dependencia.idDependencia2',$idDependencia);
                 }
             })
+            ->orderBy('usuario.apellidos','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->get();
@@ -667,6 +670,7 @@ class ReporteController extends Controller
                     ->orWhere('dependencia.idDependencia2',$idDependencia);
                 }
             })
+            ->orderBy('usuario.apellidos','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->count();
@@ -710,6 +714,7 @@ class ReporteController extends Controller
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
+            ->orderBy('usuario.apellidos','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->get();
@@ -754,6 +759,7 @@ class ReporteController extends Controller
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
+            ->orderBy('usuario.apellidos','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->count();
