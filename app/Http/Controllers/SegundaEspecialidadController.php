@@ -1374,6 +1374,7 @@ class SegundaEspecialidadController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('estado',1)
             ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
@@ -1507,6 +1508,7 @@ class SegundaEspecialidadController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('estado',1)
             ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
@@ -1628,6 +1630,7 @@ class SegundaEspecialidadController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('estado',1)
             ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";

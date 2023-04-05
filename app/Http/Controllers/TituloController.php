@@ -1472,6 +1472,7 @@ class TituloController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('estado',1)
             ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
@@ -1518,7 +1519,7 @@ class TituloController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico','escuela.nombre as escuela')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1528,6 +1529,7 @@ class TituloController extends Controller
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('escuela','tramite.idDependencia_detalle','escuela.idEscuela')
             ->where('tramite.idEstado_tramite',38)
             ->where('tipo_tramite.idTipo_tramite',2)
             ->where('tramite.idTipo_tramite_unidad',16)
@@ -1545,7 +1547,7 @@ class TituloController extends Controller
                 ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
                 ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('escuela.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
             ->where('cronograma_carpeta.visible',true)
@@ -1565,7 +1567,7 @@ class TituloController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
+            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico','escuela.nombre as escuela')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1575,6 +1577,7 @@ class TituloController extends Controller
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('escuela','tramite.idDependencia_detalle','escuela.idEscuela')
             ->where('tramite.idEstado_tramite',38)
             ->where('tipo_tramite.idTipo_tramite',2)
             ->where('tramite.idTipo_tramite_unidad',16)
@@ -1591,22 +1594,11 @@ class TituloController extends Controller
         }
         foreach ($tramites as $key => $tramite) {
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->escuela=$dependenciaDetalle->nombre;
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('estado',1)
             ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
@@ -1730,6 +1722,7 @@ class TituloController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('estado',1)
             ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
