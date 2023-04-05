@@ -92,7 +92,7 @@ Route::resource('/voucher','VoucherController');
 Route::get('vouchers/pendientes','VoucherController@Pendientes');
 Route::get('vouchers/aprobados','VoucherController@Aprobados');
 Route::get('vouchers/rechazados','VoucherController@Rechazados');
-Route::get('vouchers/reporte/aprobados','VoucherController@vouchersAprobados');
+Route::get('reporte/tesoreria/aprobados','VoucherController@vouchersAprobados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
 Route::post('chancar','TramiteController@chancarExonerado');
