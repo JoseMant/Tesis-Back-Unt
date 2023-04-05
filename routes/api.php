@@ -181,7 +181,7 @@ Route::put('grados/registrar/libro', 'GradoController@registrarEnLibro');
 Route::get('grados/firma/decano', 'GradoController@GetGradosFirmaDecano');
 Route::get('grados/firma/secretaria', 'GradoController@GetGradosFirmaSecretaria');
 Route::get('grados/firma/rector', 'GradoController@GetGradosFirmaRector');
-Route::get('grados/pendientes/impresion/{nro_resolucion}', 'GradoController@GetGradosPendientesImpresion');
+Route::get('grados/pendientes/impresion/{idResolucion}', 'GradoController@GetGradosPendientesImpresion');
 Route::get('grados/finalizados', 'GradoController@GetGradosFinalizados');
 Route::post('grados/upload/{id}','GradoController@uploadDiploma');
 // Route::get('grados/validados/secretaria', 'GradoController@GetGradosValidadosSecretaria');

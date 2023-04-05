@@ -3027,16 +3027,14 @@ class GradoController extends Controller
             ]], 200);
     }
 
-    public function GetGradosPendientesImpresion(Request $request,$nro_resolucion){
+    public function GetGradosPendientesImpresion(Request $request,$idResolucion){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
         $idDependencia=$apy['idDependencia'];
 
-        $resolucion=Resolucion::where('nro_resolucion','LIKE','%'.$nro_resolucion.'%')->orderBy('fecha','desc')
-        ->limit(1)
-        ->first();
+        $resolucion=Resolucion::find($idResolucion);
 
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
@@ -3048,7 +3046,7 @@ class GradoController extends Controller
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato',
             'cronograma_carpeta.fecha_colacion','tramite_detalle.diploma_final','tramite_detalle.codigo_diploma',
             'tramite_detalle.impresion','resolucion.nro_resolucion','tramite_detalle.nro_libro','tramite_detalle.folio'
-            ,'tramite_detalle.nro_registro','tramite_detalle.observacion_diploma','tramite.idEstado_tramite')
+            ,'tramite_detalle.nro_registro','tramite_detalle.observacion_diploma','tramite.idEstado_tramite','resolucion.idResolucion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -3067,7 +3065,7 @@ class GradoController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',16)
                 ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
-            ->where('resolucion.nro_resolucion',$nro_resolucion)
+            ->where('resolucion.idResolucion',$resolucion->idResolucion)
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -3093,7 +3091,7 @@ class GradoController extends Controller
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato',
             'cronograma_carpeta.fecha_colacion','tramite_detalle.diploma_final','tramite_detalle.codigo_diploma',
             'tramite_detalle.impresion','resolucion.nro_resolucion','tramite_detalle.nro_libro','tramite_detalle.folio'
-            ,'tramite_detalle.nro_registro','tramite_detalle.observacion_diploma')
+            ,'tramite_detalle.nro_registro','tramite_detalle.observacion_diploma','resolucion.idResolucion')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -3112,7 +3110,7 @@ class GradoController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',16)
                 ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
-            ->where('resolucion.nro_resolucion','like','%'.$nro_resolucion.'%')
+            ->where('resolucion.idResolucion',$resolucion->idResolucion)
             ->orderBy('tramite_detalle.nro_libro', 'asc')
             ->orderBy('tramite_detalle.folio', 'asc')
             ->orderBy('tramite_detalle.nro_registro', 'asc')
