@@ -1371,7 +1371,10 @@ class SegundaEspecialidadController extends Controller
             }
             $tramite->mencion=$dependenciaDetalle->nombre;
             // Verificación de escuela acreditada
-            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
+            ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
                 $tramite->fecha_inicio=$acreditacion->fecha_inicio;
@@ -1501,7 +1504,10 @@ class SegundaEspecialidadController extends Controller
             }
             $tramite->mencion=$dependenciaDetalle->nombre;
             // Verificación de escuela acreditada
-            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
+            ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
                 $tramite->fecha_inicio=$acreditacion->fecha_inicio;
@@ -1619,7 +1625,10 @@ class SegundaEspecialidadController extends Controller
             }
             $tramite->mencion=$dependenciaDetalle->nombre;
             // Verificación de escuela acreditada
-            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
+            ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
                 $tramite->fecha_inicio=$acreditacion->fecha_inicio;
