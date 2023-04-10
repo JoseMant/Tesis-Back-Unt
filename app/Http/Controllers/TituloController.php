@@ -94,6 +94,7 @@ class TituloController extends Controller
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
             ->where('cronograma_carpeta.visible',true)
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         }else {
@@ -134,6 +135,7 @@ class TituloController extends Controller
                 }
             })
             ->where('cronograma_carpeta.visible',true)
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
