@@ -67,6 +67,7 @@ class GradoController extends Controller
             ->where('tramite.idEstado_tramite',17)
             ->where('tipo_tramite.idTipo_tramite',2)
             ->where('tramite.idTipo_tramite_unidad',15)
+            ->where('tramite.estado',1)
             ->where(function($query) use ($idDependencia)
             {
                 if ($idDependencia) {
@@ -121,6 +122,7 @@ class GradoController extends Controller
             ->where('tramite.idEstado_tramite',17)
             ->where('tipo_tramite.idTipo_tramite',2)
             ->where('tramite.idTipo_tramite_unidad',15)
+            ->where('tramite.estado',1)
             ->where(function($query) use ($idDependencia)
             {
                 if ($idDependencia) {

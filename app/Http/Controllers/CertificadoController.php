@@ -73,6 +73,7 @@ class CertificadoController extends Controller
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         }else {
@@ -93,6 +94,7 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',5)
             ->where('tipo_tramite.idTipo_tramite',1)
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
