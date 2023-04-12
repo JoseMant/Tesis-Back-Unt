@@ -17,12 +17,14 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\ActualizacionTramiteJob;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ReporteTesoreriaExport;
 
 class VoucherController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt');
+        $this->middleware('jwt',['except' => ['reporteTesoreria']]);
     }
     /**
      * Display a listing of the resource.
@@ -468,8 +470,17 @@ class VoucherController extends Controller
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->where('voucher.des_estado_voucher','APROBADO')
-            ->whereMonth('voucher.fecha_operacion',02)
-            ->whereYear('voucher.fecha_operacion',2023)
+            ->where(function($query) use ($request)
+            {
+                if($request->fecha_inicio){
+                    $query->where('voucher.fecha_operacion','>=',$request->fecha_inicio);
+                }
+                if($request->fecha_fin){
+                    $query->where('voucher.fecha_operacion','<=',$request->fecha_fin);
+                }
+            })
+            // ->whereMonth('voucher.fecha_operacion',02)
+            // ->whereYear('voucher.fecha_operacion',2023)
             ->where('tramite.idTipo_tramite_unidad','!=',37)
             ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use ($request)
@@ -485,19 +496,28 @@ class VoucherController extends Controller
                 ->orWhere('voucher.fecha_operacion','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tipo_tramite_unidad.costo','LIKE','%'.$request->query('search').'%');
             })
-            ->orderBy($request->query('sort'), $request->query('order'))
+            ->orderBy('fecha_operacion','asc')
+            ->orderBy('programa','asc')
+            ->orderBy('tipo_tramite','asc')
+            ->orderBy('solicitante','asc')
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
             ->get();
-
             $total=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('usuario','tramite.idUsuario','usuario.idUsuario')
             ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->where('voucher.des_estado_voucher','APROBADO')
-            ->whereMonth('voucher.fecha_operacion',02)
-            ->whereYear('voucher.fecha_operacion',2023)
+            ->where(function($query) use ($request)
+            {
+                if($request->fecha_inicio){
+                    $query->where('voucher.fecha_operacion','>=',$request->fecha_inicio);
+                }
+                if($request->fecha_fin){
+                    $query->where('voucher.fecha_operacion','<=',$request->fecha_fin);
+                }
+            })
             ->where('tramite.idTipo_tramite_unidad','!=',37)
             ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query) use ($request)
@@ -520,6 +540,7 @@ class VoucherController extends Controller
                 when tramite.idUnidad = 1 then CONCAT(tipo_tramite_unidad.descripcion) 
                 when tramite.idUnidad = 2 then CONCAT(tipo_tramite_unidad.descripcion) 
                 when tramite.idUnidad = 3 then CONCAT(tipo_tramite_unidad.descripcion,'-',tipo_tramite.descripcion) 
+                when tramite.idUnidad = 4 then CONCAT(tipo_tramite_unidad.descripcion) 
             end) as tipo_tramite"),
             DB::raw("(case 
                 when tramite.idUnidad = 1 then (select nombre from escuela where idEscuela=tramite.idDependencia_detalle)  
@@ -533,11 +554,23 @@ class VoucherController extends Controller
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->where('voucher.des_estado_voucher','APROBADO')
-            ->whereMonth('voucher.fecha_operacion',02)
-            ->whereYear('voucher.fecha_operacion',2023)
+            ->where(function($query) use ($request)
+            {
+                if($request->fecha_inicio){
+                    $query->where('voucher.fecha_operacion','>=',$request->fecha_inicio);
+                }
+                if($request->fecha_fin){
+                    $query->where('voucher.fecha_operacion','<=',$request->fecha_fin);
+                }
+            })
             ->where('tramite.idTipo_tramite_unidad','!=',37)
             ->where('tramite.idEstado_tramite','!=',29)
-            ->orderBy($request->query('sort'), $request->query('order'))
+            ->orderBy('fecha_operacion','asc')
+            ->orderBy('programa','asc')
+            ->orderBy('tipo_tramite','asc')
+            ->orderBy('solicitante','asc')
+            ->take($request->query('size'))
+            ->skip($request->query('page')*$request->query('size'))
             ->get();
             
             $total =Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
@@ -546,8 +579,15 @@ class VoucherController extends Controller
             ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->where('voucher.des_estado_voucher','APROBADO')
-            ->whereMonth('voucher.fecha_operacion',02)
-            ->whereYear('voucher.fecha_operacion',2023)
+            ->where(function($query) use ($request)
+            {
+                if($request->fecha_inicio){
+                    $query->where('voucher.fecha_operacion','>=',$request->fecha_inicio);
+                }
+                if($request->fecha_fin){
+                    $query->where('voucher.fecha_operacion','<=',$request->fecha_fin);
+                }
+            })
             ->where('tramite.idTipo_tramite_unidad','!=',37)
             ->where('tramite.idEstado_tramite','!=',29)
             ->count();
@@ -564,6 +604,20 @@ class VoucherController extends Controller
         ]], 200);
 
     }
+
+
+    public function reporteTesoreria($fecha_inicio,$fecha_fin){
+        DB::beginTransaction();
+        try {
+            $descarga=Excel::download(new ReporteTesoreriaExport($fecha_inicio,$fecha_fin), 'Reporte_tesoreria.xlsx');
+            return $descarga;
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+
     public function Paginacion($items, $size, $page = null, $options = [])
     {
         // $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);

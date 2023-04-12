@@ -24,7 +24,7 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         return [
             AfterSheet::class    => function(AfterSheet $event) {
                 $cellRange = '1'; // All headers
-                $event->sheet->getDelegate()->getStyle($cellRange)->getFont()->setBold(true);;
+                $event->sheet->getDelegate()->getStyle($cellRange)->getFont()->setBold(true);
             },
         ];
     }

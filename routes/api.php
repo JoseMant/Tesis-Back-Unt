@@ -148,6 +148,7 @@ Route::post('carnets/import/observados', 'CarnetController@import');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::get('carnets/export', 'ExcelController@export');
 Route::get('padron_sunedu/{idOficio}', 'PadronController@padron');
+Route::get('excel/tesoreria/{fecha_inicio}/{fecha_fin}', 'VoucherController@reporteTesoreria');
 
 
 //Roles
