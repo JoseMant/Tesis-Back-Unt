@@ -136,6 +136,7 @@ class CarnetController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',21)
                 ->orWhere('tramite.idTipo_tramite_unidad',23);
             })
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         }else {
@@ -167,6 +168,7 @@ class CarnetController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',21)
                 ->orWhere('tramite.idTipo_tramite_unidad',23);
             })
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -253,6 +255,7 @@ class CarnetController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',22)
                 ->orWhere('tramite.idTipo_tramite_unidad',24);
             })
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         }else {
@@ -284,6 +287,7 @@ class CarnetController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',22)
                 ->orWhere('tramite.idTipo_tramite_unidad',24);
             })
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -458,6 +462,7 @@ class CarnetController extends Controller
                 ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
                 ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
             })
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         }else {
@@ -478,6 +483,7 @@ class CarnetController extends Controller
             ->where('tramite.idEstado_tramite',25)
             ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -542,6 +548,7 @@ class CarnetController extends Controller
             ->where('tramite.idEstado_tramite',25)
             ->where('tipo_tramite.idTipo_tramite',3)
             // ->where('tramite_detalle.asignado_certificado',$idUsuario)
+            ->where('tramite.estado',1)
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get(); 
         foreach ($tramites as $key => $tramite) {
