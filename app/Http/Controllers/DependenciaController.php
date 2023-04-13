@@ -57,4 +57,10 @@ class DependenciaController extends Controller
         }
         return response()->json($escuelas, 200);
     }
+
+    public function getDependenciaByPrograma($idDependencia_detalle){
+        $dependencia_detalle=Escuela::find($idDependencia_detalle);
+        $dependencia=DependenciaURAA::find($dependencia_detalle->idDependencia);
+        return response()->json($dependencia, 200);
+    }
 }

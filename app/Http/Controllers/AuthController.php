@@ -96,7 +96,7 @@ class AuthController extends Controller
         $credentials = request(['username', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['status' => 400,'message' => 'Correo o contraseña equivocada'], 400);
+            return response()->json(['status' => 400,'message' => 'Usuario o contraseña equivocada'], 400);
         }
 
         return $this->respondWithToken($token);
@@ -165,6 +165,7 @@ class AuthController extends Controller
         $response['celular']=$user->celular;
         $response['sexo']=$user->sexo;
         $response['idTipoUsuario']=$user->idTipo_usuario;
+        $response['idDependencia']=$user->idDependencia;
         $tipo_usuario=User::select('tipo_usuario.nombre')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idUsuario',$user->idUsuario)

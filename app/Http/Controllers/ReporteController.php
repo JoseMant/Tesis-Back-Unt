@@ -519,13 +519,28 @@ class ReporteController extends Controller
             ->where(function($query) use($request, $idDependencia)
             {
                 if ($request->idTipo_tramite_unidad!=0) {
+                    // echo $request->idTipo_tramite_unidad;
                     $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
-                }
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
                 }
                 if ($request->cronograma!=0) {
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
+                }
+            })
+            ->where(function($query) use($idDependencia)
+            {
+                if ($idDependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->orderBy('usuario.apellidos','asc')
@@ -553,11 +568,25 @@ class ReporteController extends Controller
                 if ($request->idTipo_tramite_unidad!=0) {
                     $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
                 }
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia_detalle',$idDependencia);
-                }
                 if ($request->cronograma!=0) {
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
+                }
+            })
+            ->where(function($query) use($request, $idDependencia)
+            {
+                if ($idDependencia) {
+                    if ($idDependencia==15) {
+                        $query->where('tramite.idDependencia_detalle',41)
+                        ->orWhere('tramite.idDependencia_detalle',42)
+                        ->orWhere('tramite.idDependencia_detalle',43)
+                        ->orWhere('tramite.idDependencia_detalle',44)
+                        ->orWhere('tramite.idDependencia_detalle',45)
+                        ->orWhere('tramite.idDependencia_detalle',46);
+                        
+    
+                    }else {
+                        $query->where('tramite.idDependencia_detalle',$idDependencia);
+                    }
                 }
             })
             ->orderBy('usuario.apellidos','asc')
