@@ -77,7 +77,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -132,7 +134,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -216,7 +220,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -267,7 +273,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -353,7 +361,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -404,7 +414,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -1346,7 +1358,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {
@@ -1400,7 +1414,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',43)
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
-                        ->orWhere('tramite.idDependencia_detalle',46);
+                        ->orWhere('tramite.idDependencia_detalle',46)
+                        ->orWhere('tramite.idDependencia_detalle',48)
+                        ->orWhere('tramite.idDependencia_detalle',49);
                         
     
                     }else {

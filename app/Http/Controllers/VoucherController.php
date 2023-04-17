@@ -9,7 +9,8 @@ use Illuminate\Support\Arr;
 use App\Voucher;
 use App\Tramite;
 use App\Tipo_Tramite_Unidad;
-use App\Tipo_Tramite;
+use App\Escuela;
+use App\Mencion;
 use App\User;
 use App\Historial_Estado;
 use App\Tramite_Requisito;
@@ -271,13 +272,14 @@ class VoucherController extends Controller
                 $vouchers=Voucher::select('voucher.idVoucher','tramite.idTramite','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','usuario.nro_documento','tramite.nro_matricula',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo',
-                'tipo_tramite_unidad.costo')
+                'tipo_tramite_unidad.costo','tramite.idUnidad','tramite.idDependencia_detalle')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite','tipo_tramite.descripcion')
                 ->where('des_estado_voucher','PENDIENTE')
                 ->where('tramite.idEstado_tramite','!=',29)
+                ->where('tramite.estado',1)
                 ->where(function($query) use ($request)
                 {
                     $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -296,16 +298,33 @@ class VoucherController extends Controller
                 $vouchers=Voucher::select('voucher.idVoucher','tramite.idTramite','tramite.nro_tramite', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno')
                 ,'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','usuario.nro_documento','tramite.nro_matricula',
                 DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'voucher.comentario','tramite.exonerado_archivo',
-                'tipo_tramite_unidad.costo')
+                'tipo_tramite_unidad.costo','tramite.idUnidad','tramite.idDependencia_detalle')
                 ->join('tramite','tramite.idVoucher','voucher.idVoucher')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->where('des_estado_voucher','PENDIENTE')
                 ->where('tramite.idEstado_tramite','!=',29)
+                ->where('tramite.estado',1)
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->get();
             }
+
+            foreach ($vouchers as $key => $tramite) {
+                // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
+                $dependenciaDetalle=null;
+                if ($tramite->idUnidad==1) {
+                    $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
+                }else if ($tramite->idUnidad==2) {
+                    
+                }else if ($tramite->idUnidad==3) {
+                    
+                }else{
+                    $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+                }
+                $tramite->programa=$dependenciaDetalle->nombre;
+            }
+
             $pagination=$this->Paginacion($vouchers, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
             $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
