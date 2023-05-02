@@ -249,6 +249,13 @@ class PersonaController extends Controller
                                 $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
                                 $escuelaSede->nro_matricula=$escuela->per_login;
                                 if ($escuela->sed_nombre == 'Trujillo') $escuelaSede->sede='TRUJILLO';
+                                elseif ($escuela->sed_nombre == 'SEDE TRUJILLO') $escuelaSede->sede='TRUJILLO';
+                                elseif ($escuela->sed_nombre == 'Valle Jequetepeque') $escuelaSede->sede='VALLE JEQUETEPEQUE';
+                                elseif ($escuela->sed_nombre == 'SEDE VALLE JEQUETEPEQUE') $escuelaSede->sede='VALLE JEQUETEPEQUE';
+                                elseif ($escuela->sed_nombre == 'Huamachuco') $escuelaSede->sede='HUAMACHUCO';
+                                elseif ($escuela->sed_nombre == 'SEDE HUAMACHUCO') $escuelaSede->sede='HUAMACHUCO';
+                                elseif ($escuela->sed_nombre == 'Stgo. de Chuco') $escuelaSede->sede='SANTIAGO DE CHUCO';
+                                elseif ($escuela->sed_nombre == 'SEDE SANTIAGO DE CHUCO') $escuelaSede->sede='SANTIAGO DE CHUCO';
                                 else $escuelaSede->sede=$escuela->sed_nombre;
                                 array_push($escuelas,$escuelaSede);
                             }
