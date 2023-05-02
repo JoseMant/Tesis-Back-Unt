@@ -154,7 +154,7 @@ class AdicionalController extends Controller
             ->where('tramite.idDependencia',13)
             ->where('cronograma_carpeta.fecha_colacion','2023-04-28')
             ->get();
-            return count($ingenieria);
+            // return count($ingenieria);
             //Recorremos los trámites y chancamos cada uno la resolución
             foreach ($ingenieria as $key => $tramite) {
                 $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
