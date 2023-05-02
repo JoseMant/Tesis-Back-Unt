@@ -99,31 +99,7 @@ $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto"
 // LÓGICA PARA SACAR LA FACULTAD DE LAS SEGUNDAS ESPECIALIDADES
 $facultad=$tramite->facultad;
 $escuela=$tramite->escuela;
-// if ($tramite->idUnidad==1) {
-//     $facultad=$tramite->facultad;
-//     $escuela=$tramite->escuela;
-// }elseif ($tramite->idUnidad==4) {
-//     $escuela=$tramite->facultad;
-//     // consulta con el idDependencia2
-//     $dependencia=Dependencia::find($tramite->idDependencia);
-//     $dependencia2=Dependencia::find($dependencia->idDependencia2);
-//     $facultad=$dependencia2->nombre;
-//     // if ($tramite->idDependencia==17) {
-//     //     $facultad="FACULTAD DE ENFERMERIA";
-//     // }elseif ($tramite->idDependencia==18) {
-//     //     $facultad="FACULTAD DE CIENCIAS BIOLOGICAS";
-//     // }elseif ($tramite->idDependencia==19) {
-//     //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
-//     // }elseif ($tramite->idDependencia==20) {
-//     //     $facultad="FACULTAD DE EDUCACION Y CIENCIAS DE LA COMUNICACION";
-//     // }elseif ($tramite->idDependencia==21) {
-//     //     $facultad="FACULTAD DE FARMACIA Y BIOQUIMICA";
-//     // }elseif ($tramite->idDependencia==22) {
-//     //     $facultad="FACULTAD DE MEDICINA";
-//     // }elseif ($tramite->idDependencia==23) {
-//     //     $facultad="FACULTAD DE ESTOMATOLOGIA";
-//     // }
-// }
+
 // LÓGICA DE DENOMINACIONES
 $r = '';
 switch ($escuela) {
@@ -548,10 +524,12 @@ if ($tramite->tipo_documento==1) {
                     <!--<font style="font-size:45px; font-family: brushib; margin-top:-10mm; "><b><?php //echo $nombreComp;?></b></font>-->
                     <font style="font-size:31px; /*font-family: coopblb;*/ font-family: arial; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
                     </p>
+
                     <p style="text-align: justify; text-indent: 0px; margin-bottom: 18px; margin-top: -35px; font-size:18px">
-                        De la <b><?php echo $facultad ?></b>,
+                        De la <b><?php echo $facultad ?>,</b>
                         <b>
                             <?php if ($idFicha==1 || $idFicha==2){?>ESCUELA PROFESIONAL DE <?php }?>
+                            <?php if ($tramite->idDependencia_detalle==49){?>SEGUNDA ESPECIALIZACIÓN,<?php }?>
                             <?php
                             if ($escuela=='RESIDENTADO MÉDICO' || $escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $escuela=='TECNOLOGÍA EDUCATIVA' || $escuela=='ESTIMULACIÓN TEMPRANA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $escuela=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $escuela=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
                                 echo buscarDenominaciones($escuela, $diploma);
@@ -562,6 +540,10 @@ if ($tramite->tipo_documento==1) {
                         </b>
                         <?php if ($idFicha==7){?> - <b>EDUCACIÓN <?php echo $nombre_escuela_preford ?></b> <?php }?>
                     </p>
+
+
+
+
                     <p style="text-align: justify; text-indent: 50px; font-family: Times;  margin-bottom: -3px; margin-top: -9px; font-size:18px">
                         Por tanto:</p>
                     <p style="text-align: justify; text-indent: 50px; font-size:18px; font-family: Times; line-height: 20px;">
@@ -628,7 +610,7 @@ if ($tramite->tipo_documento==1) {
                             CÓDIGO DE UNIVERSIDAD :<b> 004</b><br>
                             REGISTRADO EN EL LIBRO DE
                             <?php 
-                            if(substr($diploma, 0,1) == 'B' || substr($diploma, 0,1) == 'M' || substr($diploma, 0,1) == 'D'){
+                            if(substr($tramite->diploma, 0,1) == 'B' || substr($tramite->diploma, 0,1) == 'M' || substr($tramite->diploma, 0,1) == 'D'){
                                 echo " GRADOS ";
                             }else{
                                 echo " TÍTULOS ";

@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use App\Voucher;
 use App\Tramite;
 use App\Tipo_Tramite_Unidad;
+use App\Tipo_Tramite;
 use App\Escuela;
 use App\Mencion;
 use App\User;
@@ -246,7 +247,7 @@ class VoucherController extends Controller
             $tramite->update();
             DB::commit();
             // mensaje de validación de voucher
-            dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+            // dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
 
             return response()->json(['status' => '200', 'message' => "Voucher validado con éxito"], 200);
         } catch (\Exception $e) {

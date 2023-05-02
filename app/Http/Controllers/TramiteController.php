@@ -395,12 +395,12 @@ class TramiteController extends Controller
             
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
             
-            
-            
             // VERIFICAR QUE LA PERSONA QUE REGISTRA UN TRÁMITE DE GRADO SEA EGRESADO
             if ($tipo_tramite_unidad->idTipo_tramite==2) {
                 // VALIDACION DE REPETICIÓN DE TRÁMITES
-                $tramite_validate=Tramite::where('idUsuario',$idUsuario)->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
+                $tramite_validate=Tramite::where('idUsuario',$idUsuario)->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)
+                ->where('idEstado_tramite','!=','29')
+                ->first();
                 if ($tramite_validate) {
                     return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
                 }
@@ -438,6 +438,17 @@ class TramiteController extends Controller
                     }
                 }
             }
+            if ($tipo_tramite_unidad->idTipo_tramite==3) {
+                // VALIDACION DE REPETICIÓN DE TRÁMITES
+                if ($request->idTipo_tramite_unidad==17||$request->idTipo_tramite_unidad==19||$request->idTipo_tramite_unidad==21||$request->idTipo_tramite_unidad==23) {
+                    $tramite_validate=Tramite::where('idUsuario',$idUsuario)->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)
+                    ->where('idEstado_tramite','!=','29')
+                    ->first();
+                    if ($tramite_validate) {
+                        return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
+                    }
+                }
+            }
             $tramiteValidate=Tramite::join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->Where('voucher.entidad',trim($request->entidad))->where('voucher.nro_operacion',trim($request->nro_operacion))
             ->where('voucher.fecha_operacion',Str::substr(trim($request->fecha_operacion),0, 10))
@@ -456,18 +467,22 @@ class TramiteController extends Controller
                 ->orderBy("created_at","DESC")->first();
                 
                 if ($last_tramite) {
-                    $correlativo=(int)(substr($last_tramite->nro_tramite,0,3));
+                    $correlativo=(int)(substr($last_tramite->nro_tramite,0,4));
                     $correlativo++;
                     if ($correlativo<10) {
-                        $tramite -> nro_tramite="00".$correlativo.date('d').date('m').substr(date('Y'),2,3);
+                        $tramite -> nro_tramite="000".$correlativo.date('d').date('m').substr(date('Y'),2,3);
                     } elseif($correlativo<100){
+                        $tramite -> nro_tramite="00".$correlativo.date('d').date('m').substr(date('Y'),2,3);
+                    }elseif ($correlativo<1000) {
                         $tramite -> nro_tramite="0".$correlativo.date('d').date('m').substr(date('Y'),2,3);
-                    }else{
+                    }
+                    else{
                         $tramite -> nro_tramite=$correlativo.date('d').date('m').substr(date('Y'),2,3);
                     }
                 }else{
-                    $tramite -> nro_tramite="001".date('d').date('m').substr(date('Y'),2,3);
+                    $tramite -> nro_tramite="0001".date('d').date('m').substr(date('Y'),2,3);
                 }
+                
 
                 // REGISTRAMOS LE VOUCHER
                 $voucher=new Voucher;
@@ -612,7 +627,8 @@ class TramiteController extends Controller
                                 if ($tipo_tramite->idTipo_tramite==2) {
                                     $file->storeAs("/public"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"], $nombre);
                                 }else {
-                                    $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
+                                    $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
+                                    // $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
                                 }
                             //   $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
                               $tramite_requisito->archivo = $nombreBD;
@@ -644,79 +660,14 @@ class TramiteController extends Controller
                 $historial_estados->fecha=date('Y-m-d h:i:s');
                 $historial_estados->save();
 
-                // REGISTRAMOS EL CERTIFICADO EN PARALELO CASO EL TRÁMITE SEA ELABORACIÓN DE CARPETA
-                // if ($tipo_tramite_unidad->idTipo_tramite==2) {
-                //     if ($tipo_tramite_unidad->idTipo_tramite_unidad==15 || $tipo_tramite_unidad->idTipo_tramite_unidad==34 
-                //     || ($tipo_tramite_unidad->idTipo_tramite_unidad==16 && $request->idDependencia_detalle==11)) {
-                        
-                //         $tramiteCertificado=new Tramite;
-                //         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
-                //         // REGISTRAMOS EL TRÁMITE
-                //         $tramiteCertificado -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
-                //         $tramiteCertificado -> idTipo_tramite_unidad=37;
-                //         $tramiteCertificado -> idVoucher=$voucher->idVoucher;
-                //         $tramiteCertificado -> idUsuario=$idUsuario;
-                //         $tramiteCertificado -> idUnidad=trim($request->idUnidad);
-                //         $tramiteCertificado -> idDependencia=trim($request->idDependencia);
-                //         $tramiteCertificado -> idDependencia_detalle=trim($request->idDependencia_detalle);
-                //         $tramiteCertificado -> nro_matricula=trim($request->nro_matricula);
-                //         $tramiteCertificado -> comentario=trim($request->comentario);
-                //         $tramiteCertificado -> sede=trim($request->sede);
-                //         $tramiteCertificado->idUsuario_asignado=null;
-                //         $tramiteCertificado -> idEstado_tramite=2;
-                //         $tramiteCertificado->firma_tramite = $tramite->firma_tramite;
-                //         $tramiteCertificado -> save();
-    
-
-                //         // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
-                //         if($request->hasFile("files")){
-                //             foreach ($request->file("files") as $key => $file) {
-                //                 $requisito=json_decode($request->requisitos[$key],true);
-                //                 if ($requisito["idRequisito"]==15||$requisito["idRequisito"]==23) {
-                //                     $tramite_requisito=new Tramite_Requisito;
-                //                     $tramite_requisito->idTramite=$tramiteCertificado->idTramite;
-                //                     $tramite_requisito->idRequisito=$requisito["idRequisito"];
-                //                     $nombre = $dni.".".$file->guessExtension();
-                //                     $nombreBD = "/storage/certificado_estudios/".$requisito["nombre"]."/".$nombre;
-                //                     if ($file->getClientOriginalName()!=="vacio.kj") {
-                //                         if($file->guessExtension()==$requisito["extension"]){
-                //                         $file->storeAs("/public/certificado_estudios/".$requisito["nombre"], $nombre);
-                //                         $tramite_requisito->archivo = $nombreBD;
-                //                         }else {
-                //                             DB::rollback();
-                //                             // return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
-                //                             return response()->json(['status' => '400', 'message' => "Subir ".$requisito["nombre"]." en ".$requisito["extension"]], 400);
-                //                         }
-                //                     }
-                //                     $tramite_requisito -> save();
-                //                 }
-                //             }
-                //         }
-
-                //         //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                //         $historial_estados=new Historial_Estado;
-                //         $historial_estados->idTramite=$tramiteCertificado->idTramite;
-                //         $historial_estados->idUsuario=$idUsuario;
-                //         $historial_estados->idEstado_actual=null;
-                //         $historial_estados->idEstado_nuevo=1;
-                //         $historial_estados->fecha=date('Y-m-d h:i:s');
-                //         $historial_estados->save();
-    
-                //         //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                //         $historial_estados=new Historial_Estado;
-                //         $historial_estados->idTramite=$tramiteCertificado->idTramite;
-                //         $historial_estados->idUsuario=$idUsuario;
-                //         $historial_estados->idEstado_actual=1;
-                //         $historial_estados->idEstado_nuevo=2;
-                //         $historial_estados->fecha=date('Y-m-d h:i:s');
-                //         $historial_estados->save();
-                //     }
-
+                //Verificar que el código no esté registrado
+                // $code_validate=Tramite::where('nro_tramite',$tramite->nro_tramite)->first();
+                // if ($code_validate) {
+                //     return response()->json(['status' => '400', 'message' => "Volver a intentar"], 400);
                 // }
-
-
+                //---------------------------------------------------------------------------------------------
                 DB::commit();
-                dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                // dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                 return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente!!'], 200);
             }
         } catch (\Exception $e) {
@@ -878,31 +829,31 @@ class TramiteController extends Controller
                     }
                 }elseif($tramite->idEstado_tramite==20){
                     // Verificando que el estado del responsable sea el alumno(4) o escuela(5)
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
                         $flag=false;
                         if ($requisito['responsable']==4) {
                             $flagAlumno=true;
-                        } else if ($requisito['responsable']==5) {
+                        } else if ($requisito['responsable']==5||$requisito['responsable']==17) {
                             $flagEscuela = true;
                         }
                     }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
                         
                         $flag2=false;
                     }
                     
                 }else {
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8)) {
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
                         $flag=false;
                         if ($requisito['responsable']==4) {
                             $flagAlumno=true;
-                        }elseif($requisito['responsable']==5){
+                        }elseif($requisito['responsable']==5||$requisito['responsable']==17){
                             $flagEscuela=true;
                         }elseif($requisito['responsable']==8) {
                             $flagFacultad=true;
                         }
                     }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8)) {
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
                         $flag2=false;
                     }
                 }
@@ -1290,10 +1241,10 @@ class TramiteController extends Controller
                             if ($tramite->idTipo_tramite==2) {
                                 $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
                             }else {
-                                $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                                // $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                                $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
                             }
-                        //   $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
-                          $tramite_requisito->archivo = $nombreBD;
+                            $tramite_requisito->archivo = $nombreBD;
                         }else {
                             DB::rollback();
                             // return response()->json(['status' => '400', 'message' => "Subir archivo pdf"], 400);
@@ -1496,7 +1447,7 @@ class TramiteController extends Controller
                 }else {
                     $copias=[$secretariaEscuela->correo,$usuario->correo,$secretariaFacultad->correo,$uraa->correo];
                 }
-                dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+                // dispatch(new NotificacionCertificadoJob($decano->correo,$copias,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             }elseif ($tipo_tramite->idTipo_tramite==2) {
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
                 $historial_estados=new Historial_Estado;
@@ -1510,7 +1461,7 @@ class TramiteController extends Controller
                 $tramite->save();
                 //Correo
                 $secretariaEscuela=User::where('idTipo_usuario',5)->where('idDependencia',$tramite->idDependencia_detalle)->where('estado',true)->first();
-                dispatch(new NotificacionCarpetaJob($usuario,$secretariaEscuela,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
+                // dispatch(new NotificacionCarpetaJob($usuario,$secretariaEscuela,$tramite,$tipo_tramite,$tipo_tramite_unidad,trim($request->body)));
             }
             DB::commit();
             return response()->json(true, 200);
@@ -1779,19 +1730,6 @@ class TramiteController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
-        }
-    }
-
-    public function chancarExonerado(Request $request){
-        if ($request->hasFile("archivo")) {
-            // GUARDAMOS EL ARCHIVO DEL EXONERADO
-            $file=$request->file("archivo");
-            $nombre = $file->getClientOriginalName();
-            // $nombreBD = "/storage/exonerados/".$nombre;
-            if($file->guessExtension()=="pdf"){
-              $file->storeAs('public/elaboracion_carpeta/TÍTULO PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
-            //   $tramite->exonerado_archivo = $nombreBD;
-            }
         }
     }
 

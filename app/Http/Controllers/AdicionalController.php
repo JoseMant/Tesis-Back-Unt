@@ -98,4 +98,91 @@ class AdicionalController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function anularCarnes() {
+        $idsTramites = [2146,
+        2155,
+        1934,
+        1872,
+        1952,
+        1701,
+        1595,
+        1694,
+        1619,
+        1578,
+        1805,
+        1581,
+        1628,
+        1704,
+        2109,
+        1871,
+        1702,
+        1716,
+        1881,
+        1882,
+        1885,
+        2082];
+        foreach ($idsTramites as $key => $idTramite) {
+            $historial_estado = new Historial_Estado;
+            $historial_estado->idEstado_actual = 26;
+            $historial_estado->idEstado_nuevo = 29;
+            // $historial_estado->fecha = date('Y-m-d');
+            $historial_estado->idTramite = $idTramite;
+            $historial_estado->idUsuario = 2;
+            $historial_estado->save();
+            $tramite = Tramite::where('idTramite', $idTramite)->first();
+            $tramite->idEstado_tramite = 29;
+            $tramite->save();
+
+        }
+    }
+    public function chancarArchivo(Request $request){
+        if ($request->hasFile("archivo")) {
+            //obtenemos el archivo de la resolución a chancar
+            $file=$request->file("archivo");
+            //obtenemos todos los trámites a los que se les va a chancar
+            $ingenieria=Tramite::select('tramite.idTramite','usuario.nro_documento')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16);
+            })
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where('tramite.idDependencia',13)
+            ->where('cronograma_carpeta.fecha_colacion','2023-04-28')
+            ->get();
+            return count($ingenieria);
+            //Recorremos los trámites y chancamos cada uno la resolución
+            foreach ($ingenieria as $key => $tramite) {
+                $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
+                ->where(function($query)
+                {
+                    $query->where('idRequisito',21)
+                    ->orWhere('idRequisito',31);
+                })
+                ->first();
+                $nombre=$tramite->nro_documento.'.pdf';
+                if ($requisito->idRequisito==21) {
+                    $file->storeAs('public/elaboracion_carpeta/GRADO DE BACHILLER/RESOLUCION DE DECANATO', $nombre);
+                }else if($requisito->idRequisito==31){
+                    $file->storeAs('public/elaboracion_carpeta/TÍTULO PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
+                }
+            }
+        }
+        
+        // CÓDIGO PARA CHANCAR EXONERADO
+        // if ($request->hasFile("archivo")) {
+        //     // GUARDAMOS EL ARCHIVO DEL EXONERADO
+        //     $file=$request->file("archivo");
+        //     $nombre = $file->getClientOriginalName();
+        //     // $nombreBD = "/storage/exonerados/".$nombre;
+        //     if($file->guessExtension()=="pdf"){
+        //       $file->storeAs('public/elaboracion_carpeta/TÍTULO PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
+        //     //   $tramite->exonerado_archivo = $nombreBD;
+        //     }
+        // }
+    }
 }
