@@ -440,9 +440,17 @@ $tipoDocumento="";
 if ($tramite->tipo_documento==1) {
     $tipoDocumento="DNI";
 }if ($tramite->tipo_documento==2) {
-    $tipoDocumento="";
+    $tipoDocumento="PAS";
 }if ($tramite->tipo_documento==3) {
-    $tipoDocumento="CARNET DE EXTRANJERÍA";
+    $tipoDocumento="CE";
+}if ($tramite->tipo_documento==4) {
+    $tipoDocumento="CI";
+}if ($tramite->tipo_documento==5) {
+    $tipoDocumento="DE";
+}if ($tramite->tipo_documento==6) {
+    $tipoDocumento="CTP";
+}if ($tramite->tipo_documento==7) {
+    $tipoDocumento="CIP";
 }
 
 
