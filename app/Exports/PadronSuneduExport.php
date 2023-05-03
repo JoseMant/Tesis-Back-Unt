@@ -39,7 +39,7 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
             'ESC_POS',
             'EGRES_FEC',
             'APEPAT',
-            // 'APEMAT',
+            'APEMAT',
             'NOMBRE',
             'SEXO',
             'DOCU_TIP',
@@ -107,7 +107,7 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
                     when tramite.idUnidad = 4 then  (select denominacion from mencion where idMencion=tramite.idDependencia_detalle)
                 end)"),
         // DB::raw('CONCAT("escuela")'),
-        DB::raw('CONCAT("") as escp_pos'),'tramite_detalle.fecha_ultima_matricula','usuario.apellidos','usuario.nombres','usuario.sexo','usuario.tipo_documento','usuario.nro_documento',DB::raw('CONCAT("00","4")'),
+        DB::raw('CONCAT("") as escp_pos'),'tramite_detalle.fecha_ultima_matricula','usuario.apellido_paterno','usuario.apellido_materno','usuario.nombres','usuario.sexo','usuario.tipo_documento','usuario.nro_documento',DB::raw('CONCAT("00","4")'),
         DB::raw("(case 
                     when tipo_tramite_unidad.idTipo_tramite_unidad = 15 then 'BACHILLER' 
                     when tipo_tramite_unidad.idTipo_tramite_unidad = 16 then 'TITULO PROFESIONAL'
