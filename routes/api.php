@@ -280,3 +280,4 @@ Route::get('dependencias_detalle/{idDependencia}', 'ReporteController@getDepende
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
+Route::put('separar', 'AdicionalController@separarApellidos');

@@ -185,4 +185,36 @@ class AdicionalController extends Controller
         //     }
         // }
     }
+
+    public function separarApellidos(){
+        DB::beginTransaction();
+        try {
+            $usuarios=User::where('apellido_paterno',null)->get();
+            // return count($usuarios);
+            // $apellidos=[];
+            foreach ($usuarios as $key => $usuario) {
+                try {
+                    $apellidos=explode(" ", $usuario->apellidos, 2);
+                    $usuario->apellido_paterno= $apellidos[0];
+                    $usuario->apellido_materno=$apellidos[1];
+                    // return $usuario;
+                    $usuario->update();
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
+                // $apellidos=explode(" ", $usuario->apellidos, 2);
+                // $usuario->apellido_paterno= $apellidos[0];
+                // $usuario->apellido_materno=$apellidos[1];
+                // // return $usuario;
+                // $usuario->update();
+                
+                // 164020323
+            }
+            DB::commit();
+            return response()->json(200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
 }
