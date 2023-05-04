@@ -439,7 +439,7 @@ class CertificadoController extends Controller
                     $decano=User::join('dependencia','usuario.idDependencia','dependencia.idDependencia2')->where('idTipo_usuario',6)
                     ->where('dependencia.idDependencia',$tramite->idDependencia)->first();
                 }
-                dispatch(new NotificacionDecanatoJob($decano,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                // dispatch(new NotificacionDecanatoJob($decano,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             }elseif ($tramite->idEstado_tramite==13) {
                 $tramite->idEstado_tramite=15;
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO

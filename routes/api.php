@@ -95,7 +95,7 @@ Route::get('vouchers/rechazados','VoucherController@Rechazados');
 Route::get('reporte/tesoreria/aprobados','VoucherController@vouchersAprobados');
 Route::post('vouchers/update/{id}','TramiteController@updateVoucher');
 Route::post('requisitos/update/{id}','TramiteController@UpdateFilesRequisitos');
-Route::post('chancar','TramiteController@chancarExonerado');
+Route::post('chancar','AdicionalController@chancarArchivo');
 Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
 Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
@@ -278,3 +278,6 @@ Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGen
 Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
 Route::get('dependencias_detalle/{idDependencia}', 'ReporteController@getDependencias_Detalle');
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
+Route::get('fecha', 'AdicionalController@getFecha');
+Route::get('actualizar', 'AdicionalController@rechazar');
+Route::put('separar', 'AdicionalController@separarApellidos');

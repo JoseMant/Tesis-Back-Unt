@@ -131,7 +131,8 @@ class PersonaController extends Controller
                     $usuario=new User;
                     $usuario->nro_matricula=$personaSE->codigo;
                     $usuario->nombres=$personaSE->nombre;
-                    $usuario->apellidos=$personaSE->paterno." ".$personaSE->materno;
+                    $usuario->apellido_paterno=$personaSE->paterno;
+                    $usuario->apellido_materno=$personaSE->materno;
                     $usuario->tipo_documento=$personaSE->idTipo_documento;
                     $usuario->nro_documento=$personaSE->nro_documento;
                     $usuario->correo=$personaSE->correo_personal;
@@ -150,7 +151,8 @@ class PersonaController extends Controller
                         $usuario=new User;
                         $usuario->nro_matricula=$personaSuv->idalumno;
                         $usuario->nombres=$personaSuv->per_nombres;
-                        $usuario->apellidos=$personaSuv->per_apepaterno." ".$personaSuv->per_apematerno;
+                        $usuario->apellido_paterno=$personaSuv->per_apepaterno;
+                        $usuario->apellido_materno=$personaSuv->per_apematerno;
                         $usuario->tipo_documento=$personaSuv->per_tipo_documento;
                         $usuario->nro_documento=$personaSuv->per_dni;
                         $usuario->correo=$personaSuv->per_email;
@@ -172,7 +174,9 @@ class PersonaController extends Controller
                             $usuario=new User;
                             $usuario->nro_matricula=$personaSga->per_login;
                             $usuario->nombres=$personaSga->per_nombres;
-                            $usuario->apellidos=$personaSga->per_apellidos;
+                            $apellidos=explode(" ", $personaSga->per_apellidos, 2);
+                            $usuario->apellido_paterno= $apellidos[0];
+                            $usuario->apellido_materno=$apellidos[1];
                             $usuario->tipo_documento=1;
                             $usuario->nro_documento=$personaSga->per_dni;
                             $usuario->correo=$personaSga->per_mail;
@@ -249,6 +253,13 @@ class PersonaController extends Controller
                                 $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
                                 $escuelaSede->nro_matricula=$escuela->per_login;
                                 if ($escuela->sed_nombre == 'Trujillo') $escuelaSede->sede='TRUJILLO';
+                                elseif ($escuela->sed_nombre == 'SEDE TRUJILLO') $escuelaSede->sede='TRUJILLO';
+                                elseif ($escuela->sed_nombre == 'Valle Jequetepeque') $escuelaSede->sede='VALLE JEQUETEPEQUE';
+                                elseif ($escuela->sed_nombre == 'SEDE VALLE JEQUETEPEQUE') $escuelaSede->sede='VALLE JEQUETEPEQUE';
+                                elseif ($escuela->sed_nombre == 'Huamachuco') $escuelaSede->sede='HUAMACHUCO';
+                                elseif ($escuela->sed_nombre == 'SEDE HUAMACHUCO') $escuelaSede->sede='HUAMACHUCO';
+                                elseif ($escuela->sed_nombre == 'Stgo. de Chuco') $escuelaSede->sede='SANTIAGO DE CHUCO';
+                                elseif ($escuela->sed_nombre == 'SEDE SANTIAGO DE CHUCO') $escuelaSede->sede='SANTIAGO DE CHUCO';
                                 else $escuelaSede->sede=$escuela->sed_nombre;
                                 array_push($escuelas,$escuelaSede);
                             }
