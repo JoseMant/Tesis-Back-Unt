@@ -253,7 +253,7 @@ Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobados
 Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
-Route::get('carpeta/{id}', 'Carpeta@getDataPersona');
+Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
