@@ -2571,12 +2571,26 @@ class GradoController extends Controller
                 }
                 $newRegistro->idTipo_tramite_unidad=$tramite->idTipo_tramite_unidad;
                 $newRegistro->save();
+                // OBTENER DATOS DE AUTORIDADES
+                $rector=User::where('idTipo_usuario',12)->where('estado',1)->first();
+                $secretaria=User::where('idTipo_usuario',10)->where('estado',1)->first();
+                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',1)->first();
+
                 //Obtenemos el detalle de cada uno de los trámites Y ACTUALIZAMOS LOS DATOS QUE VAN EN EL LIBRO
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
                 $tramite_detalle->nro_libro=$newRegistro->nro_libro;
                 $tramite_detalle->folio=$newRegistro->folio;
                 $tramite_detalle->nro_registro=$newRegistro->nro_registro;
                 $tramite_detalle->idTipo_tramite_unidad=$newRegistro->idTipo_tramite_unidad;
+                if ($rector) {
+                    $tramite_detalle->autoridad1=$rector->idUsuario;
+                }
+                if ($secretaria) {
+                    $tramite_detalle->autoridad2=$secretaria->idUsuario;
+                }
+                if ($decano) {
+                    $tramite_detalle->autoridad3=$decano->idUsuario;
+                }
                 $tramite_detalle->save();
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE

@@ -189,6 +189,7 @@ class VoucherController extends Controller
                         $tramiteCertificado -> nro_matricula=$tramite->nro_matricula;
                         $tramiteCertificado -> comentario="CERTIFICADO PARA SOLICITUD DE ".$tipo_tramite_unidad->descripcion;
                         $tramiteCertificado -> sede=$tramite->sede;
+                        $tramiteCertificado -> exonerado_archivo=$tramite->exonerado_archivo;
                         $tramiteCertificado->idUsuario_asignado=null;
                         $tramiteCertificado -> idEstado_tramite=5;
                         $tramiteCertificado->firma_tramite = $tramite->firma_tramite;
