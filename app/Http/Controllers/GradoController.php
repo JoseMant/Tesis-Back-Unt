@@ -2546,9 +2546,9 @@ class GradoController extends Controller
             ->orderBy('usuario.nombres','asc')
             ->get();  
 
-            if ($tramites) {
+            if (count($tramites)>0) {
                 DB::rollback();
-                return response()->json(['status' => '400', 'message' =>"Hay trámites en estados pendientes"], 400);
+                return response()->json(['status' => '400', 'message' =>"Hay ".count($tramites)." trámites en estados pendientes"], 400);
             }
 
             // Recorremos todos los trámites y le añadimos su numeracion a cada uno
