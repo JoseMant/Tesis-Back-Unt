@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Requisito;
+use App\Amnistia;
 class RequisitoController extends Controller
 {
     public function __construct()
@@ -90,14 +91,27 @@ class RequisitoController extends Controller
 
     public function getAllByTipo_tramite_unidad($idTipo_tramite_unidad){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-        // $token = JWTAuth::getToken();
-        // $apy = JWTAuth::getPayload($token);
-        // $idUsuario=$apy['idUsuario'];
-        // $dni=$apy['nro_documento'];
-        // $idTipo_usuario=$apy['idTipo_usuario'];
-        $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
-        ->where('estado',true)->get();
-        // ->get();
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $dni=$apy['nro_documento'];
+
+        $amnistiado=Amnistia::where('nro_documento',$dni)->first();
+        if ($amnistiado) {
+            if ($idTipo_tramite_unidad==15) {
+                $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+                ->where('estado',true)
+                ->orWhere('idRequisito',71)
+                ->get();
+            }elseif ($idTipo_tramite_unidad==16) {
+                $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+                ->where('estado',true)
+                ->orWhere('idRequisito',72)
+                ->get();
+            }
+        }else {
+            $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+            ->where('estado',true)->get();
+        }
         return response()->json(['status' => '200', 'requisitos'=>$requisitos], 200);
     }
 }
