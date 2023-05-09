@@ -2520,6 +2520,37 @@ class GradoController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
 
+
+            // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+            $tramites=Tramite::select('tramite.*')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+            ->where('tramite.idEstado_tramite','!=',42)
+            ->where('tipo_tramite_unidad.idTipo_tramite',2)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
+            
+            ->where('resolucion.idResolucion',$request->idResolucion)
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('tramite.idDependencia_detalle','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
+            ->get();  
+
+            if ($tramites) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' =>"Hay trámites en estados pendientes"], 400);
+            }
+
             // Recorremos todos los trámites y le añadimos su numeracion a cada uno
             $tramites=Tramite::select('tramite.*')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
