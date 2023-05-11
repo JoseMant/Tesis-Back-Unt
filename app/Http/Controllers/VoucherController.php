@@ -175,7 +175,7 @@ class VoucherController extends Controller
 
                     // REGISTRAMOS EL CERTIFICADO EN PARALELO
                     if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==34 
-                    || ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==11)) {
+                    || ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==11)|| ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==47)) {
                         $tramiteCertificado=new Tramite;
                         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
                         // REGISTRAMOS EL TRÁMITE
