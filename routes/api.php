@@ -143,6 +143,7 @@ Route::post('cargaLectiva', 'DocenteController@getCursosDocentePrincipal');
 Route::get('personasSuv', 'PersonaSuvController@index');
 //RUTAS DESCARGA ZIP
 Route::get('download/fotos', 'ZipController@downloadFotos');
+Route::get('backup/{idResolucion}', 'ZipController@backupFiles');
 //RUTAS IMPORTAR Y EXPORTAR EXCEL
 Route::post('carnets/import/observados', 'CarnetController@import');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
@@ -281,3 +282,4 @@ Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
 Route::put('separar', 'AdicionalController@separarApellidos');
+Route::get('fecha/diploma', 'AdicionalController@getDatosDiploma');

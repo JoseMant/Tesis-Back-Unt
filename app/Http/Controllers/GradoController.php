@@ -80,9 +80,11 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
-                    }else {
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
+                    }
+                    else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
                 }
@@ -137,8 +139,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -223,8 +226,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -276,8 +280,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -364,8 +369,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -417,8 +423,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -1361,8 +1368,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -1417,8 +1425,9 @@ class GradoController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',46)
                         ->orWhere('tramite.idDependencia_detalle',48)
                         ->orWhere('tramite.idDependencia_detalle',49);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
@@ -2511,6 +2520,37 @@ class GradoController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
 
+
+            // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+            $tramites=Tramite::select('tramite.*')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+            ->where('tramite.idEstado_tramite','!=',42)
+            ->where('tipo_tramite_unidad.idTipo_tramite',2)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
+            
+            ->where('resolucion.idResolucion',$request->idResolucion)
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('tramite.idDependencia_detalle','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
+            ->get();  
+
+            if (count($tramites)>0) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' =>"Hay ".count($tramites)." trámites en estados pendientes"], 400);
+            }
+
             // Recorremos todos los trámites y le añadimos su numeracion a cada uno
             $tramites=Tramite::select('tramite.*')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -2562,12 +2602,26 @@ class GradoController extends Controller
                 }
                 $newRegistro->idTipo_tramite_unidad=$tramite->idTipo_tramite_unidad;
                 $newRegistro->save();
+                // OBTENER DATOS DE AUTORIDADES
+                $rector=User::where('idTipo_usuario',12)->where('estado',1)->first();
+                $secretaria=User::where('idTipo_usuario',10)->where('estado',1)->first();
+                $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',1)->first();
+
                 //Obtenemos el detalle de cada uno de los trámites Y ACTUALIZAMOS LOS DATOS QUE VAN EN EL LIBRO
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
                 $tramite_detalle->nro_libro=$newRegistro->nro_libro;
                 $tramite_detalle->folio=$newRegistro->folio;
                 $tramite_detalle->nro_registro=$newRegistro->nro_registro;
                 $tramite_detalle->idTipo_tramite_unidad=$newRegistro->idTipo_tramite_unidad;
+                if ($rector) {
+                    $tramite_detalle->autoridad1=$rector->idUsuario;
+                }
+                if ($secretaria) {
+                    $tramite_detalle->autoridad2=$secretaria->idUsuario;
+                }
+                if ($decano) {
+                    $tramite_detalle->autoridad3=$decano->idUsuario;
+                }
                 $tramite_detalle->save();
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE

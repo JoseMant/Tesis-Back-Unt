@@ -175,7 +175,7 @@ class VoucherController extends Controller
 
                     // REGISTRAMOS EL CERTIFICADO EN PARALELO
                     if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==34 
-                    || ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==11)) {
+                    || ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==11)|| ($tramite->idTipo_tramite_unidad==16 && $tramite->idDependencia_detalle==47)) {
                         $tramiteCertificado=new Tramite;
                         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
                         // REGISTRAMOS EL TRÁMITE
@@ -189,6 +189,7 @@ class VoucherController extends Controller
                         $tramiteCertificado -> nro_matricula=$tramite->nro_matricula;
                         $tramiteCertificado -> comentario="CERTIFICADO PARA SOLICITUD DE ".$tipo_tramite_unidad->descripcion;
                         $tramiteCertificado -> sede=$tramite->sede;
+                        $tramiteCertificado -> exonerado_archivo=$tramite->exonerado_archivo;
                         $tramiteCertificado->idUsuario_asignado=null;
                         $tramiteCertificado -> idEstado_tramite=5;
                         $tramiteCertificado->firma_tramite = $tramite->firma_tramite;

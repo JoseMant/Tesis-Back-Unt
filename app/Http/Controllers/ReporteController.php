@@ -536,9 +536,10 @@ class ReporteController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
                         ->orWhere('tramite.idDependencia_detalle',46);
-                        
-    
-                    }else {
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
+                    }else{
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }
                 }
@@ -582,8 +583,9 @@ class ReporteController extends Controller
                         ->orWhere('tramite.idDependencia_detalle',44)
                         ->orWhere('tramite.idDependencia_detalle',45)
                         ->orWhere('tramite.idDependencia_detalle',46);
-                        
-    
+                    }elseif($idDependencia==11){
+                        $query->where('tramite.idDependencia_detalle',11)
+                        ->orWhere('tramite.idDependencia_detalle',47);
                     }else {
                         $query->where('tramite.idDependencia_detalle',$idDependencia);
                     }

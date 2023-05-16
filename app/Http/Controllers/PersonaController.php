@@ -460,7 +460,8 @@ class PersonaController extends Controller
                 // obtenemos la sede de la última matricula a la que pertenece el alumno
                 $sede=PersonaSE::select('matricula.fecha_hora','sede.nombre')
                 ->join('matricula','alumno.idAlumno','matricula.idAlumno')
-                ->join('sede','matricula.idSede','sede.idSede')
+                ->join('resolucion','resolucion.idResolucion','alumno.idResolucion')
+                ->join('sede','resolucion.idSede','sede.idSede')
                 ->where('alumno.nro_documento',$dni)
                 ->orderBy('matricula.fecha_hora','desc')
                 ->limit(1)

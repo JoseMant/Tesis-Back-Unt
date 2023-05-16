@@ -143,6 +143,7 @@ class CertificadoController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
 
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
@@ -162,7 +163,11 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite.idUsuario_asignado',$idUsuario)
+            ->where(function($query) use($idUsuario,$idTipo_usuario){
+                if ($idTipo_usuario==2) {
+                    $query->where('tramite.idUsuario_asignado',$idUsuario);
+                }
+            })
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -194,7 +199,11 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',7)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite.idUsuario_asignado',$idUsuario)
+            ->where(function($query) use($idUsuario,$idTipo_usuario){
+                if ($idTipo_usuario==2) {
+                    $query->where('tramite.idUsuario_asignado',$idUsuario);
+                }
+            })
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }
@@ -240,6 +249,7 @@ class CertificadoController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
 
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
@@ -259,7 +269,11 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',8)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite.idUsuario_asignado',$idUsuario)
+            ->where(function($query) use($idUsuario,$idTipo_usuario){
+                if ($idTipo_usuario==2) {
+                    $query->where('tramite.idUsuario_asignado',$idUsuario);
+                }
+            })
             ->where(function($query) use ($request)
             {
                 $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
@@ -290,7 +304,11 @@ class CertificadoController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idEstado_tramite',8)
             ->where('tipo_tramite.idTipo_tramite',1)
-            ->where('tramite.idUsuario_asignado',$idUsuario)
+            ->where(function($query) use($idUsuario,$idTipo_usuario){
+                if ($idTipo_usuario==2) {
+                    $query->where('tramite.idUsuario_asignado',$idUsuario);
+                }
+            })
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();   
         }

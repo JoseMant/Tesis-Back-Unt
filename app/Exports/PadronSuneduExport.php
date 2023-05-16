@@ -120,9 +120,19 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
                     else 'NO'
                 end)"),
         'acreditacion.fecha_inicio','acreditacion.fecha_fin',DB::raw('CONCAT("") as FEC_INICIO_MOD_TIT_ACREDIT'),DB::raw('CONCAT("") as FEC_FIN_MOD_TIT_ACREDIT'),'tramite_detalle.fecha_inicio_acto_academico'
-        ,'tramite_detalle.fecha_sustentacion_carpeta',DB::raw('CONCAT("SI") as TRAB_INVEST_ORIGINAL'),DB::raw('CONCAT("P") as MOD_EST'),DB::raw('substr(tipo_tramite_unidad.diploma_obtenido,1, 1)'),DB::raw('CONCAT("") as PROC_REV_PAIS'),
+        ,'tramite_detalle.fecha_sustentacion_carpeta',
+
+        // DB::raw('CONCAT("SI") as TRAB_INVEST_ORIGINAL') // modalidad dependiendo si es automático
+
+        DB::raw("(case 
+                    when tramite_detalle.idModalidad_carpeta != 1 then 'SI' 
+                end) as TRAB_INVEST_ORIGINAL")
+
+        ,DB::raw('CONCAT("P") as MOD_EST'),DB::raw('substr(tipo_tramite_unidad.diploma_obtenido,1, 1)'),DB::raw('CONCAT("") as PROC_REV_PAIS'),
         DB::raw('CONCAT("") as PROC_REV_UNIV'),DB::raw('CONCAT("") as PROC_REV_GRADO'),DB::raw('CONCAT("") as CRIT_REV'),'resolucion.nro_resolucion','resolucion.fecha','cronograma_carpeta.fecha_colacion',
-        DB::raw('CONCAT("") as DIP_FECHA_DUP'),'tramite_detalle.codigo_diploma',DB::raw('CONCAT("O") as DIP_TIP_EMI'),'tramite_detalle.nro_libro','tramite_detalle.folio','tramite_detalle.nro_registro',
+        DB::raw('CONCAT("") as DIP_FECHA_DUP'),'tramite_detalle.codigo_diploma',
+        DB::raw('CONCAT("O") as DIP_TIP_EMI'),// HACERLO DINÁMICO CON UN NUEVO CAMPO
+        'tramite_detalle.nro_libro','tramite_detalle.folio','tramite_detalle.nro_registro',
         DB::raw("(case 
                     when (select sexo from usuario where idTipo_usuario=12 and estado=1) = \"M\" then 'RECTOR' 
                     else 'RECTORA'
