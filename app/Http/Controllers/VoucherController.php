@@ -130,7 +130,7 @@ class VoucherController extends Controller
                     $historial_estados=new Historial_Estado;
                     $historial_estados->idTramite=$tramite->idTramite;
                     $historial_estados->idUsuario=$idUsuario;
-                    $historial_estados->idEstado_actual=$historial_estados->idEstado_nuevo;
+                    $historial_estados->idEstado_actual=3;
                     $historial_estados->idEstado_nuevo=5;
                     $historial_estados->fecha=date('Y-m-d h:i:s');
                     $historial_estados->save();
