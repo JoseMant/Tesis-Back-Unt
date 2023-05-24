@@ -88,6 +88,8 @@ class TramiteController extends Controller
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -103,6 +105,8 @@ class TramiteController extends Controller
                     $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -120,6 +124,8 @@ class TramiteController extends Controller
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                     ->where('tipo_tramite.idTipo_tramite',1)
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -134,6 +140,8 @@ class TramiteController extends Controller
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->where('tipo_tramite.idTipo_tramite',1)
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -151,6 +159,8 @@ class TramiteController extends Controller
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                     ->Where('tramite.idUsuario',$idUsuario)
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -166,6 +176,8 @@ class TramiteController extends Controller
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->Where('tramite.idUsuario',$idUsuario)
+                    ->Where('tramite.idEstado_tramite','!=',29)
+                    ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
                     {
                         $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
