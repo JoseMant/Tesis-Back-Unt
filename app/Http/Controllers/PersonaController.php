@@ -205,14 +205,11 @@ class PersonaController extends Controller
 
     public function DatosAlumno2($idUnidad)
     {
-        // return $idUnidad."-".$dni;
         try{
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $dni=$apy['nro_documento'];
-            // $dni='71914102';
-            // return $user=JWTAuth::user();
             if($idUnidad==1){ //pregrado
                 $facultadesTotales=[];
                 //Obtenemos escuela(s) de la persona que inicia sesión
@@ -236,19 +233,14 @@ class PersonaController extends Controller
                             } 
                         }
                         if(!$existe) {
-                            // redirect(base_url()."bienvenidos");
                             array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->dep_nombre))->first());
                         }
                     }
-                    // return $facultades;
                     //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
                     foreach ($facultades as $key => $facultad) {
                         $escuelas=[];
                         foreach ($alumnoEscuelasSGA as $key => $escuela) {
                             $facultadEscuela=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
-                            // echo $facultad['nombre'];
-                            // echo strtoupper($facultadEscuela['dep_nombre']);
-                            // echo '----------------------------------------------------------------';
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
                                 $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
                                 $escuelaSede->nro_matricula=$escuela->per_login;
@@ -263,21 +255,19 @@ class PersonaController extends Controller
                                 else $escuelaSede->sede=$escuela->sed_nombre;
                                 array_push($escuelas,$escuelaSede);
                             }
-                            // echo $escuela;
                         }
                         $facultad->subdependencias=$escuelas;
                         array_push($facultadesTotales,$facultad);
                     }
                 }
-                // return $facultadesTotales;
                 //Obtenemos datos de la persona que inicia sesión
-                $personaSuv=PersonaSuv::select('persona.idpersona')
+                $idPersonaSuv=PersonaSuv::select('persona.idpersona')
                 ->join('sistema.roles_usuario','sistema.roles_usuario.idpersona','persona.idpersona')
                 ->where('sistema.roles_usuario.rol_id',25)
                 ->Where('persona.per_dni',$dni)
-                //->Where('persona.per_estado',true)
+                ->pluck('persona.idpersona')
                 ->first();
-                if ($personaSuv) {
+                if ($idPersonaSuv) {
                    //Obtenemos las escuela(s) a la(s) que pertenece dicha persona
                     $alumnoEscuelasSUV=Alumno::select('alumno.idalumno','patrimonio.sede.sed_descripcion','patrimonio.estructura.idestructura','patrimonio.estructura.estr_descripcion'
                     ,'patrimonio.estructura.iddependencia', 'curricula.curr_mencion')
@@ -285,24 +275,12 @@ class PersonaController extends Controller
                     ->join('patrimonio.area','alumno.idarea','patrimonio.area.idarea')
                     ->join('patrimonio.estructura','patrimonio.area.idestructura','patrimonio.estructura.idestructura')
                     ->join('patrimonio.sede','alumno.idsede','patrimonio.sede.idsede')
-                    ->Where('alumno.idpersona',$personaSuv['idpersona'])
+                    ->Where('alumno.idpersona',$idPersonaSuv)
                     // Obtener la escuela activa para el trámite de carné
                     // ->Where('alumno.alu_estado',1)
                     ->get();
                     // actualizamos los nombres de las menciones de educacion secundaria
-                    foreach ($alumnoEscuelasSUV as $key => $value) {
-                        if ($value->curr_mencion=='1') {
-                            $value->estr_descripcion="ESCUELA PROFESIONAL DE EDUCACION SECUNDARIA ESPECIALIDAD IDIOMAS";
-                        }elseif ($value->curr_mencion=='2') {
-                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  HISTORIA Y GEOGRAFIA";
-                        }elseif ($value->curr_mencion=='3') {
-                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  FILOSOFIA, PSICOLOGIA Y CIENCIAS SOCIALES";
-                        }elseif ($value->curr_mencion=='4') {
-                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  LENGUA Y LITERATURA";
-                        }elseif ($value->curr_mencion=='5') {
-                            $value->estr_descripcion="EDUCACION  SECUNDARIA -  CIENCIAS DE LA MATEMATICA";
-                        }
-                    }
+                    
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
                     $facultades=[];
                     foreach ($alumnoEscuelasSUV as $key => $escuela) {
@@ -315,42 +293,44 @@ class PersonaController extends Controller
                             } 
                         }
                         if(!$existe) {
-                            // redirect(base_url()."bienvenidos");
                             array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first());
                         }
-                        // array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad->estr_descripcion))->first());
                     }
-                    
                     //Recorremos la(s) facultad(es) y escuela(s) para ir añadiendo cada escuela a la facultad que pertenece y no se repitan las facultades
                     foreach ($facultades as $key => $facultad) {
                         $escuelas=[];
                         foreach ($alumnoEscuelasSUV as $key => $escuela) {
                             $facultadEscuela=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['estr_descripcion'])) {
-                                if ($value->curr_mencion=='1') {
+                                if ($escuela->curr_mencion=='1') {
                                     $escuelaSede=Escuela::where('idEscuela',41)->first();
                                     // $value->estr_descripcion="ESCUELA PROFESIONAL DE EDUCACION SECUNDARIA ESPECIALIDAD IDIOMAS";
-                                }elseif ($value->curr_mencion=='2') {
+                                }elseif ($escuela->curr_mencion=='2') {
                                     $escuelaSede=Escuela::where('idEscuela',42)->first();
                                     // $value->estr_descripcion="EDUCACION  SECUNDARIA -  HISTORIA Y GEOGRAFIA";
-                                }elseif ($value->curr_mencion=='3') {
+                                }elseif ($escuela->curr_mencion=='3') {
                                     $escuelaSede=Escuela::where('idEscuela',45)->first();
                                     // $value->estr_descripcion="EDUCACION  SECUNDARIA -  FILOSOFIA, PSICOLOGIA Y CIENCIAS SOCIALES";
-                                }elseif ($value->curr_mencion=='4') {
+                                }elseif ($escuela->curr_mencion=='4') {
                                     $escuelaSede=Escuela::where('idEscuela',46)->first();
                                     // $value->estr_descripcion="EDUCACION  SECUNDARIA -  LENGUA Y LITERATURA";
-                                }elseif ($value->curr_mencion=='5') {
+                                }elseif ($escuela->curr_mencion=='5') {
                                     $escuelaSede=Escuela::where('idEscuela',44)->first();
                                     // $value->estr_descripcion="EDUCACION  SECUNDARIA -  CIENCIAS DE LA MATEMATICA";
                                 }else {
                                     $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
                                 }
                                 $escuelaSede->nro_matricula=$escuela->idalumno;
-                                if ($escuela->sed_descripcion=="SEDE TRUJILLO") {
-                                    $escuelaSede->sede="TRUJILLO";
-                                }else {
-                                    $escuelaSede->sede=$escuela->sed_descripcion;
-                                }
+                                
+                                if ($escuela->sed_descripcion == 'Trujillo') $escuelaSede->sede='TRUJILLO';
+                                elseif ($escuela->sed_descripcion == 'SEDE TRUJILLO') $escuelaSede->sede='TRUJILLO';
+                                elseif ($escuela->sed_descripcion == 'Valle Jequetepeque') $escuelaSede->sede='VALLE JEQUETEPEQUE';
+                                elseif ($escuela->sed_descripcion == 'SEDE VALLE JEQUETEPEQUE') $escuelaSede->sede='VALLE JEQUETEPEQUE';
+                                elseif ($escuela->sed_descripcion == 'Huamachuco') $escuelaSede->sede='HUAMACHUCO';
+                                elseif ($escuela->sed_descripcion == 'SEDE HUAMACHUCO') $escuelaSede->sede='HUAMACHUCO';
+                                elseif ($escuela->sed_descripcion == 'Stgo. de Chuco') $escuelaSede->sede='SANTIAGO DE CHUCO';
+                                elseif ($escuela->sed_descripcion == 'SEDE SANTIAGO DE CHUCO') $escuelaSede->sede='SANTIAGO DE CHUCO';
+                                else $escuelaSede->sede=$escuela->sed_nombre;
                                 array_push($escuelas, $escuelaSede);
                             }
                         }
@@ -371,7 +351,6 @@ class PersonaController extends Controller
                         } else {
                             array_push($facultadesTotales,$facultad);
                         }
-                        // return $facultadesTotales;
                     }
                 }
                 if (count($facultadesTotales)>0) {
