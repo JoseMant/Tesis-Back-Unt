@@ -119,10 +119,9 @@ class AuthController extends Controller
         $response['idUsuario']=$user->idUsuario;
         $response['username']=$user->username;
         $response['estado']=$user->estado;
-        // $response['nro_matricula']=$user->nro_matricula;
         $response['nombres']=$user->nombres;
         $response['apellidos']=$user->apellidos;
-        $response['tipo_documento']=$user->tipo_documento;
+        $response['idTipo_documento']=$user->tipo_documento;
         $response['nro_documento']=$user->nro_documento;
         $response['correo']=$user->correo;
         $response['direccion']=$user->direccion;
@@ -134,7 +133,12 @@ class AuthController extends Controller
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idUsuario',$user->idUsuario)
         ->first();
+        $tipo_documento=User::select('tipo_documento.nombre')
+        ->join('tipo_documento','tipo_documento.idTipo_documento','usuario.tipo_documento')
+        ->where('usuario.idUsuario',$user->idUsuario)
+        ->first();
         $response['rol']=$tipo_usuario->nombre;
+        $response['documento']=$tipo_documento->nombre;
         return response()->json([
             'accessToken' => JWTAuth::refresh(),
             'token_type' => 'bearer',
@@ -156,10 +160,9 @@ class AuthController extends Controller
         $response['idUsuario']=$user->idUsuario;
         $response['username']=$user->username;
         $response['estado']=$user->estado;
-        // $response['nro_matricula']=$user->nro_matricula;
         $response['nombres']=$user->nombres;
         $response['apellidos']=$user->apellidos;
-        $response['tipo_documento']=$user->tipo_documento;
+        $response['idTipo_documento']=$user->tipo_documento;
         $response['nro_documento']=$user->nro_documento;
         $response['correo']=$user->correo;
         $response['direccion']=$user->direccion;
@@ -172,7 +175,12 @@ class AuthController extends Controller
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idUsuario',$user->idUsuario)
         ->first();
+        $tipo_documento=User::select('tipo_documento.nombre')
+        ->join('tipo_documento','tipo_documento.idTipo_documento','usuario.tipo_documento')
+        ->where('usuario.idUsuario',$user->idUsuario)
+        ->first();
         $response['rol']=$tipo_usuario->nombre;
+        $response['documento']=$tipo_documento->nombre;
         if ($user->estado==true) {
             if ($user->confirmed==true) {
                 return response()->json([
