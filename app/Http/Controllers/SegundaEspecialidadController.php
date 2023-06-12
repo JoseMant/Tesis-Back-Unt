@@ -1373,6 +1373,7 @@ class SegundaEspecialidadController extends Controller
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idUnidad',$tramite->idUnidad)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
             ->where('estado',1)
             ->first();
@@ -1507,6 +1508,7 @@ class SegundaEspecialidadController extends Controller
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idUnidad',$tramite->idUnidad)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
             ->where('estado',1)
             ->first();
@@ -1629,6 +1631,7 @@ class SegundaEspecialidadController extends Controller
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idUnidad',$tramite->idUnidad)
             ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
             ->where('estado',1)
             ->first();
