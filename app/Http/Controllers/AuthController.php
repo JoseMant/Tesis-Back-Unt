@@ -242,13 +242,13 @@ class AuthController extends Controller
                 // \Mail::to($usuario->correo)->send(new \App\Mail\ResetPasswordMail($usuario));
                 // PRUEBAS JOB---------------------------------
                 dispatch(new ResetPasswordJob($usuario));
-                return response()->json(['status' => '200', 'message' => 'Se envió un mensaje al correo electrónico proporcionado para continuar con la recuperación de la contraseña.'], 200);
+                return response()->json(['status' => '200', 'message' => utf8_encode('Se envió un mensaje al correo electrónico proporcionado para continuar con la recuperación de la contraseña.')], 200);
             }else{
-                return response()->json(['status' => '400', 'message' => '¡El correo no se encuentra! ¿Está seguro que ya eres miembro?'], 400);
+                return response()->json(['status' => '400', 'message' => utf8_encode('¡El correo no se encuentra! ¿Está seguro que ya eres miembro?')], 400);
             }
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['status' => '400', 'message' => 'Error!!'], 400);
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
 
