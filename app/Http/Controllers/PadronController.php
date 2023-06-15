@@ -7,6 +7,7 @@ use App\Resolucion;
 use Illuminate\Http\Request;
 use App\Exports\PadronSuneduExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\CorrecionSuneduImport;
 class PadronController extends Controller
 {
     public function __construct()
@@ -38,5 +39,21 @@ class PadronController extends Controller
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
+    }
+
+    public function correccion(Request $request){
+        
+        // return $request->all();
+        try {
+            $importacion = new CorrecionSuneduImport;
+            $excel=Excel::import( $importacion, $request->file);
+            return $importacion->getDato();
+            return $importacion->getNumFilas();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+
+            
     }
 }

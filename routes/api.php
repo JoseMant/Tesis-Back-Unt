@@ -149,6 +149,7 @@ Route::post('carnets/import/observados', 'CarnetController@import');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::get('carnets/export', 'ExcelController@export');
 Route::get('padron_sunedu/{idResolucion}', 'PadronController@padron');
+Route::post('correccion/padron_sunedu', 'PadronController@correccion');
 Route::get('excel/tesoreria/{fecha_inicio}/{fecha_fin}', 'VoucherController@reporteTesoreria');
 Route::get('download/diplomas/{idResolucion}', 'ZipController@downloadDiplomas');
 Route::post('upload/diplomas', 'UploadController@uploadzip');
