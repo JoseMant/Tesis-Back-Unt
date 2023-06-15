@@ -16,8 +16,15 @@ class ResolucionController extends Controller
         $this->middleware('jwt');
     }
 
-    public function index(){
-        $resoluciones=Resolucion::where('estado',1)
+    public function index(Request $request){
+        $resoluciones=Resolucion::select('*', DB::raw('YEAR(fecha) as anio'))
+        ->where('estado',1)
+        ->where(function($query) use ($request)
+        {
+            $query->where('fecha','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('nro_resolucion','LIKE', '%'.$request->query('search').'%');
+        })
+        ->orderBy('fecha','desc')
         ->get();
         foreach ($resoluciones as $key => $resolucion) {
             $resolucion->cronogramas=Cronograma::select('cronograma_carpeta.*','dependencia.nombre as dependencia',
@@ -58,8 +65,8 @@ class ResolucionController extends Controller
                 $cronograma->idResolucion=$resolucion->idResolucion;
                 $cronograma->update();
             }
+            $resolucion->anio = substr($resolucion->fecha, 0, 4);
             $resolucion->cronogramas=$request->cronogramas;
-            // return $resolucion;
             DB::commit();
             return response()->json($resolucion, 200);
         } catch (\Exception $e) {
@@ -90,16 +97,14 @@ class ResolucionController extends Controller
                 $value->idResolucion=null;
                 $value->update();
             }
-            // return $cronogramas;
             //agregamos las nuevas relaciones de cronogramas
             foreach ($request->cronogramas as $key => $value) {
-                // return $value;
                 $cronograma=Cronograma::find($value['idCronograma_carpeta']);
                 $cronograma->idResolucion=$resolucion->idResolucion;
                 $cronograma->update();
             }
+            $resolucion->anio = substr($resolucion->fecha, 0, 4);
             $resolucion->cronogramas=$request->cronogramas;
-            // return $resolucion;
             DB::commit();
             return response()->json($resolucion, 200);
         } catch (\Exception $e) {

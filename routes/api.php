@@ -148,8 +148,10 @@ Route::get('backup/{idResolucion}', 'ZipController@backupFiles');
 Route::post('carnets/import/observados', 'CarnetController@import');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::get('carnets/export', 'ExcelController@export');
-Route::get('padron_sunedu/{idOficio}', 'PadronController@padron');
+Route::get('padron_sunedu/{idResolucion}', 'PadronController@padron');
 Route::get('excel/tesoreria/{fecha_inicio}/{fecha_fin}', 'VoucherController@reporteTesoreria');
+Route::get('download/diplomas/{idResolucion}', 'ZipController@downloadDiplomas');
+Route::post('upload/diplomas', 'UploadController@uploadzip');
 
 
 //Roles
@@ -180,9 +182,9 @@ Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');
 Route::put('grados/envio/ura', 'GradoController@enviarUraa');
 Route::put('grados/envio/escuela', 'GradoController@enviarEscuela');
 Route::put('grados/registrar/libro', 'GradoController@registrarEnLibro');
-Route::get('grados/firma/decano', 'GradoController@GetGradosFirmaDecano');
-Route::get('grados/firma/secretaria', 'GradoController@GetGradosFirmaSecretaria');
-Route::get('grados/firma/rector', 'GradoController@GetGradosFirmaRector');
+Route::get('grados/firma/decano/{idResolucion}', 'GradoController@GetGradosFirmaDecano');
+Route::get('grados/firma/secretaria/{idResolucion}', 'GradoController@GetGradosFirmaSecretaria');
+Route::get('grados/firma/rector/{idResolucion}', 'GradoController@GetGradosFirmaRector');
 Route::get('grados/pendientes/impresion/{idResolucion}', 'GradoController@GetGradosPendientesImpresion');
 Route::get('grados/finalizados', 'GradoController@GetGradosFinalizados');
 Route::post('grados/upload/{id}','GradoController@uploadDiploma');
@@ -193,7 +195,7 @@ Route::get('resolucion/secretaria/{nro_resolucion}', 'GradoController@GetResoluc
 Route::get('grados/aprobados/secretaria', 'GradoController@GetGradosAprobadosSecretaria');
 Route::get('modalidad/carpeta/{idTipo_tramite_unidad}', 'Modalidad_CarpetaController@getModalidadGrado');
 Route::get('programas_estudios/carpeta', 'Programa_Estudios_CarpetaController@getProgramaEstudios');
-Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idDependencia_detalle}', 'Diploma_CarpetaController@getDiplomaCarpetas');
+Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idPrograma}', 'Diploma_CarpetaController@getDiplomaCarpetas');
 Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');
 Route::get('dependencia/escuelas/{id}', 'DependenciaController@getEscuelas');
 Route::get('dependencia/{idDependencia_detalle}', 'DependenciaController@getDependenciaByPrograma');
@@ -255,9 +257,13 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
+Route::put('firmas/decano', 'GradoController@firmaDecano');
+Route::put('firmas/rector', 'GradoController@firmaRector');
+Route::put('firmas/secretaria', 'GradoController@firmaSecretaria');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');
+Route::resource('dependencias', 'DependenciaController');
 
 // ACREDITACIONES
 Route::get('acreditadas/all', 'AcreditacionController@index');

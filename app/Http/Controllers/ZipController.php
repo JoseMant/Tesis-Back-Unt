@@ -29,7 +29,7 @@ class ZipController extends Controller
         try {
             //obtener carnets validados
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite')
@@ -246,6 +246,90 @@ class ZipController extends Controller
                 return response()->download(public_path($fileName));
             }else {
                 return response()->json(['status' => '400', 'message' =>"La resolución no tramites"], 400);
+            }
+
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+
+
+        
+    }
+
+    public function downloadDiplomas($idResolucion){
+        DB::beginTransaction();
+        try {
+            $secretariaGeneral=User::where('idTipo_usuario',10)->where('estado',true)->first();
+            $secretariaGeneral->idUsuario=1; // Para pruebas,luego eliminar
+        
+            // Obteniendo la resolución para el nombre del zip
+            $resolucion=Resolucion::find($idResolucion);
+            
+            // Obteniendo los trámites de dicha resolución
+            $tramites=Tramite::select('tramite.idTramite','usuario.nro_documento','tipo_tramite_unidad.diploma_obtenido',
+            'tramite.idTipo_tramite_unidad','tramite.idEstado_tramite')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+            ->where('tramite.idEstado_tramite',46)
+            ->where('tramite_detalle.autoridad2',$secretariaGeneral->idUsuario)
+            ->where('resolucion.idResolucion',$idResolucion)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
+            ->get();  
+            
+            // return count($tramites);
+            if (count($tramites)>0) {
+                // Creando el zip
+                $zip = new ZipArchive;
+                $resolucion=explode("/", $resolucion->nro_resolucion, 2);
+                if (count($resolucion)!=2) {
+                    return response()->json(['status' => '400', 'message' => "Corregir nombre de resolucion por ejemplo: 1234-4321/UNT"], 400);
+                }
+                $fileName = $resolucion[0]."-".$resolucion[1].".zip";
+                $fileName2 = $resolucion[0]."-".$resolucion[1];
+
+                // Eliminamos el zip creado con la descarga de días anteriores(si es que existe) para que no se guarde en el proyecto
+                for ($i=1; $i <= 31; $i++) { 
+                    if ($zip->open($fileName)===TRUE) {
+                        $zip->close();
+                        unlink($fileName);
+                    }
+                }
+
+                //Eliminamos el zip creado de la descarga de hoy(si es que existe) para que al momento de ser creado no se sobreescriba y tenga fotos antiguas
+                if ($zip->open($fileName)===TRUE) {
+                    $zip->close();
+                    unlink($fileName);
+                }
+                // return public_path($fileName);
+                if ($zip->open(public_path($fileName),ZipArchive::CREATE) === TRUE)
+                {
+                    foreach ($tramites as $key => $tramite) {
+                            // nombre del archivo
+                            $relativeNameInZipFile = 'T004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'_firmado.pdf';
+                            
+                            // añadiendo archivos al zip 
+                            if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==16 || $tramite->idTipo_tramite_unidad==34) {
+                                $zip->addFile(storage_path('app/public').'/diplomas/T004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf', $fileName2.'/'.$relativeNameInZipFile);
+                            }
+                    }
+                    $zip->close();   
+                }
+
+                DB::commit();
+                return response()->download(public_path($fileName));
+            }else {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' =>"La resolución no contiene trámites"], 400);
             }
 
             

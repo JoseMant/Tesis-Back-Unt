@@ -17,6 +17,7 @@ use App\Escuela;
 use App\Alumno;
 use App\Segunda_Especialidad;
 use App\Mencion;
+use App\ProgramaURAA;
 use Illuminate\Support\Facades\Http;
 
 class PersonaController extends Controller
@@ -129,7 +130,7 @@ class PersonaController extends Controller
                         ->Where('alumno.nro_documento',$request->input('dni'))->first();
                 if($personaSE){
                     $usuario=new User;
-                    $usuario->nro_matricula=$personaSE->codigo;
+                    $usuario->nro_matricula=$personaSE->nro_tramite;
                     $usuario->nombres=$personaSE->nombre;
                     $usuario->apellido_paterno=$personaSE->paterno;
                     $usuario->apellido_materno=$personaSE->materno;
@@ -218,8 +219,8 @@ class PersonaController extends Controller
                 ->join('perfil','persona.per_id','perfil.per_id')
                 ->join('sga_sede','sga_sede.sed_id','perfil.sed_id')
                 ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-                ->Where('perfil.pfl_cond','AL')
-                ->Where('per_dni',$dni)->get();
+                ->where('perfil.pfl_cond','AL')
+                ->where('per_dni',$dni)->get();
                 if (count($alumnoEscuelasSGA)>0) {
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
                     $facultades=[];
@@ -242,18 +243,19 @@ class PersonaController extends Controller
                         foreach ($alumnoEscuelasSGA as $key => $escuela) {
                             $facultadEscuela=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
-                                $escuelaSede=Escuela::where('idSGA_PREG',$escuela->dep_id)->first();
-                                $escuelaSede->nro_matricula=$escuela->per_login;
-                                if ($escuela->sed_nombre == 'Trujillo') $escuelaSede->sede='TRUJILLO';
-                                elseif ($escuela->sed_nombre == 'SEDE TRUJILLO') $escuelaSede->sede='TRUJILLO';
-                                elseif ($escuela->sed_nombre == 'Valle Jequetepeque') $escuelaSede->sede='VALLE JEQUETEPEQUE';
-                                elseif ($escuela->sed_nombre == 'SEDE VALLE JEQUETEPEQUE') $escuelaSede->sede='VALLE JEQUETEPEQUE';
-                                elseif ($escuela->sed_nombre == 'Huamachuco') $escuelaSede->sede='HUAMACHUCO';
-                                elseif ($escuela->sed_nombre == 'SEDE HUAMACHUCO') $escuelaSede->sede='HUAMACHUCO';
-                                elseif ($escuela->sed_nombre == 'Stgo. de Chuco') $escuelaSede->sede='SANTIAGO DE CHUCO';
-                                elseif ($escuela->sed_nombre == 'SEDE SANTIAGO DE CHUCO') $escuelaSede->sede='SANTIAGO DE CHUCO';
-                                else $escuelaSede->sede=$escuela->sed_nombre;
-                                array_push($escuelas,$escuelaSede);
+                                if ($escuela->dep_id == 221) {
+                                    $escuelasSede=ProgramaURAA::where('idSGA_PREG',$escuela->dep_id)->get();
+                                    foreach ($escuelasSede as $key => $escuelaSede) {
+                                        $escuelaSede->nro_matricula=$escuela->per_login;
+                                        $escuelaSede->sede = $this->GetSedeClean($escuela->sed_nombre);
+                                        array_push($escuelas,$escuelaSede);
+                                    }
+                                } else {
+                                    $escuelaSede=ProgramaURAA::where('idSGA_PREG',$escuela->dep_id)->first();
+                                    $escuelaSede->nro_matricula=$escuela->per_login;
+                                    $escuelaSede->sede = $this->GetSedeClean($escuela->sed_nombre);
+                                    array_push($escuelas,$escuelaSede);
+                                }
                             }
                         }
                         $facultad->subdependencias=$escuelas;
@@ -279,7 +281,6 @@ class PersonaController extends Controller
                     // Obtener la escuela activa para el trámite de carné
                     // ->Where('alumno.alu_estado',1)
                     ->get();
-                    // actualizamos los nombres de las menciones de educacion secundaria
                     
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
                     $facultades=[];
@@ -302,36 +303,26 @@ class PersonaController extends Controller
                         foreach ($alumnoEscuelasSUV as $key => $escuela) {
                             $facultadEscuela=Estructura::select('estr_descripcion')->Where('idestructura',$escuela->iddependencia)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['estr_descripcion'])) {
-                                if ($escuela->curr_mencion=='1') {
-                                    $escuelaSede=Escuela::where('idEscuela',41)->first();
-                                    // $value->estr_descripcion="ESCUELA PROFESIONAL DE EDUCACION SECUNDARIA ESPECIALIDAD IDIOMAS";
-                                }elseif ($escuela->curr_mencion=='2') {
-                                    $escuelaSede=Escuela::where('idEscuela',42)->first();
-                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  HISTORIA Y GEOGRAFIA";
-                                }elseif ($escuela->curr_mencion=='3') {
-                                    $escuelaSede=Escuela::where('idEscuela',45)->first();
-                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  FILOSOFIA, PSICOLOGIA Y CIENCIAS SOCIALES";
-                                }elseif ($escuela->curr_mencion=='4') {
-                                    $escuelaSede=Escuela::where('idEscuela',46)->first();
-                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  LENGUA Y LITERATURA";
-                                }elseif ($escuela->curr_mencion=='5') {
-                                    $escuelaSede=Escuela::where('idEscuela',44)->first();
-                                    // $value->estr_descripcion="EDUCACION  SECUNDARIA -  CIENCIAS DE LA MATEMATICA";
+                                if ($escuela->curr_mencion) {
+                                    if ($escuela->curr_mencion == 1) {
+                                        $escuelasSede=ProgramaURAA::where('idMencionSUV_PREG',$escuela->curr_mencion)->get();
+                                        foreach ($escuelasSede as $key => $escuelaSede) {
+                                            $escuelaSede->nro_matricula=$escuela->idalumno;
+                                            $escuelaSede->sede = $this->GetSedeClean($escuela->sed_descripcion);
+                                            array_push($escuelas, $escuelaSede);
+                                        }
+                                    } else {
+                                        $escuelaSede=ProgramaURAA::where('idMencionSUV_PREG',$escuela->curr_mencion)->first();
+                                        $escuelaSede->nro_matricula=$escuela->idalumno;
+                                        $escuelaSede->sede = $this->GetSedeClean($escuela->sed_descripcion);
+                                        array_push($escuelas, $escuelaSede);
+                                    }
                                 }else {
-                                    $escuelaSede=Escuela::where('idSUV_PREG',$escuela->idestructura)->first();
+                                    $escuelaSede=ProgramaURAA::where('idSUV_PREG',$escuela->idestructura)->first();
+                                    $escuelaSede->nro_matricula=$escuela->idalumno;
+                                    $escuelaSede->sede = $this->GetSedeClean($escuela->sed_descripcion);
+                                    array_push($escuelas, $escuelaSede);
                                 }
-                                $escuelaSede->nro_matricula=$escuela->idalumno;
-                                
-                                if ($escuela->sed_descripcion == 'Trujillo') $escuelaSede->sede='TRUJILLO';
-                                elseif ($escuela->sed_descripcion == 'SEDE TRUJILLO') $escuelaSede->sede='TRUJILLO';
-                                elseif ($escuela->sed_descripcion == 'Valle Jequetepeque') $escuelaSede->sede='VALLE JEQUETEPEQUE';
-                                elseif ($escuela->sed_descripcion == 'SEDE VALLE JEQUETEPEQUE') $escuelaSede->sede='VALLE JEQUETEPEQUE';
-                                elseif ($escuela->sed_descripcion == 'Huamachuco') $escuelaSede->sede='HUAMACHUCO';
-                                elseif ($escuela->sed_descripcion == 'SEDE HUAMACHUCO') $escuelaSede->sede='HUAMACHUCO';
-                                elseif ($escuela->sed_descripcion == 'Stgo. de Chuco') $escuelaSede->sede='SANTIAGO DE CHUCO';
-                                elseif ($escuela->sed_descripcion == 'SEDE SANTIAGO DE CHUCO') $escuelaSede->sede='SANTIAGO DE CHUCO';
-                                else $escuelaSede->sede=$escuela->sed_nombre;
-                                array_push($escuelas, $escuelaSede);
                             }
                         }
                         $facultad->subdependencias=$escuelas;
@@ -343,7 +334,6 @@ class PersonaController extends Controller
                                 }else {
                                     foreach ($value->subdependencias as $key => $subdependencia) {
                                         array_push($escuelas, $subdependencia);
-                                        
                                     }
                                     $value->subdependencias=$escuelas;
                                 }
@@ -360,92 +350,20 @@ class PersonaController extends Controller
                 }
                 
             }else if($idUnidad==2){ //postgrado
-                // dónde?
-                $facultadesTotales=array(
-                    array(
-                        'idDependencia'=>13,
-                        'idUnidad'=>2,
-                        'nombre'=>'UNIDAD DE CIENCIAS MÉDICAS',
-                        'idDependencia2'=>null,
-                        'estado'=>1,
-                        'subdependencias'=>array(
-                            array(
-                                'idPrograma'=>29,
-                                'idDependencia'=>13,
-                                'idUnidad'=>2,
-                                // 'idSGA_PREG'=>73,
-                                // 'idSUV_PREG'=>21,
-                                'nombre'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                // 'denominacion'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                // 'descripcion_grado'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                // 'descripcion_titulo'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                'estado'=>1,
-                                'nro_matricula'=>'1023300217',
-                                'sede'=>'SEDE TRUJILLO'
-                            ),
-                            array(
-                                'idPrograma'=>29,
-                                'idDependencia'=>13,
-                                'idUnidad'=>2,
-                                // 'idSGA_PREG'=>73,
-                                // 'idSUV_PREG'=>21,
-                                'nombre'=>'DOCTORADO EN MEDICINA',
-                                // 'denominacion'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                // 'descripcion_grado'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                // 'descripcion_titulo'=>'MAESTRIA EN CIENCIAS, MENCIÓN: NUTRICIÓN Y ALIMENTACIÓN ANIMAL',
-                                'estado'=>1,
-                                'nro_matricula'=>'1023300217',
-                                'sede'=>'SEDE TRUJILLO'
-                            )
-                        )
-                    )
-                    // ,
-                    // array(
-                    //     'idDependencia'=>14,
-                    //     'idUnidad'=>2,
-                    //     'nombre'=>'DOCTORADO',
-                    //     'idDependencia2'=>null,
-                    //     'estado'=>1,
-                    //     'subdependencias'=>array(
-                    //         array(
-                    //             'idPrograma'=>29,
-                    //             'idDependencia'=>14,
-                    //             'idUnidad'=>2,
-                    //             // 'idSGA_PREG'=>73,
-                    //             // 'idSUV_PREG'=>21,
-                    //             'nombre'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                    //             // 'denominacion'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                    //             // 'descripcion_grado'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                    //             // 'descripcion_titulo'=>'DOCTORADO EN ECONOMÍA Y DESARROLLO INDUSTRIAL',
-                    //             'estado'=>1,
-                    //             'nro_matricula'=>'1023300217',
-                    //             'sede'=>'SEDE TRUJILLO'
-                    //         )
-                    //     )
-                    // )
-                );
-                return response()->json(['status' => '200', 'dependencias' => $facultadesTotales], 200); 
+                return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado.'], 400); 
             }else if($idUnidad==3){ //maestría
-                // donde
-                return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
-                    'dni' => $dni
-                  ]);
+                // return Http::get('http://www.epgnew.unitru.edu.pe/epg_admin/api/matricula.php', [
+                //     'dni' => $dni
+                //   ]);
+                return response()->json(['status' => '400', 'mesagge' => 'Alumno no encontrado.'], 400); 
             }else{
                 // Obtenemos las menciones a las que pertenece el alumno
-                $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','mencion.idSegunda_Especialidad')
+                $alumnoMenciones=PersonaSE::select('alumno.codigo','mencion.idMencion','mencion.nombre','mencion.idSegunda_Especialidad', 'sede.nombre as sede')
                 ->join('mencion','alumno.idMencion','mencion.idMencion')
-                ->Where('alumno.nro_documento',$dni)
-                ->get();
-                // obtenemos la sede de la última matricula a la que pertenece el alumno
-                $sede=PersonaSE::select('matricula.fecha_hora','sede.nombre')
-                ->join('matricula','alumno.idAlumno','matricula.idAlumno')
                 ->join('resolucion','resolucion.idResolucion','alumno.idResolucion')
                 ->join('sede','resolucion.idSede','sede.idSede')
-                ->where('alumno.nro_documento',$dni)
-                ->orderBy('matricula.fecha_hora','desc')
-                ->limit(1)
-                ->first()
-                ;
+                ->Where('alumno.nro_documento',$dni)
+                ->get();
                 //Guardamos la(s) segunda especialidad(es) a la que pertenece dicho alumno
                 $facultades=[];
                 foreach ($alumnoMenciones as $key => $mencion) {
@@ -462,9 +380,6 @@ class PersonaController extends Controller
                     if (!$flag) {
                         array_push($facultades, DependenciaURAA::where('nombre',strtoupper($facultad_mencion->nombre))->first());                    
                     }
-                    // if (!in_array($facultad, $facultades)) {
-                    //     // return "existe";
-                    // }
                 }
                 //Recorremos la(s) segunda especialidad(es) y mencion(s) para ir añadiendo cada mencion a su respectiva segunda especialidad
                 foreach ($facultades as $key => $facultad) {
@@ -472,13 +387,10 @@ class PersonaController extends Controller
                     foreach ($alumnoMenciones as $key => $mencion) {
                         $facultadMencion=Segunda_Especialidad::select('nombre')->Where('idSegunda_Especialidad',$mencion->idSegunda_Especialidad)->first();
                         if ($facultad['nombre']===strtoupper($facultadMencion['nombre'])) {
-                            $mencionSede=Mencion::where('idSGA_SE',$mencion->idMencion)->first();
-                            $mencionSede->nro_matricula=$mencion->codigo;
-                            if (!$sede) {
-                                $mencionSede->sede="TRUJILLO";
-                            }else {
-                                $mencionSede->sede=$sede->nombre;
-                            }
+                            $mencionSede=ProgramaURAA::where('idSGA_SE',$mencion->idMencion)->first();
+                            $mencionSede->nro_matricula=$mencion->nro_tramite;
+                            if (!$mencion->sede) $mencionSede->sede="TRUJILLO";
+                            else $mencionSede->sede=$mencion->sede;
                             array_push($menciones, $mencionSede);
                         }
                     }
@@ -489,7 +401,20 @@ class PersonaController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
-            //return redirect()->route('alumno.show', $resolucion->idResolucion) -> with('error', 'Error al registrar alumno');
         }
+    }
+
+    public function GetSedeClean($sede)
+    {
+        if ($sede == 'Trujillo' || $sede == 'SEDE TRUJILLO') 
+            return 'TRUJILLO';
+        elseif ($sede == 'Valle Jequetepeque' || $sede == 'SEDE VALLE JEQUETEPEQUE')
+            return 'VALLE JEQUETEPEQUE';
+        elseif ($sede == 'Huamachuco' || $sede == 'SEDE HUAMACHUCO') 
+            return 'HUAMACHUCO';
+        elseif ($sede == 'Stgo. de Chuco' || $sede == 'SEDE SANTIAGO DE CHUCO') 
+            return 'SANTIAGO DE CHUCO';
+        else
+            return $sede;
     }
 }

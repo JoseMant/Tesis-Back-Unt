@@ -12,8 +12,11 @@ class Diploma_CarpetaController extends Controller
         $this->middleware('jwt');
     }
 
-    public function getDiplomaCarpetas($idUnidad,$idTipo_tramite_unidad,$idDependencia_detalle){
-        return Diploma_Carpeta::where('idUnidad',$idUnidad)->where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
-        ->where('idDependencia_detalle',$idDependencia_detalle)->where('estado',1)->get();
+    public function getDiplomaCarpetas($idUnidad,$idTipo_tramite_unidad,$idPrograma){
+        return Diploma_Carpeta::where('idUnidad',$idUnidad)
+        ->where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+        ->where('idPrograma',$idPrograma)
+        ->where('estado',1)
+        ->get();
     }
 }

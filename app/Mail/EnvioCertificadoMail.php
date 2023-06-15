@@ -36,10 +36,12 @@ class EnvioCertificadoMail extends Mailable
         // $subject = 'ACTUALIZACIÓN DEL ESTADO DEL TRÁMITE N° '.$this->tramite->nro_tramite;
         $emisor = config('mail.mailers.smtp.username');
         // return  $this->from($emisor, 'UNIDAD DE REGISTRO ACADÉMICO ADMINISTRATIVO')->subject($subject)->view('emails.actualizacion_tramite');
-        return  $this->from($emisor,'DIRECCION REGISTRO TECNICO')->subject('TRÁMITE DE CERTIFICADO DE ESTUDIO COMPLETADO')
-                ->view('emails.envio_certificado')->attach($this->ruta, [
-                                                            'as' => $this->tramite->nro_tramite.'.pdf',
-                                                            'mime' => 'application/pdf',
-                                                        ]);
+        return  $this->from($emisor,'DIRECCION REGISTRO TECNICO')
+                ->subject('TRÁMITE DE CERTIFICADO DE ESTUDIO COMPLETADO')
+                ->view('emails.envio_certificado')
+                ->attach($this->ruta, [
+                    'as' => $this->tramite->nro_tramite.'.pdf',
+                    'mime' => 'application/pdf',
+                ]);
     }
 }

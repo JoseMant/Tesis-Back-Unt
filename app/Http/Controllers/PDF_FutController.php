@@ -8,8 +8,7 @@ use App\User;
 use App\Voucher;
 use App\PersonaSE;
 use App\DependenciaURAA;
-use App\Mencion;
-use App\Escuela;
+use App\ProgramaURAA;
 use App\PersonaSuv;
 use App\PersonaSga;
 use App\Tipo_Tramite_Unidad;
@@ -31,19 +30,10 @@ class PDF_FutController extends Controller
       $usuario=User::findOrFail($tramite->idUsuario);
       $voucher=Voucher::findOrFail($tramite->idVoucher);
       $dependencia=DependenciaURAA::Where('idDependencia',$tramite->idDependencia)->first();
+      $programa=ProgramaURAA::Where('idPrograma',$tramite->idPrograma)->first();
       $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_Tramite_Unidad',$tramite->idTipo_tramite_unidad)->first();
       $tipo_tramite=Tipo_Tramite::Where('idTipo_Tramite',$tipo_tramite_unidad->idTipo_tramite)->first();
-      // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-      $dependenciaDetalle="";
-      if ($tramite->idUnidad==1) {
-        $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-      }else if ($tramite->idUnidad==2) {
-          
-      }else if ($tramite->idUnidad==3) {
-          
-      }else{
-          $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-      }
+      
       // =========================
       // ==== CREACIÓN DE PDF ====
       // =========================
@@ -78,10 +68,10 @@ class PDF_FutController extends Controller
       $this->pdf->Cell(130, 4,utf8_decode('Teléfono: '.$usuario->celular),0,0,'R');
       // FACULTAD/OFICINA
       $this->pdf->SetXY(8,65);
-      $this->pdf->Cell(110, 4,'Facultad/Programa: '.$dependencia->nombre,0,0,'L');
+      $this->pdf->Cell(110, 4,'Dependencia: '.$dependencia->nombre,0,0,'L');
       // ESCUELA/DEPARTAMENTO
       $this->pdf->SetXY(8,75);
-      $this->pdf->Cell(110, 4,utf8_decode('Escuela/Sección/Mención: '.$dependenciaDetalle->denominacion),0,0,'L');
+      $this->pdf->Cell(110, 4,utf8_decode('Programa: '.$programa->nombre),0,0,'L');
 
       // NÚMERO DE MATRÍCULA
       $y=$this->pdf->GetY();

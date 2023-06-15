@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Dependencia extends Model
+class ProgramaURAA extends Model
 {
-    protected $connection = 'mysql2';
-    protected $table = 'dependencia';
-    protected $primaryKey = 'dep_id';
+    protected $connection = 'mysql';
+    protected $table = 'programa';
+    protected $primaryKey = 'idPrograma';
     public $timestamps = false;
     protected $fillable = [];
     protected $guarded = [];

@@ -16,6 +16,7 @@ class DependenciaController extends Controller
     {
         $this->middleware('jwt');
     }
+
     public function getDependenciasByUnidad($idUnidad){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
@@ -44,7 +45,6 @@ class DependenciaController extends Controller
         
     }
 
-
     public function getEscuelas($id){
         $dependencia=DependenciaURAA::find($id);
         if ($dependencia->idUnidad==1) {
@@ -62,5 +62,11 @@ class DependenciaController extends Controller
         $dependencia_detalle=Escuela::find($idDependencia_detalle);
         $dependencia=DependenciaURAA::find($dependencia_detalle->idDependencia);
         return response()->json($dependencia, 200);
+    }
+
+    public function index() 
+    {
+        $dependencias = DependenciaURAA::all();
+        return response()->json($dependencias, 200);
     }
 }
