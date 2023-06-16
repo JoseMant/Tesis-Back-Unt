@@ -311,10 +311,10 @@ class TramiteController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
+            $idTipo_usuario=$apy['idTipo_usuario'];
             
             // TRÁMITES POR USUARIO
-            $user = User::where('idUsuario', $idUsuario)->first();
-            if ($user->idTipo_usuario == 1) {
+            if ($idTipo_usuario == 1) {
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
                 'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
                 'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
