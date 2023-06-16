@@ -34,6 +34,7 @@ use App\PersonaSuv;
 use App\PersonaSga;
 use App\Alumno;
 use App\Acreditacion;
+use App\Graduado;
 class TituloController extends Controller
 {
     public function __construct()
