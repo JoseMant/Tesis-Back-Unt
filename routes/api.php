@@ -284,7 +284,7 @@ Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
 Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGeneral');
 Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
-Route::get('dependencias_detalle/{idDependencia}', 'ReporteController@getDependencias_Detalle');
+Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
