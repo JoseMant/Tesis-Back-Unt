@@ -468,8 +468,8 @@ class CertificadoController extends Controller
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
         'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        DB::raw('CONCAT(asignado.nombres," ",asignado.apellidos) as responsable'),
-        'voucher.archivo as voucher')
+        DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as responsable'),
+        'voucher.archivo as voucher','estado_tramite.descripcion as estado')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -499,7 +499,38 @@ class CertificadoController extends Controller
             ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
         })
         ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
         ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('usuario as asignado','asignado.idUsuario','tramite.idUsuario_asignado')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->where('tipo_tramite_unidad.idTipo_tramite',1)
+        ->where(function($query)
+        {
+            $query->where('tramite.idEstado_tramite',5)
+            ->orWhere('tramite.idEstado_tramite',7)
+            ->orWhere('tramite.idEstado_tramite',8);
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('asignado.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('asignado.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
 
         foreach ($tramites as $key => $tramite) {
             $tramite->fut="fut/".$tramite->idTramite;
@@ -509,7 +540,6 @@ class CertificadoController extends Controller
             $fecha_cambio_estado=Historial_Estado::select('fecha')->where('idTramite',$tramite->idTramite)
             ->where('idEstado_nuevo',$tramite->idEstado_tramite)
             ->latest('fecha')->first();
-            echo $tramite->idTramite."/";
             $tramite->fecha_cambio_estado=$fecha_cambio_estado->fecha;
 
             $d1 = date_create($hoy);
@@ -519,18 +549,17 @@ class CertificadoController extends Controller
             $tramite->tiempo=$diferencia->d;
         }
 
-        $tramites=$tramites->where('tiempo','>',3);
+        // $tramites=$tramites->where('tiempo','>',3);
 
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-        $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-        $end = min(($pagination->perPage() * $pagination->currentPage()), $pagination->total());
-        return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-            'length'    => $pagination->total(),
-            'size'      => $pagination->perPage(),
-            'page'      => $pagination->currentPage()-1,
-            'lastPage'  => $pagination->lastPage()-1,
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
             'startIndex'=> $begin,
-            'endIndex'  => $end - 1
+            'endIndex'  => $end
         ]], 200);
     }
 
