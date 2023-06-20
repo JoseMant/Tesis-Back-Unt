@@ -86,7 +86,7 @@ class TramitesImport implements ToCollection
                         ->where('idTramite',$tramite->idTramite)
                         ->where('requisito.nombre','FOTO CARNET')
                         ->first();
-                        $tramite_requisito->comentario=$value[16]; 
+                        $tramite_requisito->comentario=$value[17]; 
                         $tramite_requisito->des_estado_requisito="RECHAZADO"; 
                         $tramite_requisito->update();
                         //Datos para el envío del correo
