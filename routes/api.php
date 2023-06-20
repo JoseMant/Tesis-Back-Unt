@@ -240,10 +240,10 @@ Route::get('titulos/diplomas/especialidad', 'SegundaEspecialidadController@GetTi
 Route::get('titulos/diplomas/facultadSE', 'SegundaEspecialidadController@GetTitulosDatosDiplomaFacultad');
 Route::get('titulos/diplomas/uraSE', 'SegundaEspecialidadController@GetTitulosDatosDiplomaUra');
 Route::get('titulos/validacion/uraSE', 'SegundaEspecialidadController@GetTitulosValidadosUra');
-Route::put('titulos/correccionSE', 'SegundaEspecialidadController@cambiarEstado');
-Route::put('titulos/envio/facultadSE', 'SegundaEspecialidadController@enviarFacultad');
+Route::put('titulos/correccionSE', 'SegundaEspecialidadController@cambiarEstado'); //usado
+Route::put('titulos/envio/facultadSE', 'SegundaEspecialidadController@enviarFacultad'); //usado
 Route::put('titulos/envio/ura', 'TituloController@enviarUraa');
-Route::put('titulos/envio/especialidad', 'SegundaEspecialidadController@enviarEscuela');
+Route::put('titulos/envio/especialidad', 'SegundaEspecialidadController@enviarEscuela');//usado
 Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
 Route::get('titulos/firma/decano', 'TituloController@GetTitulosFirmaDecano');
 Route::get('titulos/firma/secretaria', 'TituloController@GetTitulosFirmaSecretaria');
@@ -254,7 +254,7 @@ Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::get('titulos/secretaria/observados', 'TituloController@GetTitulosRechazadosSecretaria');
 Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
 Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
-Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');
+Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');//usado
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
@@ -290,3 +290,4 @@ Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
 Route::put('separar', 'AdicionalController@separarApellidos');
 Route::get('fecha/diploma', 'AdicionalController@getDatosDiploma');
+Route::post('diploma/carpeta', 'AdicionalController@diploma_carpeta');
