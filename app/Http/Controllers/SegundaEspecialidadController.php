@@ -46,75 +46,75 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',17)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->where('cronograma_carpeta.visible',true)
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',17)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->where('cronograma_carpeta.visible',true)
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite'
+        ,'programa.nombre as programa')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',17)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->where('cronograma_carpeta.visible',true)
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+        
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->where('tramite.idEstado_tramite',17)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->where('cronograma_carpeta.visible',true)
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -123,31 +123,18 @@ class SegundaEspecialidadController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
-        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosAprobadosEscuela(Request $request){
@@ -156,74 +143,69 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',30)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',30)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',30)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',30)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
@@ -232,32 +214,18 @@ class SegundaEspecialidadController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->idTramite;
-
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
-        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+        
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosRevalidadosEscuela(Request $request){
@@ -266,107 +234,88 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',31)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',31)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa',
+        'tramite.idEstado_tramite')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',31)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',31)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
-            ->get();
-            
-            $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
+            ->get();   
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
-        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosValidadosFacultad(Request $request){
@@ -375,76 +324,72 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',20)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',20)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa',
+        'tramite.idEstado_tramite')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',20)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',20)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();      
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -452,31 +397,18 @@ class SegundaEspecialidadController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
-        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosAprobadosFacultad(Request $request){
@@ -485,76 +417,71 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',32)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',32)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',32)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',32)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
@@ -562,30 +489,18 @@ class SegundaEspecialidadController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
+        
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosRevalidadosFacultad(Request $request){
@@ -594,76 +509,73 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',33)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',33)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa',
+        'tramite.idEstado_tramite')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',33)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',33)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -672,127 +584,21 @@ class SegundaEspecialidadController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion =$dependenciaDetalle->nombre;
+            
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
-    }
-
-    public function GetTitulosFacultad(Request $request){
-        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-        $token = JWTAuth::getToken();
-        $apy = JWTAuth::getPayload($token);
-
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',20)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',20)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
-        foreach ($tramites as $key => $tramite) {
-            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension')
-            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-            ->where('idTramite',$tramite->idTramite)
-            ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->escuela=$dependenciaDetalle->nombre;
-        }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
+        
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
     
-    //Sin cambios
     public function cambiarEstado(Request $request){ 
         DB::beginTransaction();
         try {
@@ -800,12 +606,12 @@ class SegundaEspecialidadController extends Controller
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -815,6 +621,7 @@ class SegundaEspecialidadController extends Controller
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('programa','tramite.idPrograma','programa.idPrograma')
             ->Find($request->idTramite); 
 
             $tramite->idEstado_tramite=$request->newEstado;
@@ -828,19 +635,6 @@ class SegundaEspecialidadController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
-
 
             //OBTENIENDO EL HISTORIAL AL QUE SE DESEA REGRESAR
             $historial_new=Historial_Estado::where('idTramite',$tramite->idTramite)
@@ -865,7 +659,6 @@ class SegundaEspecialidadController extends Controller
         }
     }
 
-    //Sin cambios
     public function enviarFacultad(Request $request){
         DB::beginTransaction();
         try {
@@ -874,12 +667,12 @@ class SegundaEspecialidadController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
 
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -889,6 +682,7 @@ class SegundaEspecialidadController extends Controller
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('programa','tramite.idPrograma','programa.idPrograma')
             ->Find($request->idTramite);
             
             //REGISTRAMOS EL ESTADO DEL TRÁMITE
@@ -920,20 +714,6 @@ class SegundaEspecialidadController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             $tramite->fut="fut/".$tramite->idTramite;
-            //Datos del usuario al que pertenece el trámite
-            $usuario=User::findOrFail($tramite->idUsuario)->first();
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
 
             DB::commit();
             return response()->json($tramite, 200);
@@ -953,7 +733,7 @@ class SegundaEspecialidadController extends Controller
             $idUsuario=$apy['idUsuario'];
 
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -1009,7 +789,7 @@ class SegundaEspecialidadController extends Controller
             }else{
                 $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
             }
-            $tramite->mencion=$dependenciaDetalle->nombre;
+            $tramite->programa=$dependenciaDetalle->nombre;
 
             DB::commit();
             return response()->json($tramite, 200);
@@ -1019,7 +799,6 @@ class SegundaEspecialidadController extends Controller
         }
     }
 
-    //Sin cambios
     public function enviarEscuela(Request $request){
         DB::beginTransaction();
         try {
@@ -1028,12 +807,12 @@ class SegundaEspecialidadController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
 
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as dependencia'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1043,6 +822,7 @@ class SegundaEspecialidadController extends Controller
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('programa','tramite.idPrograma','programa.idPrograma')
             ->Find($request->idTramite);
             
             //REGISTRAMOS EL ESTADO DEL TRÁMITE
@@ -1074,18 +854,6 @@ class SegundaEspecialidadController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
 
             DB::commit();
             return response()->json($tramite, 200);
@@ -1100,63 +868,58 @@ class SegundaEspecialidadController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.certificado_final')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',7)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
-            ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.certificado_final')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',7)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+        'tramite_detalle.certificado_final','programa.nombre as programa')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',7)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',7)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
@@ -1165,31 +928,19 @@ class SegundaEspecialidadController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
-        // return response()->json(['status' => '200', 'tramites' => $tramites], 200);
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
+        
     }
 
     public function GetTitulosDatosDiplomaEscuela(Request $request){
@@ -1198,74 +949,70 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
-            'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.created_at')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',36)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
-            'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.created_at')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',36)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
+        'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+        'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.created_at','programa.nombre as programa',
+        'tramite.idEstado_tramite')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',36)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',36)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             // obtener primera y última matrícula de cada usuario que realiza el trámite medienta esu número de matrícula
             if ($tramite->idUnidad==1) {
@@ -1358,23 +1105,16 @@ class SegundaEspecialidadController extends Controller
             }
             // --------------
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
+            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idUnidad',$tramite->idUnidad)
-            ->where('idDependencia_detalle',$tramite->idDependencia_detalle)
+            ->where('idDependencia_detalle',$tramite->idPrograma)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
@@ -1389,17 +1129,17 @@ class SegundaEspecialidadController extends Controller
                 $tramite->idAcreditacion=null;
             }
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosDatosDiplomaFacultad(Request $request){
@@ -1408,103 +1148,85 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
-            'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
-            'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
-            'tramite_detalle.url_trabajo_carpeta','tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','tramite_detalle.idModalidad_carpeta',
-            'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
-            ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',38)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
-            'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
-            'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
-            'tramite_detalle.url_trabajo_carpeta','tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','tramite_detalle.idModalidad_carpeta',
-            'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
-            ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',38)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->where(function($query) use ($idDependencia)
-            {
-                if ($idDependencia) {
-                    $query->where('tramite.idDependencia',$idDependencia)
-                    ->orWhere('dependencia.idDependencia2',$idDependencia);
-                }
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
+        'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+        'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
+        'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
+        'tramite_detalle.url_trabajo_carpeta','tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
+        'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','tramite_detalle.idModalidad_carpeta',
+        'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
+        ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
+        'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+        'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico','programa.nombre as programa','tramite_detalle.originalidad')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',38)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',38)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($idDependencia)
+        {
+            if ($idDependencia) {
+                $query->where('tramite.idDependencia',$idDependencia)
+                ->orWhere('dependencia.idDependencia2',$idDependencia);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
+            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
@@ -1524,17 +1246,16 @@ class SegundaEspecialidadController extends Controller
                 $tramite->idAcreditacion=null;
             }
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
     public function GetTitulosDatosDiplomaUra(Request $request){
@@ -1543,91 +1264,71 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
 
-        if ($request->query('search')!="") {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
-            'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
-            'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
-            'tramite_detalle.url_trabajo_carpeta','tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','tramite_detalle.idModalidad_carpeta',
-            'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
-            ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',39)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            // ->where('tramite_detalle.asignado_certificado',$idUsuario)
-            ->where(function($query) use ($request)
-            {
-                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                // ->orWhere('tipo_tramite.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        }else {
-            // TRÁMITES POR USUARIO
-            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
-            'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-            ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
-            'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
-            'tramite_detalle.url_trabajo_carpeta','tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','tramite_detalle.idModalidad_carpeta',
-            'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
-            ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
-            'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',39)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where('tramite.idTipo_tramite_unidad',34)
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();   
-        }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
+        'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+        'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
+        'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
+        'tramite_detalle.url_trabajo_carpeta','tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
+        'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','tramite_detalle.idModalidad_carpeta',
+        'tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta','tramite_detalle.url_trabajo_carpeta'
+        ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
+        'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
+        'tramite_detalle.idAcreditacion','tramite_detalle.fecha_inicio_acto_academico','programa.nombre as programa','tramite_detalle.originalidad')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->where('tramite.idEstado_tramite',39)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->where('tramite.idEstado_tramite',39)
+        ->where('tramite.idTipo_tramite_unidad',34)
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->count();
+
         foreach ($tramites as $key => $tramite) {
             $tramite->fut="fut/".$tramite->idTramite;
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
+            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
             // Verificación de escuela acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
@@ -1647,20 +1348,19 @@ class SegundaEspecialidadController extends Controller
                 $tramite->idAcreditacion=null;
             }
         }
-        $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
-            $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-            $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-            return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-                'length'    => $pagination->total(),
-                'size'      => $pagination->perPage(),
-                'page'      => $pagination->currentPage()-1,
-                'lastPage'  => $pagination->lastPage()-1,
-                'startIndex'=> $begin,
-                'endIndex'  => $end - 1
-            ]], 200);
+        
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
     }
 
-    //Sin cambios
     public function GuardarDatosDiploma(Request $request){
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -1671,12 +1371,16 @@ class SegundaEspecialidadController extends Controller
             // RETORNANDO EL GRADO EDITADO
             $tramite=Tramite::find($request->idTramite);
             // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
+            if ($request->fecha_inicio_acto_academico>$request->fecha_sustentacion_carpeta) { //Validación de fecha de inicio de acto académico y el acto académico
+                return response()->json(['status' => '400', 'message' => "La fecha de inicio de acto académico no puede ser mayor a la fecha del acto académico."], 400);
+            }
             $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
             $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
             $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
             $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
             $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
             $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
+            $tramite_detalle->originalidad=$request->originalidad;
             $tramite_detalle->idPrograma_estudios_carpeta=$request->idPrograma_estudios_carpeta;
             $tramite_detalle->fecha_primera_matricula=$request->fecha_primera_matricula;
             $tramite_detalle->fecha_ultima_matricula=$request->fecha_ultima_matricula;
@@ -1761,7 +1465,7 @@ class SegundaEspecialidadController extends Controller
             // RETORNANDO EL GRADO EDITADO
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -1771,7 +1475,7 @@ class SegundaEspecialidadController extends Controller
             ,'tramite_detalle.nro_creditos_carpeta','tramite_detalle.idPrograma_estudios_carpeta','tramite_detalle.fecha_primera_matricula',
             'tramite_detalle.fecha_ultima_matricula','tramite_detalle.idDiploma_carpeta','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion'
-            ,'tramite_detalle.fecha_inicio_acto_academico')
+            ,'tramite_detalle.fecha_inicio_acto_academico','programa.nombre as programa')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1781,19 +1485,15 @@ class SegundaEspecialidadController extends Controller
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('programa','tramite.idPrograma','programa.idPrograma')
             ->find($request->idTramite);
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-            }else if ($tramite->idUnidad==2) {
-                
-            }else if ($tramite->idUnidad==3) {
-                
-            }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-            }
-            $tramite->mencion=$dependenciaDetalle->nombre;
+            
+            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
+
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -1812,7 +1512,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -1850,7 +1550,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -1926,7 +1626,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -1964,7 +1664,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -2040,7 +1740,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -2078,7 +1778,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -2146,7 +1846,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -2187,7 +1887,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -2323,7 +2023,7 @@ class SegundaEspecialidadController extends Controller
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-            'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+            'tramite.nro_tramite as codigo','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
             'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -2371,7 +2071,7 @@ class SegundaEspecialidadController extends Controller
             if ($request->query('search')!="") {
                 // TRÁMITES POR USUARIO
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2411,7 +2111,7 @@ class SegundaEspecialidadController extends Controller
             }else {
                 // TRÁMITES POR USUARIO
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2443,7 +2143,7 @@ class SegundaEspecialidadController extends Controller
             if ($request->query('search')!="") {
                 // TRÁMITES POR USUARIO
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2476,7 +2176,7 @@ class SegundaEspecialidadController extends Controller
             }else {
                 // TRÁMITES POR USUARIO
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2544,7 +2244,7 @@ class SegundaEspecialidadController extends Controller
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2577,7 +2277,7 @@ class SegundaEspecialidadController extends Controller
         }else {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2643,7 +2343,7 @@ class SegundaEspecialidadController extends Controller
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2676,7 +2376,7 @@ class SegundaEspecialidadController extends Controller
         }else {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2746,7 +2446,7 @@ class SegundaEspecialidadController extends Controller
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2786,7 +2486,7 @@ class SegundaEspecialidadController extends Controller
         }else {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2860,7 +2560,7 @@ class SegundaEspecialidadController extends Controller
             $idUsuario=$apy['idUsuario'];
             
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -2887,8 +2587,8 @@ class SegundaEspecialidadController extends Controller
             
             if($request->hasFile("archivo")){
                 $file=$request->file("archivo");
-                if ($tramite->nro_tramite."_firmado.pdf"==$file->getClientOriginalName()) {
-                    $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                if ($tramite->codigo."_firmado.pdf"==$file->getClientOriginalName()) {
+                    $nombre = $tramite->codigo.'.'.$file->guessExtension();
                     $nombreBD = "/storage/diplomas/".$nombre;
                     if($file->guessExtension()=="pdf"){
                         $file->storeAs('public/diplomas', $nombre);
@@ -3013,7 +2713,7 @@ class SegundaEspecialidadController extends Controller
                 // Obtenemos todos los trámites pendientes de impresión que sean diferentes al primer trámite que ya se registró
                 // Además, estos están ordenados por el orden del libro, folio, nro_registro
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -3083,7 +2783,7 @@ class SegundaEspecialidadController extends Controller
                 // Obtenemos todos los trámites pendientes de impresión que sean diferentes al primer trámite que ya se registró
                 // Además, estos están ordenados por el orden del libro, folio, nro_registro
                 $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -3129,7 +2829,7 @@ class SegundaEspecialidadController extends Controller
 
                 // RESPUESTA
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
                 ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
                 , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
                 ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -3173,7 +2873,7 @@ class SegundaEspecialidadController extends Controller
         if ($request->query('search')!="") {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
@@ -3205,7 +2905,7 @@ class SegundaEspecialidadController extends Controller
         }else {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo','dependencia.nombre as facultad'
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
