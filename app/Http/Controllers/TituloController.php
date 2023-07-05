@@ -823,6 +823,7 @@ class TituloController extends Controller
                 if ($graduado) {
                     $tramite->fecha_primera_matricula=$graduado->matricula_fecha;
                     $tramite->fecha_ultima_matricula=$graduado->fecha_egresado;
+                    $tramite->idUniversidad = 1;
                 } else {
                     // Verificando el SUV
                     $matriculaPrimera=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->first();
@@ -1130,6 +1131,8 @@ class TituloController extends Controller
             $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
             $tramite_detalle->idAcreditacion=$request->idAcreditacion;
             $tramite_detalle->fecha_inicio_acto_academico=$request->fecha_inicio_acto_academico;
+            $tramite_detalle->requisito_idioma=$request->requisito_idioma;
+            $tramite_detalle->idUniversidad=$request->idUniversidad;
             $tramite_detalle->update();
 
             // Cambiando el estado

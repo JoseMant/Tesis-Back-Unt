@@ -17,7 +17,9 @@ class UniversidadController extends Controller
      */
     public function index()
     {
-        return Universidad::where('estado',true)->get();
+        return Universidad::where('estado',true)
+        ->orderBy('nombre', 'ASC')
+        ->get();
     }
 
     /**
