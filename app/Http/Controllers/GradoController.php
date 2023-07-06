@@ -2528,11 +2528,11 @@ class GradoController extends Controller
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE FIRMADO POR RECTOR
                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 49, $idUsuario);
-                $historial_estados->save();
+                $historial_estado->save();
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE PENDIENTE DE FIRMA DE SECRETARÍA GENERAL
                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, 49, 46, $idUsuario);
-                $historial_estados->save();
+                $historial_estado->save();
 
                 $tramite->idEstado_tramite=46;
                 $tramite->save();
