@@ -226,8 +226,6 @@ Route::get('titulos/firma/rector', 'TituloController@GetTitulosFirmaRector');
 //Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
 Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
 Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
-Route::get('titulos/secretaria/observados', 'TituloController@GetTitulosRechazadosSecretaria');
-//Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
 Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
 Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
 //Route::put('create/codigo', 'TituloController@createCodeDiploma');
@@ -254,9 +252,6 @@ Route::get('titulos/firma/rector', 'TituloController@GetTitulosFirmaRector');
 Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
 Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
 Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
-Route::get('titulos/secretaria/observados', 'TituloController@GetTitulosRechazadosSecretaria');
-Route::get('titulos/validados/secretaria/{nro_resolucion}', 'TituloController@GetTitulosResolucion');
-Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
 Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');//usado
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
@@ -282,6 +277,10 @@ Route::get('oficio/resoluciones/{idOficio}', 'ResolucionController@getResolucion
 Route::get('oficios/all', 'OficioController@index');
 Route::post('oficios/create', 'OficioController@store');
 Route::put('oficios/update/{id}', 'OficioController@update');
+
+//Universidades
+Route::resource('universidades', 'UniversidadController');
+
 //Reportes
 Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
