@@ -388,7 +388,7 @@ class PersonaController extends Controller
                         $facultadMencion=Segunda_Especialidad::select('nombre')->Where('idSegunda_Especialidad',$mencion->idSegunda_Especialidad)->first();
                         if ($facultad['nombre']===strtoupper($facultadMencion['nombre'])) {
                             $mencionSede=ProgramaURAA::where('idSGA_SE',$mencion->idMencion)->first();
-                            $mencionSede->nro_matricula=$mencion->nro_tramite;
+                            $mencionSede->nro_matricula=$mencion->codigo;
                             if (!$mencion->sede) $mencionSede->sede="TRUJILLO";
                             else $mencionSede->sede=$mencion->sede;
                             array_push($menciones, $mencionSede);

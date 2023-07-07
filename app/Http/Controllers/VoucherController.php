@@ -17,6 +17,7 @@ use App\Tipo_Tramite;
 use App\User;
 use App\Historial_Estado;
 use App\Tramite_Requisito;
+use App\Tramite_Detalle;
 use App\Exports\ReporteTesoreriaExport;
 use App\Jobs\ActualizacionTramiteJob;
 
@@ -90,6 +91,7 @@ class VoucherController extends Controller
                         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
                         // REGISTRAMOS EL TRÁMITE
                         $tramiteCertificado->idTramite_detalle = $tramite->idTramite_detalle;
+                        
                         $tramiteCertificado->idTipo_tramite_unidad = 37;
                         $tramiteCertificado->idVoucher = $tramite->idVoucher;
                         $tramiteCertificado->idUsuario = $tramite->idUsuario;
@@ -104,7 +106,12 @@ class VoucherController extends Controller
                         $tramiteCertificado->idEstado_tramite = 5;
                         $tramiteCertificado->firma_tramite = $tramite->firma_tramite;
                         $tramiteCertificado->save();
-    
+                        
+                        //
+                        $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                        $tramite_detalle->idMotivo_certificado=1;
+                        $tramite_detalle->update();
+
                         // obtenemos el requisito de la foto pasaporte para el certificado paralelo
                         $requisito_foto=Tramite_Requisito::where('idTramite',$tramite->idTramite)
                         ->where(function($query) use ($request)

@@ -10,7 +10,7 @@ use App\Tramite_Requisito;
 use App\ProgramaURAA;
 use App\Mencion;
 use App\DependenciaURAA;
-
+use App\Tramite_Detalle;
 
 class ReporteController extends Controller
 {
@@ -693,4 +693,113 @@ class ReporteController extends Controller
         $programas = ProgramaURAA::where('idDependencia',$idDependencia)->get();
         return response()->json($programas, 200);
     }
+
+    public function reporteExpediente(Request $request){
+        // return $request->all();
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $dni=$apy['nro_documento'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+        $idDependencia=$apy['idDependencia'];
+        
+        $tramites=Tramite::select('tramite.nro_matricula','tramite_detalle.codigo_diploma',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite_detalle.folio',
+        'cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','programa.idPrograma','tramite.idPrograma')
+        ->where('tipo_tramite.idTipo_tramite',2)
+        ->where('tramite.idEstado_tramite','!=',29)
+        ->where('tramite_detalle.codigo_diploma','!=',null)
+        ->where(function($query) use($request)
+        {
+            if ($request->idUnidad!=0) {
+                $query->where('tramite.idUnidad',$request->idUnidad);
+            }
+            if ($request->idDependencia!=0) {
+                $query->where('tramite.idDependencia',$request->idDependencia);
+            }
+            if ($request->idPrograma!=0) {
+                $query->where('tramite.idPrograma',$request->idPrograma);
+            }
+            if ($request->idTipo_tramite_unidad!=0) {
+                $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
+            }
+            if ($request->cronograma!=0) {
+                $query->where('cronograma_carpeta.fecha_colacion',$request->anio);
+            }
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+        
+        $total=Tramite::select('tramite.nro_matricula','tramite_detalle.codigo_diploma',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite_detalle.folio',
+        'cronograma_carpeta.fecha_colacion')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->where('tipo_tramite.idTipo_tramite',2)
+        ->where('tramite.idEstado_tramite','!=',29)
+        ->where(function($query) use($request)
+        {
+            if ($request->idUnidad!=0) {
+                $query->where('tramite.idUnidad',$request->idUnidad);
+            }
+            if ($request->idDependencia!=0) {
+                $query->where('tramite.idDependencia',$request->idDependencia);
+            }
+            if ($request->idPrograma!=0) {
+                $query->where('tramite.idPrograma',$request->idPrograma);
+            }
+            if ($request->idTipo_tramite_unidad!=0) {
+                $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
+            }
+            if ($request->cronograma!=0) {
+                $query->where('cronograma_carpeta.fecha_colacion',$request->anio);
+            }
+        })
+        ->count();
+        
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
+    }
+
+    // public function GetDiploma(Request $request){
+    //     // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+    //     $token = JWTAuth::getToken();
+    //     $apy = JWTAuth::getPayload($token);
+    //     $idUsuario=$apy['idUsuario'];
+
+
+    //     $diploma=Tramite_Detalle::where('codigo_diploma','LIKE','%'.$request.'%');
+    //     if ($codigo_diploma) {
+    //         return response()->json(['status' => '200','diploma'=>$request], 200);
+    //     }else {
+    //         return response()->json(['status' => '400','message'=>"Dilpoma no encontrada"], 400);
+    //     }
+
+    // }
+
 }
+

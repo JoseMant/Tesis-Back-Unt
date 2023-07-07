@@ -288,6 +288,22 @@ class CronogramaController extends Controller
         }
         
     }
+
+    public function getAnioCronogramas(){
+        DB::beginTransaction();
+        try {
+            $anios=Cronograma::select(DB::raw('YEAR(fecha_colacion) as anio'))
+            ->distinct()
+            ->orderBy('anio','asc')
+            ->get();
+            DB::commit();
+            return response()->json($anios, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+        
+    }
 }
 
 

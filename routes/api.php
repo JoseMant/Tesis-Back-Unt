@@ -168,6 +168,9 @@ Route::get('cronogramas/unidad/dependencia', 'CronogramaController@GetUnidadDepe
 Route::get('resolucion/cronogramas/{idResolucion}', 'CronogramaController@getCronogramasLibres');
 Route::get('cronogramas/dependencia/{idDependencia}/{idTipo_tramite_unidad}', 'CronogramaController@cronogramasByDependencia');
 
+//Año
+Route::get('anios', 'CronogramaController@getAnioCronogramas');
+
 //GRADOS
 Route::get('grados/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
 Route::get('grados/aprobados/escuela', 'GradoController@GetGradosAprobadosEscuela');
@@ -285,7 +288,9 @@ Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
 Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGeneral');
 Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
+Route::get('reporte/elaboracion_carpeta/expedientes', 'ReporteController@reporteExpediente');
 Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
+Route::get('diploma', 'ReporteController@GetDiploma');
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
