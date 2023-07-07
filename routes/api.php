@@ -256,6 +256,7 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
+Route::get('carpeta/codigo_diploma/{codigo_diploma}', 'CarpetaController@getCarpetaByCodigoDiploma');
 Route::put('firmas/decano', 'GradoController@firmaDecano');
 Route::put('firmas/rector', 'GradoController@firmaRector');
 Route::put('firmas/secretaria', 'GradoController@firmaSecretaria');
