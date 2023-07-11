@@ -23,10 +23,10 @@ class PDF_FutController extends Controller
     $this->pdf = $pdf;
   }
 
-  public function pdf_fut($idTramite)
+  public function pdf_fut($uuid)
   {
       // DATOS
-      $tramite=Tramite::findOrFail($idTramite);
+      $tramite=Tramite::where('uuid',$uuid)->first();
       $usuario=User::findOrFail($tramite->idUsuario);
       $voucher=Voucher::findOrFail($tramite->idVoucher);
       $dependencia=DependenciaURAA::Where('idDependencia',$tramite->idDependencia)->first();
