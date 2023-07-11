@@ -35,6 +35,8 @@ use App\Escuela;
 use App\Motivo_Certificado;
 use App\PersonaSuv;
 use App\PersonaSga;
+use App\Cronograma;
+use App\Resolucion;
 class TramiteController extends Controller
 {
     public function __construct()
@@ -319,7 +321,7 @@ class TramiteController extends Controller
                 'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
                 'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
                 'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
-                'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+                'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
                 'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
                 'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
                 'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher','voucher.des_estado_voucher')
@@ -579,6 +581,16 @@ class TramiteController extends Controller
             $tramite -> sede=trim($request->sede);
             $tramite -> idUsuario_asignado=null;
             $tramite -> idEstado_tramite=2;
+
+            // Creando un uudi para realizar el llamado a los trámites por ruta
+
+                // Verificando que no haya un uuid ya guardado en bd
+                $tramiteUUID=true;
+                while ($tramiteUUID) {
+                    $uuid=Str::orderedUuid();
+                    $tramiteUUID=Tramite::where('uuid',$uuid)->first();
+                }
+                $tramite -> uuid=$uuid;
             
             // ---------------------------------------------------
             if($request->hasFile("archivo_firma")){
@@ -744,7 +756,7 @@ class TramiteController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher')
+            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -994,6 +1006,8 @@ class TramiteController extends Controller
 
                     $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                     $tramite->update();
+                }else {
+                    return response()->json(['status' => '400', 'message' => "Requisitos pendientes de validación"], 400);
                 }
             }
             
@@ -1095,7 +1109,7 @@ class TramiteController extends Controller
             'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
             'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
             'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
-            'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tipo_tramite_unidad','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+            'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
             'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
             'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
             'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher','voucher.des_estado_voucher')
@@ -1145,18 +1159,21 @@ class TramiteController extends Controller
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
 
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite',
-            'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
-            'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
-            'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
-            DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher')
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+            'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
+            'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
+            'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+            'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
+            'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+            'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher','voucher.des_estado_voucher')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->where('tramite.idTramite',$id)
             ->first();  
@@ -1211,10 +1228,10 @@ class TramiteController extends Controller
                         }elseif ($ultimo_historial->idEstado_actual==22||$ultimo_historial->idEstado_actual==40){
                             // la facultad observa un documento a la escuela
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 34, $idUsuario);
-                            $historial_estados->save();
+                            $historial_estado->save();
 
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, 34, 20, $idUsuario);
-                            $historial_estados->save();
+                            $historial_estado->save();
 
                             $tramite-> idEstado_tramite=20;
                         }elseif ($ultimo_historial->idEstado_actual==9) {
@@ -1226,18 +1243,18 @@ class TramiteController extends Controller
                             if($rechazados_facultad){
                                 // la facultad observa un documento a la escuela
                                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 34, $idUsuario);
-                                $historial_estados->save();
+                                $historial_estado->save();
                                 
                                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, 34, 32, $idUsuario);
-                                $historial_estados->save();
+                                $historial_estado->save();
                                 $tramite-> idEstado_tramite=32;
                             }else {
                                 // la facultad observa un documento a la escuela
                                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 35, $idUsuario);
-                                $historial_estados->save();
+                                $historial_estado->save();
 
                                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, 35, 7, $idUsuario);
-                                $historial_estados->save();
+                                $historial_estado->save();
                                 $tramite-> idEstado_tramite=7;
                             }
                         }
@@ -1619,6 +1636,7 @@ class TramiteController extends Controller
         ->where('tramite.idEstado_tramite','!=',29)
         ->first();
     }
+
 
     public function setHistorialEstado($idTramite, $idEstado_actual, $idEstado_nuevo, $idUsuario)
     {
