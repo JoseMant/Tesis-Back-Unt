@@ -868,7 +868,7 @@ class SegundaEspecialidadController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
@@ -895,6 +895,7 @@ class SegundaEspecialidadController extends Controller
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
             ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
         })
         ->orderBy($request->query('sort'), $request->query('order'))
@@ -906,6 +907,7 @@ class SegundaEspecialidadController extends Controller
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
         ->where('tramite.idEstado_tramite',7)
         ->where('tramite.idTipo_tramite_unidad',34)
         ->where(function($query) use ($request)
@@ -916,6 +918,7 @@ class SegundaEspecialidadController extends Controller
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
             ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
         })
         ->count();
@@ -1114,7 +1117,7 @@ class SegundaEspecialidadController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idUnidad',$tramite->idUnidad)
-            ->where('idDependencia_detalle',$tramite->idPrograma)
+            ->where('idPrograma',$tramite->idPrograma)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
@@ -1463,7 +1466,7 @@ class SegundaEspecialidadController extends Controller
             $tramite->save();
 
             // RETORNANDO EL GRADO EDITADO
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
             'tramite.nro_tramite as codigo','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
             'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'

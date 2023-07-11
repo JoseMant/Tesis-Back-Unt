@@ -399,12 +399,11 @@ class CertificadoController extends Controller
         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
-        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','motivo_certificado.nombre as motivo',
+        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
         'tramite_detalle.certificado_final',
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
         'voucher.archivo as voucher')
         ->join('tramite_detalle', 'tramite_detalle.idTramite_detalle', 'tramite.idTramite_detalle')
-        ->join('motivo_certificado','motivo_certificado.idMotivo_certificado','tramite_detalle.idMotivo_certificado')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')

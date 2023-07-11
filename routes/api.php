@@ -100,6 +100,7 @@ Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
 Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
+Route::post('tramites/finalizar','TramiteController@finalizarTramites');
 //-----------------PDFs
 Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
 Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');
@@ -166,6 +167,9 @@ Route::put('cronogramas/update/{id}', 'CronogramaController@update');
 Route::get('cronogramas/unidad/dependencia', 'CronogramaController@GetUnidadDependencia');
 Route::get('resolucion/cronogramas/{idResolucion}', 'CronogramaController@getCronogramasLibres');
 Route::get('cronogramas/dependencia/{idDependencia}/{idTipo_tramite_unidad}', 'CronogramaController@cronogramasByDependencia');
+
+//Año
+Route::get('anios', 'CronogramaController@getAnioCronogramas');
 
 //GRADOS
 Route::get('grados/validados/escuela', 'GradoController@GetGradosValidadosEscuela');
@@ -253,6 +257,8 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
+Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getDataPersona');
+Route::get('carpeta/codigo_diploma/{codigo_diploma}', 'CarpetaController@getCarpetaByCodigoDiploma');
 Route::put('firmas/decano', 'GradoController@firmaDecano');
 Route::put('firmas/rector', 'GradoController@firmaRector');
 Route::put('firmas/secretaria', 'GradoController@firmaSecretaria');
@@ -283,10 +289,13 @@ Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
 Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGeneral');
 Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
+Route::get('reporte/elaboracion_carpeta/expedientes', 'ReporteController@reporteExpediente');
 Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
+Route::get('diploma', 'ReporteController@GetDiploma');
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
 Route::put('separar', 'AdicionalController@separarApellidos');
 Route::get('fecha/diploma', 'AdicionalController@getDatosDiploma');
 Route::post('diploma/carpeta', 'AdicionalController@diploma_carpeta');
+Route::post('agregar/programa', 'AdicionalController@programas');
