@@ -1,255 +1,322 @@
 <?php
-    // LÓGICA PARA LA FECHA IMPRESA
-    $fecha = DATE($tramite->fecha_colacion);
-    $año = substr($fecha, 0, 4);
-    $mes = (int)substr($fecha, 5, 2);
-    $dia = substr($fecha, 8, 2);
-    $url_qr = "tramites-uraa.unitru.edu.pe/carpeta/".$tramite->idTramite;
-    // $dias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado");
-    $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+/**
+ * HTML2PDF Librairy - example
+ *
+ * HTML => PDF convertor
+ * distributed under the LGPL License
+ *
+ * @author      Laurent MINGUET <webmaster@html2pdf.fr>
+ *
+ * isset($_GET['vuehtml']) is not mandatory
+ * it allow to display the result in the HTML format
+ */
+// session_start();
+// include_once "denominaciones.php";
 
-    // LÓGICA PARA EL TIPO DE DOCUMENTO
-    $tipoDocumento="";
-    switch ($tramite->tipo_documento) {
-        case 1: 
-            $tipoDocumento="DNI";
-            break;
-        case 2: 
-            $tipoDocumento="PAS";
-            break;
-        case 3: 
-            $tipoDocumento="CE";
-            break;
-        case 4: 
-            $tipoDocumento="CI";
-            break;
-        case 5: 
-            $tipoDocumento="DE";
-            break;
-        case 6: 
-            $tipoDocumento="CTP";
-            break;
-        case 7: 
-            $tipoDocumento="CIP";
-            break;
-    }
+// if(!isset($_POST['codigoAlumno'])){
+//     session_destroy();
+//     header("Location:../../../index.php");
+// }
+// $id = $_POST['codigoAlumno'];
+// $diploma = $_POST['diploma'];//cod. diploma
+// $denominacion = $_POST['denominacion'];
+$cadena_de_texto =$tramite->denominacion;
+$cadena_buscada   = ' MENCIÓN:';
+$posicion_coincidencia = strpos($cadena_de_texto, $cadena_buscada);
+
+$fecha = DATE($tramite->fecha_colacion);
+$aÃ±o = substr($fecha, 0, 4);
+$mes = (int)substr($fecha, 5, 2);
+$dia = substr($fecha, 8, 2);
+
+// ob_start();
+$msg = "tramites-uraa.unitru.edu.pe/carpeta/".$tramite->idTramite;
+// $dias = array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","SÃ¡bado");
+$meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+
+
+
+// LÃ“GICA PARA SACAR LA FACULTAD DE LAS SEGUNDAS ESPECIALIDADES
+$facultad=$tramite->facultad;
+$escuela=$tramite->escuela;
+
+
+// LÃ“GICA PARA EL TIPO DE DOCUMENTO
+$tipoDocumento="";
+if ($tramite->tipo_documento==1) {
+    $tipoDocumento="DNI";
+}if ($tramite->tipo_documento==2) {
+    $tipoDocumento="PAS";
+}if ($tramite->tipo_documento==3) {
+    $tipoDocumento="CE";
+}if ($tramite->tipo_documento==4) {
+    $tipoDocumento="CI";
+}if ($tramite->tipo_documento==5) {
+    $tipoDocumento="DE";
+}if ($tramite->tipo_documento==6) {
+    $tipoDocumento="CTP";
+}if ($tramite->tipo_documento==7) {
+    $tipoDocumento="CIP";
+}
+
+
+
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Diploma UNT</title>
-</head>
+
+
 <style type="text/css">
     
-        /* table.page_header {width: 100%; border: none; background-color: #DDDDFF; border-bottom: solid 1mm #AAAADD; padding: 2mm }
+        table.page_header {width: 100%; border: none; background-color: #DDDDFF; border-bottom: solid 1mm #AAAADD; padding: 2mm }
         table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
-        table.page_content {width: 100%;border: none; padding: 2mm } */
-        #cara1{
-            margin: -20px;
-            /* margin-left: -20px; 
-            margin-top: -20px;  */
-            padding: 170px 70px 50px;
-            /* padding-bottom:50px; */
-            background-image: url(<?php echo public_path('\img')."\\nueva_diploma_unt-1.png"; ?>);
+        table.page_content {width: 100%;border: none; padding: 2mm }
+        #cara1{margin-top: -20px;margin-left: -20px; padding-right:20px ;padding-bottom:50px ;
+            /* background-image: url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>); */
             height: 100%;
-            /* position:  absolute;  */
-            /* width: 1125px; */
-            background-repeat: no-repeat;
         }
         #cara2{
-            margin: -20px;
-            padding: 50px 70px 0 70px;
-            background-image: url(<?php echo public_path('\img')."\\nueva_diploma_unt-2.png"; ?>);
-            height: 100%;
-            /* width: 104%; */
-            /* height: auto;  */
-            position:  absolute; 
-            /* margin-top: -17px;
-            margin-left: -17px; 
-            padding-right:23px ;padding-bottom:160px ; */
-            background-repeat: no-repeat;
+            /* background-image:url(<?php echo public_path('\img')."\\fondo_degradado.png"; ?>);  */
+            width: 100%; 
+            height: auto; position:  absolute; 
+            margin-top: -20px;margin-left: -20px; padding-right:23px ;padding-bottom:160px ;
             
-        }
-        h1 {
-            text-align: center;
-            font-family: Times; 
-            font-size:27px;
-            margin: 10px 0;
-        }
-        h2 {
-            text-align: center;
-            font-family: Times; 
-            font-size:27px;
-        }
-        p {
-            text-align: justify;
-            /* text-indent: 10px; */
-            font-family: Times; 
-            line-height: 120%;
-            margin: 10px 0;
-            font-size:20px;
-        }
-        #cara1 table td {
-            width: 318px;
-            font-family: Times; 
-            text-align: center;
-            /* border: 1px; */
-        }
-        #cara2 table td {
-            /* width: 131px; */
-            font-family: Times; 
-            text-align: justify;
-            /* border: 1px; */
         }
     
 </style>
-<body>
-    <div id="cara1">
-        <p>En nombre de la Nación, <b>la Universidad Nacional de Trujillo</b>, por medio del Consejo Universitario, confiere el
-            <?php 
-                if(substr($tramite->diploma_obtenido, 0,1) == 'B' || substr($tramite->diploma_obtenido, 0,1) == 'M' || substr($tramite->diploma_obtenido, 0,1) == 'D') {
-                    echo " GRADO ACADÉMICO ";
-                } else {
-                //     if($escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL')
-                //         echo " TÍTULO ";
-                //     else
-                        echo " TÍTULO PROFESIONAL ";
-                }
-            ?>de:</p>
-        <h1><?php echo $tramite->denominacion; ?></h1>
-        <p style="margin: 0;">a:</p>
-        <h2><?php echo $tramite->nombreComp; ?></h2>
-        <p>De la <b><?php echo $tramite->facultad.", ".$tramite->programa; ?></b></p>
-        <p>Cumpliendo con los requisitos exigidos por las disposiciones legales y reglamentarias vigentes. Por tanto, se expide el presente DIPLOMA para que se le reconozca como tal y se le otorgue los goces y privilegios que le confieren las Leyes de la República.</p>
-        <p style="text-align: right"><?php echo "Trujillo, ".$dia." de ".$meses[$mes-1]. " de ".$año; ?></p>
-        <br>
-        <table>
-            <tbody>
-                <tr>
-                    <td style="height: 90px;"><img src="./img/firmas/AMELIA_MORILLAS-ENFERMERIA.png" alt="FIRMA AUTORIDAD 1" style="height: 90px;"></td>
-                    <td style="height: 90px;"><img src="./img/firmas/AMELIA_MORILLAS-ENFERMERIA.png" alt="FIRMA AUTORIDAD 2" style="height: 90px;"></td>
-                    <td style="height: 90px;"><img src="./img/firmas/AMELIA_MORILLAS-ENFERMERIA.png" alt="FIRMA AUTORIDAD 3" style="height: 90px;"></td>
-                
-                </tr>
-                <tr>
-                    <td><b><?php echo $secretaria->nombres ?></b></td>
-                    <td><b><?php echo $rector->nombres ?></b></td>
-                    <td><b><?php echo $decano->nombres ?></b></td>
-                </tr>
-                <tr>
-                    <td>
-                        <?php if ($secretaria->sexo == 'M') echo "SECRETARIO GENERAL"; ?>
-                        <?php if ($secretaria->sexo == 'F') echo "SECRETARIA GENERAL"; ?>
-                        <?php if ($secretaria->cargo) echo $secretaria->cargo ?>
-                    </td>
-                    <td>
-                        <?php if ($rector->sexo == 'M') echo "RECTOR"; ?>    
-                        <?php if ($rector->sexo == 'F') echo "RECTORA"; ?>
-                        <?php if ($rector->cargo) echo $rector->cargo ?>
-                    </td>
-                    <td>
-                        <?php if ($decano->sexo == 'M') echo "DECANO"; ?>    
-                        <?php if ($decano->sexo == 'F') echo "DECANA"; ?>
-                        <?php if ($decano->cargo) echo $decano->cargo ?>
-                    </td>
-                </tr>
-            </tbody>
+<div id="cara1">
+    <img src=<?php echo public_path()."/img/cabecera_vacia_diploma.png"; ?> style="width: 1060px; height: 131px; position: absolute; top: 10px; left: 40px">
+    <div style="margin-top: 0mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
+        <table class="page_content" border="0">
+            <tr border="0">
+                <td style="width: 100%; text-align: left;" colspan="5">
+                    <?php if ($opcFoto == 1){ ?>
+                        <?php if ($tramite->idTipo_tramite_unidad == 34){ ?>
+                            <img src="<?php echo public_path().$fotoAlumno?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                        <?php }else{ ?>
+                            <img src="<?php echo public_path().$fotoAlumno?>" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:30px; padding: 5px; width: 129px; height: 170px;">
+                        <?php } ?>
+                    <?php }else{ ?>
+                        <img src="avatar2.png" align="right" style="margin-left: 20px; margin-right: 40px;  margin-top:27px; padding: 5px; width: 129px; height: 170px;">
+                    <?php } ?>
+                    <!-- <p style="text-align: center; font-family: Times; font-size: 25px; font-weight: bold; margin-top: 5px; margin-bottom: 15px; margin-left: 214px">A NOMBRE DE LA NACIÃ“N</p> -->
+                    <p style="text-align: center; font-family: Times; font-size: 25px; font-weight: bold; margin-top: 5px; margin-bottom: 15px; margin-left: 214px">&nbsp;</p>
+                    <p style="text-align: justify; margin-left: 2px; margin-top: 6px; margin-bottom: 1px; font-size:22px;"><b>El Rector de la Universidad Nacional de Trujillo</b></p>
+                    <p style="text-indent: 50px; text-align: justify;  font-family: Times; font-size:18px; margin-bottom: -5px;">
+                        Por cuanto:</p>
+                    <p style="text-indent: 50px; text-align: justify;  font-size:19px; line-height: 34px; ">
+                        EL CONSEJO UNIVERSITARIO DE ESTA UNIVERSIDAD, en la fecha, ha conferido el
+                            <?php 
+                            if(substr($tramite->diploma, 0,1) == 'B' || substr($tramite->diploma, 0,1) == 'M' || substr($tramite->diploma, 0,1) == 'D'){
+                                echo " GRADO ACADÉMICO ";
+                            }else{
+                                if($escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL')
+                                    echo " TÍTULO ";
+                                else
+                                    echo " TÍTULO PROFESIONAL ";
+                            }
+                            ?>de :
+                    </p>
+                    <?php if ($idFicha==1 || $idFicha==2){?>
+                        <p style="text-align: center; margin-bottom:5px; margin-top: 15px;">
+                    <!-- <b><?php //echo $denominacion;?></b> -->
+                            <b>
+                                <?php 
+                                    if($posicion_coincidencia){
+                                        $primeraParte = substr($tramite->denominacion, 0, $posicion_coincidencia);
+                                        echo "<p style='font-size:32px; margin-top: -6px;'>".$primeraParte.'</p><br>';
+                                        $segundaParte = substr($tramite->denominacion, $posicion_coincidencia);
+                                        echo "<p style='font-size:23px;margin-top: -36px;;margin-bottom: -10px;'>".$segundaParte."</p>";
+                                    }else{
+                                        echo "<p style='font-size:35px;margin-top: -10px;'>".$tramite->denominacion."</p>";
+                                    }
+                                ?></b>
+                        </p>
+                    <?php }?>
+
+                    <?php if ($idFicha==4){?>
+                        <p style="text-align: center; margin-bottom:5px; margin-top: 15px;">
+                    <!-- <b><?php //echo $denominacion;?></b> -->
+                            <b>
+                                <?php 
+                                    if($posicion_coincidencia){
+                                        $primeraParte = substr($tramite->denominacion, 0, $posicion_coincidencia);
+                                        echo "<p style='font-size:25px; margin-top: -6px;'>".$primeraParte.'</p><br>';
+                                        $segundaParte = substr($tramite->denominacion, $posicion_coincidencia);
+                                        echo "<p style='font-size:23px;margin-top: -36px;;margin-bottom: -10px;'>".$segundaParte."</p>";
+                                    }else{
+                                        echo "<p style='font-size:28px;margin-top: -10px;margin-bottom: 10px'>".$tramite->denominacion."</p>";
+                                    }
+                                ?></b>
+                        </p>
+                    <?php }?>
+
+                    <?php if ($diploma == 'T141' || $diploma == 'T142' || $diploma == 'T143' || $diploma == 'T144' || $diploma == 'T168' || $diploma == 'T055' || $diploma == 'T045' || $diploma == 'T138' || $diploma == 'T195' || $diploma == 'T108' || $diploma == 'T148' || $diploma == 'T151' || $diploma == 'T164' || $diploma == 'T196' || $diploma == 'T197' || $diploma == 'T154' || $diploma == 'T152' || $diploma == 'M137') {?>
+                        <p style="font-size:20px; text-align: center; margin-top: -22px;">
+                    <?php }else {?>   
+                        <p style="font-size:20px; text-align: center; ">
+                    <?php } ?>   
+
+                    <div style="float:right; margin-left: -532mm; ">a:&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                    <!--<font style="font-size:45px; font-family: brushib; margin-top:-10mm; "><b><?php //echo $nombreComp;?></b></font>-->
+
+                    <?php if ($idFicha==1 || $idFicha==2){?>
+                        <font style="font-size:31px; /*font-family: coopblb;*/ font-family: arial; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
+                        </p>
+                    <?php }?>
+                    <?php if ($idFicha==4){?>
+                        <font style="font-size:25px; /*font-family: coopblb;*/ font-family: arial; margin-top:-8mm; "><b><?php echo $tramite->nombreComp;?></b></font>
+                        </p>
+                    <?php }?>
+
+                    <p style="text-align: justify; text-indent: 0px; margin-bottom: 18px; margin-top: -35px; font-size:18px">
+                        De la <b><?php echo $facultad ?>,</b>
+                        <b>
+                            <?php if ($idFicha==1 || $idFicha==2){?>ESCUELA PROFESIONAL DE <?php }?>
+                            <?php if ($idFicha==4 && $tramite->idDependencia_detalle==49){?>SEGUNDA ESPECIALIZACIÃ“N,<?php }?>
+                            <?php
+                            if ($escuela=='RESIDENTADO MÉDICO' || $escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $escuela=='TECNOLOGÍA EDUCATIVA' || $escuela=='ESTIMULACIÓN TEMPRANA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $escuela=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $escuela=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
+                                echo buscarDenominaciones($escuela, $diploma);
+                            }else{
+                                echo $escuela;
+                            }
+                            ?>
+                        </b>
+                        <?php if ($idFicha==7){?> - <b>EDUCACIÃ“N <?php echo $nombre_escuela_preford ?></b> <?php }?>
+                    </p>
+
+
+
+
+                    <p style="text-align: justify; text-indent: 50px; font-family: Times;  margin-bottom: -3px; margin-top: -9px; font-size:18px">
+                        Por tanto:</p>
+                    <p style="text-align: justify; text-indent: 50px; font-size:18px; font-family: Times; line-height: 20px;">
+                        Le expido el presente DIPLOMA para que se le reconozca como tal y se le otorgue los goces y privilegios que le 
+                        confieren las Leyes de la República.
+                    </p>
+                    <p style="text-align: right;  margin-top: -12px; font-size:16px; font-family: Times;">
+                        Trujillo, <?php echo $dia." de ".$meses[$mes-1]. " de ".$aÃ±o; ?>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 100%; text-align: left;" colspan="5">
+                    &nbsp;<br>
+                    &nbsp;<br>
+                    &nbsp;<br>
+                    &nbsp;<br>
+                </td>
+            </tr>
+            <tr style="margin-bottom: -5px;" valign="top">
+                <td style="width: 30%; text-align: center;margin-top: 8px">
+                    <?php if ($secretaria->sexo=='M'){?>SECRETARIO GENERAL<?php }?>  
+                    <?php if ($secretaria->sexo=='F'){?>SECRETARIA GENERAL<?php }?>  
+                    <?php echo $secretaria->cargo?>
+                    <br>
+                    <b><?php  if ($secretaria->grado){echo $secretaria->grado.". ";} echo $secretaria->nombres?></b>
+                </td>
+                <td style="width: 5%; text-align: center;margin-top: 8px">
+                &nbsp; 
+                </td>
+                <td style="width: 30%; text-align: center;">
+                    <?php if ($rector->sexo=='M'){?>RECTOR<?php }?>    
+                    <?php if ($rector->sexo=='F'){?>RECTORA<?php }?>  
+                    <!-- RECTOR(A) -->
+                    <br>
+                    <b><?php if ($rector->grado){echo $rector->grado.". ";} echo $rector->nombres?></b>
+                </td>
+                <td style="width: 5%; text-align: center;margin-top: 8px">
+                    &nbsp;
+                </td>
+                <td style="width: 30%; text-align: center;">
+                    <?php if ($decano->sexo=='M'){?>DECANO<?php }?>    
+                    <?php if ($decano->sexo=='F'){?>DECANA<?php }?>    
+                    <?php echo $decano->cargo?><br>
+                    <b><?php  if ($decano->grado){echo $decano->grado.". ";} echo $decano->nombres?></b>
+                </td>
+            </tr>
         </table>
     </div>
-    <div id="cara2">
+</div>
+
+<div id="cara2">
+    <div style="margin-top: 14mm; margin-bottom: 0mm; margin-left: 10mm; margin-right: 10mm">
         <br>
-        <table>
-            <tbody>
-                <tr>
-                    <td>
-                        <br>
-                        <img src="<?php echo public_path().$foto_interesado?>" alt="FOTO DEL INTERESADO" style="width: 131px;">
-                    </td>
-                    <td colspan="5">
-                        <div style="padding-left: 20px; width: 680px; line-height: 140%;">
-                            CÓDIGO DE UNIVERSIDAD: <b>004</b><br>
-                            TIPO DOCUMENTO: <b><?php echo $tipoDocumento; ?></b><br>
-                            N° DOCUMENTO: <b><?php echo $tramite->nro_documento?></b><br>
-                            ABREVIATURA GRADO/TÍTULO: <b><?php echo $tramite->diploma_obtenido; ?></b><br>
+        <table >
+            <tr>
+                <td style="width: 45mm; text-align: center; margin-left: 10px;">
+                    <qrcode value="<?php echo $msg; ?>" ec="L" style="width: 30mm; margin-top: -4px; margin-left: -51px; background-color: white; color: #251e9b;"></qrcode><br><br>
+                    <!--<span style="margin-left: -60px;"> C&oacute;digo para verificar validez del Documento </span>   251e9b-->
+                </td>
+                <td style="width: 130mm;">
+                    <div style="margin-top: -5px; margin-left: -40px;">
+                        <p  style="font-size: 11px; margin-top: 0px; line-height: 15px;">
+                            CÓDIGO DE UNIVERSIDAD :<b> 004</b><br>
+                            TIPO DOCUMENTO:<b> <?php echo $tipoDocumento; ?></b><br>
+                            N° DOCUMENTO: <b> <?php echo $tramite->nro_documento?></b> <br>
+                            ABREVIATURA GRADO/TÍTULO: <b><?php echo $tramite->diploma_obtenido; ?></b> <br>
                             MODALIDAD DE OBTENCIÓN: <b><?php echo $tramite->acto_academico;?></b><br>
-                            MODALIDAD DE ESTUDIOS: <b>P - PRESENCIAL</b><br>
-                            <br>
-                            RESOLUCIÓN DE OTORGAMIENTO: <b>RCU Nº <?php echo $tramite->nro_resolucion; ?></b><br>
-                            FECHA DE RESOLUCIÓN DE OTORGAMIENTO: <b>
-                                <?php 
-                                    $date=date_create($tramite->fecha_resolucion);
-                                    echo date_format($date,'d/m/Y');
-                                ?>
-                            </b><br>
-                            <?php if(substr($emision_diploma, 0,1) == 'D') { ?>
-                            <br>
-                            RESOLUCIÓN DE DUPLICADO: <b>RR Nº <?php echo $tramite->nro_resolucion; ?></b><br>
-                            FECHA DE RESOLUCIÓN DE DUPLICADO: <b>
-                                <?php 
-                                    $date=date_create($tramite->fecha_resolucion);
-                                    echo date_format($date,'d/m/Y');
-                                ?>
-                            </b><br>
-                            <?php } ?>
-                            CÓDIGO DEL DIPLOMA: <b><?php echo $tramite->codigo_diploma; ?></b><br>
-                            EMISIÓN DE DIPLOMA: <b><?php echo $emision_diploma; ?></b><br>
-                            <br>
+                            MODALIDAD DE ESTUDIOS: <b> P - PRESENCIAL</b><br>
+
                             REGISTRADO EN EL LIBRO DE
                             <?php 
-                                if(substr($tramite->diploma_obtenido, 0,1) == 'B' || substr($tramite->diploma_obtenido, 0,1) == 'M' || substr($tramite->diploma_obtenido, 0,1) == 'D'){
-                                    echo "GRADOS DE ".substr($tramite->diploma_obtenido, 4);
-                                }else{
-                                    echo "TÍTULOS ".substr($tramite->diploma_obtenido, 11);
-                                }
+                            if(substr($tramite->diploma, 0,1) == 'B' || substr($tramite->diploma, 0,1) == 'M' || substr($tramite->diploma, 0,1) == 'D'){
+                                echo " GRADOS ";
+                            }elseif($idFicha==4 && substr($tramite->diploma, 0,1) == 'T'){
+                                echo " TÍTULOS DE SEGUNDA ESPECIALIDAD";
+                            }else {
+                                echo " TÍTULOS";
+                            }
                             ?>
-                            Nº: <b><?php echo $tramite->nro_libro?></b><br>
-                            EN EL FOLIO Nº: <b><?php echo $tramite->folio;?></b><br>
-                            REGISTRO Nº: <b><?php echo $tramite->nro_registro; ?></b> DE SECRETARÍA GENERAL
-                        </div>
-                    </td>
-                    <td>
-                        <div style="width: 131px;">
-                            Para comprobar su autenticidad, escanear el código QR:<br>
-                            <qrcode value="<?php echo $url_qr; ?>" ec="C" style="width: 131px; background-color: white; color: #000000;"></qrcode>
-                            <!-- <img src="./img/qr.png" alt="QR"> -->
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <br><br><br><br><br>
-                        <br><br><br><br>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td colspan="3" style="border: 1px;">
-                        <div style="width: 390px; padding: 20px;">
-                            <?php if ($secretaria->sexo == 'M') echo "El Secretario General"; ?>
-                            <?php if ($secretaria->sexo == 'F') echo "La Secretaria General"; ?>
-                            de la Universidad Nacional de Trujillo CERTIFICA que este documento es auténtico y  ha  sido  expedido  por  la  institución  y  por   las autoridades  competentes  de  la  Universidad, cuyas  firmas   figuran   en   el   anverso  del presente diploma.
-                            <span style="text-align: center;">
-                                <br><br><br><br>
-                                <br><br><br><br>
-                                <b><?php echo $secretaria->nombres ?></b><br>
-                                <?php if ($secretaria->sexo == 'M') echo "SECRETARIO GENERAL"; ?>
-                                <?php if ($secretaria->sexo == 'F') echo "SECRETARIA GENERAL"; ?>
-                                <?php if ($secretaria->cargo) echo $secretaria->cargo ?>
-                            </span>
-                        </div>
-                    </td>
-                    <td colspan="2"></td>
-                </tr>
-            </tbody>
+                            Nº:<b> <?php echo $tramite->nro_libro?> </b> <br>
+                            EN EL FOLIO Nº:<b> <?php echo $tramite->folio;?></b> <br>
+                            REGISTRO Nº: <b><?php echo $tramite->nro_registro; ?> </b> DE SECRETARÍA GENERAL <br>
+                        </p>
+                    </div>
+                </td>
+                <td>
+                    <p  style="font-size: 11px; margin-top: -5px;">
+                        RESOLUCIÓN DE OTORGAMIENTO: <b> RCU N° <?php echo $tramite->nro_resolucion; ?></b><br>
+                        FECHA DE RESOLUCIÓN DE OTORGAMIENTO: <b>
+                            <?php 
+                                $date=date_create($tramite->fecha_resolucion);
+                                echo date_format($date,'d/m/Y');
+                            ?>
+                        </b><br>
+                        CÓDIGO DEL DIPLOMA:  <b><?php echo $tramite->codigo_diploma; ?></b><br>
+                        EMISIÓN DE DIPLOMA:  <b><?php echo $diplomasEstado; ?></b><br><br>
+                        <?php if($diplomasEstado=='DUPLICADO') {
+                            $date = date_create($fechaEmision);
+                            echo "FECHA DE EMISIÃ“N: ";?><b>
+                            <?php echo date_format($date,'d/m/Y');?></b>
+                        <?php
+                        }
+                    ?>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>
+                        <br><br><br><br><br><br><br>
+                        <!-- &nbsp;____________________________________<br>
+                        <p style="font-size: 11px; text-align: right; margin-right: -15px;">
+                            Firma del Interesado</p> -->
+                    </div>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <div>
+                        <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+                        <br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                    </div>
+                </td>
+            </tr>
         </table>
-    <!-- <br><br><br> -->
+        <br>
     </div>
-    
-</body>
-</html>
+</div>

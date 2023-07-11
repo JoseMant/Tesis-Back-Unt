@@ -59,11 +59,15 @@ class ResolucionController extends Controller
             $resolucion->estado =true;
             $resolucion->save();
 
-            foreach ($request->cronogramas as $key => $value) {
-                // return $value;
-                $cronograma=Cronograma::find($value['idCronograma_carpeta']);
-                $cronograma->idResolucion=$resolucion->idResolucion;
-                $cronograma->update();
+            if ($request->cronogramas) {
+                foreach ($request->cronogramas as $key => $value) {
+                    // return $value;
+                    $cronograma=Cronograma::find($value['idCronograma_carpeta']);
+                    $cronograma->idResolucion=$resolucion->idResolucion;
+                    $cronograma->update();
+                }
+            }else {
+                return response()->json(['status' => '400', 'message' => "Asignar algún cronograma para la resolución"], 400);
             }
             $resolucion->anio = substr($resolucion->fecha, 0, 4);
             $resolucion->cronogramas=$request->cronogramas;
@@ -76,6 +80,7 @@ class ResolucionController extends Controller
     }
 
     public function update(Request $request,$id){
+        return $request->all();
         DB::beginTransaction();
         try {
             // return $request->all();
@@ -91,18 +96,24 @@ class ResolucionController extends Controller
             $resolucion->estado =trim($request->estado);
             $resolucion->update();
 
-            //Eliminamos todas las relaciones de los cronogramas que pertenecen a esa resolucion
-            $cronogramas=Cronograma::where('idResolucion',$id)->get();
-            foreach ($cronogramas as $key => $value) {
-                $value->idResolucion=null;
-                $value->update();
+
+            if ($request->cronogramas) {
+                //Eliminamos todas las relaciones de los cronogramas que pertenecen a esa resolucion
+                $cronogramas=Cronograma::where('idResolucion',$id)->get();
+                foreach ($cronogramas as $key => $value) {
+                    $value->idResolucion=null;
+                    $value->update();
+                }
+                //agregamos las nuevas relaciones de cronogramas
+                foreach ($request->cronogramas as $key => $value) {
+                    $cronograma=Cronograma::find($value['idCronograma_carpeta']);
+                    $cronograma->idResolucion=$resolucion->idResolucion;
+                    $cronograma->update();
+                }
+            }else {
+                return response()->json(['status' => '400', 'message' => "Asignar algún cronograma para la resolución"], 400);
             }
-            //agregamos las nuevas relaciones de cronogramas
-            foreach ($request->cronogramas as $key => $value) {
-                $cronograma=Cronograma::find($value['idCronograma_carpeta']);
-                $cronograma->idResolucion=$resolucion->idResolucion;
-                $cronograma->update();
-            }
+            
             $resolucion->anio = substr($resolucion->fecha, 0, 4);
             $resolucion->cronogramas=$request->cronogramas;
             DB::commit();
