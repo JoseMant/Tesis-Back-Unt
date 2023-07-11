@@ -16,6 +16,7 @@ use App\User;
 use App\Tramite_Detalle;
 use App\Estado_Tramite;
 use App\Jobs\RegistroTramiteJob;
+use App\Jobs\AnularTramiteJob;
 use App\Jobs\ActualizacionTramiteJob;
 use App\Jobs\ObservacionTramiteJob;
 use App\Jobs\FinalizacionCarnetJob;
@@ -86,10 +87,13 @@ class TramiteController extends Controller
                 if ($idTipo_usuario==1) {
                     // TRÁMITES POR USUARIO
                     $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
-                    DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado','tramite.idUsuario_asignado')
+                    DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado',
+                    'tramite.idUsuario_asignado','usuario.correo')
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                     ->Where('tramite.idEstado_tramite','!=',29)
                     ->Where('tramite.idEstado_tramite','!=',15)
                     ->where(function($query) use ($request)
@@ -194,10 +198,12 @@ class TramiteController extends Controller
                 if ($idTipo_usuario==1) {
                     // TRÁMITES POR USUARIO
                     $tramites=Tramite::select('tramite.nro_tramite','tramite.created_at','tramite.idTramite','tramite.idTipo_tramite_unidad','estado_tramite.idEstado_tramite',
-                    DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado','tramite.idUsuario_asignado')
+                    DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),'estado_tramite.nombre as estado',
+                    'tramite.idUsuario_asignado','usuario.correo')
                     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                     ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
+                    ->join('usuario','usuario.idUsuario','tramite.idUsuario')
                     ->Where('tramite.idEstado_tramite','!=',29)
                     ->Where('tramite.idEstado_tramite','!=',15)
                     ->orderBy($request->query('sort'), $request->query('order'))
@@ -1395,7 +1401,11 @@ class TramiteController extends Controller
     }
     
     public function anularTramite(Request $request)
-    {
+    {   
+        
+        
+        
+        // return $request->all();
         DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -1416,6 +1426,24 @@ class TramiteController extends Controller
 
             $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
             $tramite->update();
+
+
+            $idusuario=Tramite::select('tramite.idUsuario')
+            ->where('tramite.idTramite',$request->idTramite)
+            ->first();
+            $usuario=User::find($idusuario->idUsuario);
+
+            $tramite=Tramite::find($request->idTramite);
+
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite->idTipo_tramite_unidad);
+
+            $tipo_tramite=Tipo_tramite::find($tipo_tramite_unidad->idTipo_tramite);
+            
+           if (!$request->body) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => 'Registre motivo'], 400);
+           }
+            dispatch(new AnularTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad,$request->body, $request->cc));
             DB::commit();
             return response()->json(true,200);
         } catch (\Exception $e) {

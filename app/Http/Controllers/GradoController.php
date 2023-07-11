@@ -2405,6 +2405,7 @@ class GradoController extends Controller
 
     // Firmas   
     public function firmaDecano(Request $request){
+        DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
@@ -2499,6 +2500,7 @@ class GradoController extends Controller
     }
 
     public function firmaRector(Request $request){
+        DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
@@ -2577,6 +2579,7 @@ class GradoController extends Controller
 
     public function firmaSecretaria(Request $request){
         set_time_limit(0);
+        DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();

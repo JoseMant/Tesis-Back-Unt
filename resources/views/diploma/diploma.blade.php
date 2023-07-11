@@ -41,16 +41,13 @@
 </head>
 <style type="text/css">
     
-        /* table.page_header {width: 100%; border: none; background-color: #DDDDFF; border-bottom: solid 1mm #AAAADD; padding: 2mm }
-        table.page_footer {width: 100%; border: none; background-color: #DDDDFF; border-top: solid 1mm #AAAADD; padding: 2mm}
-        table.page_content {width: 100%;border: none; padding: 2mm } */
         #cara1{
             margin: -20px;
             /* margin-left: -20px; 
             margin-top: -20px;  */
-            padding: 170px 70px 50px;
+            padding: 180px 70px 50px;
             /* padding-bottom:50px; */
-            background-image: url(<?php echo public_path('\img')."\\nueva_diploma_unt-1.jpg"; ?>);
+            background-image: url(<?php echo public_path('\img')."\\nueva_diploma_unt-7.jpg"; ?>);
             height: 100%;
             /* position:  absolute;  */
             /* width: 1125px; */
@@ -110,11 +107,16 @@
             text-align: justify;
             /* border: 1px; */
         }
+        /* @font-face {
+            font-family: TheGreatestFont;
+            src: url(<?php echo public_path('\font').'\\letra1.otf'; ?>);
+        } */
     
 </style>
 <body>
     <div id="cara1">
-        <p>En nombre de la Nación, <b>La Universidad Nacional de Trujillo</b>, por medio del Consejo Universitario, confiere el
+        <!-- <p>En nombre de la Nación, <b>La Universidad Nacional de Trujillo</b>, por medio del Consejo Universitario, confiere el -->
+        <p><b>La Universidad Nacional de Trujillo</b>, por medio del Consejo Universitario, confiere el
             <?php 
                 if(substr($tramite->diploma_obtenido, 0,1) == 'B' || substr($tramite->diploma_obtenido, 0,1) == 'M' || substr($tramite->diploma_obtenido, 0,1) == 'D') {
                     echo " GRADO ACADÉMICO ";
@@ -122,7 +124,7 @@
                 //     if($escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL')
                 //         echo " TÍTULO ";
                 //     else
-                        echo " TÍTULO PROFESIONAL ";
+                    echo " TÍTULO PROFESIONAL ";
                 }
             ?>de:
         </p>
