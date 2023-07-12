@@ -231,6 +231,9 @@ Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::get('titulos/aprobados/secretaria', 'TituloController@GetTitulosAprobadosSecretaria');
 Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
 //Route::put('create/codigo', 'TituloController@createCodeDiploma');
+Route::get('carnets/solicitados','PDF_CarnetsController@pdf_carnetsSolicitados');
+Route::get('carnets/recibidos','PDF_CarnetsController@pdf_carnetsRecibidos');
+
 
 //TITULOS segunda especialidad
 Route::get('titulos/validados/especialidad', 'SegundaEspecialidadController@GetTitulosValidadosEscuela');
