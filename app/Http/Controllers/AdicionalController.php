@@ -240,12 +240,15 @@ class AdicionalController extends Controller
                     $tramite->idPrograma=$tramite->idDependencia_detalle;
                 } else if ($tramite->idUnidad == 1 && $tramite->idDependencia_detalle == 51) { 
                     $tramite->idPrograma=50;
+                } else if ($tramite->idUnidad == 1 && $tramite->idDependencia_detalle == 52) { 
+                    $tramite->idPrograma=51;
                 } else if ($tramite->idUnidad == 4) { 
                     $tramite->idPrograma = $tramite->idDependencia_detalle + 51;
                 }
                 $tramite->save();
             }
             DB::commit();
+            return response()->json(['status' => '200', 'message' => 'OK'], 200);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
@@ -303,6 +306,7 @@ class AdicionalController extends Controller
                 $tramite->save();
             }
             DB::commit();
+            return response()->json(['status' => '200', 'message' => 'OK'], 200);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
