@@ -259,9 +259,9 @@ class AuthController extends Controller
         try {
             $user = User::where('reset_password', $code)->first();
             if (! $user)
-                return response()->json(['status' => '400', 'message' => 'Enlace de recuperación de contraseña caducado'], 400);
+                return response()->json(['status' => '400', 'message' => utf8_encode('Enlace de recuperación de contraseña caducado')], 400);
             DB::commit();
-            return response()->json(['status' => '200', 'message' => 'Has confirmado correctamente tu correo!','code'=>$code], 200);
+            return response()->json(['status' => '200', 'message' =>utf8_encode( 'Has confirmado correctamente tu correo!'),'code'=>$code], 200);
             // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');
         } catch (\Exception $e) {
             DB::rollback();
@@ -279,9 +279,9 @@ class AuthController extends Controller
                 $user->reset_password = null;
                 $user->update();
                 DB::commit();
-                return response()->json(['status' => '200', 'message' => 'Cambio de contraseña con éxito!'], 200);
+                return response()->json(['status' => '200', 'message' => utf8_encode('Cambio de contraseña con éxito!')], 200);
             }else{
-                return response()->json(['status' => '400', 'message' => 'El nombre de usuario no se encuentra registrado'], 400);
+                return response()->json(['status' => '400', 'message' =>utf8_encode( 'El nombre de usuario no se encuentra registrado')], 400);
             }
 
             // return redirect('/home')->with('notification', 'Has confirmado correctamente tu correo!');

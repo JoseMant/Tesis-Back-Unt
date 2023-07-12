@@ -1471,6 +1471,7 @@ class GradoController extends Controller
             $tramite_detalle->idDiploma_carpeta=$request->idDiploma_carpeta;
             $tramite_detalle->idAcreditacion=$request->idAcreditacion;
             $tramite_detalle->fecha_inicio_acto_academico=$request->fecha_inicio_acto_academico;
+            $tramite_detalle->idUniversidad=1;
             $tramite_detalle->update();
 
             // Cambiando el estado
@@ -2185,7 +2186,6 @@ class GradoController extends Controller
             ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
         })
-        ->orderBy($request->query('sort'), $request->query('order'))
         ->orderBy('tramite.idTipo_tramite_unidad','asc')
         ->orderBy('dependencia.nombre','asc')
         ->orderBy('programa.nombre','asc')

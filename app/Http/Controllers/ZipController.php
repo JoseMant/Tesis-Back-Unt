@@ -55,7 +55,7 @@ class ZipController extends Controller
                 ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
                 ->where('idTramite',$tramite->idTramite)
                 ->where('requisito.nombre','FOTO CARNET')
-                ->where('tramite_requisito.des_estado_requisito','PENDIENTE')
+                // ->where('tramite_requisito.des_estado_requisito','PENDIENTE')
                 ->get();
             }
             // return $tramites;
@@ -262,7 +262,7 @@ class ZipController extends Controller
         DB::beginTransaction();
         try {
             $secretariaGeneral=User::where('idTipo_usuario',10)->where('estado',true)->first();
-            $secretariaGeneral->idUsuario=1; // Para pruebas,luego eliminar
+            $secretariaGeneral->idUsuario=2; // Para pruebas,luego eliminar
         
             // Obteniendo la resolución para el nombre del zip
             $resolucion=Resolucion::find($idResolucion);
@@ -315,7 +315,7 @@ class ZipController extends Controller
                 {
                     foreach ($tramites as $key => $tramite) {
                             // nombre del archivo
-                            $relativeNameInZipFile = 'T004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'_firmado.pdf';
+                            $relativeNameInZipFile = 'T004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf';
                             
                             // añadiendo archivos al zip 
                             if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==16 || $tramite->idTipo_tramite_unidad==34) {

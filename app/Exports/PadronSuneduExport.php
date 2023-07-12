@@ -86,29 +86,32 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         DB::raw('substr(tipo_tramite_unidad.diploma_obtenido,1, 1) AS ABRE_GYT'),
         DB::raw("(case 
                     when tramite.idUnidad = 1 then programa.nombre
+                    when tramite.idUnidad = 4 then programa.denominacion
                 end) AS CARR_PROG"),
         'diploma_carpeta.descripcion AS DEN_GRAD',
         DB::raw("(case 
                     when tramite.idUnidad = 4 then programa.nombre
                 end) AS SEG_ESP"),
         DB::raw("(case 
-                when tipo_tramite_unidad.idTipo_tramite_unidad = 16 then '004'
-                when tipo_tramite_unidad.idTipo_tramite_unidad = 34 then '004'
+                when tramite_detalle.idUniversidad IS NULL then '004'
+                when tramite_detalle.idUniversidad IS NOT NULL then universidad.codigo_sunedu 
             end) AS PROC_BACH"),
         DB::raw('CONCAT("") AS PROC_INST_ORIG'),
         DB::raw('CONCAT("") AS PROC_TITULO_PED'),
         'programa_estudios_carpeta.descripcion AS PROG_ESTU',
         'tramite_detalle.nro_creditos_carpeta AS NUM_CRED',
-        'modalidad_carpeta.acto_academico AS MOD_OBT',
+        'modalidad_carpeta.nombre_padron AS MOD_OBT',
         DB::raw('CONCAT("P") AS MOD_EST'),
         'tramite_detalle.url_trabajo_carpeta AS REG_METADATO',
         'tramite_detalle.nombre_trabajo_carpeta AS TRAB_INV',
-        // DB::raw('CONCAT("REQ_IDM") AS REQ_IDM'),
+        DB::raw('CONCAT("") AS REQ_IDM'),
+        // DB::raw("(case 
+        //         when tramite_detalle.idTipo_tramite_unidad = 15 then 'SI'
+        //         when tipo_tramite_unidad.idTipo_tramite_unidad = 15 then 'SI'
+        //         when tipo_tramite_unidad.idTipo_tramite_unidad = 15 then 'SI'
+        //     end) AS REQ_IDM"),
         DB::raw("(case 
-                when tipo_tramite_unidad.idTipo_tramite_unidad = 15 then 'SI'
-            end) AS REQ_IDM"),
-        DB::raw("(case 
-                    when tramite_detalle.idAcreditacion != null then 'SI' 
+                    when tramite_detalle.idAcreditacion IS NOT NULL then 'SI' 
                     else 'NO'
                 end) AS PROG_ACREDIT"),
         'acreditacion.fecha_inicio AS FEC_INICIO_ACREDIT',
@@ -117,8 +120,11 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         DB::raw("(case 
                     when tramite_detalle.idModalidad_carpeta != 1 then 'SI' 
                 end) as TRAB_INVEST_ORIGINAL"),
-        DB::raw('CONCAT("NUEVO CAMPO EN DATOS DE DIPLOMA") AS MEC_UTI'),
-        DB::raw('CONCAT("PREGUNTAR A QUÉ ÁREA PERTENECE LA COMISIÓN DE ÉTICA") AS DEP_VER_ORIG'),
+        DB::raw('tramite_detalle.originalidad AS MEC_UTI'),
+        DB::raw("(case 
+                    when tramite.idTipo_tramite_unidad = 16 then dependencia.denominacion  
+                    when tramite.idTipo_tramite_unidad = 34 then  (select denominacion from dependencia d where d.idDependencia=dependencia.idDependencia2)
+                end) AS DEP_VER_ORIG"),
         DB::raw('CONCAT("") as PROC_REV_PAIS'),
         DB::raw('CONCAT("") as PROC_REV_UNIV'),
         DB::raw('CONCAT("") as PROC_REV_GRADO'),
@@ -190,7 +196,7 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         ->join('programa_estudios_carpeta','programa_estudios_carpeta.idPrograma_estudios_carpeta','tramite_detalle.idPrograma_estudios_carpeta')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-        // ->join('oficio','resolucion.idOficio','oficio.idOficio')
+        ->leftJoin('universidad','tramite_detalle.idUniversidad','universidad.idUniversidad')
         ->leftJoin('acreditacion','acreditacion.idAcreditacion','tramite_detalle.idAcreditacion')
         ->where(function($query)
             {
@@ -203,7 +209,7 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         //     $query->where('tramite.idEstado_tramite',42)
         //     ->orWhere('tramite.idEstado_tramite',44);
         // })
-        ->where('tramite.idEstado_tramite',42)
+        ->where('tramite.idEstado_tramite',44)
         ->where('resolucion.idResolucion',$this->idResolucion)
         ->orderBy('tramite.idTipo_tramite_unidad','asc')
         ->orderBy('tramite.idPrograma','asc')

@@ -100,9 +100,9 @@ Route::put('tramite/update','TramiteController@updateTramiteRequisitos');
 Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
-Route::post('tramites/finalizar','TramiteController@finalizarTramites');
+Route::post('carpetas/finalizar','CarpetaController@finalizarCarpetas');
 //-----------------PDFs
-Route::get('fut/{idTramite}','PDF_FutController@pdf_fut');
+Route::get('fut/{uuid}','PDF_FutController@pdf_fut');
 Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');
 Route::get('constancia/{idTramite}','PDF_ConstanciaController@pdf_constancia');
 Route::get('libro','PDF_LibroController@pdf_libro');
@@ -146,8 +146,9 @@ Route::get('personasSuv', 'PersonaSuvController@index');
 Route::get('download/fotos', 'ZipController@downloadFotos');
 Route::get('backup/{idResolucion}', 'ZipController@backupFiles');
 //RUTAS IMPORTAR Y EXPORTAR EXCEL
-Route::post('carnets/import/observados', 'CarnetController@import');
+Route::post('carnets/import/observados', 'CarnetController@observadosimport');
 Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
+Route::post('carnets/import/solicitados', 'CarnetController@solicitadosImport');
 Route::get('carnets/export', 'ExcelController@export');
 Route::get('padron_sunedu/{idResolucion}', 'PadronController@padron');
 Route::post('correccion/padron_sunedu', 'PadronController@correccion');
@@ -260,7 +261,7 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
-Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getDataPersona');
+Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');
 Route::get('carpeta/codigo_diploma/{codigo_diploma}', 'CarpetaController@getCarpetaByCodigoDiploma');
 Route::put('firmas/decano', 'GradoController@firmaDecano');
 Route::put('firmas/rector', 'GradoController@firmaRector');
@@ -302,3 +303,4 @@ Route::put('separar', 'AdicionalController@separarApellidos');
 Route::get('fecha/diploma', 'AdicionalController@getDatosDiploma');
 Route::post('diploma/carpeta', 'AdicionalController@diploma_carpeta');
 Route::post('agregar/programa', 'AdicionalController@programas');
+Route::get('uuid', 'AdicionalController@uuid');
