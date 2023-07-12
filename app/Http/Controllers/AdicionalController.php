@@ -35,6 +35,7 @@ use App\Escuela;
 use App\Motivo_Certificado;
 use App\PersonaSuv;
 use App\PersonaSga;
+use App\Diploma_carpeta;
 
 class AdicionalController extends Controller
 {
@@ -141,27 +142,34 @@ class AdicionalController extends Controller
             //obtenemos el archivo de la resolución a chancar
             $file=$request->file("archivo");
             //obtenemos todos los trámites a los que se les va a chancar
-            $ingenieria=Tramite::select('tramite.idTramite','usuario.nro_documento')
+            $enfermeria=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','tramite.idDependencia','dependencia.idDependencia')
             ->where(function($query)
             {
                 $query->where('tramite.idTipo_tramite_unidad',15)
-                ->orWhere('tramite.idTipo_tramite_unidad',16);
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
             ->where('tramite.idEstado_tramite','!=',29)
-            ->where('tramite.idDependencia',13)
-            ->where('cronograma_carpeta.fecha_colacion','2023-04-28')
+            ->where(function($query)
+            {
+                $query->where('tramite.idDependencia',11)
+                ->orWhere('dependencia.idDependencia2',11);
+            })
+            ->where('cronograma_carpeta.fecha_colacion','2023-07-26')
             ->get();
-            // return count($ingenieria);
+            // return count($ingAmbiental);
             //Recorremos los trámites y chancamos cada uno la resolución
-            foreach ($ingenieria as $key => $tramite) {
+            foreach ($enfermeria as $key => $tramite) {
                 $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
                 ->where(function($query)
                 {
                     $query->where('idRequisito',21)
-                    ->orWhere('idRequisito',31);
+                    ->orWhere('idRequisito',31)
+                    ->orWhere('idRequisito',68);
                 })
                 ->first();
                 $nombre=$tramite->nro_documento.'.pdf';
@@ -169,6 +177,8 @@ class AdicionalController extends Controller
                     $file->storeAs('public/elaboracion_carpeta/GRADO DE BACHILLER/RESOLUCION DE DECANATO', $nombre);
                 }else if($requisito->idRequisito==31){
                     $file->storeAs('public/elaboracion_carpeta/TÍTULO PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
+                }else if($requisito->idRequisito==68){
+                    $file->storeAs('public/elaboracion_carpeta/TÍTULO EN SEGUNDA ESPECIALIDAD  PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
                 }
             }
         }
@@ -216,5 +226,70 @@ class AdicionalController extends Controller
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
+    }
+
+
+    public function programas(){
+        DB::beginTransaction();
+        try {
+            $tramites=Tramite::whereNull('idPrograma')->get();
+            foreach ($tramites as $tramite) {
+                $tramite->idPrograma=$tramite->idDependencia_detalle;
+                $tramite->save();
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function firmar(){
+        DB::beginTransaction();
+        try {
+            $tramites=Tramite::select('tramite.idTramite_detalle',
+            DB::raw("(case 
+                    when tramite.idUnidad = 1 then (select idUsuario from usuario where idTipo_usuario=6 and idDependencia=tramite.idDependencia and estado=1) 
+                    when tramite.idUnidad = 4 then  (select idUsuario from usuario where idTipo_usuario=6 and idDependencia=dependencia.idDependencia2 and estado=1)
+                end) as idDecano"))
+            ->join('dependencia','tramite.idDependencia','dependencia.idDependencia')
+            ->where('tramite.idEstado_tramite',44)
+            ->where('tramite.idTipo_tramite_unidad',34)
+            ->get();
+            $idRector=User::where('idTipo_usuario',12)->where('estado',1)->pluck('idUsuario')->first();
+            $idSec_general=User::where('idTipo_usuario',10)->where('estado',1)->pluck('idUsuario')->first();
+            foreach ($tramites as $tramite) {
+                $tramite_detalle=Tramite_Detalle::where('idTramite_detalle',$tramite->idTramite_detalle)->first();
+                $tramite_detalle->autoridad1=$idRector;
+                $tramite_detalle->autoridad2=$idSec_general;
+                $tramite_detalle->autoridad3=$tramite->idDecano;
+                $tramite_detalle;
+                $tramite_detalle->save();
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+    public function diploma_carpeta(Request $request){
+        $diplomas=Diploma_carpeta::get();
+        foreach ($diplomas as $key => $diploma) {
+            $diploma->idPrograma=$diploma->idDependencia_detalle;
+            $diploma->save();
+        }
+    }
+
+    public function uuid(){
+        $array=array();
+        for ($i=0; $i < 99; $i++) { 
+            array_push($array, Str::orderedUuid());
+            // $array->push(Str::uuid().'\n');
+        }
+        return $array;
+        return Str::uuid().'////////////'.Str::orderedUuid().'////////////'.Str::uuid()->getHex().'////////////'.Str::orderedUuid()->getHex();
+        return Str::orderedUuid();
+        return Str::uuid()->getHex();
+        return Str::orderedUuid()->getHex();
     }
 }
