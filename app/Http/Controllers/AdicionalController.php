@@ -70,9 +70,11 @@ class AdicionalController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
     public function getFecha(){
         return $inicio=date('Y-m-d')." 00:00:00";
     }
+
     public function rechazar(){
         try {
             $correlativo = 2000;
@@ -137,6 +139,7 @@ class AdicionalController extends Controller
 
         }
     }
+
     public function chancarArchivo(Request $request){
         if ($request->hasFile("archivo")) {
             //obtenemos el archivo de la resolución a chancar
@@ -228,13 +231,18 @@ class AdicionalController extends Controller
         }
     }
 
-
-    public function programas(){
+    public function setValuesProgramas(){
         DB::beginTransaction();
         try {
-            $tramites=Tramite::whereNull('idPrograma')->get();
+            $tramites=Tramite::all();
             foreach ($tramites as $tramite) {
-                $tramite->idPrograma=$tramite->idDependencia_detalle;
+                if ($tramite->idUnidad == 1 && $tramite->idDependencia_detalle <= 49) {
+                    $tramite->idPrograma=$tramite->idDependencia_detalle;
+                } else if ($tramite->idUnidad == 1 && $tramite->idDependencia_detalle == 51) { 
+                    $tramite->idPrograma=50;
+                } else if ($tramite->idUnidad == 4) { 
+                    $tramite->idPrograma = $tramite->idDependencia_detalle + 51;
+                }
                 $tramite->save();
             }
             DB::commit();
@@ -272,6 +280,7 @@ class AdicionalController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
     public function diploma_carpeta(Request $request){
         $diplomas=Diploma_carpeta::get();
         foreach ($diplomas as $key => $diploma) {
@@ -280,16 +289,23 @@ class AdicionalController extends Controller
         }
     }
 
-    public function uuid(){
-        $array=array();
-        for ($i=0; $i < 99; $i++) { 
-            array_push($array, Str::orderedUuid());
-            // $array->push(Str::uuid().'\n');
+    public function setValuesUuid(){
+        DB::beginTransaction();
+        try {
+            $tramites=Tramite::where('uuid', null)->get();
+            foreach ($tramites as $tramite) {
+                $tramiteUUID=true;
+                while ($tramiteUUID) {
+                    $uuid=Str::orderedUuid();
+                    $tramiteUUID=Tramite::where('uuid', $uuid)->first();
+                }
+                $tramite -> uuid=$uuid;
+                $tramite->save();
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
-        return $array;
-        return Str::uuid().'////////////'.Str::orderedUuid().'////////////'.Str::uuid()->getHex().'////////////'.Str::orderedUuid()->getHex();
-        return Str::orderedUuid();
-        return Str::uuid()->getHex();
-        return Str::orderedUuid()->getHex();
     }
 }
