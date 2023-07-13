@@ -30,10 +30,6 @@ class PDF_CarnetsController extends Controller
     $token = JWTAuth::setToken($request->access);
     $apy = JWTAuth::getPayload($token);
     
-
-    
-
-// $idDependencia=5;
     $tramites=Tramite::select('tramite.sede','programa.nombre as escuela',DB::raw('count(tramite.idEstado_tramite) as carnets'))
     ->join('programa','programa.idPrograma','tramite.idPrograma')
     ->where('tramite.idTipo_tramite_unidad',17)
@@ -83,20 +79,6 @@ class PDF_CarnetsController extends Controller
     $this->pdf->SetXY(175,30);
     $this->pdf->Cell(27, 7,'FIRMA',1,0,'C');
 
-    //DATOS
-    //SEDE
-    // $this->pdf->SetXY(10,34);
-    // $this->pdf->Cell(30, 4,'VALLE JEQUETEPEQUE',1,0,'L');
-    // //ESCUELA
-    // $this->pdf->SetXY(40,34);
-    // $this->pdf->Cell(112, 4,utf8_decode(' EDUCACION SECUNDARIA, MENCIÓN EN: IDIOMAS: INGLÉS - FRANCÉS O INGLÉS - ALEMÁN'),1,0,'L');
-    // //#CARNETS
-    // $this->pdf->SetXY(152,34);
-    // $this->pdf->Cell(18, 4,'#CARNETS',1,0,'C');
-    // //FIRMA
-    // $this->pdf->SetXY(170,34);
-    // $this->pdf->Cell(35, 4,'FIRMA',1,0,'C');
-
     $salto=0;
     $i=0;
     $inicioY=37;
@@ -112,10 +94,6 @@ class PDF_CarnetsController extends Controller
         $this->pdf->Cell(33, 8,$sede,1,0,'L');
         //ESCUELA
         $this->pdf->SetXY(43,$inicioY+$salto);
-        // $escuela=$tramite->escuela;
-        // if (strlen($tramite->escuela)>50) {
-        //     $escuela=substr($tramite->escuela, 0, -20)."...";
-        // }
         $this->pdf->Cell(114, 8,utf8_decode($tramite->escuela),1,0,'L');
         //#CARNETS
         $this->pdf->SetXY(157,$inicioY+$salto);
@@ -157,17 +135,8 @@ class PDF_CarnetsController extends Controller
   {
     $token = JWTAuth::setToken($request->access);
     $apy = JWTAuth::getPayload($token);
-    // $idUsuario=$apy['idUsuario'];
-    $idUsuario=73;
+    $idUsuario=$apy['idUsuario'];
     $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
-    // return count($usuario_programas)
-    // $a=0;
-    // foreach ($usuario_programas as $key ) {
-    //     $a++;
-    // }
-    // return $a;
-    // return $usuario_programas;
-    // $idDependencia=5;
     $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.sede', 'usuario.apellidos as apellidos','usuario.nombres as nombres'
     ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
     ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
@@ -196,101 +165,93 @@ class PDF_CarnetsController extends Controller
     ->get();
 
     
-    
-
     $this->pdf->AliasNbPages();
     $this->pdf->AddPage('P');
-
-    $this->pdf->SetFont('Arial','', 9);
-    $this->pdf->SetXY(10,10);
-    $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
-    $this->pdf->SetXY(10,14);
-    $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
-    $this->pdf->SetXY(10,18);
-    $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
-
-    $this->pdf->SetXY(-65,10);
-    $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
-    $this->pdf->SetXY(-65,14);
-    $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
-    //TITULO
-    $this->pdf->SetFont('Arial','B', 15);
-    $this->pdf->SetXY(10,23);
-    $this->pdf->Cell(188, 4,utf8_decode('CARNETS RECIBIDOS'),0,0,'C');
-
-    //TITULO
     
+    $salto=0;
+    $i=0;
+    $inicioY=39;
+    $pagina=1;
+                        $this->pdf->SetFont('Arial','', 9);
+                        $this->pdf->SetXY(10,10);
+                        $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+                        $this->pdf->SetXY(10,14);
+                        $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+                        
+
+                        $this->pdf->SetXY(-65,10);
+                        $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+                        $this->pdf->SetXY(-65,14);
+                        $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+                        $this->pdf->SetXY(-65,18);
+                        $this->pdf->Cell(80, 4,'PAG: '.$pagina,0,0,'C');
+                        //TITULO
+                        $this->pdf->SetFont('Arial','B', 15);
+                        $this->pdf->SetXY(10,23);
+                        $this->pdf->Cell(188, 4,utf8_decode('CARNETS RECIBIDOS'),0,0,'C');
+                        //TABLA
+                        //NRO MATRICULA
+                        $this->pdf->SetFont('Arial','B', 7);
+                        $this->pdf->SetXY(10,34);
+                        $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
+                        //APELLIDOS Y NOMBRES
+                        $this->pdf->SetXY(35,34);
+                        $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
+                        //NOMBRES
+                        $this->pdf->SetXY(100,34);
+                        $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
+                        //SEDE
+                        $this->pdf->SetXY(153,34);
+                        $this->pdf->Cell(45, 5,'SEDE',1,0,'C');
     
-        
-            
-
-            //TABLA
-            //NRO MATRICULA
-            $this->pdf->SetFont('Arial','B', 7);
-            $this->pdf->SetXY(10,34);
-            $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
-            //APELLIDOS Y NOMBRES
-            $this->pdf->SetXY(35,34);
-            $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
-            //NOMBRES
-            $this->pdf->SetXY(100,34);
-            $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
-            //SEDE
-            $this->pdf->SetXY(153,34);
-            $this->pdf->Cell(45, 5,'SEDE',1,0,'C');
-
-
-            // //TABLA
-            // //NRO MATRICULA
-            // $this->pdf->SetXY(10,34);
-            // $this->pdf->Cell(25, 4,'1513300920',1,0,'C');
-            // //APELLIDOS Y NOMBRES
-            // $this->pdf->SetXY(35,34);
-            // $this->pdf->Cell(67, 4,utf8_decode(' NIÑO LADRON DE GUEVARA ARROYO'),1,0,'L');
-            // //NOMBRES
-            // $this->pdf->SetXY(102,34);
-            // $this->pdf->Cell(51, 4,utf8_decode(' CARMEN IDALIA'),1,0,'L');
-            // //SEDE
-            // $this->pdf->SetXY(153,34);
-            // $this->pdf->Cell(40, 4,' VALLE JEQUETEPEQUE',1,0,'L');
-            
-            $salto=0;
-            $i=0;
-            $inicioY=39;
-
-            $programaY=29;
             foreach ($tramites as $key => $tramite) {
-                // if ($key!=0) {
-                //     return $tramite[$key-1]->programa;
-                // }
+
                 if($key==0||$tramites[$key-1]['programa']!=$tramites[$key]['programa']){
 
+                    
+                    
                     if($key!=0&&$tramites[$key-1]['programa']!=$tramites[$key]['programa']){
                         $this->pdf->AddPage();
-                        $inicioY=20;
+                        $pagina++;
                         $salto=0;
                         
                         //TABLA
                         //NRO MATRICULA
                         $this->pdf->SetFont('Arial','B', 7);
-                        $this->pdf->SetXY(10,15);
+                        $this->pdf->SetXY(10,34);
                         $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
                         //APELLIDOS Y NOMBRES
-                        $this->pdf->SetXY(35,15);
+                        $this->pdf->SetXY(35,34);
                         $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
                         //NOMBRES
-                        $this->pdf->SetXY(100,15);
+                        $this->pdf->SetXY(100,34);
                         $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
                         //SEDE
-                        $this->pdf->SetXY(153,15);
+                        $this->pdf->SetXY(153,34);
                         $this->pdf->Cell(45, 5,'SEDE',1,0,'C');
-                        $programaY=10;
                     
                     }
 
+                    $this->pdf->SetFont('Arial','', 9);
+                    $this->pdf->SetXY(10,10);
+                    $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+                    $this->pdf->SetXY(10,14);
+                    $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+                        
+
+                    $this->pdf->SetXY(-65,10);
+                    $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+                    $this->pdf->SetXY(-65,14);
+                    $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+                    $this->pdf->SetXY(-65,18);
+                    $this->pdf->Cell(80, 4,'PAG: '.$pagina,0,0,'C');
+                    //TITULO
+                    $this->pdf->SetFont('Arial','B', 15);
+                    $this->pdf->SetXY(10,23);
+                    $this->pdf->Cell(188, 4,utf8_decode('CARNETS RECIBIDOS'),0,0,'C');
 
                     $this->pdf->SetFont('Arial','B', 8);
-                    $this->pdf->SetXY(10,$programaY);
+                    $this->pdf->SetXY(10,29);
                     $this->pdf->Cell(188, 4,utf8_decode('PROGRAMA: '.$tramite->programa),0,0,'L');
                     $this->pdf->SetFont('Arial','', 7);
                 }
@@ -309,36 +270,49 @@ class PDF_CarnetsController extends Controller
                 $this->pdf->Cell(45, 5,$tramite->sede,1,0,'L');
 
                 $salto+=5;
-                $i+=1;
-                if (($inicioY+$salto)>=272) {
-                    $this->pdf->AddPage();
-                    $inicioY=15;
-                    $salto=0;
+                
+                if (($inicioY+$salto)>=273&&$key<(count($tramites)-1)&&$tramites[$key]['programa']==$tramites[$key+1]['programa']) {
+
+                    
+                        $this->pdf->AddPage();
+                        $pagina++;
+                        $salto=0;
+                        $this->pdf->SetFont('Arial','', 9);
+                        $this->pdf->SetXY(10,10);
+                        $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+                        $this->pdf->SetXY(10,14);
+                        $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+                        
+
+                        $this->pdf->SetXY(-65,10);
+                        $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+                        $this->pdf->SetXY(-65,14);
+                        $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+                        $this->pdf->SetXY(-65,18);
+                        $this->pdf->Cell(80, 4,'PAG: '.$pagina,0,0,'C');
+                        //TITULO
+                        $this->pdf->SetFont('Arial','B', 15);
+                        $this->pdf->SetXY(10,23);
+                        $this->pdf->Cell(188, 4,utf8_decode('CARNETS RECIBIDOS'),0,0,'C');
                     //TABLA
                     //NUM.ORD.
                     $this->pdf->SetFont('Arial','B', 7);
-                    $this->pdf->SetXY(10,10);
+                    $this->pdf->SetXY(10,34);
                     $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
                     //APELLIDOS Y NOMBRES
-                    $this->pdf->SetXY(35,10);
+                    $this->pdf->SetXY(35,34);
                     $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
                     //NOMBRES
-                    $this->pdf->SetXY(100,10);
+                    $this->pdf->SetXY(100,34);
                     $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
                     //SEDE
-                    $this->pdf->SetXY(153,10);
+                    $this->pdf->SetXY(153,34);
                     $this->pdf->Cell(45, 5,'SEDE',1,0,'C');
                     $this->pdf->SetFont('Arial','', 7);
+                    
+                    
                 }
             }
-    
-    
-        
-        
-        
-    
-    
-
   return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
   ->header('Content-Type', 'application/pdf');
   }

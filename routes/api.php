@@ -262,7 +262,7 @@ Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');
-Route::get('carpeta/codigo_diploma/{codigo_diploma}', 'CarpetaController@getCarpetaByCodigoDiploma');
+Route::get('carpetas/search', 'CarpetaController@getCarpetaBySearch');
 Route::put('firmas/decano', 'GradoController@firmaDecano');
 Route::put('firmas/rector', 'GradoController@firmaRector');
 Route::put('firmas/secretaria', 'GradoController@firmaSecretaria');

@@ -202,8 +202,9 @@ class CarpetaController extends Controller
         return $tramite;
     }
 
-    public function getCarpetaByCodigoDiploma(Request $request){
-        $tramite=Tramite::select('tramite.idTramite','usuario.nombres','usuario.apellidos','usuario.nro_documento','tramite.sede','tipo_tramite_unidad.diploma_obtenido',
+    public function getCarpetaBySearch(Request $request){
+        return $tramites=Tramite::select('tramite.idTramite','usuario.nombres','usuario.apellidos','usuario.nro_documento','tramite.sede',
+        'tipo_tramite_unidad.descripcion as tipo_tramite',
         'modalidad_carpeta.acto_academico as modalidadSustentancion','tramite_detalle.nro_libro','tramite_detalle.folio','tramite_detalle.nro_registro','resolucion.nro_resolucion',
         DB::raw("(case 
                     when tramite.idUnidad = 1 then dependencia.denominacion  
@@ -216,26 +217,41 @@ class CarpetaController extends Controller
         ->join('tramite_detalle', 'tramite_detalle.idTramite_detalle', 'tramite.idTramite_detalle')
         ->join('diploma_carpeta', 'tramite_detalle.idDiploma_carpeta', 'diploma_carpeta.idDiploma_carpeta')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite_detalle.idTipo_tramite_unidad')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('modalidad_carpeta','modalidad_carpeta.idModalidad_carpeta','tramite_detalle.idModalidad_carpeta')
         ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-        ->where('tramite_detalle.codigo_diploma', $request->codigo_diploma)
-        ->first();
-
-        if (!$tramite) return response()->json(['status' => '400', 'message' => "No se encuentra carpeta con ese código de diploma"], 400);
-
-        $requisito=Tramite_Requisito::select('tramite_requisito.archivo')
-        ->where(function($query){
-            $query->where('tramite_requisito.idRequisito',15)
-            ->orWhere('tramite_requisito.idRequisito',23)
-            ->orWhere('tramite_requisito.idRequisito',44)
-            ->orWhere('tramite_requisito.idRequisito',52)
-            ->orWhere('tramite_requisito.idRequisito',61);
+        ->where('tipo_tramite_unidad.idTipo_tramite', 2)
+        ->where(function($query) use ($request)
+        {
+            if ($request->query('tipo')=="codigo") {
+                $query->where('tramite_detalle.codigo_diploma', 'LIKE', '%'.$request->query('search').'%');
+            }
+            if ($request->query('tipo')=="dni") {
+                $query->where('usuario.nro_documento', 'LIKE', '%'.$request->query('search'));
+            }
+            if ($request->query('tipo')=="dato") {
+                $query->where('usuario.apellidos', 'LIKE', '%'.$request->query('search').'%');
+            }
         })
-        ->where('idTramite',$tramite->idTramite)
-        ->first();
+        ->get();
 
-        $tramite->foto=$requisito->archivo;
-        return $tramite;
+        if (!$tramite) return response()->json(['status' => '400', 'message' => "No se encuentra carpeta con esa búsqueda"], 400);
+
+        foreach ($tramites as $key => $tramite) {
+            $requisito=Tramite_Requisito::select('tramite_requisito.archivo')
+            ->where(function($query) {
+                $query->where('tramite_requisito.idRequisito',15)
+                ->orWhere('tramite_requisito.idRequisito',23)
+                ->orWhere('tramite_requisito.idRequisito',44)
+                ->orWhere('tramite_requisito.idRequisito',52)
+                ->orWhere('tramite_requisito.idRequisito',61);
+            })
+            ->where('idTramite',$tramite->idTramite)
+            ->first();
+    
+            $tramite->foto=$requisito->archivo;
+        }
+
+        return $tramites;
     }
 }
