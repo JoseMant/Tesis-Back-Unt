@@ -1018,6 +1018,8 @@ class TramiteController extends Controller
             $voucher->des_estado_voucher='PENDIENTE';
             $voucher->idUsuario_aprobador=null;
             $voucher->comentario=null;
+
+            $tramite->idEstado_tramite=2;
             
             if($request->hasFile("archivo_voucher")){
                 $file=$request->file("archivo_voucher");
@@ -1062,12 +1064,7 @@ class TramiteController extends Controller
             $voucher->update();
 
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-            $historial_estados=new Historial_Estado;
-            $historial_estados->idTramite=$tramite->idTramite;
-            $historial_estados->idUsuario=$idUsuario;
-            $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-            $historial_estados->idEstado_nuevo=2;
-            $historial_estados->fecha=date('Y-m-d h:i:s');
+            $historial_estados=$this->setHistorialEstado($tramite->idTramite,4,2,$idUsuario);
             $historial_estados->save();
 
             // TRÁMITES POR USUARIO

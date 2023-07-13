@@ -302,5 +302,5 @@ Route::get('actualizar', 'AdicionalController@rechazar');
 Route::put('separar', 'AdicionalController@separarApellidos');
 Route::get('fecha/diploma', 'AdicionalController@getDatosDiploma');
 Route::post('diploma/carpeta', 'AdicionalController@diploma_carpeta');
-Route::post('agregar/programa', 'AdicionalController@programas');
-Route::get('uuid', 'AdicionalController@uuid');
+Route::post('agregar/programa', 'AdicionalController@setValuesProgramas');
+Route::get('uuid', 'AdicionalController@setValuesUuid');
