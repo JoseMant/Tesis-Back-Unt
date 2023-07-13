@@ -214,15 +214,9 @@ class AuthController extends Controller
             foreach ($tramites as $key => $tramite) {
                 // Obtenemos el último registro del historial de cada trámite
                 $historial_estado=Historial_Estado::where('idTramite',$tramite->idTramite)->orderBy('idHistorial_estado', 'desc')->first();
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$user->idUsuario;
-                $historial_estados->idEstado_actual=28;
-                $historial_estados->idEstado_nuevo=$historial_estado->idEstado_actual;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
-                $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
+                //ELIMINANDO EL HISTORIAL DE CAMBIO DE CORREO PARA EVITAR ERRORES EN EL FLUJO
+                $tramite->idEstado_tramite = $historial_estado->idEstado_actual;
+                $historial_estado->delete();
                 $tramite->update();
             }
             // ----------------------------------------------------------
