@@ -722,7 +722,7 @@ class TramiteController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad')
+            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad','tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -982,7 +982,7 @@ class TramiteController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$request->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             // mensaje de validación de voucher
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
             $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')
@@ -1129,7 +1129,8 @@ class TramiteController extends Controller
             'tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
             'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
             'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
-            'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher','voucher.des_estado_voucher')
+            'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher',
+            'voucher.des_estado_voucher','tramite.uuid')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
@@ -1184,10 +1185,10 @@ class TramiteController extends Controller
                     if ($tramite->idEstado_tramite==30) {
                         if ($ultimo_historial->idEstado_actual==18) {
                             // flujo regular
-                            $tramite-> idEstado_tramite=31;
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 31, $idUsuario);
                             $historial_estado->save();
-                            // $historial_estados->idEstado_nuevo=31;
+
+                            $tramite-> idEstado_tramite=31;
                         }elseif ($ultimo_historial->idEstado_actual==22||$ultimo_historial->idEstado_actual==40){
                             // la facultad observa un documento a la escuela
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 34, $idUsuario);
@@ -1259,9 +1260,10 @@ class TramiteController extends Controller
                                 $historial_estado->save();
                                 $tramite-> idEstado_tramite=32;
                             } else {
-                                $tramite-> idEstado_tramite=$ultimo_historial->idEstado_actual;
                                 $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, $ultimo_historial->idEstado_actual, $idUsuario);
                                 $historial_estado->save();
+                                
+                                $tramite-> idEstado_tramite=$ultimo_historial->idEstado_actual;
                             }
                         }
                         
@@ -1275,7 +1277,7 @@ class TramiteController extends Controller
                 $tramite-> save();   
             }
 
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             //Requisitos
             $tramite->requisitos=Tramite_Requisito::select('*')

@@ -19,6 +19,7 @@ use App\Estado_Tramite;
 use App\MatriculaSUV;
 use App\Resolucion;
 use App\Libro;
+use App\Cronograma;
 // use App\Jobs\RegistroTramiteJob;
 // use App\Jobs\EnvioCertificadoJob;
 use Illuminate\Support\Str;
@@ -54,12 +55,10 @@ class GradoController extends Controller
         // TRÁMITES
         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
-        'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
-        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
-        DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher',
-        'cronograma_carpeta.fecha_cierre_alumno',
-        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+        'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
+        'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
+        'voucher.archivo as voucher','cronograma_carpeta.fecha_cierre_alumno','cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato',
+        'cronograma_carpeta.fecha_colacion','tramite.uuid')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -130,7 +129,7 @@ class GradoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
 
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
 
         $begin = $request->query('page')*$request->query('size');
@@ -155,11 +154,9 @@ class GradoController extends Controller
         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
-        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
-        DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher',
-        'cronograma_carpeta.fecha_cierre_alumno',
-        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 
+        'usuario.nro_documento', 'usuario.correo','voucher.archivo as voucher','cronograma_carpeta.fecha_cierre_alumno',
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.uuid')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -232,7 +229,7 @@ class GradoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
 
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
@@ -263,7 +260,7 @@ class GradoController extends Controller
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
         'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite',
-        'programa.nombre as programa')
+        'programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -333,7 +330,7 @@ class GradoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
@@ -360,7 +357,7 @@ class GradoController extends Controller
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
         'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite',
-        'programa.nombre as programa')
+        'programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -433,7 +430,7 @@ class GradoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
 
         $begin = $request->query('page')*$request->query('size');
@@ -460,48 +457,8 @@ class GradoController extends Controller
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-        ->join('programa','tramite.idPrograma','programa.idPrograma')
-        ->where('tramite.idEstado_tramite',32)
-        ->where('tramite.idTipo_tramite_unidad',15)
-        ->where(function($query) use ($idDependencia)
-        {
-            if ($idDependencia) {
-                $query->where('tramite.idDependencia',$idDependencia)
-                ->orWhere('dependencia.idDependencia2',$idDependencia);
-            }
-        })
-        ->where(function($query) use ($request)
-        {
-            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-            ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
-            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-        })
-        ->where('cronograma_carpeta.visible',true)
-        ->orderBy($request->query('sort'), $request->query('order'))
-        ->take($request->query('size'))
-        ->skip($request->query('page')*$request->query('size'))
-        ->get();
-
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
-        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
-        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa'
+        ,'tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -572,7 +529,7 @@ class GradoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
 
         $begin = $request->query('page')*$request->query('size');
@@ -600,7 +557,7 @@ class GradoController extends Controller
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','cronograma_carpeta.fecha_cierre_alumno',
         'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite'
-        ,'programa.nombre as programa')
+        ,'programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -672,7 +629,7 @@ class GradoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             
         }
         $begin = $request->query('page')*$request->query('size');
@@ -687,6 +644,7 @@ class GradoController extends Controller
         ]], 200);
     }    
     
+    // Se puede reutilizar en titulos y SE
     public function cambiarEstado(Request $request){
         DB::beginTransaction();
         try {
@@ -700,7 +658,8 @@ class GradoController extends Controller
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa',
+            'tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -723,7 +682,7 @@ class GradoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             //OBTENIENDO EL HISTORIAL AL QUE SE DESEA REGRESAR
             $historial_new=Historial_Estado::where('idTramite',$tramite->idTramite)
@@ -737,8 +696,8 @@ class GradoController extends Controller
             ->where('idHistorial_estado','>',$historial_new->idHistorial_estado)
             ->get();
             foreach ($historiales as $key => $historial) {
-                $historial->estado=0;
-                $historial->save();
+                // $historial->estado=0;
+                $historial->delete();
             }
             DB::commit();
             return response()->json($tramite, 200);
@@ -762,7 +721,8 @@ class GradoController extends Controller
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa'
+            ,'tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -803,7 +763,7 @@ class GradoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             DB::commit();
             return response()->json($tramite, 200);
@@ -878,7 +838,7 @@ class GradoController extends Controller
     }
     //-------------------------------------------------------
 
-    // Parece que se reutiliza en títulos
+    // Se puede reutilizar en titulos y SE
     public function enviarEscuela(Request $request)
     {
         DB::beginTransaction();
@@ -893,7 +853,8 @@ class GradoController extends Controller
             ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
             , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
-            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa')
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','programa.nombre as programa'
+            ,'tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -934,7 +895,7 @@ class GradoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             
             DB::commit();
             return response()->json($tramite, 200);
@@ -959,7 +920,7 @@ class GradoController extends Controller
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
         'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-        'tramite_detalle.certificado_final','programa.nombre as programa')
+        'tramite_detalle.certificado_final','programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -1016,7 +977,7 @@ class GradoController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
@@ -1087,7 +1048,7 @@ class GradoController extends Controller
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->where('tramite.idEstado_tramite',36)
         ->where('tramite.idTipo_tramite_unidad',15)
-        ->where(function($query) use ($idDependencia)
+        ->where(function($query) use ($usuario_programas)
         {
             if (count($usuario_programas) > 0) {
                 $query->whereIn('tramite.idPrograma',$usuario_programas);
@@ -1450,10 +1411,7 @@ class GradoController extends Controller
 
             // RETORNANDO EL GRADO EDITADO
             $tramite=Tramite::find($request->idTramite);
-            // AÑADIENDO LOS DATOS DEL DIPLOMA SUBIDOS POR LA ESCUELA AL DETALLE DEL TRÁMITE
-            if ($request->fecha_inicio_acto_academico>$request->fecha_sustentacion_carpeta) { //Validación de fecha de inicio de acto académico y el acto académico
-                return response()->json(['status' => '400', 'message' => "La fecha de inicio de acto académico no puede ser mayor a la fecha del acto académico."], 400);
-            }
+            
             $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
             $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
             if ($tramite->idTipo_tramite_unidad==15) {
@@ -1462,6 +1420,7 @@ class GradoController extends Controller
             }else {
                 $tramite_detalle->fecha_sustentacion_carpeta =$request->fecha_sustentacion_carpeta;
             }
+
             $tramite_detalle->nombre_trabajo_carpeta=trim($request->nombre_trabajo_carpeta);
             $tramite_detalle->url_trabajo_carpeta=trim($request->url_trabajo_carpeta);
             $tramite_detalle->nro_creditos_carpeta=$request->nro_creditos_carpeta;
