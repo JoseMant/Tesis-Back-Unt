@@ -33,6 +33,7 @@ class UserController extends Controller
         'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
+        ->where('usuario.idTipo_usuario','!=',4)
         ->orderBy('usuario.apellidos')
         ->get();
         foreach ($usuarios as $key => $usuario) {
@@ -78,6 +79,7 @@ class UserController extends Controller
             'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idTipo_usuario','!=',1)
+            ->where('usuario.idTipo_usuario','!=',4)
             ->orderBy('usuario.apellidos')
             ->get();
             foreach ($usuarios as $key => $usuario) {
