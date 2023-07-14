@@ -183,10 +183,10 @@ Route::get('grados/diplomas/escuela', 'GradoController@GetGradosDatosDiplomaEscu
 Route::get('grados/diplomas/facultad', 'GradoController@GetGradosDatosDiplomaFacultad');
 Route::get('grados/diplomas/ura', 'GradoController@GetGradosDatosDiplomaUra');
 Route::get('grados/validacion/ura', 'GradoController@GetGradosValidadosUra');
-Route::put('grados/correccion', 'GradoController@cambiarEstado');
-Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');
+Route::put('grados/correccion', 'GradoController@cambiarEstado');//Usado
+Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');//Usado
 Route::put('grados/envio/ura', 'GradoController@enviarUraa');
-Route::put('grados/envio/escuela', 'GradoController@enviarEscuela');
+Route::put('grados/envio/escuela', 'GradoController@enviarEscuela');//Usado
 Route::put('grados/registrar/libro', 'GradoController@registrarEnLibro');
 Route::get('grados/firma/decano/{idResolucion}', 'GradoController@GetGradosFirmaDecano');
 Route::get('grados/firma/secretaria/{idResolucion}', 'GradoController@GetGradosFirmaSecretaria');
@@ -202,7 +202,7 @@ Route::get('grados/aprobados/secretaria', 'GradoController@GetGradosAprobadosSec
 Route::get('modalidad/carpeta/{idTipo_tramite_unidad}', 'Modalidad_CarpetaController@getModalidadGrado');
 Route::get('programas_estudios/carpeta', 'Programa_Estudios_CarpetaController@getProgramaEstudios');
 Route::get('diplomas/carpeta/{idUnidad}/{idTipo_tramite_unidad}/{idPrograma}', 'Diploma_CarpetaController@getDiplomaCarpetas');
-Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');
+Route::put('grados/datos', 'GradoController@GuardarDatosDiploma');//Usado
 Route::get('dependencia/escuelas/{id}', 'DependenciaController@getEscuelas');
 Route::get('dependencia/{idDependencia_detalle}', 'DependenciaController@getDependenciaByPrograma');
 Route::put('create/codigo', 'GradoController@createCodeDiploma');
