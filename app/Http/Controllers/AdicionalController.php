@@ -231,7 +231,7 @@ class AdicionalController extends Controller
         }
     }
 
-    public function setValuesProgramas(){
+    public function setValuesProgramasTramite(){
         DB::beginTransaction();
         try {
             $tramites=Tramite::all();
@@ -246,6 +246,30 @@ class AdicionalController extends Controller
                     $tramite->idPrograma = $tramite->idDependencia_detalle + 51;
                 }
                 $tramite->save();
+            }
+            DB::commit();
+            return response()->json(['status' => '200', 'message' => 'OK'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function setValuesProgramasDiplomaCarpeta(){
+        DB::beginTransaction();
+        try {
+            $diplomas=Diploma_Carpeta::all();
+            foreach ($diplomas as $diploma) {
+                if ($diploma->idUnidad == 1 && $diploma->idDependencia_detalle <= 49) {
+                    $diploma->idPrograma=$diploma->idDependencia_detalle;
+                } else if ($diploma->idUnidad == 1 && $diploma->idDependencia_detalle == 51) { 
+                    $diploma->idPrograma=50;
+                } else if ($diploma->idUnidad == 1 && $diploma->idDependencia_detalle == 52) { 
+                    $diploma->idPrograma=51;
+                } else if ($diploma->idUnidad == 4) { 
+                    $diploma->idPrograma = $diploma->idDependencia_detalle + 51;
+                }
+                $diploma->save();
             }
             DB::commit();
             return response()->json(['status' => '200', 'message' => 'OK'], 200);

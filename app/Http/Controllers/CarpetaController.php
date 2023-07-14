@@ -223,14 +223,16 @@ class CarpetaController extends Controller
         ->where('tipo_tramite_unidad.idTipo_tramite', 2)
         ->where(function($query) use ($request)
         {
-            if ($request->query('tipo')=="codigo") {
-                $query->where('tramite_detalle.codigo_diploma', 'LIKE', '%'.$request->query('search').'%');
-            }
-            if ($request->query('tipo')=="dni") {
+            if ($request->query('tipo')=="codigo_diploma") {
+                $query->where('tramite_detalle.codigo_diploma', 'LIKE', $request->query('search'));
+            } else if ($request->query('tipo')=="nro_documento") {
                 $query->where('usuario.nro_documento', 'LIKE', '%'.$request->query('search'));
-            }
-            if ($request->query('tipo')=="dato") {
+            } else if ($request->query('tipo')=="apellidos") {
                 $query->where('usuario.apellidos', 'LIKE', '%'.$request->query('search').'%');
+            } else if ($request->query('tipo')=="nombres") {
+                $query->where('usuario.nombres', 'LIKE', '%'.$request->query('search').'%');
+            } else {
+                return response()->json(['status' => '400', 'message' => "Búsqueda incorrecta"], 400);
             }
         })
         ->get();
