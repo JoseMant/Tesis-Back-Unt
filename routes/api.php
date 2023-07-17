@@ -288,6 +288,9 @@ Route::put('oficios/update/{id}', 'OficioController@update');
 //Universidades
 Route::resource('universidades', 'UniversidadController');
 
+//Libros digitales
+Route::get('libros/tipo_tramite_unidad/{idTipo_tramite_unidad}', 'LibroController@getLibrosByTipoTramiteUnidad');
+
 //Reportes
 Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
