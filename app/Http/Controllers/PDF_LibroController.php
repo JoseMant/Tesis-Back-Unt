@@ -19,64 +19,15 @@ class PDF_LibroController extends Controller
 
     public function pdf_libro()
     {
-      // =========================
-      // ==== CREACIÓN DE PDF ====
-      // =========================
-      $this->pdf=new FPDF('P', 'mm', array(219,305));
-      $this->pdf->AliasNbPages();
-      $this->pdf->AddPage('O');
-
-      // LOGO Y TÍTULO
-
-      $this->pdf->Image( public_path().'/img/logo_unt.png', 8, 0, -1300, -1300);
-      $this->pdf->SetFont('times', 'B', 22);
-      $this->pdf->SetXY(50,5);
-      $this->pdf->Cell(200, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
-      $this->pdf->SetFont('times', 'B', 18);
-      $this->pdf->SetXY(50,15);
-      $this->pdf->Cell(200, 4,utf8_decode('LIBRO DIGITAL DE REGISTRO DE GRADOS Y TÍTULOS'),0,0,'C');
-        
-      $y=$this->pdf->GetY();
-      $this->pdf->SetXY(8,$y+15);
-      $this->pdf->SetFont('times', 'B', 9);
-      $this->pdf->MultiCell(25,4,"NRO DE REGISTRO",1,'C');
-
-      $x=$this->pdf->GetX();
-      $this->pdf->SetXY($x+23,$y+15);
-      $this->pdf->MultiCell(75,8,"APELLIDOS Y NOMBRES",1,'C');
-
-      $x=$this->pdf->GetX();
-      $this->pdf->SetXY($x+98,$y+15);
-      $this->pdf->MultiCell(25,4,utf8_decode("CÓDIGO DEL DIPLOMA"),1,'C');
-
-      $x=$this->pdf->GetX();
-      $this->pdf->SetXY($x+123,$y+15);
-      $this->pdf->MultiCell(65,8,utf8_decode("DENOMINACIÓN"),1,'C');
-
-      $x=$this->pdf->GetX();
-      $this->pdf->SetXY($x+188,$y+15);
-      $this->pdf->MultiCell(39.85,8,utf8_decode("FACULTAD"),1,'C');
-
-      $x=$this->pdf->GetX();
-      $this->pdf->SetFont('times', 'B', 8);
-      $this->pdf->SetXY($x+228,$y+15);
-      $this->pdf->MultiCell(20,4,utf8_decode("FECHA DE COLACIÓN"),1,'C');
-
-      $x=$this->pdf->GetX();
-      $this->pdf->SetFont('times', 'B', 9);
-      $this->pdf->SetXY($x+248,$y+15);
-      $this->pdf->MultiCell(40,4,utf8_decode("FECHA Y NRO DE RESOLUCIÓN"),1,'C');
-
       
       // tramites----------------------
       $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombreComp')
       ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
-      ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-      , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+      ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','tipo_tramite_unidad.costo'
       ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
       'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
       'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','diploma_carpeta.codigo as diploma',
-      'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro','tramite_detalle.folio'
+      'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro as nro_libro','tramite_detalle.folio as folio'
       ,'tramite_detalle.nro_registro','tramite_detalle.codigo_diploma', 
       DB::raw("(case 
                   when tramite.idUnidad = 1 then dependencia.nombre  
@@ -92,192 +43,190 @@ class PDF_LibroController extends Controller
       ->join('diploma_carpeta','tramite_detalle.idDiploma_carpeta','diploma_carpeta.idDiploma_carpeta')
       ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
       ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-      ->join('voucher','tramite.idVoucher','voucher.idVoucher')
       ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
       ->join('resolucion','cronograma_carpeta.idResolucion','resolucion.idResolucion')
       ->where('tramite_detalle.nro_libro','!=',null)
       ->where('tramite_detalle.folio','!=',null)
       ->where('tramite_detalle.nro_registro','!=',null)
-      ->where('tramite.idTipo_tramite_unidad','!=',37)
-      ->orderBy('tramite_detalle.nro_libro', 'asc')
-      ->orderBy('tramite_detalle.folio', 'asc')
+      // ->where('tramite.idTipo_tramite_unidad','!=',37)
+      ->where('tramite.idTipo_tramite_unidad',34)
       ->orderBy('tramite_detalle.nro_registro', 'asc')
+      ->orderBy('tramite_detalle.folio', 'asc')
+      ->orderBy('tramite_detalle.nro_libro', 'asc')
       ->get();
-      // CONTENIDO DE LA TABLA 
-      $numTramites=count($tramites);
-      $iterador= (int)($numTramites/20);
+      
+      
+      $this->pdf=new FPDF('P', 'mm', 'A3');
+      $this->pdf->AliasNbPages();
+      $this->pdf->AddPage('O');
+
+      $this->pdf->Image( public_path().'/img/logo_unt.png', 8, 0, -1300, -1300);
+      $this->pdf->SetFont('times', 'B', 70);
+      $this->pdf->SetXY(0,70);
+      $this->pdf->Cell(420, 70,'LIBRO '.$tramites[0]['nro_libro'],0,0,'C');
+      $this->pdf->SetFont('times', 'B', 18);
+
+      
+
+
+      $this->pdf->AliasNbPages();
+      $this->pdf->AddPage('O');
+      // LOGO Y TÍTULO
+      $this->pdf->Image( public_path().'/img/logo_unt.png', 8, 0, -1300, -1300);
+      $this->pdf->SetFont('times', 'B', 22);
+      $this->pdf->SetXY(0,15);
+      $this->pdf->Cell(420, 10,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+      $this->pdf->SetFont('times', 'B', 18);
+      $this->pdf->SetXY(0,25);
+      $this->pdf->Cell(420, 10,utf8_decode('LIBRO DIGITAL DE REGISTRO DE GRADOS Y TÍTULOS'),0,0,'C');
+      
+      $this->pdf->SetFont('times', 'B', 9);
+      $this->pdf->SetXY(8,35);
+      $this->pdf->multiCell(80,5,'LIBRO: '.$tramites[0]['nro_libro'].', FOLIO: '.$tramites[0]['folio'],0,'L');
+    
+      $this->pdf->SetXY(8,40);
+      $this->pdf->multiCell(20,5,"NRO DE REGISTRO",1,'C');
+          
+
+          
+      $this->pdf->SetXY(28,40);
+      $this->pdf->multiCell(80,10,"APELLIDOS Y NOMBRES",1,'C');
+
+      $this->pdf->SetXY(108,40);
+      $this->pdf->multiCell(40,10,utf8_decode("CÓDIGO DEL DIPLOMA"),1,'C');
+
+      
+      $this->pdf->SetXY(148,40);
+      $this->pdf->multiCell(135,10,utf8_decode("DENOMINACIÓN"),1,'C');
+
+
+      $this->pdf->SetXY(283,40);
+      $this->pdf->multiCell(65,10,utf8_decode("FACULTAD"),1,'C');
+
+      $this->pdf->SetXY(348,40);
+      $this->pdf->multiCell(20,5,utf8_decode("FECHA DE COLACIÓN"),1,'C');
+      
+      $this->pdf->SetXY(368,40);
+      $this->pdf->multiCell(40,5,utf8_decode("FECHA Y NRO DE RESOLUCIÓN"),1,'C');
+
       $iterador= 1;
+      $y=50;
+      $salto=10;
+
       foreach ($tramites as $key => $tramite) {
+      
+            
+
         if ($iterador>20) {
+
+
           $iterador= 1;
           $this->pdf->AddPage('O');
+
+          $this->pdf->Image( public_path().'/img/logo_unt.png', 8, 0, -1300, -1300);
+          $this->pdf->SetFont('times', 'B', 22);
+          $this->pdf->SetXY(0,15);
+          $this->pdf->Cell(420, 10,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+          $this->pdf->SetFont('times', 'B', 18);
+          $this->pdf->SetXY(0,25);
+          $this->pdf->Cell(420, 10,utf8_decode('LIBRO DIGITAL DE REGISTRO DE GRADOS Y TÍTULOS'),0,0,'C');
+            
+          
+          $this->pdf->SetFont('times', 'B', 9);
+          $this->pdf->SetXY(8,35);
+          $this->pdf->Cell(40,5,'LIBRO: '.$tramite->nro_libro.', FOLIO: '.$tramite->folio,0,'L');
+      
+          
+
+          $this->pdf->SetXY(8,40);
+          $this->pdf->multiCell(20,5,"NRO DE REGISTRO",1,'C');
+              
+
+              
+          $this->pdf->SetXY(28,40);
+          $this->pdf->Cell(80,10,"APELLIDOS Y NOMBRES",1,'C');
+
+          $this->pdf->SetXY(108,40);
+          $this->pdf->Cell(40,10,utf8_decode("CÓDIGO DEL DIPLOMA"),1,'C');
+
+      
+          $this->pdf->SetXY(148,40);
+          $this->pdf->multiCell(135,10,utf8_decode("DENOMINACIÓN"),1,'C');
+
+    
+          $this->pdf->SetXY(283,40);
+          $this->pdf->Cell(65,10,utf8_decode("FACULTAD"),1,'C');
+    
+          $this->pdf->SetXY(348,40);
+          $this->pdf->multiCell(20,5,utf8_decode("FECHA DE COLACIÓN"),1,'C');
+          
+          $this->pdf->SetXY(368,40);
+          $this->pdf->multiCell(40,5,utf8_decode("FECHA Y NRO DE RESOLUCIÓN"),1,'C');
+          $y=50;
+          $salto=10;
+          
         }
-        # code...
-        $y=$this->pdf->GetY();
+        
+      
+        $this->pdf->SetFont('times', '',9);
         $this->pdf->SetXY(8,$y);
-        $this->pdf->SetFont('times', '', 9);
-        $this->pdf->MultiCell(25,8,$tramite->nro_registro,1,'C');
-
-        $this->pdf->SetFont('times', '', 8);
-        $nombres=$tramite->nombreComp;
-        $tamNombres= strlen($nombres);
-        $x=$this->pdf->GetX();
-        $this->pdf->SetXY($x+23,$y);
-        if ($tamNombres>=47) {
-          $this->pdf->MultiCell(75,4,utf8_decode($nombres),1,'C');
-        }else {
-          $this->pdf->MultiCell(75,8,utf8_decode($nombres),1,'C');
+        $this->pdf->multiCell(20,10,$tramite->nro_registro,1,'C');
+        
+        $this->pdf->SetXY(28,$y);   
+        if (strlen($tramite->nombreComp)<45) {
+          $this->pdf->multiCell(80,10,utf8_decode($tramite->nombreComp),1,'L');
+        }else{
+          $this->pdf->multiCell(80,5,utf8_decode($tramite->nombreComp),1,'L');
         }
 
-        $x=$this->pdf->GetX();
-        $this->pdf->SetXY($x+98,$y);
-        $this->pdf->MultiCell(25,8,utf8_decode($tramite->codigo_diploma),1,'C');
+        $this->pdf->SetXY(108,$y);
+        $this->pdf->multiCell(40,10,utf8_decode($tramite->codigo_diploma),1,'C');
+        // $this->pdf->Cell(40,10,utf8_decode('AAAAAAAAAAAAAAA'),1,'C');
 
-        $this->pdf->SetFont('times', '', 8);
-        $denominacion=$tramite->denominacion;
-        $tamDenominacion= strlen($denominacion);
-        $x=$this->pdf->GetX();
-        $this->pdf->SetXY($x+123,$y);
-        if ($tamDenominacion>=38) {
-          $this->pdf->MultiCell(65,4,utf8_decode($denominacion),1,'C');
-        }else {
-          $this->pdf->MultiCell(65,8,utf8_decode($denominacion),1,'C');
+        $this->pdf->SetXY(148,$y);
+        if (strlen($tramite->denominacion)<70) {
+          $this->pdf->Cell(135,10,utf8_decode($tramite->denominacion),1,'L');
+        }else{
+          $this->pdf->multiCell(135,5,utf8_decode($tramite->denominacion),1,'L');
+        }
+        
+        // $this->pdf->multiCell(135,5,utf8_decode('SEGUNDA ESPECIALIDAD PROFESIONAL EN FARMACIA Y BIOQUÍMICA MENCIÓN: FARMACIA HOSPITALARIA Y COMUNITARIA'),1,'C');
+        
+        
+        $this->pdf->SetXY(283,$y);
+        if (strlen($tramite->facultad)<35) {
+          $this->pdf->Cell(65,10,utf8_decode($tramite->facultad),1,'L');
+        }else{
+        
+          $this->pdf->multiCell(65,5,utf8_decode($tramite->facultad),1,'L');
+         
         }
 
-        $facultad=$tramite->facultad;
-        $tamFacultad=strlen($facultad);
-        $this->pdf->SetFont('times', '', 6.5);
-        $x=$this->pdf->GetX();
-        $this->pdf->SetXY($x+188,$y);
-        // $this->pdf->MultiCell(39.85,4,utf8_decode($facultad),1,'C');
-        if ($tamFacultad>=28) {
-          $this->pdf->MultiCell(39.85,4,utf8_decode($facultad),1,'C');
-        }else {
-          $this->pdf->MultiCell(39.85,8,utf8_decode($facultad),1,'C');
-        }
+  
+        $this->pdf->SetXY(348,$y);
+        $this->pdf->MultiCell(20,10,utf8_decode($tramite->fecha_colacion),1,'C');
+       
+        
+        $this->pdf->SetXY(368,$y);
+        $this->pdf->MultiCell(40,10,utf8_decode($tramite->fecha_resolucion." ".$tramite->nro_resolucion),1,'C');
 
-        $x=$this->pdf->GetX();
-        $this->pdf->SetFont('times', '', 10);
-        $this->pdf->SetXY($x+228,$y);
-        $this->pdf->MultiCell(20,8,utf8_decode($tramite->fecha_colacion),1,'C');
-
-        $x=$this->pdf->GetX();
-        $this->pdf->SetFont('times', '', 9);
-        $this->pdf->SetXY($x+248,$y);
-        $this->pdf->MultiCell(40,8,utf8_decode($tramite->fecha_resolucion." ".$tramite->nro_resolucion),1,'C');
-
+        $y+=10;
         $iterador++;
+
+        // if ($key<(count($tramites)-1)) {
+        //   if ($tramites[$key]['nro_libro']!=$tramites[$key+1]['nro_libro']) {
+        //     $this->pdf->AddPage('O');
+        //     $iterador=21;
+        //     $this->pdf->SetFont('times', 'B', 22);
+        //     $this->pdf->SetXY(0,15);
+        //     $this->pdf->Cell(420, 10,'LIBRO:'.$tramites[$key+1]['nro_libro'],0,0,'C');
+        //     $this->pdf->SetFont('times', '', 9);
+        //   }
+        // }
+
       }
 
-      // for ($i=0; $i <= $iterador; $i++) { 
-      //   # code...
-      //   $y=$this->pdf->GetY();
-      //   $this->pdf->SetXY(8,$y);
-      //   $this->pdf->SetFont('times', '', 9);
-      //   $this->pdf->MultiCell(25,8,"9999999999",1,'C');
-  
-      //   $this->pdf->SetFont('times', '', 8);
-      //   $nombres="TANTAQUISPE TANTAQUISPE TANTAQUISPE TANTAQUISPE TANTAQUISPE TANTAQUISPE";
-      //   $tamNombres= strlen($nombres);
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+23,$y);
-      //   if ($tamNombres>=47) {
-      //     $this->pdf->MultiCell(75,4,utf8_decode($nombres),1,'C');
-      //   }else {
-      //     $this->pdf->MultiCell(75,8,utf8_decode($nombres),1,'C');
-      //   }
-  
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+98,$y);
-      //   $this->pdf->MultiCell(25,8,utf8_decode("G-00055555"),1,'C');
-  
-      //   $this->pdf->SetFont('times', '', 8);
-      //   $denominacion="DOCTOR EN CIENCIAS DE LA COMUNICACION";
-      //   $tamDenominacion= strlen($denominacion);
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+123,$y);
-      //   if ($tamDenominacion>=38) {
-      //     $this->pdf->MultiCell(65,4,utf8_decode($denominacion),1,'C');
-      //   }else {
-      //     $this->pdf->MultiCell(65,8,utf8_decode($denominacion),1,'C');
-      //   }
-  
-      //   $facultad="FACULTAD DE ENFERMERIA";
-      //   $tamFacultad=strlen($facultad);
-      //   $this->pdf->SetFont('times', '', 6.5);
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+188,$y);
-      //   // $this->pdf->MultiCell(39.85,4,utf8_decode($facultad),1,'C');
-      //   if ($tamFacultad>=28) {
-      //     $this->pdf->MultiCell(39.85,4,utf8_decode($facultad),1,'C');
-      //   }else {
-      //     $this->pdf->MultiCell(39.85,8,utf8_decode($facultad),1,'C');
-      //   }
-  
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetFont('times', '', 10);
-      //   $this->pdf->SetXY($x+228,$y);
-      //   $this->pdf->MultiCell(20,8,utf8_decode("23-12-12"),1,'C');
-  
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetFont('times', '', 9);
-      //   $this->pdf->SetXY($x+248,$y);
-      //   $this->pdf->MultiCell(40,8,utf8_decode("23-12-12 021-2022"),1,'C');
-
-      //   # code...
-      //   $y=$this->pdf->GetY();
-      //   $this->pdf->SetXY(8,$y);
-      //   $this->pdf->SetFont('times', '', 9);
-      //   $this->pdf->MultiCell(25,8,"9999999999",1,'C');
-  
-      //   $this->pdf->SetFont('times', '', 8);
-      //   $nombres="TANTAQUISPE TANTAQUISPE TANTAQUISPE";
-      //   $tamNombres= strlen($nombres);
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+23,$y);
-      //   if ($tamNombres>=47) {
-      //     $this->pdf->MultiCell(75,4,utf8_decode($nombres),1,'C');
-      //   }else {
-      //     $this->pdf->MultiCell(75,8,utf8_decode($nombres),1,'C');
-      //   }
-  
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+98,$y);
-      //   $this->pdf->MultiCell(25,8,utf8_decode("G-00055555"),1,'C');
-  
-      //   $this->pdf->SetFont('times', '', 8);
-      //   $denominacion="DOCTOR EN CIENCIAS DE LA COMUNICACION";
-      //   $tamDenominacion= strlen($denominacion);
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+123,$y);
-      //   if ($tamDenominacion>=38) {
-      //     $this->pdf->MultiCell(65,4,utf8_decode($denominacion),1,'C');
-      //   }else {
-      //     $this->pdf->MultiCell(65,8,utf8_decode($denominacion),1,'C');
-      //   }
-  
-      //   $facultad="FACULTAD DE ENFERMERIA";
-      //   $tamFacultad=strlen($facultad);
-      //   $this->pdf->SetFont('times', '', 6.5);
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetXY($x+188,$y);
-      //   // $this->pdf->MultiCell(39.85,4,utf8_decode($facultad),1,'C');
-      //   if ($tamFacultad>=28) {
-      //     $this->pdf->MultiCell(39.85,4,utf8_decode($facultad),1,'C');
-      //   }else {
-      //     $this->pdf->MultiCell(39.85,8,utf8_decode($facultad),1,'C');
-      //   }
-  
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetFont('times', '', 10);
-      //   $this->pdf->SetXY($x+228,$y);
-      //   $this->pdf->MultiCell(20,8,utf8_decode("23-12-12"),1,'C');
-  
-      //   $x=$this->pdf->GetX();
-      //   $this->pdf->SetFont('times', '', 9);
-      //   $this->pdf->SetXY($x+248,$y);
-      //   $this->pdf->MultiCell(40,8,utf8_decode("23-12-12 021-2022"),1,'C');
-      // }
+     
 
       $nombre_descarga = utf8_decode("LIBRO DE GRADOS Y TÍTULOS");
       $this->pdf->SetTitle( $nombre_descarga );
