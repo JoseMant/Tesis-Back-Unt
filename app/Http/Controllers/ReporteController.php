@@ -11,12 +11,16 @@ use App\ProgramaURAA;
 use App\Mencion;
 use App\DependenciaURAA;
 use App\Tramite_Detalle;
+use Codedge\Fpdf\Fpdf\Fpdf;
 
 class ReporteController extends Controller
 {
-    public function __construct()
+    protected $pdf;
+
+    public function __construct(\App\PDF_Fut $pdf)
     {
-        $this->middleware('jwt');
+        $this->pdf = $pdf;
+        $this->middleware('jwt', ['except' => ['expedientesPDF']]);
     }
     public function enviadoFacultad(Request $request){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -785,21 +789,276 @@ class ReporteController extends Controller
         ]], 200);
     }
 
-    // public function GetDiploma(Request $request){
-    //     // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-    //     $token = JWTAuth::getToken();
-    //     $apy = JWTAuth::getPayload($token);
-    //     $idUsuario=$apy['idUsuario'];
+
+    public function expedientesPDF(Request $request){
+        // return $request->all();
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        // $token = JWTAuth::getToken();
+        // $apy = JWTAuth::getPayload($token);
+        // $idUsuario=$apy['idUsuario'];
+        // $dni=$apy['nro_documento'];
+        // $idTipo_usuario=$apy['idTipo_usuario'];
+        // $idDependencia=$apy['idDependencia'];
+        
+        $tramites=Tramite::select('tramite.nro_matricula','tramite_detalle.codigo_diploma as codigo_diploma',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite_detalle.folio as folio',
+        'cronograma_carpeta.fecha_colacion as fecha','programa.nombre as programa','dependencia.nombre as dependencia','tipo_tramite_unidad.descripcion as descripcion')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('programa','programa.idPrograma','tramite.idPrograma')
+        ->where('tipo_tramite.idTipo_tramite',2)
+        ->where('tramite.idEstado_tramite','!=',29)
+        ->where('tramite_detalle.codigo_diploma','!=',null)
+        ->where(function($query) use($request)
+        {
+            if ($request->idUnidad!=0) {
+                $query->where('tramite.idUnidad',$request->idUnidad);
+            }
+            if ($request->idDependencia!=0) {
+                $query->where('tramite.idDependencia',$request->idDependencia);
+            }
+            if ($request->idPrograma!=0) {
+                $query->where('tramite.idPrograma',$request->idPrograma);
+            }
+            if ($request->idTipo_tramite_unidad!=0) {
+                $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
+            }
+            if ($request->cronograma!=0) {
+                $query->where('cronograma_carpeta.fecha_colacion',$request->anio);
+            }
+        })
+        ->orderby('programa')
+        ->orderby('solicitante')
+        ->get();
+
+        $this->pdf->AliasNbPages('A4');
+        $this->pdf->AddPage('P');
+        $pag=1;
+
+        $this->pdf->SetFont('Arial','', 9);
+        $this->pdf->SetXY(10,10);
+        $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+        $this->pdf->SetXY(10,14);
+        $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+        $this->pdf->SetXY(10,18);
+        $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
+
+        $this->pdf->SetXY(-65,10);
+        $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+        $this->pdf->SetXY(-65,14);
+        $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+        $this->pdf->SetXY(-65,18);
+        $this->pdf->Cell(80, 4,'PAG: '.$pag,0,0,'C');
+        //TITULO
+        $this->pdf->SetFont('Arial','B', 10);
+        $this->pdf->SetXY(0,25);
+        $this->pdf->Cell(210, 4,utf8_decode('RELACIÓN DE EXPEDIENTES QUE PASAN AL SERVICIO DE ARCHIVO'),0,0,'C');
+        
+        //
+        $this->pdf->SetFont('Arial','', 8);
+        $this->pdf->SetXY(5,34);
+        $this->pdf->Cell(30, 4,utf8_decode('FACULTAD                :'),0,0,'L');
+        $this->pdf->SetXY(5,38);
+        $this->pdf->Cell(30, 4,utf8_decode('ESCUELA                  :'),0,0,'L');
+        $this->pdf->SetXY(5,42);
+        $this->pdf->Cell(30, 4,utf8_decode('GRADO Y/O TÍTULO:'),0,0,'L');
+        $this->pdf->SetXY(35,34);
+        $this->pdf->Cell(150, 4,utf8_decode($tramites[0]['dependencia']),0,0,'L');
+        $this->pdf->SetXY(35,38);
+        $this->pdf->Cell(150, 4,utf8_decode($tramites[0]['programa']),0,0,'L');
+        $this->pdf->SetXY(35,42);
+        $this->pdf->Cell(150, 4,utf8_decode($tramites[0]['descripcion']),0,0,'L');
+        //TABLA
+        //#
+        $this->pdf->SetFont('Arial','B', 7);
+        $this->pdf->SetXY(5,50);
+        $this->pdf->multiCell(10,3.5,'NUM.ORD.',1,'C');
+        //NRO.MATRICULA
+        $this->pdf->SetXY(15,50);
+        $this->pdf->multiCell(25, 3.5,utf8_decode('NÚMERO DE MATRÍCULA'),1,'C');
+        //#FICHA
+        $this->pdf->SetXY(40,50);
+        $this->pdf->multiCell(30, 3.5,utf8_decode('NÚMERO DE'),'T','C');
+        $this->pdf->SetXY(40,53.5);
+        $this->pdf->multiCell(30, 3.5,utf8_decode('FICHA'),'B','C');
+        //SOLICITANTE
+        $this->pdf->SetXY(70,50);
+        $this->pdf->Cell(100, 7,'APELLIDOS Y NOMBRES',1,0,'C');
+        //FOLIO
+        $this->pdf->SetXY(170,50);
+        $this->pdf->Cell(10, 7,'FOLIO',1,0,'C');
+        //FECHA
+        $this->pdf->SetXY(180,50);
+        $this->pdf->Cell(25, 7,'FECHA',1,0,'C');
+
+        $salto=0;
+        $i=0;
+        $inicioY=57;
+        
+        $this->pdf->SetFont('Arial','', 8);
+        foreach ($tramites as $key => $tramite) {
+        
+            //#
+            $this->pdf->SetXY(5,$inicioY+$salto);
+            $this->pdf->Cell(10, 6,$i+1,0,0,'C');
+            //nro_matricula
+            $this->pdf->SetXY(15,$inicioY+$salto);
+            $this->pdf->Cell(25, 6,$tramite->nro_matricula,0,0,'C');
+            //codigo_diploma
+            $this->pdf->SetXY(40,$inicioY+$salto);
+            $this->pdf->Cell(30, 6,$tramite->codigo_diploma,0,0,'C');
+            //solicitante
+            $this->pdf->SetXY(70,$inicioY+$salto);
+            $this->pdf->Cell(100, 6,utf8_decode($tramite->solicitante),0,'L');
+            //folio
+            $this->pdf->SetXY(170,$inicioY+$salto);
+            $this->pdf->Cell(10, 6,$tramite->folio,0,0,'C');
+            //fecha
+            $this->pdf->SetXY(180,$inicioY+$salto);
+            $this->pdf->Cell(25, 6,$tramite->fecha,0,0,'C');
+            $salto+=6;
+            $i+=1;
+            if($key!=0&&$key<(count($tramites)-1)&&$tramites[$key]['programa']!=$tramites[$key+1]['programa']){
+                $this->pdf->AddPage('P');
+                $pag++;
+                $this->pdf->SetFont('Arial','', 9);
+                $this->pdf->SetXY(10,10);
+                $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+                $this->pdf->SetXY(10,14);
+                $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+                $this->pdf->SetXY(10,18);
+                $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
+
+                $this->pdf->SetXY(-65,10);
+                $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+                $this->pdf->SetXY(-65,14);
+                $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+                $this->pdf->SetXY(-65,18);
+                 $this->pdf->Cell(80, 4,'PAG: '.$pag,0,0,'C');
+                //TITULO
+                $this->pdf->SetFont('Arial','B', 10);
+                $this->pdf->SetXY(0,25);
+                $this->pdf->Cell(210, 4,utf8_decode('RELACIÓN DE EXPEDIENTES QUE PASAN AL SERVICIO DE ARCHIVO'),0,0,'C');
+                
+                //
+                $this->pdf->SetFont('Arial','', 8);
+                $this->pdf->SetXY(5,34);
+                $this->pdf->Cell(30, 4,utf8_decode('FACULTAD                :'),0,0,'L');
+                $this->pdf->SetXY(5,38);
+                $this->pdf->Cell(30, 4,utf8_decode('ESCUELA                  :'),0,0,'L');
+                $this->pdf->SetXY(5,42);
+                $this->pdf->Cell(30, 4,utf8_decode('GRADO Y/O TÍTULO:'),0,0,'L');
+                $this->pdf->SetXY(35,34);
+                $this->pdf->Cell(150, 4,utf8_decode($tramites[$key+1]['dependencia']),0,0,'L');
+                $this->pdf->SetXY(35,38);
+                $this->pdf->Cell(150, 4,utf8_decode($tramites[$key+1]['programa']),0,0,'L');
+                $this->pdf->SetXY(35,42);
+                $this->pdf->Cell(150, 4,utf8_decode($tramites[$key+1]['descripcion']),0,0,'L');
+                //TABLA
+                //#
+                $this->pdf->SetFont('Arial','B', 7);
+                $this->pdf->SetXY(5,50);
+                $this->pdf->multiCell(10,3.5,'NUM.ORD.',1,'C');
+                //NRO.MATRICULA
+                $this->pdf->SetXY(15,50);
+                $this->pdf->multiCell(25, 3.5,utf8_decode('NÚMERO DE MATRÍCULA'),1,'C');
+                //#FICHA
+                $this->pdf->SetXY(40,50);
+                $this->pdf->multiCell(30, 3.5,utf8_decode('NÚMERO DE'),'T','C');
+                $this->pdf->SetXY(40,53.5);
+                $this->pdf->multiCell(30, 3.5,utf8_decode('FICHA'),'B','C');
+                //SOLICITANTE
+                $this->pdf->SetXY(70,50);
+                $this->pdf->Cell(100, 7,'APELLIDOS Y NOMBRES',1,0,'C');
+                //FOLIO
+                $this->pdf->SetXY(170,50);
+                $this->pdf->Cell(10, 7,'FOLIO',1,0,'C');
+                //FECHA
+                $this->pdf->SetXY(180,50);
+                $this->pdf->Cell(25, 7,'FECHA',1,0,'C');
+
+                $salto=0;
+                $i=0;
+                $inicioY=57;
+                $this->pdf->SetFont('Arial','', 8);
+            }
+            if (($inicioY+$salto)>=273) {
+                $this->pdf->AddPage('P');
+                $inicioY=57;
+                $salto=0;
+                $pag++;
+                $this->pdf->SetFont('Arial','', 9);
+                $this->pdf->SetXY(10,10);
+                $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+                $this->pdf->SetXY(10,14);
+                $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+                $this->pdf->SetXY(10,18);
+                $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
+
+                $this->pdf->SetXY(-65,10);
+                $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+                $this->pdf->SetXY(-65,14);
+                $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+                $this->pdf->SetXY(-65,18);
+                 $this->pdf->Cell(80, 4,'PAG: '.$pag,0,0,'C');
+                //TITULO
+                $this->pdf->SetFont('Arial','B', 10);
+                $this->pdf->SetXY(0,25);
+                $this->pdf->Cell(210, 4,utf8_decode('RELACIÓN DE EXPEDIENTES QUE PASAN AL SERVICIO DE ARCHIVO'),0,0,'C');
+
+                $this->pdf->SetFont('Arial','', 8);
+                $this->pdf->SetXY(5,34);
+                $this->pdf->Cell(30, 4,utf8_decode('FACULTAD                :'),0,0,'L');
+                $this->pdf->SetXY(5,38);
+                $this->pdf->Cell(30, 4,utf8_decode('ESCUELA                  :'),0,0,'L');
+                $this->pdf->SetXY(5,42);
+                $this->pdf->Cell(30, 4,utf8_decode('GRADO Y/O TÍTULO:'),0,0,'L');
+                $this->pdf->SetXY(35,34);
+                $this->pdf->Cell(150, 4,utf8_decode($tramites[$key+1]['dependencia']),0,0,'L');
+                $this->pdf->SetXY(35,38);
+                $this->pdf->Cell(150, 4,utf8_decode($tramites[$key+1]['programa']),0,0,'L');
+                $this->pdf->SetXY(35,42);
+                $this->pdf->Cell(150, 4,utf8_decode($tramites[$key+1]['descripcion']),0,0,'L');
+                //TABLA
+                //#
+                $this->pdf->SetFont('Arial','B', 7);
+                $this->pdf->SetXY(5,50);
+                $this->pdf->multiCell(10,3.5,'NUM.ORD.',1,'C');
+                //NRO.MATRICULA
+                $this->pdf->SetXY(15,50);
+                $this->pdf->multiCell(25, 3.5,utf8_decode('NÚMERO DE MATRÍCULA'),1,'C');
+                //#FICHA
+                $this->pdf->SetXY(40,50);
+                $this->pdf->multiCell(30, 3.5,utf8_decode('NÚMERO DE'),'T','C');
+                $this->pdf->SetXY(40,53.5);
+                $this->pdf->multiCell(30, 3.5,utf8_decode('FICHA'),'B','C');
+                //SOLICITANTE
+                $this->pdf->SetXY(70,50);
+                $this->pdf->Cell(100, 7,'APELLIDOS Y NOMBRES',1,0,'C');
+                //FOLIO
+                $this->pdf->SetXY(170,50);
+                $this->pdf->Cell(10, 7,'FOLIO',1,0,'C');
+                //FECHA
+                $this->pdf->SetXY(180,50);
+                $this->pdf->Cell(25, 7,'FECHA',1,0,'C');
+
+                $this->pdf->SetFont('Arial','', 8);
+            }
+        }
+
+        return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
+        ->header('Content-Type', 'application/pdf');  
+
+    }
 
 
-    //     $diploma=Tramite_Detalle::where('codigo_diploma','LIKE','%'.$request.'%');
-    //     if ($codigo_diploma) {
-    //         return response()->json(['status' => '200','diploma'=>$request], 200);
-    //     }else {
-    //         return response()->json(['status' => '400','message'=>"Dilpoma no encontrada"], 400);
-    //     }
-
-    // }
+    
+    
 
 }
 
