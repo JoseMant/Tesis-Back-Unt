@@ -281,7 +281,7 @@ class ReporteController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);

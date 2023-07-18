@@ -452,7 +452,7 @@ class ConstanciaController extends Controller
 
             $tramite->idEstado_tramite=11;
             $tramite->update();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
             $dependenciaDetalle=null;
             if ($tramite->idUnidad==1) {
@@ -553,7 +553,7 @@ class ConstanciaController extends Controller
 
             $tramite->update();
             $tramite->constancia_final=$tramite_detalle->constancia_final;
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             // //Requisitos
             // $tramite->requisitos=Tramite_Requisito::select('*')
             // ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
