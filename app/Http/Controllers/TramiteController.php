@@ -722,7 +722,7 @@ class TramiteController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad','tramite.uuid')
+            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad','tramite.uuid','tramite_detalle.certificado_final')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -1087,7 +1087,7 @@ class TramiteController extends Controller
             ->where('tramite.idTramite',$id)
             ->first();
 
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             //Requisitos
             $tramite->requisitos=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
@@ -1313,7 +1313,7 @@ class TramiteController extends Controller
             $idUsuario=$apy['idUsuario'];
             $uraa=User::find($idUsuario);
             $tramite=Tramite::find($request->idTramite);
-            // $tramite->fut="fut/".$tramite->idTramite;
+            // $tramite->fut="fut/".$tramite->uuid;
             // $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             // 'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
             // ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -1591,7 +1591,7 @@ class TramiteController extends Controller
                 }
             }
 
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')

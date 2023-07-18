@@ -138,7 +138,7 @@ class CarnetController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
         
         $begin = $request->query('page')*$request->query('size');
@@ -244,7 +244,7 @@ class CarnetController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
         
         $begin = $request->query('page')*$request->query('size');
@@ -330,7 +330,7 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
 
         // Respuesta paginada
@@ -415,7 +415,7 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
         
         $begin = $request->query('page')*$request->query('size');
@@ -568,7 +568,7 @@ class CarnetController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
         }
 
         $begin = $request->query('page')*$request->query('size');

@@ -104,7 +104,7 @@ class PDF_LibroController extends Controller
         $salto=10;
 
         foreach ($tramites as $key => $tramite) {
-
+            
             if ($iterador>20) {
                 $iterador= 1;
                 $this->pdf->AddPage('O');
@@ -188,6 +188,17 @@ class PDF_LibroController extends Controller
 
             $y+=10;
             $iterador++;
+            if ($key!=0&&$key<(count($tramites)-1)&&$tramites[$key]['nro_libro']!=$tramites[$key+1]['nro_libro']) {
+                
+                $this->pdf->AddPage('O');
+                $this->pdf->Image( public_path().'/img/logo_unt.png', 8, 0, -1300, -1300);
+                $this->pdf->SetFont('times', 'B', 70);
+                $this->pdf->SetXY(0,70);
+                $this->pdf->Cell(420, 70,'LIBRO '.$tramites[$key+1]['nro_libro'],0,0,'C');
+                $this->pdf->SetFont('times', 'B', 18);
+
+                $iterador= 21;
+            }
         }
 
         $nombre_descarga = utf8_decode("LIBRO DE GRADOS Y TÍTULOS");
