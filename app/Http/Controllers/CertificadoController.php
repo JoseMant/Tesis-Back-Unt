@@ -48,7 +48,7 @@ class CertificadoController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher')
+            'voucher.archivo as voucher','tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -73,7 +73,7 @@ class CertificadoController extends Controller
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             //Requisitos
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario')
@@ -107,7 +107,7 @@ class CertificadoController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher')
+            'voucher.archivo as voucher','tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -140,12 +140,13 @@ class CertificadoController extends Controller
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
+           
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
@@ -173,7 +174,7 @@ class CertificadoController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher')
+            'voucher.archivo as voucher','tramite.uuid')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -200,12 +201,13 @@ class CertificadoController extends Controller
             ->orderBy($request->query('sort'), $request->query('order'))
             ->get();
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
+            
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
@@ -313,7 +315,7 @@ class CertificadoController extends Controller
             }
             $tramite->update();
             $tramite->certificado_final=$tramite_detalle->certificado_final;
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             //Requisitos
             $tramite->requisitos=Tramite_Requisito::select('*')
             ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
@@ -344,7 +346,7 @@ class CertificadoController extends Controller
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
         'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher')
+        'voucher.archivo as voucher','tramite.uuid')
         ->join('tramite_detalle', 'tramite_detalle.idTramite_detalle', 'tramite.idTramite_detalle')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -369,12 +371,13 @@ class CertificadoController extends Controller
         ->orderBy($request->query('sort'), $request->query('order'))
         ->get();
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
+           
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
             $begin = ($pagination->currentPage()-1)*$pagination->perPage();
@@ -402,7 +405,7 @@ class CertificadoController extends Controller
         'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
         'tramite_detalle.certificado_final',
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher')
+        'voucher.archivo as voucher','tramite.uuid')
         ->join('tramite_detalle', 'tramite_detalle.idTramite_detalle', 'tramite.idTramite_detalle')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -435,12 +438,13 @@ class CertificadoController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
+                
         }
 
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
@@ -532,7 +536,7 @@ class CertificadoController extends Controller
         ->count();
 
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             // -------------------------------------------------
             // OBTENER LA CANTIDAD DE DÍAS QUE LLEVA ASIGNADO CADA TRÁMITE
             $hoy=date('y-m-d h:i:s a');
@@ -609,7 +613,7 @@ class CertificadoController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -642,7 +646,7 @@ class CertificadoController extends Controller
         'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
         'tramite_detalle.certificado_final',
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher')
+        'voucher.archivo as voucher','tramite.uuid')
         ->join('tramite_detalle', 'tramite_detalle.idTramite_detalle', 'tramite.idTramite_detalle')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -668,7 +672,7 @@ class CertificadoController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')

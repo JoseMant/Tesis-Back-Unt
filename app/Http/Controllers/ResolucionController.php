@@ -80,7 +80,6 @@ class ResolucionController extends Controller
     }
 
     public function update(Request $request,$id){
-        return $request->all();
         DB::beginTransaction();
         try {
             // return $request->all();
@@ -94,23 +93,22 @@ class ResolucionController extends Controller
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
             $resolucion->fecha=trim($request->fecha);
             $resolucion->estado =trim($request->estado);
-            $resolucion->update();
-
+            $resolucion->save();
 
             if ($request->cronogramas) {
                 //Eliminamos todas las relaciones de los cronogramas que pertenecen a esa resolucion
                 $cronogramas=Cronograma::where('idResolucion',$id)->get();
                 foreach ($cronogramas as $key => $value) {
                     $value->idResolucion=null;
-                    $value->update();
+                    $value->save();
                 }
                 //agregamos las nuevas relaciones de cronogramas
                 foreach ($request->cronogramas as $key => $value) {
                     $cronograma=Cronograma::find($value['idCronograma_carpeta']);
                     $cronograma->idResolucion=$resolucion->idResolucion;
-                    $cronograma->update();
+                    $cronograma->save();
                 }
-            }else {
+            } else {
                 return response()->json(['status' => '400', 'message' => "Asignar algún cronograma para la resolución"], 400);
             }
             

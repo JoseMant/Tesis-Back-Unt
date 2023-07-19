@@ -92,7 +92,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -161,7 +161,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -229,7 +229,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -299,7 +299,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -369,7 +369,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -437,7 +437,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -494,7 +494,7 @@ class TituloController extends Controller
             ->where('idTramite',$tramite->idTramite)
             ->get();
             
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             //OBTENIENDO EL HISTORIAL AL QUE SE DESEA REGRESAR
             $historial_new=Historial_Estado::where('idTramite',$tramite->idTramite)
@@ -559,7 +559,7 @@ class TituloController extends Controller
             $tramite->save();
 
 
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             // OBTENIENDO LOS REQUISITOS Y DATOS ADICIONALES DEL TRÁMITE
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
@@ -630,7 +630,7 @@ class TituloController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             
             DB::commit();
             return response()->json($tramite, 200);
@@ -680,7 +680,7 @@ class TituloController extends Controller
             $tramite->save();
 
             // OBTENIENDO LOS REQUISITOS Y DATOS ADICIONALES DEL TRÁMITE
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.idRequisito','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -736,7 +736,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -986,7 +986,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
@@ -1066,7 +1066,7 @@ class TituloController extends Controller
         ->get();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')

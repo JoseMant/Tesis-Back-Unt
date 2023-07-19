@@ -827,7 +827,7 @@ class GradoController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             DB::commit();
             return response()->json($tramite, 200);
@@ -1267,7 +1267,7 @@ class GradoController extends Controller
         ->count();
 
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             
             // Verificación de programa acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
@@ -1369,7 +1369,7 @@ class GradoController extends Controller
         ->count();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
 
             // Verificación de programa acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
@@ -2294,7 +2294,7 @@ class GradoController extends Controller
             }
             $tramite->update();
             $tramite->diploma_final=$tramite_detalle->diploma_final;
-            $tramite->fut="fut/".$tramite->idTramite;
+            $tramite->fut="fut/".$tramite->uuid;
             //Requisitos
             $tramite->requisitos=Tramite_Requisito::select('*')
             ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
