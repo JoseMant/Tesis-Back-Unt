@@ -1613,7 +1613,11 @@ class GradoController extends Controller
         
         foreach ($tramites as $key => $tramite) {
             // Verificación de programa acreditada
-            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)->where('fecha_fin','>=',$tramite->fecha_colacion)->first();
+            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
+            ->where('fecha_fin','>=',$tramite->fecha_colacion)
+            ->where('idPrograma',$tramite->idPrograma)
+            ->where('estado',1)
+            ->first();
             if ($acreditacion) {
                 $tramite->dependencia_acreditado="SÍ";
                 $tramite->fecha_inicio=$acreditacion->fecha_inicio;
