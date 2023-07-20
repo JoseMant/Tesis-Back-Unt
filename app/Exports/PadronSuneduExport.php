@@ -204,12 +204,12 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
                 ->orWhere('tramite.idTipo_tramite_unidad',16)
                 ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
-        // ->where(function($query)
-        // {
-        //     $query->where('tramite.idEstado_tramite',42)
-        //     ->orWhere('tramite.idEstado_tramite',44);
-        // })
-        ->where('tramite.idEstado_tramite',44)
+        ->where(function($query)
+        {
+            $query->where('tramite.idEstado_tramite',42)
+            ->orWhere('tramite.idEstado_tramite',44);
+        })
+        // ->where('tramite.idEstado_tramite',44)
         ->where('resolucion.idResolucion',$this->idResolucion)
         ->orderBy('tramite.idTipo_tramite_unidad','asc')
         ->orderBy('tramite.idPrograma','asc')
