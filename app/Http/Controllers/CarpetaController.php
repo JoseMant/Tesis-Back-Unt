@@ -8,8 +8,10 @@ use App\User;
 use App\Tramite;
 use App\Tramite_Detalle;
 use App\Resolucion;
+use App\Cronograma;
 use App\Diploma_Carpeta;
 use App\Tramite_Requisito;
+use App\Historial_estado;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -38,8 +40,10 @@ class CarpetaController extends Controller
                 ->where('fecha_colacion','>',$cronograma->fecha_colacion)
                 ->orderBy('fecha_colacion') //Si no se pone el order, traerá todos las colaciones mayores, pero la más próxima será por id y no por fecha de colación.   
                 ->first();
-                $cronogramasSig->visible=true;
-                $cronogramasSig->save();
+                if ($cronogramasSig) {
+                    $cronogramasSig->visible=true;
+                    $cronogramasSig->save();
+                }
             }
 
             // Obteniendo todas las carpetas que se van a finalizar
@@ -255,5 +259,16 @@ class CarpetaController extends Controller
         }
 
         return $tramites;
+    }
+
+    public function setHistorialEstado($idTramite, $idEstado_actual, $idEstado_nuevo, $idUsuario)
+    {
+        $historial_estados = new Historial_Estado;
+        $historial_estados->idTramite = $idTramite;
+        $historial_estados->idEstado_actual = $idEstado_actual;
+        $historial_estados->idEstado_nuevo = $idEstado_nuevo;
+        $historial_estados->idUsuario = $idUsuario;
+        $historial_estados->fecha = date('Y-m-d h:i:s');
+        return $historial_estados;
     }
 }
