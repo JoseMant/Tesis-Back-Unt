@@ -153,12 +153,26 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
         DB::raw('(select CONCAT(apellidos," ",nombres) from usuario where idTipo_usuario=10 and estado=1) AS AUTORIDAD2'),
         DB::raw("(case 
                     when tramite.idUnidad = 1 then (case 
-                                                        when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) = \"M\" then 'DECANO' 
-                                                        else 'DECANA'
+                                                        when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) = \"M\" then 
+                                                            (case 
+                                                                when (select cargo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) IS NOT NULL then 'DECANO (E)'
+                                                                else 'DECANO'
+                                                            end)
+                                                        else (case 
+                                                                when (select cargo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=tramite.idDependencia and estado=1) IS NOT NULL then 'DECANA (E)'
+                                                                else 'DECANA'
+                                                            end)
                                                     end) 
                     when tramite.idUnidad = 4 then  (case 
-                                                        when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=dependencia.idDependencia2 and estado=1) = \"M\" then 'DECANO' 
-                                                        else 'DECANA'
+                                                        when (select sexo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=dependencia.idDependencia2 and estado=1) = \"M\" then 
+                                                            (case 
+                                                                when (select cargo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=dependencia.idDependencia2 and estado=1) IS NOT NULL then 'DECANO (E)'
+                                                                else 'DECANO'
+                                                            end)
+                                                        else (case 
+                                                                when (select cargo from usuario where idTipo_usuario=6 and estado=1 and idDependencia=dependencia.idDependencia2 and estado=1) IS NOT NULL then 'DECANA (E)'
+                                                                else 'DECANA'
+                                                            end)
                                                     end) 
                 end) AS CARGO3"),
         DB::raw("(case 
@@ -204,12 +218,12 @@ class PadronSuneduExport implements FromCollection,WithHeadings,ShouldAutoSize, 
                 ->orWhere('tramite.idTipo_tramite_unidad',16)
                 ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
-        // ->where(function($query)
-        // {
-        //     $query->where('tramite.idEstado_tramite',42)
-        //     ->orWhere('tramite.idEstado_tramite',44);
-        // })
-        ->where('tramite.idEstado_tramite',44)
+        ->where(function($query)
+        {
+            $query->where('tramite.idEstado_tramite',42)
+            ->orWhere('tramite.idEstado_tramite',44);
+        })
+        // ->where('tramite.idEstado_tramite',42)
         ->where('resolucion.idResolucion',$this->idResolucion)
         ->orderBy('tramite.idTipo_tramite_unidad','asc')
         ->orderBy('tramite.idPrograma','asc')
