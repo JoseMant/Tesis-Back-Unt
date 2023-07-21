@@ -715,6 +715,7 @@ class TramiteController extends Controller
             ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->find($request->idTramite);
 
             // DATOS PARA EL CORREO 
@@ -1419,7 +1420,7 @@ class TramiteController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher')
+            'voucher.archivo as voucher','tramite_detalle.certificado_final')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -1427,6 +1428,7 @@ class TramiteController extends Controller
             ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
             ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->find($request->idTramite);
             
             // DATOS PARA EL CORREO 

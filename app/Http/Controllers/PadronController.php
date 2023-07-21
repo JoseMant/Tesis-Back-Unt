@@ -14,16 +14,6 @@ class PadronController extends Controller
     {
         $this->middleware('jwt', ['except' => ['padron','correccion']]);
     }
-    // public function padron($idOficio){
-    //     DB::beginTransaction();
-    //     try {
-    //         $descarga=Excel::download(new PadronSuneduExport($idOficio), 'PADRON_SUNEDU.xlsx');
-    //         return $descarga;
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
-    //     }
-    // }
 
     public function padron($idResolucion){
         DB::beginTransaction();

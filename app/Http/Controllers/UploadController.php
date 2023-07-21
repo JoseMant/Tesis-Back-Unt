@@ -57,8 +57,8 @@ class UploadController extends Controller
                     DB::rollback();
                     return response()->json(['status' => '400', 'message' =>"Esta subiendo el archivo incorrecto, debe ser: ".$fileName], 400);
                 }
+                // Guardando el zip en la carpeta temporal para luego ser utilizada
                 if($file->guessExtension()=="zip"){
-                    // Storage::delete($nombreBD);
                     $file->storeAs('public/diplomas', $nombre);
                 }
             }
@@ -75,11 +75,10 @@ class UploadController extends Controller
                     return response()->json(['status' => '400', 'message' =>"La cantidad de archivos es MAYOR a la que cantidad de diplomas firmados que se espera."], 400);
                 }
 
-                // Validando que cada archivo esté almacenado su nombre en la bd y extrayendo
+                // Validando que cada archivo esté almacenado su nombre en la bd, renombrando cada archivo quitando la parte "_firmado" y actualizando el estado de los trámites 
                 for ($i=0; $i<$zip->numFiles;$i++) {
                     $nombreZip=substr($zip->getNameIndex($i),0,-12);
                     $zip->renameIndex($i,$nombreZip.'.pdf');
-                    // $zip->renameName($zip->getNameIndex($i),$nombreZip);
 
                     $tramite_detalle=Tramite_Detalle::where('nombre_descarga_sunedu',$nombreZip)->first();                    
                     if ($tramite_detalle) {
@@ -113,6 +112,7 @@ class UploadController extends Controller
                 }
                 $zip->close();
             }
+            // Abriendo nuevamente el zip actualizado con los nuevos nombres y extrayendo para que se chanquen los firmados digitalmente
             if ($zip->open(storage_path('app/public/diplomas/'.$nombre)) === TRUE) //en la función open se le pasa la ruta de nuestro archivo (alojada en carpeta temporal)
             {
                 $zip->extractTo(storage_path('app/public/diplomas')); 

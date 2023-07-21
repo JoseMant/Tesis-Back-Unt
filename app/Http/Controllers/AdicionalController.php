@@ -145,7 +145,7 @@ class AdicionalController extends Controller
             //obtenemos el archivo de la resolución a chancar
             $file=$request->file("archivo");
             //obtenemos todos los trámites a los que se les va a chancar
-            $enfermeria=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
+            $educacion=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -159,14 +159,14 @@ class AdicionalController extends Controller
             ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query)
             {
-                $query->where('tramite.idDependencia',11)
-                ->orWhere('dependencia.idDependencia2',11);
+                $query->where('tramite.idDependencia',10)
+                ->orWhere('dependencia.idDependencia2',10);
             })
-            ->where('cronograma_carpeta.fecha_colacion','2023-07-26')
+            ->where('cronograma_carpeta.fecha_colacion','2023-07-13')
             ->get();
-            // return count($ingAmbiental);
+            // return count($educacion);
             //Recorremos los trámites y chancamos cada uno la resolución
-            foreach ($enfermeria as $key => $tramite) {
+            foreach ($educacion as $key => $tramite) {
                 $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
                 ->where(function($query)
                 {
@@ -331,6 +331,84 @@ class AdicionalController extends Controller
             }
             DB::commit();
             return response()->json(['status' => '200', 'message' => 'OK'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+
+    public function createCodeDiploma(Request $request){
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+
+            $tramites=Tramite::select('tramite.idTramite_detalle','usuario.apellidos','usuario.nombres')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+            ->where('tramite.idEstado_tramite',44)
+            ->where('tipo_tramite.idTipo_tramite',2)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15);
+            })
+            ->where('resolucion.idResolucion',22)
+            ->orderBy('tramite_detalle.nro_libro', 'asc')
+            ->orderBy('tramite_detalle.folio', 'asc')
+            ->orderBy('tramite_detalle.nro_registro', 'asc')
+            ->get(); 
+
+
+            $codigoInicial='00046728';
+            foreach ($tramites as $key => $value) {
+                $codigo=$codigoInicial+$key+1;
+                $tamCodigo=strlen($codigo);
+                switch ($tamCodigo) {
+                    case 1:
+                        $codigo="0000000".$codigo;
+                        break;
+                    case 2:
+                        $codigo="000000".$codigo;
+                        break;
+                    case 3:
+                        $codigo="00000".$codigo;
+                        break;
+                    case 4:
+                        $codigo="0000".$codigo;
+                        break;
+                    case 5:
+                        $codigo="000".$codigo;
+                        break;
+                    case 6:
+                        $codigo="00".$codigo;
+                        break;
+                    case 7:
+                        $codigo="0".$codigo;
+                        break;
+                }
+                $value->codigo="G".$codigo;
+
+                $tramite_detalle=Tramite_Detalle::find($value->idTramite_detalle);
+                $tramite_detalle->codigo_diploma="G".$codigo;
+                $tramite_detalle->save();
+            }
+            
+            DB::commit();
+            return response()->json( 'ok',200);
+
+
+            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
