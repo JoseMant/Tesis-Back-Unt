@@ -296,6 +296,7 @@ Route::get('reporte/enviado/facultad', 'ReporteController@enviadoFacultad');
 Route::get('reporte/enviado/ura', 'ReporteController@enviadoUra');
 Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGeneral');
 Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
+Route::get('reporte/status_tramites/excel/{idDependencia}/{cronograma}', 'ReporteController@crearExcel');
 Route::get('reporte/elaboracion_carpeta/expedientes', 'ReporteController@reporteExpediente');
 Route::get('reporte/expedientesPDF', 'ReporteController@expedientesPDF');
 Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');

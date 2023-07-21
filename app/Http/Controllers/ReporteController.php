@@ -12,6 +12,9 @@ use App\Mencion;
 use App\DependenciaURAA;
 use App\Tramite_Detalle;
 use Codedge\Fpdf\Fpdf\Fpdf;
+use App\Exports\ReporteGradoExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class ReporteController extends Controller
 {
@@ -20,7 +23,7 @@ class ReporteController extends Controller
     public function __construct(\App\PDF_Fut $pdf)
     {
         $this->pdf = $pdf;
-        $this->middleware('jwt', ['except' => ['expedientesPDF']]);
+        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcel']]);
     }
     public function enviadoFacultad(Request $request){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -1057,7 +1060,20 @@ class ReporteController extends Controller
     }
 
 
-    
+    public function crearExcel($idDependencia,$cronograma){
+       
+        // return $idDependencia."-".$cronograma;
+
+        DB::beginTransaction();
+        try {
+            $descarga=Excel::download(new ReporteGradoExport($idDependencia,$cronograma), 'REPORTE.xlsx');
+            return $descarga;
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+
+    }
     
 
 }
