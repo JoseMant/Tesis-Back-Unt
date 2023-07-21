@@ -90,7 +90,7 @@ class CarpetaController extends Controller
         'tramite.idTipo_tramite_unidad', 'tramite_detalle.codigo_diploma', 'tramite_detalle.diploma_final',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
         'tipo_tramite_unidad.descripcion as tramite', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 
-        'resolucion.idResolucion','tramite_detalle.*')
+        'resolucion.idResolucion')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('resolucion', 'resolucion.idResolucion', 'cronograma_carpeta.idResolucion')
