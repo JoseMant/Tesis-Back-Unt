@@ -1079,7 +1079,7 @@ class ReporteController extends Controller
             // Declarando variable que indicará en qué fila de Response se almacenará cada array
             $cont_cells=0;
 
-            // Declarando variable que indicará el key en la variable datos de cada programa que se imprimirá 
+            // Declarando variable que indicará el key en la variable datos de cada programa que se imprimirá
             // Obteniendo las escuelas pertenecientes a la dependencia
             $programas=ProgramaURAA::where('idDependencia',$idDependencia)->get();
 
@@ -1120,7 +1120,7 @@ class ReporteController extends Controller
                 }
 
             }
-            
+
             $descarga=Excel::download(new ReporteGradoExport($response,$datos), 'REPORTE.xlsx');
             return $descarga;
         } catch (\Exception $e) {
@@ -1173,7 +1173,7 @@ class ReporteController extends Controller
 
         $dependencia=DependenciaURAA::find($idDependencia);
         $this->pdf->SetXY(5,30);
-        $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA FACULTAD DE '.$dependencia->nombre),0,0,'C');
+        $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA '.$dependencia->nombre),0,0,'C');
 
         // $this->pdf->SetFont('Arial','B', 7);
         // $this->pdf->SetFont('Arial','U', 7);
@@ -1287,7 +1287,7 @@ class ReporteController extends Controller
                     $this->pdf->SetFont('Arial','B', 13);
 
                     $this->pdf->SetXY(5,30);
-                    $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA FACULTAD DE '.$dependencia->nombre),0,0,'C');
+                    $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA '.$dependencia->nombre),0,0,'C');
 
                     $this->pdf->SetFont('Arial','', 7);
                 }
