@@ -145,7 +145,7 @@ class AdicionalController extends Controller
             //obtenemos el archivo de la resolución a chancar
             $file=$request->file("archivo");
             //obtenemos todos los trámites a los que se les va a chancar
-            $educacion=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
+            $ingenieria=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -159,14 +159,14 @@ class AdicionalController extends Controller
             ->where('tramite.idEstado_tramite','!=',29)
             ->where(function($query)
             {
-                $query->where('tramite.idDependencia',10)
-                ->orWhere('dependencia.idDependencia2',10);
+                $query->where('tramite.idDependencia',13)
+                ->orWhere('dependencia.idDependencia2',13);
             })
-            ->where('cronograma_carpeta.fecha_colacion','2023-07-13')
+            ->where('cronograma_carpeta.fecha_colacion','2023-08-04')
             ->get();
-            // return count($educacion);
+            // return count($ingenieria);
             //Recorremos los trámites y chancamos cada uno la resolución
-            foreach ($educacion as $key => $tramite) {
+            foreach ($ingenieria as $key => $tramite) {
                 $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
                 ->where(function($query)
                 {
