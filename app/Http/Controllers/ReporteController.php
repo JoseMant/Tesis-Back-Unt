@@ -1067,7 +1067,61 @@ class ReporteController extends Controller
 
         DB::beginTransaction();
         try {
-            $descarga=Excel::download(new ReporteGradoExport($idDependencia,$cronograma), 'REPORTE.xlsx');
+            // Declarando la respuesta a exportar
+            $response=array();
+            // Seleccionando la dependencia que será la cabecera general y añadiendo a response
+            $dependencia=DependenciaURAA::where('idDependencia',$idDependencia)->first();
+            $response[0] = [""," COLACIÓN DEL ".$cronograma." DE LA ".$dependencia->nombre];
+
+            // Declarando variable con información de inicio de cada programa y la cantidad de filas que ocupa
+            $datos=array();
+
+            // Declarando variable que indicará en qué fila de Response se almacenará cada array
+            $cont_cells=0;
+
+            // Declarando variable que indicará el key en la variable datos de cada programa que se imprimirá 
+            // Obteniendo las escuelas pertenecientes a la dependencia
+            $programas=ProgramaURAA::where('idDependencia',$idDependencia)->get();
+
+            foreach ($programas as $key => $programa) {
+                // // Obteniendo los trámites de cada programa pertenecientes a la colación seleccionada
+                $tramites=Tramite::select('tramite.nro_tramite','tramite.nro_matricula',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+                'estado_tramite.descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'))
+                ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+                ->join('usuario as asignado','tramite.idUsuario_asignado','asignado.idUsuario')
+                ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                ->where('tramite.idTipo_tramite_unidad',37)
+                ->where('tramite.idEstado_tramite','!=',29)
+                ->where('tramite.idEstado_tramite','!=',15)
+                ->where('tramite.idPrograma',$programa->idPrograma)
+                ->where('cronograma_carpeta.fecha_colacion',$cronograma)
+                ->get();
+
+                if (count($tramites)>0) {
+                    // Añadiendo dos espacios antes de empezar cada programa
+                    $cont_cells++;
+                    $response[$cont_cells]=[""];
+                    // Añadiendo la cabecera con el nombre del programa
+                    $cont_cells++;
+                    $response[$cont_cells]=["","CERTIFICADOS PENDIENTES DE ".$programa->nombre];
+                    // Añadiendo información referente a la fila de inicio y cantidad de datos de cada programa
+                    $datos[$key]=[$cont_cells,count($tramites)];
+                    // Agregando las cabeceras de cada programa
+                    $cont_cells++;
+                    $response[$cont_cells]=["","N°","N° TRÁMITE","N° MATRÍCULA","EGRESADOS","ESTADO","ASIGNADO","OBSERVACIONES"];
+
+                    foreach ($tramites as $key => $tramite) {
+                        $cont_cells++;
+                        $response[$cont_cells]=["",$key+1,$tramite->nro_tramite,$tramite->nro_matricula,$tramite->solicitante,$tramite->descripcion,$tramite->asignado];
+                    }
+
+                }
+
+            }
+            
+            $descarga=Excel::download(new ReporteGradoExport($response,$datos), 'REPORTE.xlsx');
             return $descarga;
         } catch (\Exception $e) {
             DB::rollback();
