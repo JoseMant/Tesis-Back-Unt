@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Dependencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -23,7 +24,7 @@ class ReporteController extends Controller
     public function __construct(\App\PDF_Fut $pdf)
     {
         $this->pdf = $pdf;
-        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcel']]);
+        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcel','crearPDF']]);
     }
     public function enviadoFacultad(Request $request){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -89,7 +90,7 @@ class ReporteController extends Controller
             ->skip($request->query('page')*$request->query('size'))
             ->get();
 
-            
+
             $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
@@ -156,7 +157,7 @@ class ReporteController extends Controller
             ->orderBy($request->query('sort'), $request->query('order'))
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
-            ->get(); 
+            ->get();
 
             $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
@@ -254,7 +255,7 @@ class ReporteController extends Controller
         ->skip($request->query('page')*$request->query('size'))
         ->get();
 
-        
+
         $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
@@ -276,14 +277,14 @@ class ReporteController extends Controller
             }
         })
         ->count();
-        
+
         foreach ($tramites as $key => $tramite) {
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
             'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
-            
+
             $tramite->fut="fut/".$tramite->uuid;
         }
         $begin = $request->query('page')*$request->query('size');
@@ -344,7 +345,7 @@ class ReporteController extends Controller
             ->skip($request->query('page')*$request->query('size'))
             ->get();
 
-            
+
             $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
@@ -391,9 +392,9 @@ class ReporteController extends Controller
             ->orderBy($request->query('sort'), $request->query('order'))
             ->take($request->query('size'))
             ->skip($request->query('page')*$request->query('size'))
-            ->get(); 
+            ->get();
 
-            
+
             $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
@@ -556,7 +557,7 @@ class ReporteController extends Controller
                         $query->where('tramite.idDependencia',$idDependencia);
                     }elseif ($request->idUnidad==4) {
                         $query->where('dependencia.idDependencia2',$idDependencia);
-                        
+
                     }
                 }else {
                     $query->where('tramite.idDependencia',$idDependencia)
@@ -599,7 +600,7 @@ class ReporteController extends Controller
                         $query->where('tramite.idDependencia',$idDependencia);
                     }elseif ($request->idUnidad==4) {
                         $query->where('dependencia.idDependencia2',$idDependencia);
-                        
+
                     }
                 }else {
                     $query->where('tramite.idDependencia',$idDependencia)
@@ -710,7 +711,7 @@ class ReporteController extends Controller
         $dni=$apy['nro_documento'];
         $idTipo_usuario=$apy['idTipo_usuario'];
         $idDependencia=$apy['idDependencia'];
-        
+
         $tramites=Tramite::select('tramite.nro_matricula','tramite_detalle.codigo_diploma',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite_detalle.folio',
         'cronograma_carpeta.fecha_colacion','programa.nombre as programa')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -747,7 +748,7 @@ class ReporteController extends Controller
         ->take($request->query('size'))
         ->skip($request->query('page')*$request->query('size'))
         ->get();
-        
+
         $total=Tramite::select('tramite.nro_matricula','tramite_detalle.codigo_diploma',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite_detalle.folio',
         'cronograma_carpeta.fecha_colacion')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -779,7 +780,7 @@ class ReporteController extends Controller
             }
         })
         ->count();
-        
+
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
         return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
@@ -802,7 +803,7 @@ class ReporteController extends Controller
         // $dni=$apy['nro_documento'];
         // $idTipo_usuario=$apy['idTipo_usuario'];
         // $idDependencia=$apy['idDependencia'];
-        
+
         $tramites=Tramite::select('tramite.nro_matricula','tramite_detalle.codigo_diploma as codigo_diploma',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite_detalle.folio as folio',
         'cronograma_carpeta.fecha_colacion as fecha','programa.nombre as programa','dependencia.nombre as dependencia','tipo_tramite_unidad.descripcion as descripcion')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -861,7 +862,7 @@ class ReporteController extends Controller
         $this->pdf->SetFont('Arial','B', 10);
         $this->pdf->SetXY(0,25);
         $this->pdf->Cell(210, 4,utf8_decode('RELACIÓN DE EXPEDIENTES QUE PASAN AL SERVICIO DE ARCHIVO'),0,0,'C');
-        
+
         //
         $this->pdf->SetFont('Arial','', 8);
         $this->pdf->SetXY(5,34);
@@ -902,10 +903,10 @@ class ReporteController extends Controller
         $salto=0;
         $i=0;
         $inicioY=57;
-        
+
         $this->pdf->SetFont('Arial','', 8);
         foreach ($tramites as $key => $tramite) {
-        
+
             //#
             $this->pdf->SetXY(5,$inicioY+$salto);
             $this->pdf->Cell(10, 6,$i+1,0,0,'C');
@@ -947,7 +948,7 @@ class ReporteController extends Controller
                 $this->pdf->SetFont('Arial','B', 10);
                 $this->pdf->SetXY(0,25);
                 $this->pdf->Cell(210, 4,utf8_decode('RELACIÓN DE EXPEDIENTES QUE PASAN AL SERVICIO DE ARCHIVO'),0,0,'C');
-                
+
                 //
                 $this->pdf->SetFont('Arial','', 8);
                 $this->pdf->SetXY(5,34);
@@ -1055,13 +1056,13 @@ class ReporteController extends Controller
         }
 
         return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
-        ->header('Content-Type', 'application/pdf');  
+        ->header('Content-Type', 'application/pdf');
 
     }
 
 
     public function crearExcel($idDependencia,$cronograma){
-       
+
         // return $idDependencia."-".$cronograma;
 
         DB::beginTransaction();
@@ -1074,7 +1075,176 @@ class ReporteController extends Controller
         }
 
     }
-    
+
+    public function crearPDF($idDependencia,$cronograma){
+
+        $tramites=Tramite::select('tramite.nro_tramite','tramite.nro_matricula',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+                'estado_tramite.descripcion as descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'),'programa.nombre as programa')
+                ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+                ->join('usuario as asignado','tramite.idUsuario_asignado','asignado.idUsuario')
+                ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                ->join('programa','programa.idPrograma','tramite.idPrograma')
+                ->where('tramite.idTipo_tramite_unidad',37)
+                ->where('tramite.idEstado_tramite','!=',29)
+                ->where('tramite.idEstado_tramite','!=',15)
+                ->where('tramite.idDependencia',$idDependencia)
+                ->where('cronograma_carpeta.fecha_colacion',$cronograma)
+                ->orderby('programa')
+                ->orderby('solicitante')
+                ->get();
+
+        $this->pdf->AliasNbPages('A4');
+        $this->pdf->AddPage('L');
+
+        $pag=1;
+
+        $this->pdf->SetFont('Arial','', 9);
+        $this->pdf->SetXY(10,10);
+        $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+        $this->pdf->SetXY(10,14);
+        $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+        $this->pdf->SetXY(10,18);
+        $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
+
+        $this->pdf->SetXY(-65,10);
+        $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+        $this->pdf->SetXY(-65,14);
+        $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+        $this->pdf->SetXY(-65,18);
+        $this->pdf->Cell(80, 4,'PAG: '.$pag,0,0,'C');
+
+        $this->pdf->SetFont('Arial','B', 13);
+
+        $dependencia=DependenciaURAA::find($idDependencia);
+        $this->pdf->SetXY(5,30);
+        $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA FACULTAD DE '.$dependencia->nombre),0,0,'C');
+
+        // $this->pdf->SetFont('Arial','B', 7);
+        // $this->pdf->SetFont('Arial','U', 7);
+        // $this->pdf->SetXY(5,38);
+        // $this->pdf->Cell(297, 4,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[0]['programa']),0,0,'C');
+
+        // $this->pdf->SetFont('Arial','B', 7);
+        // $this->pdf->SetXY(5,42);
+        // $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
+        // //N° TRÁMITE
+        // $this->pdf->SetXY(10,42);
+        // $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
+        // //N° MATRÍCULA
+        // $this->pdf->SetXY(25,42);
+        // $this->pdf->Cell(15,4,utf8_decode('N° MATRÍ.'),1,'C');
+        // //EGRESADOS
+        // $this->pdf->SetXY(40,42);
+        // $this->pdf->Cell(70,4,utf8_decode('EGRESADOS'),1,'C');
+        // //ESTADO
+        // $this->pdf->SetXY(110,42);
+        // $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
+        // //ASIGNADO
+        // $this->pdf->SetXY(180,42);
+        // $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
+        // //OBSERVACION
+        // $this->pdf->SetXY(230,42);
+        // $this->pdf->Cell(60, 4,'OBSERVACION',1,0,'C');
+
+        $salto=0;
+        $i=0;
+        $inicioY=38;
+        $this->pdf->SetFont('Arial','', 7);
+        foreach ($tramites as $key => $tramite) {
+
+            if($key==0||$key<(count($tramites)-1)&&$tramites[$key]['programa']!=$tramites[$key+1]['programa']){
+                if($key==0){
+                    $key=-1;
+                }
+                $this->pdf->SetFont('Arial','U', 8);
+                $this->pdf->SetXY(5,$inicioY+$salto);
+                $this->pdf->Cell(297, 8,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[$key+1]['programa']),0,0,'C');
+                $salto+=8;
+                $this->pdf->SetFont('Arial','B', 7);
+                $this->pdf->SetXY(5,$inicioY+$salto);
+                $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
+                //N° TRÁMITE
+                $this->pdf->SetXY(10,$inicioY+$salto);
+                $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
+                //N° MATRÍCULA
+                $this->pdf->SetXY(25,$inicioY+$salto);
+                $this->pdf->Cell(20,4,utf8_decode('N°MATRÍCULA'),1,'C');
+                //EGRESADOS
+                $this->pdf->SetXY(45,$inicioY+$salto);
+                $this->pdf->Cell(70,4,'EGRESADOS',1,'C');
+                //ESTADO
+                $this->pdf->SetXY(115,$inicioY+$salto);
+                $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
+                //ASIGNADO
+                $this->pdf->SetXY(185,$inicioY+$salto);
+                $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
+                //OBSERVACION
+                $this->pdf->SetXY(235,$inicioY+$salto);
+                $this->pdf->Cell(57, 4,'OBSERVACION',1,0,'C');
+                $this->pdf->SetFont('Arial','', 7);
+
+                $salto+=4;
+            }
+                $this->pdf->SetXY(5,$inicioY+$salto);
+                $this->pdf->Cell(5,4,$i+1,1,'C');
+                //N° TRÁMITE
+                $this->pdf->SetXY(10,$inicioY+$salto);
+                $this->pdf->Cell(15,4,$tramite->nro_tramite,1,'C');
+                //N° MATRÍCULA
+                $this->pdf->SetXY(25,$inicioY+$salto);
+                $this->pdf->Cell(20,4,$tramite->nro_matricula,1,'C');
+                //EGRESADOS
+                $this->pdf->SetXY(45,$inicioY+$salto);
+                $this->pdf->Cell(70,4,utf8_decode($tramite->solicitante),1,'C');
+                //ESTADO
+                $this->pdf->SetXY(115,$inicioY+$salto);
+                $this->pdf->Cell(70, 4,utf8_decode($tramite->descripcion),1,0,'C');
+                //ASIGNADO
+                $this->pdf->SetXY(185,$inicioY+$salto);
+                $this->pdf->Cell(50, 4,utf8_decode($tramite->asignado),1,0,'C');
+                //OBSERVACION
+                $this->pdf->SetXY(235,$inicioY+$salto);
+                $this->pdf->Cell(57, 4,'',1,0,'C');
+                $salto+=4;
+                $i+=1;
+
+                if (($inicioY+$salto)>=182) {
+                    $this->pdf->AddPage('L');
+                    $inicioY=42;
+                    $salto=0;
+                    $pag++;
+                    $this->pdf->SetFont('Arial','', 9);
+                    $this->pdf->SetXY(10,10);
+                    $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+                    $this->pdf->SetXY(10,14);
+                    $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+                    $this->pdf->SetXY(10,18);
+                    $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
+
+                    $this->pdf->SetXY(-65,10);
+                    $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+                    $this->pdf->SetXY(-65,14);
+                    $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+                    $this->pdf->SetXY(-65,18);
+                    $this->pdf->Cell(80, 4,'PAG: '.$pag,0,0,'C');
+
+                    $this->pdf->SetFont('Arial','B', 13);
+
+                    $this->pdf->SetXY(5,30);
+                    $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA FACULTAD DE '.$dependencia->nombre),0,0,'C');
+
+                    $this->pdf->SetFont('Arial','', 7);
+                }
+
+        }
+
+        return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
+        ->header('Content-Type', 'application/pdf');
+
+    }
+
 
 }
 
