@@ -1066,7 +1066,25 @@ class ReporteController extends Controller
 
         DB::beginTransaction();
         try {
-            $descarga=Excel::download(new ReporteGradoExport($idDependencia,$cronograma), 'REPORTE.xlsx');
+            // Declarando la respuesta a exportar
+            $response=array();
+            // Seleccionando los programas de la dependencia 
+            $dependencia=DependenciaURAA::where('idDependencia',$idDependencia)->first();
+            return $dependencia=[$dependencia->nombre];
+            // return $dependencia->nombre;
+            $response = array_push($dependencia);
+            return $response;
+            $escuelas=ProgramaURAA::where('idDependencia',$idDependencia)->get();
+            foreach ($escuelas as $key => $value) {
+                # code...
+            }
+            // return $escuelas=$escuelas->toArray();
+            $level_one_array=[0=>"Escuela 1",1=>""];
+            $level_two_array=[0=>"alumno 1",1=>""];
+            $level_three_array=[0=>"Escuela 2",1=>""];
+            $level_four_array=[0=>"alumno 1",1=>""];
+            $arrays = [$level_one_array, $level_two_array, $level_three_array,$level_four_array];
+            $descarga=Excel::download(new ReporteGradoExport($idDependencia,$cronograma,$arrays), 'REPORTE.xlsx');
             return $descarga;
         } catch (\Exception $e) {
             DB::rollback();

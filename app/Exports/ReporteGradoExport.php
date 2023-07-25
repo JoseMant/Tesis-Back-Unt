@@ -14,16 +14,21 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Carbon\Carbon;
-class ReporteGradoExport implements WithHeadings,ShouldAutoSize, WithEvents
+use Maatwebsite\Excel\Concerns\FromArray;
+
+class ReporteGradoExport implements ShouldAutoSize, WithEvents,FromArray
 {
     public $idDependencia;
     public $cronograma;
+    public $arrays;
     /**
     * @return \Illuminate\Support\Collection
     */
-    public function __construct($idDependencia,$cronograma){
+    public function __construct($idDependencia,$cronograma,$arrays){
         $this->idDependencia = $idDependencia;
         $this->cronograma = $cronograma;
+        $this->arrays = $arrays;
+
     }
     // public function columnFormats(): array
     // {
@@ -41,18 +46,22 @@ class ReporteGradoExport implements WithHeadings,ShouldAutoSize, WithEvents
             },
         ];
     }
-    public function headings(): array
+    // public function headings(): array
+    // {
+    //     return [
+    //         // 'NOMBRE'=>['First row', 'First row'],
+    //         'N°',
+    //         'NRO TRAMITE','EGRESADOS','MOTIVO','ESTADO','ASIGNADO'
+
+    //     ];
+    // }
+    public function array(): array
     {
-        return [
-            // 'NOMBRE'=>['First row', 'First row'],
-            'N°',
-            'NRO TRAMITE','EGRESADOS','MOTIVO','ESTADO','ASIGNADO'
+        return $this->arrays;
 
-        ];
     }
-
     // public function collection()
     // {
-        
+    //     return $this->arrays;
     // }
 }
