@@ -1175,72 +1175,39 @@ class ReporteController extends Controller
         $this->pdf->SetXY(5,30);
         $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA '.$dependencia->nombre),0,0,'C');
 
-        // $this->pdf->SetFont('Arial','B', 7);
-        // $this->pdf->SetFont('Arial','U', 7);
-        // $this->pdf->SetXY(5,38);
-        // $this->pdf->Cell(297, 4,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[0]['programa']),0,0,'C');
+        $this->pdf->SetFont('Arial','U', 8);
+        $this->pdf->SetXY(5,34);
+        $this->pdf->Cell(297, 8,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[0]['programa']),0,0,'C');
 
-        // $this->pdf->SetFont('Arial','B', 7);
-        // $this->pdf->SetXY(5,42);
-        // $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
-        // //N° TRÁMITE
-        // $this->pdf->SetXY(10,42);
-        // $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
-        // //N° MATRÍCULA
-        // $this->pdf->SetXY(25,42);
-        // $this->pdf->Cell(15,4,utf8_decode('N° MATRÍ.'),1,'C');
-        // //EGRESADOS
-        // $this->pdf->SetXY(40,42);
-        // $this->pdf->Cell(70,4,utf8_decode('EGRESADOS'),1,'C');
-        // //ESTADO
-        // $this->pdf->SetXY(110,42);
-        // $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
-        // //ASIGNADO
-        // $this->pdf->SetXY(180,42);
-        // $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
-        // //OBSERVACION
-        // $this->pdf->SetXY(230,42);
-        // $this->pdf->Cell(60, 4,'OBSERVACION',1,0,'C');
+        $this->pdf->SetFont('Arial','B', 7);
+        $this->pdf->SetXY(5,42);
+        $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
+        //N° TRÁMITE
+        $this->pdf->SetXY(10,42);
+        $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
+        //N° MATRÍCULA
+        $this->pdf->SetXY(25,42);
+        $this->pdf->Cell(20,4,utf8_decode('N°MATRÍCULA'),1,'C');
+        //EGRESADOS
+        $this->pdf->SetXY(45,42);
+        $this->pdf->Cell(70,4,utf8_decode('EGRESADOS'),1,'C');
+        //ESTADO
+        $this->pdf->SetXY(115,42);
+        $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
+        //ASIGNADO
+        $this->pdf->SetXY(185,42);
+        $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
+        //OBSERVACION
+        $this->pdf->SetXY(235,42);
+        $this->pdf->Cell(57, 4,'OBSERVACION',1,0,'C');
 
         $salto=0;
         $i=0;
-        $inicioY=38;
+        $inicioY=46;
         $this->pdf->SetFont('Arial','', 7);
         foreach ($tramites as $key => $tramite) {
 
-            if($key==0||$key<(count($tramites)-1)&&$tramites[$key]['programa']!=$tramites[$key+1]['programa']){
-                if($key==0){
-                    $key=-1;
-                }
-                $this->pdf->SetFont('Arial','U', 8);
-                $this->pdf->SetXY(5,$inicioY+$salto);
-                $this->pdf->Cell(297, 8,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[$key+1]['programa']),0,0,'C');
-                $salto+=8;
-                $this->pdf->SetFont('Arial','B', 7);
-                $this->pdf->SetXY(5,$inicioY+$salto);
-                $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
-                //N° TRÁMITE
-                $this->pdf->SetXY(10,$inicioY+$salto);
-                $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
-                //N° MATRÍCULA
-                $this->pdf->SetXY(25,$inicioY+$salto);
-                $this->pdf->Cell(20,4,utf8_decode('N°MATRÍCULA'),1,'C');
-                //EGRESADOS
-                $this->pdf->SetXY(45,$inicioY+$salto);
-                $this->pdf->Cell(70,4,'EGRESADOS',1,'C');
-                //ESTADO
-                $this->pdf->SetXY(115,$inicioY+$salto);
-                $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
-                //ASIGNADO
-                $this->pdf->SetXY(185,$inicioY+$salto);
-                $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
-                //OBSERVACION
-                $this->pdf->SetXY(235,$inicioY+$salto);
-                $this->pdf->Cell(57, 4,'OBSERVACION',1,0,'C');
-                $this->pdf->SetFont('Arial','', 7);
 
-                $salto+=4;
-            }
                 $this->pdf->SetXY(5,$inicioY+$salto);
                 $this->pdf->Cell(5,4,$i+1,1,'C');
                 //N° TRÁMITE
@@ -1263,10 +1230,42 @@ class ReporteController extends Controller
                 $this->pdf->Cell(57, 4,'',1,0,'C');
                 $salto+=4;
                 $i+=1;
+                if($key<(count($tramites)-1)&&$tramites[$key]['programa']!=$tramites[$key+1]['programa']){
+                    // if($key==0){
+                    //     $key=-1;
+                    // }
+                    $this->pdf->SetFont('Arial','U', 8);
+                    $this->pdf->SetXY(5,$inicioY+$salto);
+                    $this->pdf->Cell(297, 8,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[$key+1]['programa']),0,0,'C');
+                    $salto+=8;
+                    $this->pdf->SetFont('Arial','B', 7);
+                    $this->pdf->SetXY(5,$inicioY+$salto);
+                    $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
+                    //N° TRÁMITE
+                    $this->pdf->SetXY(10,$inicioY+$salto);
+                    $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
+                    //N° MATRÍCULA
+                    $this->pdf->SetXY(25,$inicioY+$salto);
+                    $this->pdf->Cell(20,4,utf8_decode('N°MATRÍCULA'),1,'C');
+                    //EGRESADOS
+                    $this->pdf->SetXY(45,$inicioY+$salto);
+                    $this->pdf->Cell(70,4,'EGRESADOS',1,'C');
+                    //ESTADO
+                    $this->pdf->SetXY(115,$inicioY+$salto);
+                    $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
+                    //ASIGNADO
+                    $this->pdf->SetXY(185,$inicioY+$salto);
+                    $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
+                    //OBSERVACION
+                    $this->pdf->SetXY(235,$inicioY+$salto);
+                    $this->pdf->Cell(57, 4,'OBSERVACION',1,0,'C');
+                    $this->pdf->SetFont('Arial','', 7);
 
+                    $salto+=4;
+                }
                 if (($inicioY+$salto)>=182) {
                     $this->pdf->AddPage('L');
-                    $inicioY=42;
+                    $inicioY=46;
                     $salto=0;
                     $pag++;
                     $this->pdf->SetFont('Arial','', 9);
