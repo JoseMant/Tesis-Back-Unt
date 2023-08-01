@@ -168,7 +168,7 @@ class PersonaController extends Controller
                         return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                     }else{
                         // verificamos en la bd del sga
-                        $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_celular','per_sexo'
+                        $personaSga=PersonaSga::select('per_nombres','per_apellidos','per_dni','per_mail','per_email_institucional','per_celular','per_sexo'
                         ,'per_login','per_direccion','per_fnaci')
                         ->Where('per_dni',$request->input('dni'))->first();
                         if($personaSga){
@@ -179,8 +179,11 @@ class PersonaController extends Controller
                             $usuario->apellido_paterno= $apellidos[0];
                             $usuario->apellido_materno=$apellidos[1];
                             $usuario->tipo_documento=1;
+                            if($personaSga->per_email_institucional!=null)
+                                $usuario->correo=$personaSga->per_email_institucional;
+                            else
+                                $usuario->correo=$personaSga->per_mail;
                             $usuario->nro_documento=$personaSga->per_dni;
-                            $usuario->correo=$personaSga->per_mail;
                             $usuario->direccion=$personaSga->per_direccion;
                             $usuario->fecha_nacimiento=$personaSga->per_fnaci;
                             $usuario->celular=$personaSga->per_celular;
