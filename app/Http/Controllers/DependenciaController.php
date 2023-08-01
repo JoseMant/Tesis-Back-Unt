@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\DependenciaURAA;
 use App\Escuela;
+use App\ProgramaURAA;
 use App\Mencion;
 use App\Programa;
 
@@ -46,16 +47,10 @@ class DependenciaController extends Controller
     }
 
     public function getEscuelas($id){
-        $dependencia=DependenciaURAA::find($id);
-        if ($dependencia->idUnidad==1) {
-            $escuelas =Escuela::where('idDependencia',$id)->where('estado',true)->get();
-        }else if ($dependencia->idUnidad==2) {
-            
-        }else if ($dependencia->idUnidad==3) {
-            
-        }else{
-        }
-        return response()->json($escuelas, 200);
+        $programas = ProgramaURAA::where('idDependencia',$id)
+        ->where('estado',true)
+        ->get();
+        return response()->json($programas, 200);
     }
 
     public function getDependenciaByPrograma($idDependencia_detalle){
