@@ -207,7 +207,7 @@ class CarpetaController extends Controller
     }
 
     public function getCarpetaBySearch(Request $request){
-        return $tramites=Tramite::select('tramite.idTramite','usuario.nombres','usuario.apellidos','usuario.nro_documento','tramite.sede',
+        $tramites=Tramite::select('tramite.idTramite','usuario.nombres','usuario.apellidos','usuario.nro_documento','tramite.sede',
         'tipo_tramite_unidad.descripcion as tipo_tramite',
         'modalidad_carpeta.acto_academico as modalidadSustentancion','tramite_detalle.nro_libro','tramite_detalle.folio','tramite_detalle.nro_registro','resolucion.nro_resolucion',
         DB::raw("(case 
@@ -241,7 +241,7 @@ class CarpetaController extends Controller
         })
         ->get();
 
-        if (!$tramite) return response()->json(['status' => '400', 'message' => "No se encuentra carpeta con esa búsqueda"], 400);
+        if (!$tramites) return response()->json(['status' => '400', 'message' => "No se encuentra carpeta con esa búsqueda"], 400);
 
         foreach ($tramites as $key => $tramite) {
             $requisito=Tramite_Requisito::select('tramite_requisito.archivo')
