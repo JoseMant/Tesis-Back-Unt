@@ -12,6 +12,8 @@ use App\User;
 use App\Tramite;
 use App\Historial_Estado;
 use App\Escuela;
+use App\ProgramaURAA;
+use App\Usuario_Programa;
 use Illuminate\Support\Facades\Hash;
 
 
@@ -29,17 +31,21 @@ class UserController extends Controller
      */
     public function index()
     {
-        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
+        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos',
+        'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol',
+        'usuario.confirmed','usuario.estado','usuario.idDependencia')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
         ->where('usuario.idTipo_usuario','!=',4)
         ->orderBy('usuario.apellidos')
         ->get();
         foreach ($usuarios as $key => $usuario) {
-            if ($usuario->idTipo_usuario==5) {
-                $escuela=Escuela::find($usuario->idDependencia);
-                $usuario->idFacultad=$escuela->idDependencia;
+            $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
+            if (count($usuario->programas) > 0) {
+                $programa = ProgramaURAA::find($usuario->programas[0]);
+                $usuario->idFacultad = $programa->idDependencia;
+            } else {
+                $usuario->idFacultad = $usuario->idDependencia;
             }
         }
         return response()->json($usuarios, 200);
@@ -69,10 +75,7 @@ class UserController extends Controller
             ->orderBy('usuario.apellidos')
             ->get();
             foreach ($usuarios as $key => $usuario) {
-                if ($usuario->idTipo_usuario==5) {
-                    $escuela=Escuela::find($usuario->idDependencia);
-                    $usuario->idFacultad=$escuela->idDependencia;
-                }
+                $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
             }
         }else{
             $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
@@ -83,10 +86,7 @@ class UserController extends Controller
             ->orderBy('usuario.apellidos')
             ->get();
             foreach ($usuarios as $key => $usuario) {
-                if ($usuario->idTipo_usuario==5) {
-                    $escuela=Escuela::find($usuario->idDependencia);
-                    $usuario->idFacultad=$escuela->idDependencia;
-                }
+                $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
             }
         }
         return response()->json($usuarios, 200);
