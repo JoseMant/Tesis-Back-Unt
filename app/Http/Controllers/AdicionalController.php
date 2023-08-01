@@ -35,7 +35,7 @@ use App\Escuela;
 use App\Motivo_Certificado;
 use App\PersonaSuv;
 use App\PersonaSga;
-use App\Diploma_carpeta;
+use App\Diploma_Carpeta;
 
 class AdicionalController extends Controller
 {

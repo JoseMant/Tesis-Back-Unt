@@ -818,13 +818,13 @@ class TituloController extends Controller
                 $tramite->idUniversidad = 1;
             } else {
                 // Accedemos a la bd de diplomas para obtener la fecha de primera matrícula y egreso
-                $graduado=Graduado::select('matricula_fecha','fecha_egresado')->where('tipo_ficha',1)->where('grad_estado',2)
-                ->where('cod_alumno',$tramite->nro_matricula)->first();
-                if ($graduado) {
-                    $tramite->fecha_primera_matricula=$graduado->matricula_fecha;
-                    $tramite->fecha_ultima_matricula=$graduado->fecha_egresado;
-                    $tramite->idUniversidad = 1;
-                } else {
+                // $graduado=Graduado::select('matricula_fecha','fecha_egresado')->where('tipo_ficha',1)->where('grad_estado',2)
+                // ->where('cod_alumno',$tramite->nro_matricula)->first();
+                // if ($graduado) {
+                //     $tramite->fecha_primera_matricula=$graduado->matricula_fecha;
+                //     $tramite->fecha_ultima_matricula=$graduado->fecha_egresado;
+                //     $tramite->idUniversidad = 1;
+                // } else {
                     // Verificando el SUV
                     $matriculaPrimera=MatriculaSUV::select('mat_fecha')->where('idalumno',$tramite->nro_matricula)->first();
                     if ($matriculaPrimera) {
@@ -843,7 +843,7 @@ class TituloController extends Controller
                             $tramite->fecha_primera_matricula = null;
                         }
                     }       
-                }
+                // }
             }
 
             // NUMERO DE CRÉDITOS SUV
