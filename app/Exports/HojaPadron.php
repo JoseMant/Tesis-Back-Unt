@@ -32,8 +32,10 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
     public function columnFormats(): array
     {
         return [
-            'B' => NumberFormat::FORMAT_TEXT,
+            'A' => NumberFormat::FORMAT_TEXT,
             'Q' => NumberFormat::FORMAT_TEXT,
+            'B' => NumberFormat::FORMAT_TEXT,
+            'R' => NumberFormat::FORMAT_TEXT,
         ];
     }
     public function registerEvents(): array
