@@ -1348,8 +1348,7 @@ class TramiteController extends Controller
     public function anularTramite(Request $request)
     {   
         
-        
-        
+
         // return $request->all();
         DB::beginTransaction();
         try {
@@ -1369,10 +1368,29 @@ class TramiteController extends Controller
             $historial_estados->fecha=date('Y-m-d h:i:s');
             $historial_estados->save();
 
+            //Anulando tramite desde el estado mismo
             $tramite->idEstado_tramite=$historial_estados->idEstado_nuevo;
             $tramite->update();
 
 
+            //EQUAL - Anular tramite _paralelo
+            $tramite_2=Tramite::where('nro_tramite',$tramite->nro_tramite)->where('idTramite','<>',$tramite->idTramite)->where('idUsuario',$tramite->idUsuario)->first();
+            if($tramite_2)
+            {
+                $tramite_2->idEstado_tramite = 29;
+                $tramite_2->update();
+
+                //EQUAL - Registrar el estado anulado _paralelo
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite = $tramite_2->idTramite;
+                $historial_estados->idUsuario = $idUsuario;
+                $historial_estados->idEstado_actual = $tramite_2->idEstado_tramite;
+                $historial_estados->idEstado_nuevo = 29;
+                $historial_estados->fecha = date('Y-m-d h:i:s');
+                $historial_estados->save();
+            }
+           
+            //DATOS para envío del correo
             $idusuario=Tramite::select('tramite.idUsuario')
             ->where('tramite.idTramite',$request->idTramite)
             ->first();
