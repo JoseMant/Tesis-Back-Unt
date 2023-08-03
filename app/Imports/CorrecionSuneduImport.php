@@ -10,6 +10,7 @@ use App\Tramite_Detalle;
 use App\Modalidad_Carpeta;
 use App\Programa_Estudios_Carpeta;
 use App\User;
+use App\Universidad;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
@@ -62,11 +63,13 @@ class Correcionsuneduimport implements ToCollection,WithMultipleSheets
     */
     public function collection(Collection $collection)
     {
+        // $this->setDato("hola"); 
         $numAlumnos_porRegistrar = count($collection);
         $this->setNumFilas( $numAlumnos_porRegistrar );
         foreach ($collection as $key => $value) {
             if ($key>=1) {
                 if ($value[0]) {
+                    
                     $tramite=Tramite::find($value[0]);
                     $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
 
@@ -88,7 +91,6 @@ class Correcionsuneduimport implements ToCollection,WithMultipleSheets
                         }
                     }
 
-
                     if (is_string($value[11])) $tramite_detalle->fecha_primera_matricula=$value[11];
                     else {
                         $date = Date::excelToDateTimeObject($value[11]);
@@ -101,6 +103,12 @@ class Correcionsuneduimport implements ToCollection,WithMultipleSheets
                         $tramite_detalle->fecha_ultima_matricula=date_format($date,"Y-m-d");
                     }
                     
+                    if ($value[17]) {
+                        $universidad=Universidad::where('codigo_sunedu',$value[17])->first();
+                        if ($universidad) {
+                            $tramite_detalle->idUniversidad=$universidad->codigo_sunedu;
+                        }
+                    }
                     $modalidad_estudio_carpeta=Programa_Estudios_Carpeta::where('descripcion',$value[20])->first();
                     $tramite_detalle->idPrograma_estudios_carpeta=$modalidad_estudio_carpeta->idPrograma_estudios_carpeta;
                     $tramite_detalle->nro_creditos_carpeta=$value[21];
