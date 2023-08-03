@@ -12,14 +12,29 @@ use App\Programa_Estudios_Carpeta;
 use App\User;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
 
-class Correcionsuneduimport implements ToCollection
+class Correcionsuneduimport implements ToCollection,WithMultipleSheets
 {
 
     private $estado=0;
     private $dato="";
     private $numFilas=0;
     
+    public function sheets(): array
+    {
+        return [
+        'PADRÓN' => $this, // Nombre de la hoja de Excel que va a leer. Si no se encuentra el nombre tal cual, se omitirá el registro.
+        ];
+    }
+
+    // public function onUnknownSheet($sheetName)
+    // {
+    //     info("La hoja {$sheetName} no se encontró.");
+    //     $this->estado=1;
+    // }
+
     public function getStatus(): int
     {
         return $this->estado;
@@ -54,9 +69,17 @@ class Correcionsuneduimport implements ToCollection
                 if ($value[0]) {
                     $tramite=Tramite::find($value[0]);
                     $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
-                    $modalidades_carpeta=Modalidad_Carpeta::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)
-                    ->where('estado',1)
-                    ->where('modalidad_sustentacion',$value[62])->get();
+
+                    if ($tramite->idTipo_tramite_unidad==16||$tramite->idTipo_tramite_unidad==34) {
+                        $modalidades_carpeta=Modalidad_Carpeta::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)
+                        ->where('estado',1)
+                        ->where('modalidad_sustentacion',$value[62])
+                        ->get();
+                    }else {
+                        $modalidades_carpeta=Modalidad_Carpeta::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)
+                        ->where('estado',1)
+                        ->get();
+                    }
 
                     foreach ($modalidades_carpeta as $modalidad) {
                         if ($modalidad->acto_academico=$value[22]) {
@@ -65,12 +88,6 @@ class Correcionsuneduimport implements ToCollection
                         }
                     }
 
-                    // $modalidad_carpeta=Modalidad_Carpeta::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)
-                    // ->where('nombre_padron', $value[22])
-                    // ->where('modalidad_sustentacion',$value[62])
-                    // ->where('estado',1)
-                    // ->first();
-                    // $tramite_detalle->idModalidad_carpeta=$modalidad_carpeta->idModalidad_carpeta;
 
                     if (is_string($value[11])) $tramite_detalle->fecha_primera_matricula=$value[11];
                     else {
