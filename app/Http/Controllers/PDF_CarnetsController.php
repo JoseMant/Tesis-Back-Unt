@@ -39,8 +39,9 @@ class PDF_CarnetsController extends Controller
     ->groupBy('tramite.sede')
     ->groupBy('programa.nombre')
     ->orderBy('tramite.sede')
-    
     ->get();
+
+    
 
 
 
@@ -82,6 +83,7 @@ class PDF_CarnetsController extends Controller
     $salto=0;
     $i=0;
     $inicioY=37;
+    $totalcarnets=0;
     $this->pdf->SetFont('Arial','', 7);
     foreach ($tramites as $key => $tramite) {
         
@@ -103,6 +105,7 @@ class PDF_CarnetsController extends Controller
         $this->pdf->Cell(27, 8,' ',1,0,'C');
         $salto+=8;
         $i+=1;
+        $totalcarnets+=$tramite->carnets;
         if (($inicioY+$salto)>=269) {
             $this->pdf->AddPage();
             $inicioY=17;
@@ -123,6 +126,11 @@ class PDF_CarnetsController extends Controller
             $this->pdf->SetFont('Arial','', 7);
         }
     }
+
+    $this->pdf->SetXY(139,$inicioY+$salto);
+    $this->pdf->Cell(18, 5,'TOTAL:',1,0,'L');
+    $this->pdf->SetXY(157,$inicioY+$salto);
+    $this->pdf->Cell(45, 5,$totalcarnets,1,0,'L');
 
     return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
      ->header('Content-Type', 'application/pdf');    
