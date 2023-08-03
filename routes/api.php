@@ -159,6 +159,10 @@ Route::post('upload/diplomas', 'UploadController@uploadzip');
 
 //Roles
 Route::get('roles', 'Tipo_UsuarioController@GetRoles');
+
+//Tipos_documentos
+Route::get('tipos_documentos', 'Tipo_DocumentoController@GetTipos_documentos');
+
 //Cronograma
 Route::get('cronogramas/all', 'CronogramaController@index');
 Route::get('cronogramas/activos/{idDependencia}/{idTipo_tramite_unidad}', 'CronogramaController@getCronogramasActivos');
