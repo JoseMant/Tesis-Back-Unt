@@ -32,10 +32,13 @@ class PDF_CarnetsController extends Controller
     
     $tramites=Tramite::select('tramite.sede','programa.nombre as escuela',DB::raw('count(tramite.idEstado_tramite) as carnets'))
     ->join('programa','programa.idPrograma','tramite.idPrograma')
-    ->where('tramite.idTipo_tramite_unidad',17)
-    ->orWhere('tramite.idTipo_tramite_unidad',18)
-    ->orWhere('tramite.idTipo_tramite_unidad',30)
-    ->where('tramite.idEstado_tramite',27)
+    ->where(function($query)
+    {
+        $query->where('tramite.idTipo_tramite_unidad',17)
+        ->orWhere('tramite.idTipo_tramite_unidad',18)
+        ->orWhere('tramite.idTipo_tramite_unidad',30);
+    })
+    ->where('tramite.idEstado_tramite',26)
     ->groupBy('tramite.sede')
     ->groupBy('programa.nombre')
     ->orderBy('tramite.sede')
@@ -86,7 +89,7 @@ class PDF_CarnetsController extends Controller
     $totalcarnets=0;
     $this->pdf->SetFont('Arial','', 7);
     foreach ($tramites as $key => $tramite) {
-        
+        $totalcarnets=$totalcarnets+$tramite->carnets;
         //SEDE
         $this->pdf->SetXY(10,$inicioY+$salto);
         $sede=$tramite->sede;
@@ -105,7 +108,7 @@ class PDF_CarnetsController extends Controller
         $this->pdf->Cell(27, 8,' ',1,0,'C');
         $salto+=8;
         $i+=1;
-        $totalcarnets+=$tramite->carnets;
+        
         if (($inicioY+$salto)>=269) {
             $this->pdf->AddPage();
             $inicioY=17;
