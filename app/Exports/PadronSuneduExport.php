@@ -55,7 +55,7 @@ class MaestroExport implements WithTitle,FromArray,WithEvents,ShouldAutoSize
     public function array(): array
     {
         return [
-            ["N°","PROG_ESTU","","","TODOS LOS CAMPOS RESALTADOS SON EDITABLES EDITABLES"],
+            ["N°","PROG_ESTU","","","TODOS LOS CAMPOS RESALTADOS SON EDITABLES"],
             ["1","CICLO REGULAR"],
             ["2","CONVALIDACIÓN"],
             ["3","COMPLEMENTACIÓN ACADÉMICA"],

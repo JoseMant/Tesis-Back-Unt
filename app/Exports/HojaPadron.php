@@ -32,8 +32,10 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
     public function columnFormats(): array
     {
         return [
-            'B' => NumberFormat::FORMAT_TEXT,
+            'A' => NumberFormat::FORMAT_TEXT,
             'Q' => NumberFormat::FORMAT_TEXT,
+            'B' => NumberFormat::FORMAT_TEXT,
+            'R' => NumberFormat::FORMAT_TEXT,
         ];
     }
     public function registerEvents(): array
@@ -196,7 +198,7 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
         DB::raw('CONCAT("") AS PROC_PAIS_EXT'),
         DB::raw('CONCAT("") AS PROC_UNIV_EXT'),
         DB::raw('CONCAT("") AS PROC_GRADO_EXT'),
-        // DB::raw('oficio.nro_oficio AS REG_OFICIO'),
+        DB::raw('CONCAT("") AS REG_OFICIO'),
         DB::raw('CONCAT("") AS FEC_MAT_MOD'),
         DB::raw('CONCAT("") AS FEC_INICIO_MOD'),
         DB::raw('CONCAT("") AS FEC_FIN_MOD'),

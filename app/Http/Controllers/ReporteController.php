@@ -1081,12 +1081,12 @@ class ReporteController extends Controller
 
             // Declarando variable que indicará el key en la variable datos de cada programa que se imprimirá
             // Obteniendo las escuelas pertenecientes a la dependencia
-            $programas=ProgramaURAA::where('idDependencia',$idDependencia)->get();
+            $programas=ProgramaURAA::where('idDependencia',$idDependencia)->where('estado',true)->orderBy('nombre','asc')->get();
 
             foreach ($programas as $key => $programa) {
                 // // Obteniendo los trámites de cada programa pertenecientes a la colación seleccionada
                 $tramites=Tramite::select('tramite.nro_tramite','tramite.nro_matricula',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
-                'estado_tramite.descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'))
+                'estado_tramite.descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'),'tramite.idEstado_tramite')
                 ->join('usuario','tramite.idUsuario','usuario.idUsuario')
                 ->join('usuario as asignado','tramite.idUsuario_asignado','asignado.idUsuario')
                 ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
@@ -1095,8 +1095,12 @@ class ReporteController extends Controller
                 ->where('tramite.idTipo_tramite_unidad',37)
                 ->where('tramite.idEstado_tramite','!=',29)
                 ->where('tramite.idEstado_tramite','!=',15)
+                ->where('tramite.idEstado_tramite','!=',13)
                 ->where('tramite.idPrograma',$programa->idPrograma)
                 ->where('cronograma_carpeta.fecha_colacion',$cronograma)
+                ->where('tramite.estado',true)
+                ->orderBy('usuario.apellidos','asc')
+                ->orderBy('usuario.nombres','asc')
                 ->get();
 
                 if (count($tramites)>0) {
@@ -1113,6 +1117,15 @@ class ReporteController extends Controller
                     $response[$cont_cells]=["","N°","N° TRÁMITE","N° MATRÍCULA","EGRESADOS","ESTADO","ASIGNADO","OBSERVACIONES"];
 
                     foreach ($tramites as $key => $tramite) {
+                        // Personalizando los mensajes del reporte
+                        if ($tramite->idEstado_tramite==5) {
+                            $tramite->descripcion="PENDIENTE DE ASIGNACIÓN A ENCARGADO";
+                        }elseif ($tramite->idEstado_tramite==7) {
+                            $tramite->descripcion="PENDIENTE DE VALIDACIÓN DE FOTOGRAFÍA";
+                        }elseif ($tramite->idEstado_tramite==8) {
+                            $tramite->descripcion="PENDIENTE DE GENERACIÓN DE CERTIFICADO";
+                        }
+
                         $cont_cells++;
                         $response[$cont_cells]=["",$key+1,$tramite->nro_tramite,$tramite->nro_matricula,$tramite->solicitante,$tramite->descripcion,$tramite->asignado];
                     }
@@ -1133,7 +1146,8 @@ class ReporteController extends Controller
     public function crearPDF($idDependencia,$cronograma){
 
         $tramites=Tramite::select('tramite.nro_tramite','tramite.nro_matricula',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
-                'estado_tramite.descripcion as descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'),'programa.nombre as programa')
+                'estado_tramite.descripcion as descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'),'programa.nombre as programa',
+                'tramite.idEstado_tramite')
                 ->join('usuario','tramite.idUsuario','usuario.idUsuario')
                 ->join('usuario as asignado','tramite.idUsuario_asignado','asignado.idUsuario')
                 ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
@@ -1143,6 +1157,7 @@ class ReporteController extends Controller
                 ->where('tramite.idTipo_tramite_unidad',37)
                 ->where('tramite.idEstado_tramite','!=',29)
                 ->where('tramite.idEstado_tramite','!=',15)
+                ->where('tramite.idEstado_tramite','!=',13)
                 ->where('tramite.idDependencia',$idDependencia)
                 ->where('cronograma_carpeta.fecha_colacion',$cronograma)
                 ->orderby('programa')
@@ -1175,7 +1190,7 @@ class ReporteController extends Controller
         $this->pdf->SetXY(5,30);
         $this->pdf->Cell(297, 4,utf8_decode(' COLACIÓN DEL '.$cronograma.' DE LA '.$dependencia->nombre),0,0,'C');
 
-        $this->pdf->SetFont('Arial','U', 8);
+        $this->pdf->SetFont('Arial','BU', 8);
         $this->pdf->SetXY(5,34);
         $this->pdf->Cell(297, 8,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[0]['programa']),0,0,'C');
 
@@ -1220,6 +1235,14 @@ class ReporteController extends Controller
                 $this->pdf->SetXY(45,$inicioY+$salto);
                 $this->pdf->Cell(70,4,utf8_decode($tramite->solicitante),1,'C');
                 //ESTADO
+                // Personalizando los mensajes del reporte
+                if ($tramite->idEstado_tramite==5) {
+                    $tramite->descripcion="PENDIENTE DE ASIGNACIÓN A ENCARGADO";
+                }elseif ($tramite->idEstado_tramite==7) {
+                    $tramite->descripcion="PENDIENTE DE VALIDACIÓN DE FOTOGRAFÍA";
+                }elseif ($tramite->idEstado_tramite==8) {
+                    $tramite->descripcion="PENDIENTE DE GENERACIÓN DE CERTIFICADO";
+                }
                 $this->pdf->SetXY(115,$inicioY+$salto);
                 $this->pdf->Cell(70, 4,utf8_decode($tramite->descripcion),1,0,'C');
                 //ASIGNADO
@@ -1234,7 +1257,8 @@ class ReporteController extends Controller
                     // if($key==0){
                     //     $key=-1;
                     // }
-                    $this->pdf->SetFont('Arial','U', 8);
+                    $i=0;
+                    $this->pdf->SetFont('Arial','BU', 8);
                     $this->pdf->SetXY(5,$inicioY+$salto);
                     $this->pdf->Cell(297, 8,utf8_decode('CERTIFICADOS PENDIENTES DE '.$tramites[$key+1]['programa']),0,0,'C');
                     $salto+=8;

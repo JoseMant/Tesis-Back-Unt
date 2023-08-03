@@ -1625,6 +1625,7 @@ class TramiteController extends Controller
         ->where('voucher.nro_operacion',$nro_operacion)
         ->where('voucher.fecha_operacion',$fecha_operacion)
         ->where('tramite.idUsuario',$idUsuario)
+        ->where('tramite.idTipo_tramite_unidad','!=',37)
         ->where('tramite.idEstado_tramite','!=',29)
         ->first();
     }

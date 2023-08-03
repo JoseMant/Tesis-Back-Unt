@@ -162,7 +162,7 @@ class AdicionalController extends Controller
                 $query->where('tramite.idDependencia',13)
                 ->orWhere('dependencia.idDependencia2',13);
             })
-            ->where('cronograma_carpeta.fecha_colacion','2023-08-04')
+            ->where('cronograma_carpeta.fecha_colacion','2023-08-18')
             ->get();
             // return count($ingenieria);
             //Recorremos los trámites y chancamos cada uno la resolución

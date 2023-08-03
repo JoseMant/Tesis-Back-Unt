@@ -1643,6 +1643,161 @@ class GradoController extends Controller
         ]], 200);
     }
 
+    // versión firmas
+    // public function registrarEnLibro(Request $request){
+    //     try {
+    //         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+    //         $token = JWTAuth::getToken();
+    //         $apy = JWTAuth::getPayload($token);
+    //         $idUsuario=$apy['idUsuario'];
+
+
+    //         // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+    //         $tramites=Tramite::join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+    //         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+    //         ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+    //         ->where('tramite.idEstado_tramite','!=',42)
+    //         ->where('tramite.idEstado_tramite','!=',29)
+    //         ->where(function($query)
+    //         {
+    //             $query->where('tramite.idTipo_tramite_unidad',15)
+    //             ->orWhere('tramite.idTipo_tramite_unidad',16)
+    //             ->orWhere('tramite.idTipo_tramite_unidad',34);
+    //         })
+            
+    //         ->where('resolucion.idResolucion',$request->idResolucion)
+    //         ->get();  
+
+    //         if (count($tramites)>0) {
+    //             DB::rollback();
+    //             return response()->json(['status' => '400', 'message' =>"Hay ".count($tramites)." trámites en estados pendientes"], 400);
+    //         }
+
+    //         // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+    //         $tramites=Tramite::join('usuario','usuario.idUsuario','tramite.idUsuario')
+    //         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+    //         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+    //         ->join('programa','programa.idPrograma','tramite.idPrograma')
+    //         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+    //         ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+    //         ->where('tramite.idEstado_tramite',42)
+    //         ->where(function($query)
+    //         {
+    //             $query->where('tramite.idTipo_tramite_unidad',15)
+    //             ->orWhere('tramite.idTipo_tramite_unidad',16)
+    //             ->orWhere('tramite.idTipo_tramite_unidad',34);
+    //         })
+            
+    //         ->where('resolucion.idResolucion',$request->idResolucion)
+    //         ->orderBy('tramite.idTipo_tramite_unidad','asc')
+    //         ->orderBy('dependencia.nombre','asc')
+    //         ->orderBy('programa.nombre','asc')
+    //         ->orderBy('usuario.apellidos','asc')
+    //         ->orderBy('usuario.nombres','asc')
+    //         ->get();  
+            
+    //         foreach ($tramites as $key => $tramite) {
+                
+
+    //             // obtenemos datos del último registro del libro
+    //             $ultimoRegistro=Libro::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->orderBy('nro_registro','desc')
+    //             ->limit(1)
+    //             ->first();
+                
+    //             // GUARDAMOS EL REGISTRO EN EL LIBRO
+    //             $newRegistro=new Libro();
+    //             if ($ultimoRegistro->folio==200 && $ultimoRegistro->contador==20) {
+    //                 $newRegistro->nro_libro=$ultimoRegistro->nro_libro+1;
+    //                 $newRegistro->folio=1;
+    //                 $newRegistro->nro_registro=$ultimoRegistro->nro_registro+1;
+    //                 $newRegistro->contador=1;
+    //             }elseif ($ultimoRegistro->contador==20) {
+    //                 $newRegistro->nro_libro=$ultimoRegistro->nro_libro;
+    //                 $newRegistro->folio=$ultimoRegistro->folio+1;
+    //                 $newRegistro->nro_registro=$ultimoRegistro->nro_registro+1;
+    //                 $newRegistro->contador=1;
+    //             }else {
+    //                 $newRegistro->nro_libro=$ultimoRegistro->nro_libro;
+    //                 $newRegistro->folio=$ultimoRegistro->folio;
+    //                 $newRegistro->nro_registro=$ultimoRegistro->nro_registro+1;
+    //                 $newRegistro->contador=$ultimoRegistro->contador+1;
+    //             }
+    //             $newRegistro->idTipo_tramite_unidad=$tramite->idTipo_tramite_unidad;
+    //             $newRegistro->save();
+
+    //             //Obtenemos el detalle de cada uno de los trámites Y ACTUALIZAMOS LOS DATOS QUE VAN EN EL LIBRO
+    //             $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+    //             $tramite_detalle->nro_libro=$newRegistro->nro_libro;
+    //             $tramite_detalle->folio=$newRegistro->folio;
+    //             $tramite_detalle->nro_registro=$newRegistro->nro_registro;
+    //             $tramite_detalle->idTipo_tramite_unidad=$newRegistro->idTipo_tramite_unidad;
+
+    //             // Registramos el código de diploma
+    //             $letra=null;
+    //             if($tramite->idTipo_tramite_unidad==15) $letra="BO";
+    //             elseif($tramite->idTipo_tramite_unidad==16) $letra="TO";
+    //             elseif ($tramite->idTipo_tramite_unidad==34) $letra="SO";
+
+    //             $tramite_detalle->codigo_diploma=$letra.$newRegistro->nro_libro.$newRegistro->folio.$newRegistro->nro_registro;
+    //             $tramite_detalle->save();
+
+    //             //REGISTRAMOS EL ESTADO DEL TRÁMITE
+    //             $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 43, $idUsuario);
+    //             $historial_estado->save();
+
+    //             //REGISTRAMOS EL ESTADO DEL TRÁMITE
+    //             $historial_estado = $this->setHistorialEstado($tramite->idTramite, 43, 13, $idUsuario);
+    //             $historial_estado->save();
+
+    //             $tramite->idEstado_tramite=13;
+    //             $tramite->save();
+    //         }
+
+    //         // TRÁMITES POR USUARIO
+    //         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
+    //         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula',
+    //         'tramite.exonerado_archivo', 'tramite_detalle.*', 'tramite.idTipo_tramite_unidad',
+    //         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
+    //         'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
+    //         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
+    //         'voucher.archivo as voucher',
+    //         'resolucion.idResolucion', 'cronograma_carpeta.fecha_cierre_alumno',
+    //         'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+    //         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+    //         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+    //         ->join('resolucion', 'resolucion.idResolucion', 'cronograma_carpeta.idResolucion')
+    //         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+    //         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+    //         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+    //         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+    //         ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+    //         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+    //         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+    //         ->where('tramite.idEstado_tramite',13)
+    //         ->where('tipo_tramite_unidad.idTipo_tramite',2)
+    //         ->where(function($query)
+    //         {
+    //             $query->where('tramite.idTipo_tramite_unidad',15)
+    //             ->orWhere('tramite.idTipo_tramite_unidad',16)
+    //             ->orWhere('tramite.idTipo_tramite_unidad',34);
+    //         })
+    //         ->where('resolucion.idResolucion',$request->idResolucion)
+    //         ->orderBy('tramite.idTipo_tramite_unidad','asc')
+    //         ->orderBy('dependencia.nombre','asc')
+    //         ->orderBy('programa.nombre','asc')
+    //         ->orderBy('usuario.apellidos','asc')
+    //         ->orderBy('usuario.nombres','asc')
+    //         ->get();  
+
+    //         DB::commit();
+    //         return response()->json($tramites, 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+    //     }
+    // }
+
+    // versión producción
     public function registrarEnLibro(Request $request){
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -1652,11 +1807,16 @@ class GradoController extends Controller
 
 
             // Recorremos todos los trámites y le añadimos su numeracion a cada uno
-            $tramites=Tramite::join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            $tramites=Tramite::select('tramite.*')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite','!=',42)
-            ->where('tramite.idEstado_tramite','!=',29)
+	        ->where('tramite.idEstado_tramite','!=',29)
+            ->where('tipo_tramite_unidad.idTipo_tramite',2)
             ->where(function($query)
             {
                 $query->where('tramite.idTipo_tramite_unidad',15)
@@ -1667,19 +1827,21 @@ class GradoController extends Controller
             ->where('resolucion.idResolucion',$request->idResolucion)
             ->get();  
 
+
             if (count($tramites)>0) {
                 DB::rollback();
                 return response()->json(['status' => '400', 'message' =>"Hay ".count($tramites)." trámites en estados pendientes"], 400);
             }
 
             // Recorremos todos los trámites y le añadimos su numeracion a cada uno
-            $tramites=Tramite::join('usuario','usuario.idUsuario','tramite.idUsuario')
+            $tramites=Tramite::select('tramite.*','dependencia.idDependencia2')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
             ->join('programa','programa.idPrograma','tramite.idPrograma')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-            ->where('tramite.idEstado_tramite',42)
+            ->where('tramite.idEstado_tramite',42)            
             ->where(function($query)
             {
                 $query->where('tramite.idTipo_tramite_unidad',15)
@@ -1696,8 +1858,6 @@ class GradoController extends Controller
             ->get();  
             
             foreach ($tramites as $key => $tramite) {
-                
-
                 // obtenemos datos del último registro del libro
                 $ultimoRegistro=Libro::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->orderBy('nro_registro','desc')
                 ->limit(1)
@@ -1723,32 +1883,50 @@ class GradoController extends Controller
                 }
                 $newRegistro->idTipo_tramite_unidad=$tramite->idTipo_tramite_unidad;
                 $newRegistro->save();
-
+                // OBTENER DATOS DE AUTORIDADES
+                $rector=User::where('idTipo_usuario',12)->where('estado',1)->first();
+                $secretaria=User::where('idTipo_usuario',10)->where('estado',1)->first();
+                if ($tramite->idTipo_tramite_unidad==34) {
+                    $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia2)->where('estado',1)->first();
+                }else {
+                    $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',1)->first();
+                }
                 //Obtenemos el detalle de cada uno de los trámites Y ACTUALIZAMOS LOS DATOS QUE VAN EN EL LIBRO
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
                 $tramite_detalle->nro_libro=$newRegistro->nro_libro;
                 $tramite_detalle->folio=$newRegistro->folio;
                 $tramite_detalle->nro_registro=$newRegistro->nro_registro;
                 $tramite_detalle->idTipo_tramite_unidad=$newRegistro->idTipo_tramite_unidad;
-
-                // Registramos el código de diploma
-                $letra=null;
-                if($tramite->idTipo_tramite_unidad==15) $letra="BO";
-                elseif($tramite->idTipo_tramite_unidad==16) $letra="TO";
-                elseif ($tramite->idTipo_tramite_unidad==34) $letra="SO";
-
-                $tramite_detalle->codigo_diploma=$letra.$newRegistro->nro_libro.$newRegistro->folio.$newRegistro->nro_registro;
+                if ($rector) {
+                    $tramite_detalle->autoridad1=$rector->idUsuario;
+                }
+                if ($secretaria) {
+                    $tramite_detalle->autoridad2=$secretaria->idUsuario;
+                }
+                if ($decano) {
+                    $tramite_detalle->autoridad3=$decano->idUsuario;
+                }
                 $tramite_detalle->save();
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
-                $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 43, $idUsuario);
-                $historial_estado->save();
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                $historial_estados->idEstado_nuevo=43;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
 
                 //REGISTRAMOS EL ESTADO DEL TRÁMITE
-                $historial_estado = $this->setHistorialEstado($tramite->idTramite, 43, 13, $idUsuario);
-                $historial_estado->save();
+                $historial_estados=new Historial_Estado;
+                $historial_estados->idTramite=$tramite->idTramite;
+                $historial_estados->idUsuario=$idUsuario;
+                $historial_estados->idEstado_actual=43;
+                $historial_estados->idEstado_nuevo=44;
+                $historial_estados->fecha=date('Y-m-d h:i:s');
+                $historial_estados->save();
 
-                $tramite->idEstado_tramite=13;
+                $tramite->idEstado_tramite=44;
                 $tramite->save();
             }
 
