@@ -2774,6 +2774,7 @@ class GradoController extends Controller
                 // Creando el diploma con los datos obtenidos
                 // return $tramite;
                 $html2pdf = new Html2Pdf('L', 'A4', 'es', true, 'UTF-8');
+                $html2pdf->AddFont('brandey', '', 'brandey.php');
                 $html2pdf->writeHTML(view('diploma.diploma', [
                     'foto_interesado'=>$requisito_foto->archivo,
                     'decano'=>$decano,'secretaria'=>$secretariaGeneral,'rector'=>$rector,
