@@ -258,7 +258,7 @@ Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@Ge
 Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
 Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');//usado
-Route::put('create/codigo', 'TituloController@createCodeDiploma');
+// Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');
