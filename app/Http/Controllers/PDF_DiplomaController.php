@@ -17,16 +17,17 @@ class PDF_DiplomaController extends Controller
 {
     public function Diploma($idTramite){
         try {
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombreComp')
-            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.denominacion as facultad'
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombreComp')
+            ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite as codigo',
+            'dependencia.denominacion as dependencia'
             ,'tramite.nro_matricula','usuario.tipo_documento','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-            , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+            , DB::raw('CONCAT("NÂ° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
             ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
             'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-            'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','tramite_detalle.codigo_diploma',
+            'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','diploma_carpeta.codigo as diploma',
             'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro','tramite_detalle.folio'
             ,'tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','tipo_tramite_unidad.diploma_obtenido',
-            'modalidad_carpeta.acto_academico')
+            'modalidad_carpeta.acto_academico','tramite_detalle.codigo_diploma', 'programa.nombre as programa')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -39,27 +40,23 @@ class PDF_DiplomaController extends Controller
             ->join('voucher','tramite.idVoucher','voucher.idVoucher')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+            ->join('programa','tramite.idPrograma','programa.idPrograma')
             ->Find($idTramite);
-            // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-            $dependenciaDetalle=null;
-            if ($tramite->idUnidad==1) {
-                $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
+            // VERIFICAR LA UNIDAD
+            if ($tramite->idUnidad==1) { 
                 $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
                 ->where('idDependencia',$tramite->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
-                $tramite->programa=$dependenciaDetalle->nombre;
             }else if ($tramite->idUnidad==2) {
                 
             }else if ($tramite->idUnidad==3) {
                 
             }else{
-                $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
                 $dependencia=DependenciaURAA::find($tramite->idDependencia);
                 $dependencia2=DependenciaURAA::find($dependencia->idDependencia2);
-                $tramite->facultad=$dependencia2->denominacion;
+                $tramite->dependencia=$dependencia2->denominacion;
                 // ----------------------------------------
                 $decano=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
                 ->where('idDependencia',$dependencia2->idDependencia)->where('idTipo_usuario',6)->where('estado',true)->first();
-                $tramite->programa=$dependenciaDetalle->denominacion;
             }
             
             $requisito_foto=Tramite_Requisito::where('idTramite',$tramite->idTramite)
@@ -73,18 +70,18 @@ class PDF_DiplomaController extends Controller
             $rector=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')->where('idTipo_usuario',12)->where('estado',true)->first();
             $secretaria=User::select(DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as nombres'),'usuario.cargo','usuario.sexo','usuario.grado')
             ->where('idTipo_usuario',10)->where('estado',true)->first();
-            // $tramite->escuela="RESIDENTADO MÉDICO";
+            // $tramite->escuela="RESIDENTADO MÃ‰DICO";
             // return $tramite;
 
 
             $html2pdf = new Html2Pdf('L', 'A4', 'es', true, 'UTF-8');
-            $html2pdf->writeHTML(view('emails.diploma', [
-                'foto_interesado'=>$requisito_foto->archivo,
-                'decano'=>$decano,'secretaria'=>$secretaria,'rector'=>$rector,
-                'emision_diploma'=>'O - ORIGINAL',
-                'tramite'=>$tramite
-            ]));
-            $html2pdf->output($tramite->nro_tramite.'.pdf');
+            $html2pdf->writeHTML(view('emails.diploma', ['opcFoto' => 1, 'diploma' => 'T110','ficha' => 'PREGRADO','fotoAlumno'=>$requisito_foto->archivo,
+                                                        'denominacion'=>'BACHILLER EN CIENCIAS DE LA COMUNICACIÃ“N','nombreComp'=>
+                                                    'KEVIN JOEL','facultad'=>' FACULTAD DE INGENIERIA','idFicha'=>$tramite->idUnidad,'escuela'=>'INGENIERIA DE SISTEMAS',
+                                                'decano'=>$decano,'secretaria'=>$secretaria,'rectorCargo'=>'RECTOR(A)','rector'=>$rector,
+                                            'nrolibro'=>1,'folio'=>1,'nroRegistro'=>12,'nroDoc'=>'75411199','tipoFicha'=>'Bachiller','tipoActo'=>'tesis',
+                                        'numResolucionUniv'=>'123-2022','fechaResolucionCU'=>'23/03/2022','diplomasEstado'=>'O - ORIGINAL','tramite'=>$tramite]));
+            $html2pdf->output($tramite->codigo.'.pdf');
         }catch(Html2PdfException $e) {
             echo $e;
             exit;
