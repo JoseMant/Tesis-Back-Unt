@@ -151,6 +151,7 @@ Route::post('carnets/import/aprobados', 'CarnetController@aprobadosImport');
 Route::post('carnets/import/solicitados', 'CarnetController@solicitadosImport');
 Route::get('carnets/export', 'ExcelController@export');
 Route::get('padron_sunedu/{idResolucion}', 'PadronController@padron');
+Route::get('padron_oficio_sunedu/{idOficio}', 'PadronController@padronOficio');
 Route::post('correccion/padron_sunedu', 'PadronController@correccion');
 Route::get('excel/tesoreria/{fecha_inicio}/{fecha_fin}', 'VoucherController@reporteTesoreria');
 Route::get('download/diplomas/{idResolucion}', 'ZipController@downloadDiplomas');
