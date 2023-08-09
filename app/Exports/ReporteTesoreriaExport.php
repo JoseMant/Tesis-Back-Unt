@@ -70,10 +70,11 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
             when tramite.idUnidad = 3 then CONCAT(tipo_tramite_unidad.descripcion,'-',tipo_tramite.descripcion) 
             when tramite.idUnidad = 4 then CONCAT(tipo_tramite_unidad.descripcion) 
         end) as tipo_tramite"),
-        DB::raw("(case 
-            when tramite.idUnidad = 1 then (select nombre from escuela where idEscuela=tramite.idDependencia_detalle)  
-            when tramite.idUnidad = 4 then  (select denominacion from mencion where idMencion=tramite.idDependencia_detalle)
-        end) as programa"),
+        // DB::raw("(case 
+        //     when tramite.idUnidad = 1 then (select nombre from escuela where idEscuela=tramite.idDependencia_detalle)  
+        //     when tramite.idUnidad = 4 then  (select denominacion from mencion where idMencion=tramite.idDependencia_detalle)
+        // end) as programa"),
+        'programa.nombre',
         'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','tipo_tramite_unidad.costo'
         )
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
@@ -81,6 +82,7 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
         ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
         ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
         ->where('voucher.des_estado_voucher','APROBADO')
         ->where(function($query) use ($fecha_inicio,$fecha_fin)
         {
@@ -94,7 +96,7 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
         ->where('tramite.idTipo_tramite_unidad','!=',37)
         ->where('tramite.idEstado_tramite','!=',29)
         ->orderBy('fecha_operacion','asc')
-        ->orderBy('programa','asc')
+        ->orderBy('programa.nombre','asc')
         ->orderBy('tipo_tramite','asc')
         ->orderBy('solicitante','asc')
         // ->take($request->query('size'))

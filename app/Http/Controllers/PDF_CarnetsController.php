@@ -133,7 +133,7 @@ class PDF_CarnetsController extends Controller
     $this->pdf->SetXY(139,$inicioY+$salto);
     $this->pdf->Cell(18, 5,'TOTAL:',1,0,'L');
     $this->pdf->SetXY(157,$inicioY+$salto);
-    $this->pdf->Cell(45, 5,$totalcarnets,1,0,'L');
+    $this->pdf->Cell(45, 5,$totalcarnets,1,'B','C');
 
     return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
      ->header('Content-Type', 'application/pdf');    
@@ -201,13 +201,17 @@ class PDF_CarnetsController extends Controller
                         $this->pdf->SetXY(10,23);
                         $this->pdf->Cell(188, 4,utf8_decode('CARNETS RECIBIDOS'),0,0,'C');
                         //TABLA
-                        //NRO MATRICULA
+                        //#
                         $this->pdf->SetFont('Arial','B', 7);
                         $this->pdf->SetXY(10,34);
+                        $this->pdf->Cell(10, 5,'#',1,0,'C');
+                        //NRO MATRICULA
+                        $this->pdf->SetFont('Arial','B', 7);
+                        $this->pdf->SetXY(20,34);
                         $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
                         //APELLIDOS Y NOMBRES
-                        $this->pdf->SetXY(35,34);
-                        $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
+                        $this->pdf->SetXY(45,34);
+                        $this->pdf->Cell(55, 5,'APELLIDOS',1,0,'C');
                         //NOMBRES
                         $this->pdf->SetXY(100,34);
                         $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
@@ -227,13 +231,17 @@ class PDF_CarnetsController extends Controller
                         $salto=0;
                         
                         //TABLA
-                        //NRO MATRICULA
+                        //#
                         $this->pdf->SetFont('Arial','B', 7);
                         $this->pdf->SetXY(10,34);
+                        $this->pdf->Cell(10, 5,'#',1,0,'C');
+                        //NRO MATRICULA
+                        $this->pdf->SetFont('Arial','B', 7);
+                        $this->pdf->SetXY(20,34);
                         $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
                         //APELLIDOS Y NOMBRES
-                        $this->pdf->SetXY(35,34);
-                        $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
+                        $this->pdf->SetXY(45,34);
+                        $this->pdf->Cell(55, 5,'APELLIDOS',1,0,'C');
                         //NOMBRES
                         $this->pdf->SetXY(100,34);
                         $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
@@ -266,13 +274,16 @@ class PDF_CarnetsController extends Controller
                     $this->pdf->Cell(188, 4,utf8_decode('PROGRAMA: '.$tramite->programa),0,0,'L');
                     $this->pdf->SetFont('Arial','', 7);
                 }
-                
-
+                $i+=1;
+                //#
                 $this->pdf->SetXY(10,$inicioY+$salto);
+                $this->pdf->Cell(10, 5,$i,1,0,'C');
+                //MATRICULA
+                $this->pdf->SetXY(20,$inicioY+$salto);
                 $this->pdf->Cell(25, 5,$tramite->nro_matricula,1,0,'C');
                 //APELLIDOS Y NOMBRES
-                $this->pdf->SetXY(35,$inicioY+$salto);
-                $this->pdf->Cell(65, 5,utf8_decode($tramite->apellidos),1,0,'L');
+                $this->pdf->SetXY(45,$inicioY+$salto);
+                $this->pdf->Cell(55, 5,utf8_decode($tramite->apellidos),1,0,'L');
                 //NOMBRES
                 $this->pdf->SetXY(100,$inicioY+$salto);
                 $this->pdf->Cell(53, 5,utf8_decode($tramite->nombres),1,0,'L');
@@ -305,14 +316,17 @@ class PDF_CarnetsController extends Controller
                         $this->pdf->SetFont('Arial','B', 15);
                         $this->pdf->SetXY(10,23);
                         $this->pdf->Cell(188, 4,utf8_decode('CARNETS RECIBIDOS'),0,0,'C');
-                    //TABLA
-                    //NUM.ORD.
+                    //#
                     $this->pdf->SetFont('Arial','B', 7);
                     $this->pdf->SetXY(10,34);
+                    $this->pdf->Cell(10, 5,'#',1,0,'C');
+                    //NRO MATRICULA
+                    $this->pdf->SetFont('Arial','B', 7);
+                    $this->pdf->SetXY(20,34);
                     $this->pdf->Cell(25, 5,'NRO MATRICULA',1,0,'C');
                     //APELLIDOS Y NOMBRES
-                    $this->pdf->SetXY(35,34);
-                    $this->pdf->Cell(65, 5,'APELLIDOS',1,0,'C');
+                    $this->pdf->SetXY(45,34);
+                    $this->pdf->Cell(55, 5,'APELLIDOS',1,0,'C');
                     //NOMBRES
                     $this->pdf->SetXY(100,34);
                     $this->pdf->Cell(53, 5,'NOMBRES',1,0,'C');
