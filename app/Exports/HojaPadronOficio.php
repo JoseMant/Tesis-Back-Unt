@@ -17,18 +17,18 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize, WithEvents,WithColumnFormatting
+class HojaPadronOficio implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize, WithEvents,WithColumnFormatting
 {
-    public $idResolucion;
+    public $idOficio;
     /**
     * @return \Illuminate\Support\Collection
     */
-    public function __construct($idResolucion){
-        $this->idResolucion = $idResolucion;
+    public function __construct($idOficio){
+        $this->idOficio = $idOficio;
     }
     public function title(): string
     {
-        return 'PADRÓN';
+        return 'PADRÓN_OFICIO';
     }
     public function columnFormats(): array
     {
@@ -45,21 +45,13 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
             AfterSheet::class    => function(AfterSheet $event) {
                 $cellRange = '1'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRange)->getFont()->setBold(true);
-                $event->sheet->getDelegate()->getStyle('L1:M1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('U1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('V1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('W1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('Y1:AA1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('AE1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('AG1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
-                $event->sheet->getDelegate()->getStyle('BK1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('0FD9F1');
+                // No hay mas estilos para los headings
             },
         ];
     }
     public function headings(): array
     {
         return [
-            'TRÁMITE',
             'COD_UNIV','RAZ_SOC','FAC_NOM','ESC_POS','PRIM_APE','SEG_APE','NOMBRE','SEXO','DOCU_TIP','DOCU_NUM','MATRI_FEC','EGRES_FEC','ABRE_GYT','CARR_PROG','DEN_GRAD','SEG_ESP',
             'PROC_BACH','PROC_INST_ORIG', //NUEVO aplica solo para traslado externo  y universidades no licenciadas
             'PROC_TITULO_PED', //solo aplica para preford
@@ -85,7 +77,7 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
     }
     public function collection()
     {
-        $tramites = Tramite::select('tramite.idTramite',DB::raw('CONCAT("004") AS COD_UNIV'),
+        $tramites = Tramite::select(DB::raw('CONCAT("004") AS COD_UNIV'),
         DB::raw('CONCAT("UNIVERSIDAD NACIONAL DE TRUJILLO") AS RAZ_SOC'),
         DB::raw("(case 
                     when tramite.idUnidad = 1 then dependencia.denominacion  
@@ -227,6 +219,7 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
         ->join('programa_estudios_carpeta','programa_estudios_carpeta.idPrograma_estudios_carpeta','tramite_detalle.idPrograma_estudios_carpeta')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+        ->join('oficio','oficio.idOficio','resolucion.idOficio')
         ->leftJoin('universidad','tramite_detalle.idUniversidad','universidad.idUniversidad')
         ->leftJoin('acreditacion','acreditacion.idAcreditacion','tramite_detalle.idAcreditacion')
         ->where(function($query)
@@ -241,7 +234,7 @@ class HojaPadron implements WithTitle,FromCollection,WithHeadings,ShouldAutoSize
             ->orWhere('tramite.idEstado_tramite',44);
         })
         // ->where('tramite.idEstado_tramite',42)
-        ->where('resolucion.idResolucion',$this->idResolucion)
+        ->where('oficio.idOficio',$this->idOficio)
         ->orderBy('tramite.idTipo_tramite_unidad','asc')
         ->orderBy('tramite.idPrograma','asc')
         ->orderBy('usuario.apellidos','asc')
