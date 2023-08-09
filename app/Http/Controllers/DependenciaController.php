@@ -29,13 +29,12 @@ class DependenciaController extends Controller
         try {
             if ($idTipo_usuario==8) {
                 if ($idUnidad==1) {
-                    $dependencias=DependenciaURAA::where('idDependencia',$idDependencia)->get();
+                    $dependencias=DependenciaURAA::where('idDependencia',$idDependencia)->where('estado', 1)->get();
                 }elseif ($idUnidad==4) {
-                    $dependencias=DependenciaURAA::where('idDependencia2',$idDependencia)->get();
+                    $dependencias=DependenciaURAA::where('idDependencia2',$idDependencia)->where('estado', 1)->get();
                 }
-                // $dependencias=DependenciaURAA::where('idDependencia',$idDependencia)->get();
-            }else {
-                $dependencias=DependenciaURAA::where('idUnidad',$idUnidad)->get();
+            } else {
+                $dependencias=DependenciaURAA::where('idUnidad',$idUnidad)->where('estado', 1)->get();
             }
             DB::commit();
             return response()->json($dependencias, 200);

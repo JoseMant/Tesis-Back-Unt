@@ -159,6 +159,10 @@ Route::post('upload/diplomas', 'UploadController@uploadzip');
 
 //Roles
 Route::get('roles', 'Tipo_UsuarioController@GetRoles');
+
+//Tipos_documentos
+Route::get('tipos_documentos', 'Tipo_DocumentoController@GetTipos_documentos');
+
 //Cronograma
 Route::get('cronogramas/all', 'CronogramaController@index');
 Route::get('cronogramas/activos/{idDependencia}/{idTipo_tramite_unidad}', 'CronogramaController@getCronogramasActivos');
@@ -258,7 +262,7 @@ Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@Ge
 Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
 Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');//usado
-Route::put('create/codigo', 'TituloController@createCodeDiploma');
+// Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');

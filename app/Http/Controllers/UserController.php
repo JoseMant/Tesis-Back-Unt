@@ -131,7 +131,9 @@ class UserController extends Controller
             $usuario->apellidos=$request->apellidos;
             $usuario->tipo_documento=$request->tipo_documento;
             if ($request->idDependencia) {
-                $usuario->idDependencia=$request->idDependencia;
+                if($usuario->idTipo_usuario!=5){
+                    $usuario->idDependencia=$request->idDependencia;
+                }
             }
             $usuario->nro_documento=$request->nro_documento;
             $usuario->correo=$request->correo;
@@ -150,9 +152,22 @@ class UserController extends Controller
             $rol=$usuario->rol;
 
             if ($usuario->idTipo_usuario==5) {
-                $escuela=Escuela::find($usuario->idDependencia);
-                $usuario->idFacultad=$escuela->idDependencia;
+                $programas = $request->programas;
+                foreach($programas as $progra)
+                {
+                    $usuario_programa = new Usuario_Programa();
+                    $usuario_programa->idUsuario = $usuario->idUsuario;
+                    $usuario_programa->idPrograma = $progra;
+                    $usuario_programa->status = 1;
+                    $usuario_programa->save();
+                }
+
+                $programa=ProgramaURAA::find($programas[0]);
+                $usuario->idFacultad=$programa->idDependencia;
             }
+    
+            $usuario->programas=$request->programas;
+
             //Correo de creación de usuario
             dispatch(new RegistroUsuarioJob($usuario,$rol));
             DB::commit();
@@ -202,7 +217,9 @@ class UserController extends Controller
             $usuario->nombres=$request->nombres;
             $usuario->apellidos=$request->apellidos;
             if ($request->idDependencia) {
-                $usuario->idDependencia=$request->idDependencia;
+                if($usuario->idTipo_usuario!=5){
+                    $usuario->idDependencia=$request->idDependencia;
+                }
             }
             $usuario->celular=$request->celular;
             $usuario->estado=$request->estado;
@@ -212,10 +229,33 @@ class UserController extends Controller
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$id)
             ->first();
+
             if ($usuario->idTipo_usuario==5) {
-                $escuela=Escuela::find($usuario->idDependencia);
-                $usuario->idFacultad=$escuela->idDependencia;
+                 
+                //Eliminar todos los programas previos registrados
+                $programas_prev = Usuario_Programa::where('idUsuario',$usuario->idUsuario)->get();
+                foreach($programas_prev as $progra_prev)
+                {
+                    $programaEliminado = Usuario_Programa::find($progra_prev->idUsuario_programa);
+                    $programaEliminado->delete();
+                }
+
+                //Registrar los programas nuevos
+                $programas = $request->programas;
+                foreach($programas as $progra)
+                {
+                    $usuario_programa = new Usuario_Programa();
+                    $usuario_programa->idUsuario = $usuario->idUsuario;
+                    $usuario_programa->idPrograma = $progra;
+                    $usuario_programa->status = 1;
+                    $usuario_programa->save();
+                }
+
+                $programa=ProgramaURAA::find($programas[0]);
+                $usuario->idFacultad=$programa->idDependencia;
             }
+            $usuario->programas=$request->programas;
+            
             DB::commit();
             return response()->json($usuario, 200);
         } catch (\Exception $e) {

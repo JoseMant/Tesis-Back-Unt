@@ -37,8 +37,8 @@ $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto"
 
 
 // LÃ“GICA PARA SACAR LA FACULTAD DE LAS SEGUNDAS ESPECIALIDADES
-$facultad=$tramite->facultad;
-$escuela=$tramite->escuela;
+$dependencia=$tramite->dependencia;
+$programa=$tramite->programa;
 
 
 // LÃ“GICA PARA EL TIPO DE DOCUMENTO
@@ -108,7 +108,7 @@ if ($tramite->tipo_documento==1) {
                             if(substr($tramite->diploma, 0,1) == 'B' || substr($tramite->diploma, 0,1) == 'M' || substr($tramite->diploma, 0,1) == 'D'){
                                 echo " GRADO ACADÉMICO ";
                             }else{
-                                if($escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL')
+                                if($programa=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $programa=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL')
                                     echo " TÍTULO ";
                                 else
                                     echo " TÍTULO PROFESIONAL ";
@@ -143,7 +143,7 @@ if ($tramite->tipo_documento==1) {
                                         $segundaParte = substr($tramite->denominacion, $posicion_coincidencia);
                                         echo "<p style='font-size:23px;margin-top: -36px;;margin-bottom: -10px;'>".$segundaParte."</p>";
                                     }else{
-                                        echo "<p style='font-size:28px;margin-top: -10px;margin-bottom: 10px'>".$tramite->denominacion."</p>";
+                                        echo "<p style='font-size:25px;margin-top: -10px;margin-bottom: 10px'>".$tramite->denominacion."</p>";
                                     }
                                 ?></b>
                         </p>
@@ -168,19 +168,19 @@ if ($tramite->tipo_documento==1) {
                     <?php }?>
 
                     <p style="text-align: justify; text-indent: 0px; margin-bottom: 18px; margin-top: -35px; font-size:18px">
-                        De la <b><?php echo $facultad ?>,</b>
+                        De la <b><?php echo $dependencia ?>,</b>
                         <b>
-                            <?php if ($idFicha==1 || $idFicha==2){?>ESCUELA PROFESIONAL DE <?php }?>
-                            <?php if ($idFicha==4 && $tramite->idDependencia_detalle==49){?>SEGUNDA ESPECIALIZACIÃ“N,<?php }?>
+                            <?php if ($idFicha==1 || $idFicha==2){?>PROGRAMA PROFESIONAL DE <?php }?>
+                            <?php if ($idFicha==4 && $tramite->idDependencia_detalle==49){?>SEGUNDA ESPECIALIZACIÓN,<?php }?>
                             <?php
-                            if ($escuela=='RESIDENTADO MÉDICO' || $escuela=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $escuela=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $escuela=='TECNOLOGÍA EDUCATIVA' || $escuela=='ESTIMULACIÓN TEMPRANA' || $escuela=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $escuela=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $escuela=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
-                                echo buscarDenominaciones($escuela, $diploma);
+                            if ($programa=='RESIDENTADO MÉDICO' || $programa=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $programa=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $programa=='TECNOLOGÍA EDUCATIVA' || $programa=='ESTIMULACIÓN TEMPRANA' || $programa=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $programa=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $programa=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
+                                echo buscarDenominaciones($programa, $diploma);
                             }else{
-                                echo $escuela;
+                                echo $programa;
                             }
                             ?>
                         </b>
-                        <?php if ($idFicha==7){?> - <b>EDUCACIÃ“N <?php echo $nombre_escuela_preford ?></b> <?php }?>
+                        <?php if ($idFicha==7){?> - <b>EDUCACIÓN <?php echo $nombre_escuela_preford ?></b> <?php }?>
                     </p>
 
 
@@ -299,8 +299,7 @@ if ($tramite->tipo_documento==1) {
                         <br><br><br><br><br><br><br>
                         <!-- &nbsp;____________________________________<br>
                         <p style="font-size: 11px; text-align: right; margin-right: -15px;">
-                            Firma del Interesado</p> -->
-                    </div>
+                            Firma del Interesado</p> -->                    </div>
                 </td>
                 <td colspan="2"></td>
             </tr>

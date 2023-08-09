@@ -361,16 +361,16 @@ class AdicionalController extends Controller
             ->where('tipo_tramite.idTipo_tramite',2)
             ->where(function($query)
             {
-                $query->where('tramite.idTipo_tramite_unidad',15);
+                $query->where('tramite.idTipo_tramite_unidad',16);
             })
-            ->where('resolucion.idResolucion',22)
+            ->where('resolucion.idResolucion',24)
             ->orderBy('tramite_detalle.nro_libro', 'asc')
             ->orderBy('tramite_detalle.folio', 'asc')
             ->orderBy('tramite_detalle.nro_registro', 'asc')
             ->get(); 
 
 
-            $codigoInicial='00046728';
+            $codigoInicial='00044300';
             foreach ($tramites as $key => $value) {
                 $codigo=$codigoInicial+$key+1;
                 $tamCodigo=strlen($codigo);
@@ -397,13 +397,13 @@ class AdicionalController extends Controller
                         $codigo="0".$codigo;
                         break;
                 }
-                $value->codigo="G".$codigo;
+                $value->codigo="T".$codigo;
 
                 $tramite_detalle=Tramite_Detalle::find($value->idTramite_detalle);
                 $tramite_detalle->codigo_diploma="G".$codigo;
                 $tramite_detalle->save();
             }
-            
+            // return $tramites;
             DB::commit();
             return response()->json( 'ok',200);
 
