@@ -173,7 +173,13 @@ class PDF_CarnetsController extends Controller
     ->join('programa','tramite.idPrograma','programa.idPrograma')
     ->where('tramite.idEstado_tramite',27)
     ->where('tipo_tramite.idTipo_tramite',3)
-    ->where('tramite.sede',$sede)
+    // ->where('tramite.sede',$sede)
+    ->where(function($query) use ($sede)
+    {
+        if ($sede) {
+            $query->where('tramite.sede',$sede);
+        }
+    })
     ->where(function($query) use ($usuario_programas)
     {
         if (count($usuario_programas) > 0) {

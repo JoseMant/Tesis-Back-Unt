@@ -459,6 +459,7 @@ class CarnetController extends Controller
 
     public function GetCarnetsRecibidos(Request $request)
     {
+        // return $request->all();
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
@@ -498,6 +499,12 @@ class CarnetController extends Controller
             ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
         })
+        ->where(function($query) use ($request)
+        {
+            if ($request->query('sede')) {
+                $query->where('tramite.sede',$request->query('sede'));
+            }
+        })
         ->orderBy($request->query('sort'), $request->query('order'))
         ->take($request->query('size'))
         ->skip($request->query('page')*$request->query('size'))
@@ -530,6 +537,12 @@ class CarnetController extends Controller
             ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
             ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
             ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->where(function($query) use ($request)
+        {
+            if ($request->query('sede')) {
+                $query->where('tramite.sede',$request->query('sede'));
+            }
         })
         ->count();
         
