@@ -24,7 +24,16 @@ class PDF_CarnetsController extends Controller
     $this->pdf = $pdf;
     $this->middleware('jwt', ['except' => ['pdf_carnetsSolicitados','pdf_carnetsRecibidos']]);
   }
-  
+
+  public function getSedesUraa(){
+    return Tramite::select('tramite.sede as sede')
+    ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+    ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+    ->where('tramite.idEstado_tramite',27)
+    ->where('tipo_tramite.idTipo_tramite',3)->distinct()->orderBy('sede')->get();
+
+  }
+
   public function pdf_carnetsSolicitados(Request $request)
   {
     $token = JWTAuth::setToken($request->access);
@@ -144,15 +153,16 @@ class PDF_CarnetsController extends Controller
 
   public function pdf_carnetsRecibidos(Request $request)
   {
+    // return $request->all();
     $token = JWTAuth::setToken($request->access);
     $apy = JWTAuth::getPayload($token);
     $idUsuario=$apy['idUsuario'];
+    $sede=$request->sede;
     $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
     $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.sede', 'usuario.apellidos as apellidos','usuario.nombres as nombres'
-    ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
-    ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
-    , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-    ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','programa.idPrograma as idPrograma')
+    ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite'
+    ,'tramite.nro_matricula','usuario.nro_documento'
+    , 'programa.nombre as programa','programa.idPrograma as idPrograma')
     ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
     ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
     ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -160,10 +170,10 @@ class PDF_CarnetsController extends Controller
     ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
     ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
     ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-    ->join('voucher','tramite.idVoucher','voucher.idVoucher')
     ->join('programa','tramite.idPrograma','programa.idPrograma')
     ->where('tramite.idEstado_tramite',27)
     ->where('tipo_tramite.idTipo_tramite',3)
+    ->where('tramite.sede',$sede)
     ->where(function($query) use ($usuario_programas)
     {
         if (count($usuario_programas) > 0) {
@@ -222,6 +232,7 @@ class PDF_CarnetsController extends Controller
             foreach ($tramites as $key => $tramite) {
 
                 if($key==0||$tramites[$key-1]['programa']!=$tramites[$key]['programa']){
+                    $i=0;
 
                     
                     
