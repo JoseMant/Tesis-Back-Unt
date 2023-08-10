@@ -1450,7 +1450,7 @@ class TramiteController extends Controller
             ->find($request->idTramite);
             
             // DATOS PARA EL CORREO 
-            // $usuario=User::find($tramite->idUsuario);
+            $usuario=User::find($tramite->idUsuario);
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite->idTipo_tramite_unidad);
             $tipo_tramite=Tipo_Tramite::find($tramite->idTipo_tramite);
             //Editamos los cada uno de los requisitos que llegan junto al trámite en el request

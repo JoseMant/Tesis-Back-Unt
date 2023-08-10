@@ -699,6 +699,11 @@ class ReporteController extends Controller
 
     public function getProgramas($idDependencia){
         $programas = ProgramaURAA::where('idDependencia',$idDependencia)->get();
+        foreach ($programas as $key => $programa) {
+            if ($programa->idDependencia=10 && $programa->idPrograma!=8 && $programa->idPrograma!=13 && $programa->idPrograma!=14 && $programa->idPrograma!=15) {
+                $programa->nombre=substr($programa->nombre, 22);
+            }
+        }
         return response()->json($programas, 200);
     }
 
