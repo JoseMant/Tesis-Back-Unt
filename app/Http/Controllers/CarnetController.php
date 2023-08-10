@@ -32,6 +32,8 @@ use App\Escuela;
 use App\PersonaSuv;
 use App\PersonaSga;
 use App\ProgramaURAA;
+use App\Usuario_Programa;
+
 class CarnetController extends Controller
 {
     public function __construct()
@@ -462,6 +464,7 @@ class CarnetController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
         $idDependencia=$apy['idDependencia'];
+        $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
 
         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
@@ -479,25 +482,10 @@ class CarnetController extends Controller
         ->join('programa','tramite.idPrograma','programa.idPrograma')
         ->where('tramite.idEstado_tramite',27)
         ->where('tipo_tramite.idTipo_tramite',3)
-        ->where(function($query) use ($idDependencia)
+        ->where(function($query) use ($usuario_programas)
         {
-            if ($idDependencia) {
-                if ($idDependencia==15) {
-                    $query->where('tramite.idPrograma',41)
-                    ->orWhere('tramite.idPrograma',42)
-                    ->orWhere('tramite.idPrograma',43)
-                    ->orWhere('tramite.idPrograma',44)
-                    ->orWhere('tramite.idPrograma',45)
-                    ->orWhere('tramite.idPrograma',46)
-                    ->orWhere('tramite.idPrograma',48)
-                    ->orWhere('tramite.idPrograma',49);
-                }elseif($idDependencia==11){
-                    $query->where('tramite.idPrograma',11)
-                    ->orWhere('tramite.idPrograma',47);
-                }
-                else {
-                    $query->where('tramite.idPrograma',$idDependencia);
-                }
+            if (count($usuario_programas) > 0) {
+                $query->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
         ->where(function($query) use ($request)
@@ -527,25 +515,10 @@ class CarnetController extends Controller
         ->join('programa','tramite.idPrograma','programa.idPrograma')
         ->where('tramite.idEstado_tramite',27)
         ->where('tipo_tramite.idTipo_tramite',3)
-        ->where(function($query) use ($idDependencia)
+        ->where(function($query) use ($usuario_programas)
         {
-            if ($idDependencia) {
-                if ($idDependencia==15) {
-                    $query->where('tramite.idPrograma',41)
-                    ->orWhere('tramite.idPrograma',42)
-                    ->orWhere('tramite.idPrograma',43)
-                    ->orWhere('tramite.idPrograma',44)
-                    ->orWhere('tramite.idPrograma',45)
-                    ->orWhere('tramite.idPrograma',46)
-                    ->orWhere('tramite.idPrograma',48)
-                    ->orWhere('tramite.idPrograma',49);
-                }elseif($idDependencia==11){
-                    $query->where('tramite.idPrograma',11)
-                    ->orWhere('tramite.idPrograma',47);
-                }
-                else {
-                    $query->where('tramite.idPrograma',$idDependencia);
-                }
+            if (count($usuario_programas) > 0) {
+                $query->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
         ->where(function($query) use ($request)
