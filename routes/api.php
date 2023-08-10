@@ -39,7 +39,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //TRÁMITE
 Route::resource('tramites','TramiteController');
+Route::post('tramites/secretaria','TramiteSecretariaController@store');
 Route::get('tramite/usuario','TramiteController@GetByUser');
+//DOCENTE
+// Route::post('docente/registrar','TramiteSecretariaController@prueba');
+Route::get('tramites/docentes/registrar','TramiteSecretariaController@GetTramitesDocente');
+Route::post('docente/registrar','TramiteSecretariaController@registroDocente');
+
 // Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
 //tramite fisico
@@ -83,6 +89,16 @@ Route::get('unidades','UnidadController@index');
 Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getAllByTipo_tramiteUnidad');
 Route::get('requisitos/{idTipo_tramite_unidad}','RequisitoController@getAllByTipo_tramite_unidad');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
+Route::resource('motivos_certificado','Motivo_CertificadoController');
+Route::resource('alumnosSE','PersonaSEController');
+
+
+Route::get('profesiones','ProfesionDocenteController@index');
+Route::get('categorias','CategoriaSGAController@index');
+Route::get('dependenciasSGA','DependenciaSGAController@index');
+Route::get('unidadSGA/{idDependencia}','DependenciaSGAController@getUnidadByDependencia');
+Route::get('dedicaciones/docente','DedicacionDocenteController@index');
+
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
@@ -238,7 +254,7 @@ Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
 //Route::put('create/codigo', 'TituloController@createCodeDiploma');
 Route::get('carnets/solicitados','PDF_CarnetsController@pdf_carnetsSolicitados');
 Route::get('carnets/recibidos','PDF_CarnetsController@pdf_carnetsRecibidos');
-
+Route::get('sedes/uraa','PDF_CarnetsController@getSedesUraa');
 
 //TITULOS segunda especialidad
 Route::get('titulos/validados/especialidad', 'SegundaEspecialidadController@GetTitulosValidadosEscuela');
