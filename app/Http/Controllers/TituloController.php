@@ -763,7 +763,7 @@ class TituloController extends Controller
         $idUsuario=$apy['idUsuario'];
         $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.sede','tramite.idEstado_tramite', 
         'tramite.idTipo_tramite_unidad', 'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
         'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
@@ -910,6 +910,7 @@ class TituloController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idPrograma',$tramite->idPrograma)
+            ->where('sede',$tramite->sede)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
@@ -943,7 +944,7 @@ class TituloController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.sede','tramite.idEstado_tramite', 
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula',
         'tramite.exonerado_archivo', 'tramite_detalle.*', 'tramite.idTipo_tramite_unidad',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
@@ -996,6 +997,7 @@ class TituloController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idPrograma',$tramite->idPrograma)
+            ->where('sede',$tramite->sede)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
@@ -1030,7 +1032,7 @@ class TituloController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.sede','tramite.idEstado_tramite', 
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula',
         'tramite.exonerado_archivo', 'tramite_detalle.*', 'tramite.idTipo_tramite_unidad',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
@@ -1077,6 +1079,7 @@ class TituloController extends Controller
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idPrograma',$tramite->idPrograma)
+            ->where('sede',$tramite->sede)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {

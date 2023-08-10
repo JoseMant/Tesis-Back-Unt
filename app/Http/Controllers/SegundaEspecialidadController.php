@@ -945,7 +945,7 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
         'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
         'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
@@ -1111,6 +1111,7 @@ class SegundaEspecialidadController extends Controller
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idUnidad',$tramite->idUnidad)
             ->where('idPrograma',$tramite->idPrograma)
+            ->where('sede',$tramite->sede)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
@@ -1144,7 +1145,7 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
         'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
         'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
@@ -1228,6 +1229,7 @@ class SegundaEspecialidadController extends Controller
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idUnidad',$tramite->idUnidad)
             ->where('idPrograma',$tramite->idPrograma)
+            ->where('sede',$tramite->sede)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
@@ -1260,7 +1262,7 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
         'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
         'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
@@ -1330,6 +1332,7 @@ class SegundaEspecialidadController extends Controller
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
             ->where('idUnidad',$tramite->idUnidad)
             ->where('idPrograma',$tramite->idPrograma)
+            ->where('sede',$tramite->sede)
             ->where('estado',1)
             ->first();
             if ($acreditacion) {
