@@ -39,6 +39,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //TRÁMITE
 Route::resource('tramites','TramiteController');
+
 Route::post('tramites/secretaria','TramiteSecretariaController@store');
 Route::get('tramite/usuario','TramiteController@GetByUser');
 //DOCENTE
@@ -136,6 +137,10 @@ Route::post('users/create','UserController@store');
 Route::put('settings/user','UserController@settings');
 Route::put('settings/password','UserController@resetPassword');
 // Route::get('personas/datosAlumno/{dni}','PersonaController@DatosAlumno');
+
+
+//TIPO TRAMITE UNIDAD
+Route::get('tipos_unidad_tramite/pendientes_impresion','Tipo_Tramite_UnidadController@getTramitesforPendientesImpresion');
 
 //TIPOS DE TRÁMITE
 Route::resource('tipos_tramites','Tipo_TramiteController');
