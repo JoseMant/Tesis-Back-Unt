@@ -57,7 +57,7 @@ Route::post('tramite/asignar','TramiteController@AsignacionTramites');
 Route::get('tramite/certificados/validados','CertificadoController@GetCertificadosValidados');
 Route::get('tramite/certificados/asignados','CertificadoController@GetCertificadosAsignados');
 Route::get('tramite/certificados/aprobados','CertificadoController@GetCertificadosAprobados');
-Route::get('tramite/certificados/aprobados/reporte','CertificadoController@reporteAprobados');
+Route::get('tramite/certificados/aprobados/reporte','ReporteController@reporteAprobados');
 Route::get('tramite/certificados/pendientes','CertificadoController@GetCertificadosPendientes');
 Route::get('tramite/certificados/firma_uraa','CertificadoController@GetCertificadosFirmaUraa');
 Route::get('tramite/certificados/firma_decano','CertificadoController@GetCertificadosFirmaDecano');

@@ -15,7 +15,7 @@ use App\Tramite_Detalle;
 use Codedge\Fpdf\Fpdf\Fpdf;
 use App\Exports\ReporteGradoExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Carbon\Carbon;
 
 class ReporteController extends Controller
 {
@@ -24,7 +24,7 @@ class ReporteController extends Controller
     public function __construct(\App\PDF_Fut $pdf)
     {
         $this->pdf = $pdf;
-        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcel','crearPDF']]);
+        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcel','crearPDF','reporteAprobados']]);
     }
     public function enviadoFacultad(Request $request){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -1327,6 +1327,169 @@ class ReporteController extends Controller
 
     }
 
+    public function reporteAprobados(Request $request){
+        
+        $token = JWTAuth::setToken($request->access);
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+
+        // Obteniendo los certificados trabajados hoy
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
+        'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
+        'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
+        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
+        DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
+        'voucher.archivo as voucher','tramite.uuid')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
+        ->where('historial_estado.idEstado_actual',10)
+        ->where('historial_estado.idEstado_nuevo',11)
+        ->where('tipo_tramite_unidad.idTipo_tramite',1)
+        ->where(function($query) use($request){
+            // Parseando la fecha
+            $fecha = Carbon::parse($request->fecha);
+            $dia = $fecha->day;
+            $mes = $fecha->month;
+            $año = $fecha->year;
+            if ($fecha) {
+                $query->whereDay('historial_estado.fecha',$dia)
+                ->whereMonth('historial_estado.fecha',$mes)
+                ->whereYear('historial_estado.fecha',$año);
+            }
+        })
+        ->where(function($query) use($idTipo_usuario,$idUsuario){
+            if ($idTipo_usuario==2) {
+                $query->where('historial_estado.idUsuario',$idUsuario);
+            }
+        })
+        // ->where('historial_estado.idUsuario',$idUsuario)
+        ->get();
+
+        $this->pdf->AliasNbPages();
+        $this->pdf->AddPage('L');
+
+        $this->pdf->SetFont('Arial','', 9);
+        $this->pdf->SetXY(10,10);
+        $this->pdf->Cell(65, 4,'UNIVERSIDAD NACIONAL DE TRUJILLO',0,0,'C');
+        $this->pdf->SetXY(10,14);
+        $this->pdf->Cell(65, 4,utf8_decode('UNIDAD DE REGISTROS ACADEMICOS'),0,0,'C');
+        $this->pdf->SetXY(10,18);
+        $this->pdf->Cell(40, 4,utf8_decode('SECCIÓN DE INFORMÁTICA Y SISTEMAS'),0,0,'L');
+
+        $this->pdf->SetXY(-65,10);
+        $this->pdf->Cell(80, 4,'FECHA : '.date("j/ n/ Y"),0,0,'C');
+        $this->pdf->SetXY(-65,14);
+        $this->pdf->Cell(80, 4,'HORA : '.date("H:i:s"),0,0,'C');
+        //TITULO
+        $this->pdf->SetFont('Arial','B', 10);
+        $this->pdf->SetXY(0,25);
+        $this->pdf->Cell(297, 4,utf8_decode('CERTIFICADOS APROBADOS'),0,0,'C');
+        
+        
+        $this->pdf->SetFont('Arial','B', 7);
+        //TABLA
+        //SEDE
+        $this->pdf->SetXY(5,30);
+        $this->pdf->Cell(5, 5,'#',1,0,'C');
+        $this->pdf->SetXY(10,30);
+        $this->pdf->Cell(20, 5,utf8_decode('NRO. TRÁMITE'),1,0,'C');
+        //ESCUELA
+        $this->pdf->SetXY(30,30);
+        $this->pdf->Cell(70, 5,'SOLICITANTE',1,0,'C');
+        //#CARNETS
+        $this->pdf->SetXY(100,30);
+        $this->pdf->Cell(65, 5,utf8_decode('TRÁMITE'),1,0,'C');
+        //FIRMA
+        $this->pdf->SetXY(165,30);
+        $this->pdf->Cell(35, 5,'UNIDAD',1,0,'C');
+        $this->pdf->SetXY(200,30);
+        $this->pdf->Cell(20, 5,utf8_decode('# MATRÍCULA'),1,0,'C');
+        $this->pdf->SetXY(220,30);
+        $this->pdf->Cell(50, 5,'DEPENDENCIA',1,0,'C');
+        $this->pdf->SetXY(270,30);
+        $this->pdf->Cell(20, 5,'FECHA',1,0,'C');
+
+
+        $this->pdf->SetFont('Arial','', 7);
+        
+
+        $salto=0;
+        $i=0;
+        $inicioY=35;
+        $totalcarnets=0;
+        foreach ($tramites as $key => $tramite) {
+            $totalcarnets=$totalcarnets+$tramite->carnets;
+            
+            //TABLA
+            //SEDE
+            $this->pdf->SetXY(5,$inicioY+$salto);
+            $this->pdf->Cell(5, 7,$i+1,1,0,'C');
+            $this->pdf->SetXY(10,$inicioY+$salto);
+            $this->pdf->Cell(20, 7,$tramite->nro_tramite,1,0,'C');
+            //ESCUELA
+            $this->pdf->SetXY(30,$inicioY+$salto);
+            $this->pdf->Cell(70, 7,utf8_decode($tramite->solicitante),1,0,'L');
+            //#CARNETS
+            $this->pdf->SetXY(100,$inicioY+$salto);
+            $this->pdf->Cell(65, 7,utf8_decode($tramite->tramite),1,0,'L');
+            //FIRMA
+            $this->pdf->SetXY(165,$inicioY+$salto);
+            $this->pdf->Cell(35, 7,utf8_decode($tramite->unidad),1,0,'C');
+            $this->pdf->SetXY(200,$inicioY+$salto);
+            $this->pdf->Cell(20, 7,$tramite->nro_matricula,1,0,'C');
+            $this->pdf->SetFont('Arial','', 6);
+            $this->pdf->SetXY(220,$inicioY+$salto);
+            $this->pdf->multiCell(50, 3.5,utf8_decode($tramite->dependencia),1,'C');
+            $this->pdf->SetFont('Arial','', 7);
+            $this->pdf->SetXY(270,$inicioY+$salto);
+            $fecha=strtotime($tramite->fecha);
+            $this->pdf->Cell(20, 7,date("Y m d",$fecha),1,0,'C');
+
+            $salto+=7;
+            $i+=1;
+            
+            if (($inicioY+$salto)>=269) {
+                $this->pdf->AddPage();
+                $inicioY=17;
+                $salto=0;
+                $this->pdf->SetFont('Arial','B', 7);
+                    //TABLA
+                    //SEDE
+                    $this->pdf->SetXY(5,30);
+                    $this->pdf->Cell(5, 5,'#',1,0,'C');
+                    $this->pdf->SetXY(10,30);
+                    $this->pdf->Cell(30, 5,utf8_decode('NRO. TRÁMITE'),1,0,'C');
+                    //ESCUELA
+                    $this->pdf->SetXY(40,30);
+                    $this->pdf->Cell(70, 5,'SOLICITANTE',1,0,'C');
+                    //#CARNETS
+                    $this->pdf->SetXY(110,30);
+                    $this->pdf->Cell(70, 5,utf8_decode('TRÁMITE'),1,0,'C');
+                    //FIRMA
+                    $this->pdf->SetXY(180,30);
+                    $this->pdf->Cell(30, 5,'UNIDAD',1,0,'C');
+                    $this->pdf->SetXY(210,30);
+                    $this->pdf->Cell(30, 5,utf8_decode('NRO. MATRÍCULA'),1,0,'C');
+                    $this->pdf->SetXY(240,30);
+                    $this->pdf->Cell(30, 5,'DEPENDENCIA',1,0,'C');
+                    $this->pdf->SetXY(270,30);
+                    $this->pdf->Cell(20, 5,'FECHA',1,0,'C');
+
+
+                    $this->pdf->SetFont('Arial','', 7);
+            }
+        }
+
+        return response($this->pdf->Output('i',"Reporte_carnets_recibos".".pdf", false))
+        ->header('Content-Type', 'application/pdf');
+    }
 
 }
 
