@@ -2277,11 +2277,17 @@ class GradoController extends Controller
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->where('tramite.idEstado_tramite',44)
         ->where('tipo_tramite_unidad.idTipo_tramite',2)
-        ->where(function($query)
+        ->where(function($query) use ($request)
         {
-            $query->where('tramite.idTipo_tramite_unidad',15)
-            ->orWhere('tramite.idTipo_tramite_unidad',16)
-            ->orWhere('tramite.idTipo_tramite_unidad',34);
+            if ($request->query('tramite') != 0) {
+                $query->Where('tipo_tramite_unidad.idTipo_tramite_unidad',$request->query('tramite'));
+            }
+            else{
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            }
+
         })
         ->where('resolucion.idResolucion',$resolucion->idResolucion)
         ->where(function($query) use ($request)

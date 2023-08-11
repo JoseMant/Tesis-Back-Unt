@@ -21,6 +21,12 @@ class Tipo_Tramite_UnidadController extends Controller
         return Tipo_tramite_unidad::all();
     }
 
+    public function getTramitesforPendientesImpresion()
+    {
+        return Tipo_tramite_unidad::whereIn('idTipo_tramite_unidad',[15,16,34])->get();
+    }
+
+
     /**
      * Show the form for creating a new resource.
      *
