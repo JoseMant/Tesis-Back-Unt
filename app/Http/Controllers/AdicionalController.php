@@ -141,11 +141,12 @@ class AdicionalController extends Controller
     }
 
     public function chancarArchivo(Request $request){
+        // return $request->all();
         if ($request->hasFile("archivo")) {
             //obtenemos el archivo de la resolución a chancar
             $file=$request->file("archivo");
             //obtenemos todos los trámites a los que se les va a chancar
-            $ingenieria=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
+            $tramites=Tramite::select('tramite.idTramite','usuario.nro_documento','tramite.idTipo_tramite_unidad')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -157,16 +158,16 @@ class AdicionalController extends Controller
                 ->orWhere('tramite.idTipo_tramite_unidad',34);
             })
             ->where('tramite.idEstado_tramite','!=',29)
-            ->where(function($query)
+            ->where(function($query) use($request)
             {
-                $query->where('tramite.idDependencia',13)
-                ->orWhere('dependencia.idDependencia2',13);
+                $query->where('tramite.idDependencia',$request->dependencia)
+                ->orWhere('dependencia.idDependencia2',$request->dependencia);
             })
-            ->where('cronograma_carpeta.fecha_colacion','2023-08-18')
+            ->where('cronograma_carpeta.fecha_colacion',$request->colacion)
             ->get();
-            // return count($ingenieria);
+            // return count($tramites);
             //Recorremos los trámites y chancamos cada uno la resolución
-            foreach ($ingenieria as $key => $tramite) {
+            foreach ($tramites as $key => $tramite) {
                 $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
                 ->where(function($query)
                 {
@@ -370,7 +371,7 @@ class AdicionalController extends Controller
             ->get(); 
 
 
-            $codigoInicial='00044300';
+            $codigoInicial='00044325';
             foreach ($tramites as $key => $value) {
                 $codigo=$codigoInicial+$key+1;
                 $tamCodigo=strlen($codigo);
@@ -397,10 +398,9 @@ class AdicionalController extends Controller
                         $codigo="0".$codigo;
                         break;
                 }
-                $value->codigo="T".$codigo;
 
                 $tramite_detalle=Tramite_Detalle::find($value->idTramite_detalle);
-                $tramite_detalle->codigo_diploma="G".$codigo;
+                $tramite_detalle->codigo_diploma="T".$codigo;
                 $tramite_detalle->save();
             }
             // return $tramites;

@@ -1310,7 +1310,7 @@ class GradoController extends Controller
 
         $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad',
-        'tramite.nro_tramite','dependencia.nombre as facultad','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
+        'tramite.nro_tramite','dependencia.nombre as dependencia','tramite.nro_matricula','usuario.nro_documento','usuario.correo',
         'voucher.archivo as voucher', DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','tramite_detalle.idTramite_detalle',
         'tramite_detalle.idModalidad_carpeta','tramite_detalle.fecha_sustentacion_carpeta','tramite_detalle.nombre_trabajo_carpeta',
@@ -1327,10 +1327,10 @@ class GradoController extends Controller
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-        ->join('programa','tramite.idPrograma','programa.idPrograma')
         ->where('tramite.idEstado_tramite',39)
         ->where('tramite.idTipo_tramite_unidad',15)
         ->where(function($query) use ($request)
@@ -1371,8 +1371,6 @@ class GradoController extends Controller
         ->count();
         
         foreach ($tramites as $key => $tramite) {
-            $tramite->fut="fut/".$tramite->uuid;
-
             // Verificación de programa acreditada
             $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
             ->where('fecha_fin','>=',$tramite->fecha_colacion)
@@ -1406,6 +1404,7 @@ class GradoController extends Controller
     }
 
     public function GuardarDatosDiploma(Request $request){
+        DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
