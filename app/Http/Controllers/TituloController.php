@@ -700,7 +700,7 @@ class TituloController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite', 
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.sede', 'tramite.idPrograma','tramite.idEstado_tramite', 
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo', 
         'tramite_detalle.certificado_final',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',

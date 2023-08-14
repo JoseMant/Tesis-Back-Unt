@@ -46,7 +46,7 @@ class SegundaEspecialidadController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idDependencia=$apy['idDependencia'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
@@ -861,7 +861,7 @@ class SegundaEspecialidadController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as dependencia'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
