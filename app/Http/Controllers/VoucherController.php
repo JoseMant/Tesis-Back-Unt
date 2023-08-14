@@ -247,6 +247,14 @@ class VoucherController extends Controller
             ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
         })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if ($idTipo_usuario==3) {
+                $query->where('voucher.entidad','!=','Tesoreria UNT');
+            }elseif($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
         ->count();
 
         $begin = $request->query('page')*$request->query('size');
@@ -262,48 +270,100 @@ class VoucherController extends Controller
     }
 
     public function Aprobados(Request $request){
-        $vouchers=Voucher::select('tramite.idTramite','tramite.nro_tramite','tramite.idUnidad','tramite.idPrograma',
-            'tramite.nro_matricula', 'tramite.exonerado_archivo', DB::raw("(case when tramite.exonerado_archivo is null then 'NO' else 'SI' end) as exonerado"),
-            'programa.nombre as programa',
-            DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'), 'tipo_tramite_unidad.costo',
-            'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'), 
-            'voucher.idVoucher', 'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','voucher.comentario')
-            ->join('tramite','tramite.idVoucher','voucher.idVoucher')
-            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite','tipo_tramite.descripcion')
-            ->where('des_estado_voucher','APROBADO')
-            ->where('tramite.idEstado_tramite','!=',29)
-            ->where('tramite.estado',1)
-            ->where(function($query) use ($request) {
-                $query->where('programa.nombre','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('tipo_tramite_unidad.costo','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
-                ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
-                ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
-                ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
-            })
-            ->orderBy($request->query('sort'), $request->query('order'))
-            ->get();
-        $pagination=$this->Paginacion($vouchers, $request->query('size'), $request->query('page')+1);
-        $begin = ($pagination->currentPage()-1)*$pagination->perPage();
-        $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
-        return response()->json(['status' => '200', 'data' =>array_values($pagination->items()),"pagination"=>[
-            'length'    => $pagination->total(),
-            'size'      => $pagination->perPage(),
-            'page'      => $pagination->currentPage()-1,
-            'lastPage'  => $pagination->lastPage()-1,
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+
+        $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
+
+        $tramites=Voucher::select('tramite.idTramite','tramite.nro_tramite','tramite.idUnidad','tramite.idPrograma',
+        'tramite.nro_matricula', 'tramite.exonerado_archivo', DB::raw("(case when tramite.exonerado_archivo is null then 'NO' else 'SI' end) as exonerado"),
+        'programa.nombre as programa',
+        DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'), 'tipo_tramite_unidad.costo',
+        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'), 
+        'voucher.idVoucher', 'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','voucher.comentario')
+        ->join('tramite','tramite.idVoucher','voucher.idVoucher')
+        ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite','tipo_tramite.descripcion')
+        ->where('des_estado_voucher','APROBADO')
+        ->where('tramite.idEstado_tramite','!=',29)
+        ->where('tramite.estado',1)
+        ->where(function($query) use ($request) {
+            $query->where('programa.nombre','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.costo','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
+            ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
+        })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        $total=Voucher::join('tramite','tramite.idVoucher','voucher.idVoucher')
+        ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite','tipo_tramite.descripcion')
+        ->where('des_estado_voucher','APROBADO')
+        ->where('tramite.idEstado_tramite','!=',29)
+        ->where('tramite.estado',1)
+        ->where(function($query) use ($request) {
+            $query->where('programa.nombre','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.costo','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('entidad','LIKE','%'.$request->query('search').'%')
+            ->orWhere('nro_operacion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
+        })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
+        ->count();
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
             'startIndex'=> $begin,
-            'endIndex'  => $end - 1
-        ]], 200); 
+            'endIndex'  => $end
+        ]], 200);
+
     }
 
     public function Rechazados(Request $request){
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+
+        $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
+
         $tramites=Tramite::select('tramite.idTramite','tramite.nro_tramite','tramite.idUnidad','tramite.idPrograma',
         'tramite.nro_matricula', 'tramite.exonerado_archivo',
         'programa.nombre as programa',
@@ -329,6 +389,12 @@ class VoucherController extends Controller
             ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
         })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
         ->orderBy($request->query('sort'), $request->query('order'))
         ->take($request->query('size'))
         ->skip($request->query('page')*$request->query('size'))
@@ -352,6 +418,12 @@ class VoucherController extends Controller
             ->orWhere('fecha_operacion','LIKE','%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
+        })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
+            }
         })
         ->count();
 
