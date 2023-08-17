@@ -52,29 +52,39 @@ class Historial_Codigo_DiplomaController extends Controller
         $idTramite_detalle = $tramite->idTramite_detalle;
         $tramite_detalle = Tramite_Detalle::findOrFail($idTramite_detalle);
 
+        $codigo_unique = Historial_Codigo_Diploma::where('codigo_diploma_after', $request->codigo_diploma_after)->first(); 
+
         DB::beginTransaction();
         try {
     
-            $fecha_conver = substr($request->fecha_historial,0,-14); 
+            if($codigo_unique == null)
+            {
+                $fecha_conver = substr($request->fecha_historial,0,-14); 
 
-            $historial = new Historial_Codigo_Diploma;
-           
-            $historial->idTramite = $request->idTramite;
-            $historial->codigo_diploma_before = $request->codigo_diploma_before;
-            $historial->codigo_diploma_after = $request->codigo_diploma_after;
-            $historial->descripcion = $request->descripcion;
-            $historial->fecha_historial = $fecha_conver;
-            $historial->idUsuario = $idUsuario;
-            $historial->estado = 1;
-            $historial -> save();
-            
-            //Actualizar el codigo de diploma del tramite mismo
-            $tramite_detalle->codigo_diploma = $request->codigo_diploma_after;
-            $tramite_detalle->save();
-            
-            DB::commit();
-            return response()->json($historial, 200);
-       
+                $historial = new Historial_Codigo_Diploma;
+               
+                $historial->idTramite = $request->idTramite;
+                $historial->codigo_diploma_before = $request->codigo_diploma_before;
+                $historial->codigo_diploma_after = $request->codigo_diploma_after;
+                $historial->descripcion = $request->descripcion;
+                $historial->fecha_historial = $fecha_conver;
+                $historial->idUsuario = $idUsuario;
+                $historial->estado = 1;
+                $historial -> save();
+                
+                //Actualizar el codigo de diploma del tramite mismo
+                $tramite_detalle->codigo_diploma = $request->codigo_diploma_after;
+                $tramite_detalle->save();
+
+                DB::commit();
+                return response()->json($historial, 200); 
+
+            }
+
+            else
+            {
+                return response()->json(['status' => '400', 'message' => 'Código Diploma ya existe'], 400);
+            }            
 
         } catch (\Exception $e) {
             DB::rollback();
