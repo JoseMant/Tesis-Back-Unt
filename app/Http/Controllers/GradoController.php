@@ -37,6 +37,7 @@ use App\PersonaSga;
 use App\Alumno;
 use App\Acreditacion;
 use App\Usuario_Programa;
+use App\Historial_Codigo_Diploma;
 
 class GradoController extends Controller
 {
@@ -2307,6 +2308,10 @@ class GradoController extends Controller
         ->orderBy('usuario.apellidos','asc')
         ->orderBy('usuario.nombres','asc')
         ->get();
+
+        foreach ($tramites as $key => $tramite) {
+            $tramite->historial = Historial_Codigo_Diploma::where('idTramite',$tramite->idTramite)->where('estado',1)->get();
+        }
         
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
         $begin = ($pagination->currentPage()-1)*$pagination->perPage();

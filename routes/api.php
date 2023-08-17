@@ -156,6 +156,11 @@ Route::resource('tramites_requisitos','Tramite_RequisitoController');
 Route::resource('historial_estados','Historial_EstadoController');
 
 
+//DIPLOMA_ANULACION
+Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
+
+
+
 // E-mail verification
 // Route::get('/auth/verify/{code}', 'AuthController@verify');
 
