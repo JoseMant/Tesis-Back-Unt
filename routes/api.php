@@ -344,3 +344,4 @@ Route::get('agregar/programa/tramite', 'AdicionalController@setValuesProgramasTr
 Route::get('agregar/programa/diploma_carpeta', 'AdicionalController@setValuesProgramasDiplomaCarpeta');
 Route::get('uuid', 'AdicionalController@setValuesUuid');
 Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
+Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
