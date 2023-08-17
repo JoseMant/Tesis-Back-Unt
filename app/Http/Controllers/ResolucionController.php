@@ -55,6 +55,9 @@ class ResolucionController extends Controller
             }
             $resolucion=new Resolucion;
             $resolucion->nro_resolucion=trim($request->nro_resolucion);
+            if(substr($resolucion->nro_resolucion,-4)!="/UNT"){
+                return response()->json( ['status'=>400,'message'=>'El número de resolucion debe terminar en /UNT'],400);
+            }
             $resolucion->fecha=trim($request->fecha);
             $resolucion->estado =true;
             $resolucion->save();
