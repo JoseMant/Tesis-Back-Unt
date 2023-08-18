@@ -30,6 +30,7 @@ use App\Imports\TramitesImport;
 use App\Exports\TramitesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\PersonaSE;
+use App\Amnistia;
 
 use App\Mencion;
 use App\Escuela;
@@ -404,14 +405,19 @@ class TramiteController extends Controller
                         ->Where('per_dni',$dni)
                         ->first();
                         if (!$alumnoSUV) {
-                            $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
-                            ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
-                            ->Where('sga_datos_alumno.con_id',6)
-                            ->Where('perfil.pfl_estado',true)
-                            ->Where('per_dni',$dni)
-                            ->first();
-                            if (!$alumnoSGA) {
-                                return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+
+                            $amnistiado=Amnistia::where('nro_documento',$dni)->first();
+                            if (!$amnistiado) {
+                                # code...
+                                $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
+                                ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
+                                ->Where('sga_datos_alumno.con_id',6)
+                                ->Where('perfil.pfl_estado',true)
+                                ->Where('per_dni',$dni)
+                                ->first();
+                                if (!$alumnoSGA) {
+                                    return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+                                }
                             }
                         }
                     }elseif ($request->idUnidad==2) {
