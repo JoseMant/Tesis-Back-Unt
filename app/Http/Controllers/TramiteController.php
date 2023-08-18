@@ -949,7 +949,7 @@ class TramiteController extends Controller
                             $historial_estados=new Historial_Estado;
                             $historial_estados->idTramite=$tramite->idTramite;
                             $historial_estados->idUsuario=$idUsuario;
-                            $historial_estados->idEstado_actual=9;
+                            $historial_estados->idEstado_actual=22;
                             $historial_estados->idEstado_nuevo=30;
                         }
                     }
