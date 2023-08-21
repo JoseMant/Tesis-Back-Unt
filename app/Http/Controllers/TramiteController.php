@@ -1149,17 +1149,17 @@ class TramiteController extends Controller
                     }
                     $nombre = $tramite->nro_documento.".".$file->guessExtension();
                     if ($tramite->idTipo_tramite==2) {
-                        $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
+                        $nombreBD = "/storage"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
                     }else {
-                        $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                        $nombreBD = "/storage"."/".$tramite->filename."/".$requisito["nombre"]."/".$nombre;
                     }
 
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
                             if ($tramite->idTipo_tramite==2) {
-                                $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
+                                $file->storeAs("/public"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
                             }else {
-                                $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
+                                $file->storeAs("/public"."/".$tramite->filename."/".$requisito["nombre"], $nombre);
                             }
                             $tramite_requisito->archivo = $nombreBD;
                         }else {
