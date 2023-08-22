@@ -604,7 +604,7 @@ class TramiteController extends Controller
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
             $historial_estado=$this->setHistorialEstado($tramite->idTramite, 1, 2, $idUsuario);
             $historial_estado->save();
-
+            dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente'], 200);
         
