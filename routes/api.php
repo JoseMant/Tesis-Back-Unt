@@ -44,8 +44,13 @@ Route::post('tramites/secretaria','TramiteSecretariaController@store');
 Route::get('tramite/usuario','TramiteController@GetByUser');
 //DOCENTE
 // Route::post('docente/registrar','TramiteSecretariaController@prueba');
-Route::get('tramites/docentes/registrar','TramiteSecretariaController@GetTramitesDocente');
 Route::post('docente/registrar','TramiteSecretariaController@registroDocente');
+Route::get('tramites/docentes/registrar','TramiteSecretariaController@GetTramitesDocente');
+Route::get('tramites/docentes/validar','TramiteSecretariaController@GetDocenteValidar');
+Route::post('tramites/docentes/validados','TramiteSecretariaController@validarDocente');
+Route::post('docente/rechazar/{id}','TramiteSecretariaController@rechazarDocente');
+Route::get('tramites/docentes/finalizados','TramiteSecretariaController@GetDocenteFinalizados');
+
 
 // Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
@@ -86,6 +91,7 @@ Route::get('tramite/constancias/firma_uraa','ConstanciaController@GetConstancias
 Route::get('bancos','BancoController@index');
 Route::get('respuesta','BancoController@respuesta');
 Route::get('tipos_tramites','Tipo_TramiteController@index');
+Route::get('paises','PaisController@index');
 Route::get('sedes','SedeController@index');
 Route::get('unidades','UnidadController@index');
 Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getAllByTipo_tramiteUnidad');
@@ -97,8 +103,8 @@ Route::resource('alumnosSE','PersonaSEController');
 
 Route::get('profesiones','ProfesionDocenteController@index');
 Route::get('categorias','CategoriaSGAController@index');
-Route::get('dependenciasSGA','DependenciaSGAController@index');
-Route::get('unidadSGA/{idDependencia}','DependenciaSGAController@getUnidadByDependencia');
+Route::get('dependenciasSGA','DependenciaSGAController@getDependenciasSGA');
+Route::get('departamentos/{idDependencia}','DependenciaSGAController@DepartamentosByDependencia');
 Route::get('dedicaciones/docente','DedicacionDocenteController@index');
 
 Route::resource('motivos_certificado','Motivo_CertificadoController');
