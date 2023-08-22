@@ -30,6 +30,7 @@ use App\Imports\TramitesImport;
 use App\Exports\TramitesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\PersonaSE;
+use App\Amnistia;
 
 use App\Mencion;
 use App\Escuela;
@@ -404,14 +405,19 @@ class TramiteController extends Controller
                         ->Where('per_dni',$dni)
                         ->first();
                         if (!$alumnoSUV) {
-                            $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
-                            ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
-                            ->Where('sga_datos_alumno.con_id',6)
-                            ->Where('perfil.pfl_estado',true)
-                            ->Where('per_dni',$dni)
-                            ->first();
-                            if (!$alumnoSGA) {
-                                return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+
+                            $amnistiado=Amnistia::where('nro_documento',$dni)->first();
+                            if (!$amnistiado) {
+                                # code...
+                                $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
+                                ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
+                                ->Where('sga_datos_alumno.con_id',6)
+                                ->Where('perfil.pfl_estado',true)
+                                ->Where('per_dni',$dni)
+                                ->first();
+                                if (!$alumnoSGA) {
+                                    return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
+                                }
                             }
                         }
                     }elseif ($request->idUnidad==2) {
@@ -949,7 +955,7 @@ class TramiteController extends Controller
                             $historial_estados=new Historial_Estado;
                             $historial_estados->idTramite=$tramite->idTramite;
                             $historial_estados->idUsuario=$idUsuario;
-                            $historial_estados->idEstado_actual=9;
+                            $historial_estados->idEstado_actual=22;
                             $historial_estados->idEstado_nuevo=30;
                         }
                     }
@@ -1143,17 +1149,17 @@ class TramiteController extends Controller
                     }
                     $nombre = $tramite->nro_documento.".".$file->guessExtension();
                     if ($tramite->idTipo_tramite==2) {
-                        $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
+                        $nombreBD = "/storage"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
                     }else {
-                        $nombreBD = "/storage"."/".$tramite->tipo_tramite."/".$requisito["nombre"]."/".$nombre;
+                        $nombreBD = "/storage"."/".$tramite->filename."/".$requisito["nombre"]."/".$nombre;
                     }
 
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
                             if ($tramite->idTipo_tramite==2) {
-                                $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
+                                $file->storeAs("/public"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
                             }else {
-                                $file->storeAs("/public"."/".$tramite->tipo_tramite."/".$requisito["nombre"], $nombre);
+                                $file->storeAs("/public"."/".$tramite->filename."/".$requisito["nombre"], $nombre);
                             }
                             $tramite_requisito->archivo = $nombreBD;
                         }else {

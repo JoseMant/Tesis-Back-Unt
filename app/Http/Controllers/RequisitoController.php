@@ -100,7 +100,7 @@ class RequisitoController extends Controller
             if ($idTipo_tramite_unidad==15) {
                 $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
                 ->where('estado',true)
-                ->orWhere('idRequisito',71)
+                // ->orWhere('idRequisito',71)
                 ->get();
             }elseif ($idTipo_tramite_unidad==16) {
                 $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)

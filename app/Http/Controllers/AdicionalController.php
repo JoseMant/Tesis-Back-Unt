@@ -36,6 +36,7 @@ use App\Motivo_Certificado;
 use App\PersonaSuv;
 use App\PersonaSga;
 use App\Diploma_Carpeta;
+use App\Historial_Codigo_Diploma;
 
 class AdicionalController extends Controller
 {
@@ -414,4 +415,42 @@ class AdicionalController extends Controller
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function createHistorialCodeDiploma(Request $request){
+        DB::beginTransaction();
+        try {
+
+            $tramites=Tramite::select('tramite.idTramite','tramite_detalle.codigo_diploma')   
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->where('tramite.idEstado_tramite',44)
+            ->get(); 
+            
+            foreach ($tramites as $tramite) {
+                $historial_codigos = Historial_Codigo_Diploma::where('idTramite', $tramite->idTramite)->get();
+                if(count($historial_codigos) == 0)
+                {
+                    $historial_estado=Historial_Estado::where('idTramite',$tramite->idTramite)->where('idEstado_nuevo',44)->first();
+                    $newHistorial = new Historial_Codigo_Diploma;
+                    $newHistorial->idTramite = $tramite->idTramite;
+                    $newHistorial->codigo_diploma_before = 'NINGUNO';
+                    $newHistorial->codigo_diploma_after = $tramite->codigo_diploma;
+                    $newHistorial->descripcion = 'NUEVO CÓDIGO';
+                    $newHistorial->idUsuario = $historial_estado->idUsuario;
+                    $newHistorial->fecha_historial = substr($historial_estado->fecha,0,10);
+                    $newHistorial->save();
+                }
+            }
+
+               
+            // return $tramites;
+            DB::commit();
+            return response()->json( 'ok',200);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+
 }

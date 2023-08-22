@@ -193,7 +193,19 @@ class VoucherController extends Controller
         $tramites=Tramite::select('tramite.idTramite','tramite.nro_tramite','tramite.idUnidad','tramite.idPrograma',
         'tramite.nro_matricula', 'tramite.exonerado_archivo',
         'programa.nombre as programa',
-        DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'), 'tipo_tramite_unidad.costo',
+        DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'),
+        DB::raw("(case 
+                    when tramite.idTipo_tramite_unidad = 34 then (case
+                                                                        when tramite.idDependencia=17 then 624.20
+                                                                        when tramite.idDependencia=18 then 450
+                                                                        when tramite.idDependencia=19 then 250
+                                                                        when tramite.idDependencia=20 then 200
+                                                                        when tramite.idDependencia=21 then 1000
+                                                                        when tramite.idDependencia=22 then 250
+                                                                        when tramite.idDependencia=23 then 1500
+                                                                  end)
+                    else tipo_tramite_unidad.costo
+                end) AS costo"),
         'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'), 
         'voucher.idVoucher', 'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','voucher.comentario')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
@@ -440,11 +452,39 @@ class VoucherController extends Controller
     }
 
     public function vouchersAprobados(Request $request){
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+        $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
+
         $vouchers=Tramite::select('tramite.nro_matricula',
         'programa.nombre as programa',
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.nro_documento',
-        'tipo_tramite.descripcion as tipo_tramite',
-        'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','tipo_tramite_unidad.costo')
+        DB::raw("(case 
+                    when tipo_tramite.idTipo_tramite = 1 then tipo_tramite_unidad.descripcion
+                    when tipo_tramite.idTipo_tramite = 2 then tipo_tramite_unidad.descripcion
+                    when tipo_tramite.idTipo_tramite = 4 then tipo_tramite_unidad.descripcion
+                    else CONCAT(tipo_tramite.descripcion,'-',tipo_tramite_unidad.descripcion)
+                end) AS tipo_tramite"),
+        // 'tipo_tramite_unidad.descripcion as tipo_tramite',
+        'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion',
+        DB::raw("(case 
+                    when tramite.idTipo_tramite_unidad = 34 then (case
+                                                                        when tramite.idDependencia=17 then 624.20
+                                                                        when tramite.idDependencia=18 then 450
+                                                                        when tramite.idDependencia=19 then 250
+                                                                        when tramite.idDependencia=20 then 200
+                                                                        when tramite.idDependencia=21 then 1000
+                                                                        when tramite.idDependencia=22 then 250
+                                                                        when tramite.idDependencia=23 then 1500
+                                                                  end)
+                    else tipo_tramite_unidad.costo
+                end) AS costo")
+        // 'tipo_tramite_unidad.costo'
+        
+        )
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
         ->join('usuario','tramite.idUsuario','usuario.idUsuario')
@@ -458,6 +498,14 @@ class VoucherController extends Controller
             }
             if($request->fecha_fin){
                 $query->where('voucher.fecha_operacion','<=',$request->fecha_fin);
+            }
+        })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if ($idTipo_usuario==3) {
+                $query->where('voucher.entidad','!=','Tesoreria UNT');
+            }elseif($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
         ->where('tramite.idTipo_tramite_unidad','!=',37)
@@ -485,6 +533,14 @@ class VoucherController extends Controller
                 $query->where('voucher.fecha_operacion','<=',$request->fecha_fin);
             }
         })
+        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+            if ($idTipo_usuario==3) {
+                $query->where('voucher.entidad','!=','Tesoreria UNT');
+            }elseif($idTipo_usuario==5||$idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesoreria UNT')
+                ->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
         ->where('tramite.idTipo_tramite_unidad','!=',37)
         ->where('tramite.idEstado_tramite','!=',29)
         ->count();
@@ -502,10 +558,17 @@ class VoucherController extends Controller
 
     }
 
-    public function reporteTesoreria($fecha_inicio,$fecha_fin){
+    public function reporteTesoreria(Request $request, $fecha_inicio, $fecha_fin){
         DB::beginTransaction();
         try {
-            $descarga=Excel::download(new ReporteTesoreriaExport($fecha_inicio,$fecha_fin), 'Reporte_tesoreria.xlsx');
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::setToken($request->access);
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            $idTipo_usuario=$apy['idTipo_usuario'];
+
+            $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
+            $descarga=Excel::download(new ReporteTesoreriaExport($fecha_inicio,$fecha_fin,$idTipo_usuario,$usuario_programas), 'Reporte_tesoreria.xlsx');
             return $descarga;
         } catch (\Exception $e) {
             DB::rollback();
