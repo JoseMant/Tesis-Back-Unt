@@ -122,7 +122,7 @@ class PDF_Enviados_ImpresionController extends Controller
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y);
         $this->pdf->SetFont('times', '', 10);
-        $this->pdf->MultiCell(30,9,$tramite->nro_matricula,1,'C');
+        $this->pdf->MultiCell(30,9,$tramite->nro_matricula,0,'C');
   
         $this->pdf->SetFont('times', '', 9);
         $nombres=$tramite->solicitante;
@@ -131,31 +131,31 @@ class PDF_Enviados_ImpresionController extends Controller
         $this->pdf->SetXY($x+28,$y);
         if ($tamNombres>=36) {
           // $this->pdf->SetFont('times', '', 10);
-          $this->pdf->MultiCell(75,4.5,utf8_decode("       ".$nombres),1,'C');
+          $this->pdf->MultiCell(75,4.5,utf8_decode("       ".$nombres),0,'C');
         }else {
           // $this->pdf->SetFont('times', '', 9);
-          $this->pdf->MultiCell(75,9,utf8_decode($nombres),1,'C');
+          $this->pdf->MultiCell(75,9,utf8_decode($nombres),0,'C');
         }
   
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+103,$y);
-        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_resolucion),1,'C');
+        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_resolucion),0,'C');
 
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+128,$y);
-        $this->pdf->MultiCell(30,9,utf8_decode($tramite->fecha_resolucion),1,'C');
+        $this->pdf->MultiCell(30,9,utf8_decode($tramite->fecha_resolucion),0,'C');
   
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+158,$y);
-        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_libro),1,'C');
+        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_libro),0,'C');
 
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+183,$y);
-        $this->pdf->MultiCell(20,9,utf8_decode($tramite->folio),1,'C');
+        $this->pdf->MultiCell(20,9,utf8_decode($tramite->folio),0,'C');
 
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+203,$y);
-        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_registro),1,'C');
+        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_registro),0,'C');
 
         // escuela
         // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
@@ -176,11 +176,11 @@ class PDF_Enviados_ImpresionController extends Controller
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+228,$y);
         if ($tamPrograma<29) {
-          $this->pdf->MultiCell(59,9,utf8_decode($tramite->programa),1,'C');
+          $this->pdf->MultiCell(59,9,utf8_decode($tramite->programa),0,'C');
         }elseif ($tamPrograma>=29 && $tamPrograma<=60) {
-            $this->pdf->MultiCell(59,4.5,utf8_decode($tramite->programa),1,'C');
+            $this->pdf->MultiCell(59,4.5,utf8_decode($tramite->programa),0,'C');
         }elseif($tamPrograma>=60){
-          $this->pdf->MultiCell(59,3,utf8_decode($tramite->programa),1,'C');
+          $this->pdf->MultiCell(59,3,utf8_decode($tramite->programa),0,'C');
         }
         // if ($tamPrograma>=16) {
         //     $this->pdf->MultiCell(59,4.5,utf8_decode($tramite->programa),1,'C');
