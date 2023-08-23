@@ -351,3 +351,5 @@ Route::get('agregar/programa/diploma_carpeta', 'AdicionalController@setValuesPro
 Route::get('uuid', 'AdicionalController@setValuesUuid');
 Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
 Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
+Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
+Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
