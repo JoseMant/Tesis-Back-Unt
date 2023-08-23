@@ -24,7 +24,7 @@ class PDF_Enviados_ImpresionController extends Controller
     {
         // DATA NECESARIA
         // tramites----------------------
-      $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idDependencia_detalle', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+      $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
       ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
       ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
       , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
@@ -32,7 +32,7 @@ class PDF_Enviados_ImpresionController extends Controller
       'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
       'tramite_detalle.diploma_final','tramite.idTramite_detalle','diploma_carpeta.descripcion as denominacion','diploma_carpeta.codigo as diploma',
       'tipo_tramite_unidad.idTipo_tramite_unidad as idFicha','dependencia.idDependencia','tramite_detalle.nro_libro','tramite_detalle.folio'
-      ,'tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','tramite.sede')
+      ,'tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','tramite.sede','programa.nombre as programa')
       ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
       ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
       ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -44,6 +44,7 @@ class PDF_Enviados_ImpresionController extends Controller
       ->join('voucher','tramite.idVoucher','voucher.idVoucher')
       ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
       ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+      ->join('programa','tramite.idPrograma','programa.idPrograma')
       ->where('tramite.idEstado_tramite',44)
       ->where('tramite_detalle.nro_libro','!=',null)
       ->where('tramite_detalle.folio','!=',null)
@@ -121,62 +122,71 @@ class PDF_Enviados_ImpresionController extends Controller
         $y=$this->pdf->GetY();
         $this->pdf->SetXY(8,$y);
         $this->pdf->SetFont('times', '', 10);
-        $this->pdf->MultiCell(30,8,$tramite->nro_matricula,0,'C');
+        $this->pdf->MultiCell(30,9,$tramite->nro_matricula,1,'C');
   
         $this->pdf->SetFont('times', '', 9);
         $nombres=$tramite->solicitante;
         $tamNombres= strlen($nombres);
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+28,$y);
-        if ($tamNombres>=47) {
-          $this->pdf->MultiCell(75,4,utf8_decode($nombres),0,'C');
+        if ($tamNombres>=36) {
+          // $this->pdf->SetFont('times', '', 10);
+          $this->pdf->MultiCell(75,4.5,utf8_decode("       ".$nombres),1,'C');
         }else {
-          $this->pdf->MultiCell(75,8,utf8_decode($nombres),0,'C');
+          // $this->pdf->SetFont('times', '', 9);
+          $this->pdf->MultiCell(75,9,utf8_decode($nombres),1,'C');
         }
   
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+103,$y);
-        $this->pdf->MultiCell(25,8,utf8_decode($tramite->nro_resolucion),0,'C');
+        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_resolucion),1,'C');
 
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+128,$y);
-        $this->pdf->MultiCell(30,8,utf8_decode($tramite->fecha_resolucion),0,'C');
+        $this->pdf->MultiCell(30,9,utf8_decode($tramite->fecha_resolucion),1,'C');
   
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+158,$y);
-        $this->pdf->MultiCell(25,8,utf8_decode($tramite->nro_libro),0,'C');
+        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_libro),1,'C');
 
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+183,$y);
-        $this->pdf->MultiCell(20,8,utf8_decode($tramite->folio),0,'C');
+        $this->pdf->MultiCell(20,9,utf8_decode($tramite->folio),1,'C');
 
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+203,$y);
-        $this->pdf->MultiCell(25,8,utf8_decode($tramite->nro_registro),0,'C');
+        $this->pdf->MultiCell(25,9,utf8_decode($tramite->nro_registro),1,'C');
 
         // escuela
         // VERIFICAR A QUÉ UNIDAD PERTENECE EL USUARIO PARA OBTENER ESCUELA/MENCION/PROGRAMA
-        $dependenciaDetalle=null;
-        if ($tramite->idUnidad==1) {
-            $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
-        }else if ($tramite->idUnidad==2) {
+        // $dependenciaDetalle=null;
+        // if ($tramite->idUnidad==1) {
+        //     $dependenciaDetalle=Escuela::Where('idEscuela',$tramite->idDependencia_detalle)->first();    
+        // }else if ($tramite->idUnidad==2) {
             
-        }else if ($tramite->idUnidad==3) {
+        // }else if ($tramite->idUnidad==3) {
             
-        }else{
-            $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
-        }
-        $tramite->escuela=$dependenciaDetalle->nombre;
+        // }else{
+        //     $dependenciaDetalle=Mencion::Where('idMencion',$tramite->idDependencia_detalle)->first();
+        // }
+        // $tramite->escuela=$dependenciaDetalle->nombre;
         // -------
         $this->pdf->SetFont('times', '', 8);
-        $tamEscuela=strlen($tramite->escuela);
+        $tamPrograma=strlen($tramite->programa);
         $x=$this->pdf->GetX();
         $this->pdf->SetXY($x+228,$y);
-        if ($tamEscuela>=16) {
-            $this->pdf->MultiCell(59,4,utf8_decode($tramite->escuela),0,'C');
-        }else {
-          $this->pdf->MultiCell(59,8,utf8_decode($tramite->escuela),0,'C');
+        if ($tamPrograma<29) {
+          $this->pdf->MultiCell(59,9,utf8_decode($tramite->programa),1,'C');
+        }elseif ($tamPrograma>=29 && $tamPrograma<=60) {
+            $this->pdf->MultiCell(59,4.5,utf8_decode($tramite->programa),1,'C');
+        }elseif($tamPrograma>=60){
+          $this->pdf->MultiCell(59,3,utf8_decode($tramite->programa),1,'C');
         }
+        // if ($tamPrograma>=16) {
+        //     $this->pdf->MultiCell(59,4.5,utf8_decode($tramite->programa),1,'C');
+        // }else {
+        //   $this->pdf->MultiCell(59,9,utf8_decode($tramite->programa),1,'C');
+        // }
 
 
         // $this->pdf->SetFont('times', '', 8);
