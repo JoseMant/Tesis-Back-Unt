@@ -32,17 +32,19 @@ class CarpetaController extends Controller
             //Obteniendo los cronogramas que se van a finalizar
             $cronogramas=Cronograma::where('idResolucion',$resolucion->idResolucion)->get();
             foreach ($cronogramas as $cronograma) {
-                $cronograma->visible=false;
-                $cronograma->save();
-                // buscando el cronograma más cercano para activarlo
-                $cronogramasSig=Cronograma::where('idDependencia',$cronograma->idDependencia)
-                ->where('idTipo_tramite_unidad',$cronograma->idTipo_tramite_unidad)
-                ->where('fecha_colacion','>',$cronograma->fecha_colacion)
-                ->orderBy('fecha_colacion') //Si no se pone el order, traerá todos las colaciones mayores, pero la más próxima será por id y no por fecha de colación.   
-                ->first();
-                if ($cronogramasSig) {
-                    $cronogramasSig->visible=true;
-                    $cronogramasSig->save();
+                if ($cronograma->visible) {
+                    $cronograma->visible=false;
+                    $cronograma->save();
+                    // buscando el cronograma más cercano para activarlo
+                    $cronogramasSig=Cronograma::where('idDependencia',$cronograma->idDependencia)
+                    ->where('idTipo_tramite_unidad',$cronograma->idTipo_tramite_unidad)
+                    ->where('fecha_colacion','>',$cronograma->fecha_colacion)
+                    ->orderBy('fecha_colacion') //Si no se pone el order, traerá todos las colaciones mayores, pero la más próxima será por id y no por fecha de colación.   
+                    ->first();
+                    if ($cronogramasSig) {
+                        $cronogramasSig->visible=true;
+                        $cronogramasSig->save();
+                    }
                 }
             }
 
