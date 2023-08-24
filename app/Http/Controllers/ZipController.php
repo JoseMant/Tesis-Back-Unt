@@ -127,16 +127,16 @@ class ZipController extends Controller
             
             foreach ($tramites as $key => $tramite) {
                 // // finalización de trámite
-                $historial_estados=new Historial_Estado;
-                $historial_estados->idTramite=$tramite->idTramite;
-                $historial_estados->idUsuario=$tramite->idUsuario;
-                $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                $historial_estados->idEstado_nuevo=15;
-                $historial_estados->fecha=date('Y-m-d h:i:s');
-                $historial_estados->save();
+                // $historial_estados=new Historial_Estado;
+                // $historial_estados->idTramite=$tramite->idTramite;
+                // $historial_estados->idUsuario=$tramite->idUsuario;
+                // $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
+                // $historial_estados->idEstado_nuevo=15;
+                // $historial_estados->fecha=date('Y-m-d h:i:s');
+                // $historial_estados->save();
                 
-                $tramite->idEstado_tramite=15;
-                $tramite->save();
+                // $tramite->idEstado_tramite=15;
+                // $tramite->save();
 
                 // Obteniendo los requisitos de cada trámite
                 $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
@@ -245,7 +245,7 @@ class ZipController extends Controller
                 DB::commit();
                 return response()->download(public_path($fileName));
             }else {
-                return response()->json(['status' => '400', 'message' =>"La resolución no tramites"], 400);
+                return response()->json(['status' => '400', 'message' =>"La resolución no tiene trámites"], 400);
             }
 
             
