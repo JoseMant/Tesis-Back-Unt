@@ -33,12 +33,13 @@ class PDF_LibroController extends Controller
         'cronograma_carpeta.fecha_colacion',
         'tramite.nro_matricula', 'usuario.nro_documento',
         'tramite_detalle.nro_libro as nro_libro','tramite_detalle.folio as folio','tramite_detalle.nro_registro',
-        'resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion')
+        'resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion','libro.contador')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('diploma_carpeta','tramite_detalle.idDiploma_carpeta','diploma_carpeta.idDiploma_carpeta')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('libro','libro.nro_registro','tramite_detalle.nro_registro')
         ->join('resolucion','cronograma_carpeta.idResolucion','resolucion.idResolucion')
         ->where('tramite.idTipo_tramite_unidad', $request->idTipo_tramite_unidad)
         ->where(function($query) use ($request) {
@@ -152,17 +153,17 @@ class PDF_LibroController extends Controller
             $this->pdf->multiCell(20,10,$tramite->nro_registro,1,'C');
             
             $this->pdf->SetXY(28,$y);   
-            if (strlen($tramite->nombre_completo)<45) {
-                $this->pdf->multiCell(80,10,utf8_decode($tramite->nombre_completo),1,'L');
-            }else{
+            if (strlen($tramite->nombre_completo)>40) {
                 $this->pdf->multiCell(80,5,utf8_decode($tramite->nombre_completo),1,'L');
+            }else{
+                $this->pdf->Cell(80,10,utf8_decode($tramite->nombre_completo),1,'L');
             }
 
             $this->pdf->SetXY(108,$y);
             $this->pdf->multiCell(40,10,utf8_decode($tramite->codigo_diploma),1,'C');
 
             $this->pdf->SetXY(148,$y);
-            if (strlen($tramite->denominacion)<70) {
+            if (strlen($tramite->denominacion)<80) {
                 $this->pdf->Cell(135,10,utf8_decode($tramite->denominacion),1,'L');
             }else{
                 $this->pdf->multiCell(135,5,utf8_decode($tramite->denominacion),1,'L');
@@ -188,6 +189,9 @@ class PDF_LibroController extends Controller
 
             $y+=10;
             $iterador++;
+            if($key!=0&&$key<(count($tramites)-1)&&$tramites[$key]['folio']!=$tramites[$key+1]['folio']){
+                $iterador= 21;
+            }
             if ($key!=0&&$key<(count($tramites)-1)&&$tramites[$key]['nro_libro']!=$tramites[$key+1]['nro_libro']) {
                 
                 $this->pdf->AddPage('O');
