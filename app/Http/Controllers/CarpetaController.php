@@ -232,7 +232,7 @@ class CarpetaController extends Controller
             if ($request->query('tipo')=="codigo_diploma") {
                 $query->where('tramite_detalle.codigo_diploma', 'LIKE', $request->query('search'));
             } else if ($request->query('tipo')=="nro_documento") {
-                $query->where('usuario.nro_documento', 'LIKE', '%'.$request->query('search'));
+                $query->where('usuario.nro_documento', 'LIKE', '%'.$request->query('search').'%');
             } else if ($request->query('tipo')=="apellidos") {
                 $query->where('usuario.apellidos', 'LIKE', '%'.$request->query('search').'%');
             } else if ($request->query('tipo')=="nombres") {
