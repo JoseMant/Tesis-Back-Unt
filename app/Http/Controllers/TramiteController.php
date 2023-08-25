@@ -39,6 +39,9 @@ use App\PersonaSuv;
 use App\PersonaSga;
 use App\Cronograma;
 use App\Resolucion;
+use App\MatriculaSUV;
+use App\MatriculaSGA;
+use App\SemestreAcademico;
 class TramiteController extends Controller
 {
     public function __construct()
@@ -373,7 +376,6 @@ class TramiteController extends Controller
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
             $usuario = User::findOrFail($idUsuario);
-            // return $request->all();
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
             
             //VALIDACIONES CUANDO ES ELABORACIÓN DE CARPETA O SOLICITUD DE CARNÉ
@@ -430,7 +432,48 @@ class TramiteController extends Controller
                 }
             }
             if ($tipo_tramite_unidad->idTipo_tramite==3) {
-                // VALIDACION DE REPETICIÓN DE TRÁMITES
+                // OBTENIENDO EL SEMESTRE ACADÉMICO ACTUAL
+                $semestreAcademico=SemestreAcademico::where('estado',true)->first();
+                // VALIDACIÓN DE MATRÍCULA PAGADA EN EL SUV
+                $matriculaSuv=MatriculaSUV::select('orden_pago.ord_estado')
+                ->join('matriculas.alumno','matricula.idalumno','alumno.idalumno')
+                ->join('sistema.persona','alumno.idpersona','persona.idpersona')
+                ->join('matriculas.orden_pago','matricula.idmatricula' ,'orden_pago.idmatricula')
+                ->where('matricula.mat_estado',true)
+                ->where('matricula.mat_periodo',$semestreAcademico->anio.'-'.$semestreAcademico->periodo)
+                ->where('alumno.alu_estado',true)
+                ->where('persona.per_dni',$dni)
+                ->first();
+                if ($matriculaSuv) {
+                    if (trim($matriculaSuv->ord_estado)=="PENDIENTE") {
+                        return response()->json(['status' => '400', 'message' => 'Falta subir sus datos de pago de su matrícula del semestre académico actual.'], 400);
+                    }elseif (trim($matriculaSuv->ord_estado)=="PENDIENTE DE VALIDACION") {
+                        return response()->json(['status' => '400', 'message' => 'Pendiente de validación de sus datos de pago de matrícula del semestre académico actual. Coordinar con su secretaria de escuela la validación.'], 400);
+                    }
+                }else {
+                    // VALIDACIÓN DE MATRÍCULA PAGADA EN EL SGA
+                    $matriculaSga=MatriculaSGA::select('sga_orden_pago.ord_pagado')
+                    ->join('sga_anio', 'sga_anio.ani_id' ,'sga_matricula.ani_id')
+                    ->join('sga_tanio' , 'sga_tanio.tan_id' ,'sga_anio.tan_id')
+                    ->join('perfil', 'perfil.pfl_id' , 'sga_matricula.pfl_id')
+                    ->join('persona' , 'persona.per_id' , 'perfil.per_id')
+                    ->join('sga_orden_pago' , 'sga_matricula.mat_id', 'sga_orden_pago.mat_id')
+                    ->where('sga_matricula.mat_estado', 1)
+                    ->where('sga_orden_pago.ord_pagado', 1)
+                    ->where('sga_anio.ani_anio',$semestreAcademico->anio)
+                    ->where('sga_tanio.tan_semestre',$semestreAcademico->periodo)
+                    ->where('persona.per_dni',$dni)
+                    ->first();
+                    if ($matriculaSga) {
+                        if ($matriculaSga->ord_pagado!=1) {
+                            return response()->json(['status' => '400', 'message' => 'Usted No cuenta con una matrícula PAGADA para el semestre académico actual.'], 400);
+                        }
+                    }else {
+                        // cuando no haya nada en el suv y sga, no tiene matrícula en el semestre actual
+                        return response()->json(['status' => '400', 'message' => 'Usted no cuenta con una matrícula para el semestre académico actual.'], 400);
+                    }
+                }
+                // VALIDACION DE REPETICIÓN DE TRÁMITES REGULARES
                 if ($request->idTipo_tramite_unidad==17||$request->idTipo_tramite_unidad==19||$request->idTipo_tramite_unidad==21||$request->idTipo_tramite_unidad==23) {
                     $tramite_validate=Tramite::where('idUsuario',$idUsuario)
                     ->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)
