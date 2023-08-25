@@ -170,8 +170,6 @@ if ($tramite->tipo_documento==1) {
                     <p style="text-align: justify; text-indent: 0px; margin-bottom: 18px; margin-top: -35px; font-size:18px">
                         De la <b><?php echo $dependencia ?>,</b>
                         <b>
-                            <?php if ($idFicha==1 || $idFicha==2){?>PROGRAMA DE <?php }?>
-                            <?php if ($idFicha==4 && $tramite->idDependencia_detalle==49){?>SEGUNDA ESPECIALIZACIÓN,<?php }?>
                             <?php
                             if ($programa=='RESIDENTADO MÉDICO' || $programa=='SEGUNDA ESPECIALIDAD EN ENFERMERÍA' || $programa=='SEGUNDA ESPECIALIDAD EN CIENCIAS BIOLÓGICAS' || $programa=='TECNOLOGÍA EDUCATIVA' || $programa=='ESTIMULACIÓN TEMPRANA' || $programa=='PROGRAMA DE SEGUNDA ESPECIALIDAD EN EDUCACIÓN INICIAL' || $programa=='SEGUNDA ESPECIALIDAD EN FARMACIA Y BIOQUÍMICA' || $programa=='SEGUNDA ESPECIALIDAD EN ESTOMATOLOGÍA') {
                                 echo buscarDenominaciones($programa, $diploma);

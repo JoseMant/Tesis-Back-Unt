@@ -26,7 +26,7 @@ class PDF_DiplomaController extends Controller
             ,'usuario.tipo_documento','usuario.nro_documento','tramite.idUnidad','cronograma_carpeta.fecha_colacion','diploma_carpeta.descripcion as denominacion',
             'diploma_carpeta.codigo as diploma',
             'tramite_detalle.nro_libro','tramite_detalle.folio','tramite_detalle.nro_registro','resolucion.nro_resolucion','resolucion.fecha as fecha_resolucion',
-            'tipo_tramite_unidad.diploma_obtenido','modalidad_carpeta.acto_academico','tramite_detalle.codigo_diploma', 'programa.nombre as programa','tramite_detalle.autoridad1','tramite_detalle.autoridad2'
+            'tipo_tramite_unidad.diploma_obtenido','modalidad_carpeta.acto_academico','tramite_detalle.codigo_diploma', 'programa.denominacion as programa','tramite_detalle.autoridad1','tramite_detalle.autoridad2'
             ,'tramite_detalle.autoridad3')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
