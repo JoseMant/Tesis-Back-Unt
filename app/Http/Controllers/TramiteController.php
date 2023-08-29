@@ -440,7 +440,7 @@ class TramiteController extends Controller
                 ->join('sistema.persona','alumno.idpersona','persona.idpersona')
                 ->join('matriculas.orden_pago','matricula.idmatricula' ,'orden_pago.idmatricula')
                 ->where('matricula.mat_estado',true)
-                ->where(function($query)
+                ->where(function($query) use($semestreAcademico)
                 {
                     $query->where('matricula.mat_periodo',$semestreAcademico->anio.'-'.$semestreAcademico->periodo)
                     ->orWhere('matricula.mat_periodo',$semestreAcademico->anio.'-ANUAL');
@@ -466,7 +466,7 @@ class TramiteController extends Controller
                     ->where('sga_matricula.mat_estado', 1)
                     ->where('sga_orden_pago.ord_pagado', 1)
                     ->where('sga_anio.ani_anio',$semestreAcademico->anio)
-                    ->where(function($query)
+                    ->where(function($query) use($semestreAcademico)
                     {
                         $query->where('sga_tanio.tan_semestre',$semestreAcademico->periodo)
                         ->orWhere('sga_tanio.tan_semestre',"Anual");
