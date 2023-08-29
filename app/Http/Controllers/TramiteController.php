@@ -389,11 +389,11 @@ class TramiteController extends Controller
                     return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
                 }
 
-                // Verificando que sea alumno de universidad no licenciada o amnistiados
+                // Verificando que sea alumno de universidad no licenciada(10) o amnistiados(9)
                 $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
                 ->where(function($query) {
-                    $query->where('idmodalidadingreso',8)
-                    ->orWhere('idmodalidadingreso',9);
+                    $query->where('idmodalidadingreso',9)
+                    ->orWhere('idmodalidadingreso',10);
                 })
                 ->Where('per_dni',$dni)
                 ->first();
@@ -440,7 +440,12 @@ class TramiteController extends Controller
                 ->join('sistema.persona','alumno.idpersona','persona.idpersona')
                 ->join('matriculas.orden_pago','matricula.idmatricula' ,'orden_pago.idmatricula')
                 ->where('matricula.mat_estado',true)
-                ->where('matricula.mat_periodo',$semestreAcademico->anio.'-'.$semestreAcademico->periodo)
+                ->where(function($query)
+                {
+                    $query->where('matricula.mat_periodo',$semestreAcademico->anio.'-'.$semestreAcademico->periodo)
+                    ->orWhere('matricula.mat_periodo',$semestreAcademico->anio.'-ANUAL');
+                })
+                // ->where('matricula.mat_periodo',$semestreAcademico->anio.'-'.$semestreAcademico->periodo)
                 ->where('alumno.alu_estado',true)
                 ->where('persona.per_dni',$dni)
                 ->first();
@@ -461,7 +466,12 @@ class TramiteController extends Controller
                     ->where('sga_matricula.mat_estado', 1)
                     ->where('sga_orden_pago.ord_pagado', 1)
                     ->where('sga_anio.ani_anio',$semestreAcademico->anio)
-                    ->where('sga_tanio.tan_semestre',$semestreAcademico->periodo)
+                    ->where(function($query)
+                    {
+                        $query->where('sga_tanio.tan_semestre',$semestreAcademico->periodo)
+                        ->orWhere('sga_tanio.tan_semestre',"Anual");
+                    })
+                    // ->where('sga_tanio.tan_semestre',$semestreAcademico->periodo)
                     ->where('persona.per_dni',$dni)
                     ->first();
                     if ($matriculaSga) {
@@ -1165,7 +1175,7 @@ class TramiteController extends Controller
             'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
             'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
             'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher',
-            'voucher.des_estado_voucher','tramite.uuid')
+            'voucher.des_estado_voucher','tramite.uuid','tipo_tramite.filename')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
