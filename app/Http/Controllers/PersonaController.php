@@ -270,6 +270,7 @@ class PersonaController extends Controller
                 ->join('sistema.roles_usuario','sistema.roles_usuario.idpersona','persona.idpersona')
                 ->where('sistema.roles_usuario.rol_id',25)
                 ->Where('persona.per_dni',$dni)
+                ->Where('persona.per_estado',true)
                 ->pluck('persona.idpersona')
                 ->first();
                 if ($idPersonaSuv) {
