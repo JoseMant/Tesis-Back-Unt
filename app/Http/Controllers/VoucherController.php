@@ -21,6 +21,7 @@ use App\Tramite_Detalle;
 use App\Exports\ReporteTesoreriaExport;
 use App\Jobs\ActualizacionTramiteJob;
 use App\Usuario_Programa;
+use App\PersonaSuv;
 use Illuminate\Support\Str;
 
 class VoucherController extends Controller
@@ -86,9 +87,21 @@ class VoucherController extends Controller
                     $historial_estado = $this->setHistorialEstado($tramite->idTramite, 3, 17, $idUsuario);
                     $historial_estado->save();
 
+                    // VERIFICANDO SI ES DE UNA UNIVERSIDAD NO LICENCIADA(10)
+                    $noLicenciado=false;
+                    $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where(function($query) {
+                        $query->where('idmodalidadingreso',10);
+                    })
+                    ->Where('per_dni',$usuario->nro_documento)
+                    ->first();
+                    if ($alumnoSUV) {
+                        $noLicenciado=true;
+                    }
+
                     // REGISTRAMOS EL CERTIFICADO EN PARALELO
                     if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==34 
-                    || ($tramite->idTipo_tramite_unidad==16 && ($tramite->idPrograma==11 || $tramite->idPrograma==47))) {
+                    || ($tramite->idTipo_tramite_unidad==16 && $noLicenciado==false && ($tramite->idPrograma==11 || $tramite->idPrograma==47))) {
                         $tramiteCertificado=new Tramite;
                         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
                         // REGISTRAMOS EL TRÁMITE
