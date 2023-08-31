@@ -336,9 +336,10 @@ Route::get('reporte/enviado/secretaria', 'ReporteController@enviadoSecretariaGen
 Route::get('reporte/elaboracion_carpeta/status_tramites', 'ReporteController@reporteCarpeta');
 Route::get('reporte/status_tramites/certificados/pendientes/{idDependencia}/{cronograma}', 'ReporteController@crearExcelCertificadosPendientes');
 Route::get('reporte/status_tramites/certificados/observados/{idDependencia}/{cronograma}', 'ReporteController@crearExcelCertificadosObservados');
-Route::get('reporte/status_tramites/pdf/{idDependencia}/{cronograma}', 'ReporteController@crearPDF');
+Route::get('reporte/status_tramites/pdf/{idDependencia}/{cronograma}', 'ReporteController@certificadosObservadosCarpetasPDF');
 Route::get('reporte/elaboracion_carpeta/expedientes', 'ReporteController@reporteExpediente');
 Route::get('reporte/expedientesPDF', 'ReporteController@expedientesPDF');
+Route::get('reporte/certificados/observados', 'ReporteController@certificadosObservados');
 Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
 Route::get('diploma', 'ReporteController@GetDiploma');
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
