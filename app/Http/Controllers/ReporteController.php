@@ -1883,7 +1883,8 @@ class ReporteController extends Controller
         $idTipo_usuario=$apy['idTipo_usuario'];
         $idUsuario=$apy['idUsuario'];
 
-        $tramites=Tramite::select('tramite.nro_tramite','tramite.nro_matricula',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+        $tramites=Tramite::select('tramite.nro_tramite','tramite.nro_matricula',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'usuario.celular',
+        'tramite_requisito.comentario','requisito.nombre',
         'estado_tramite.descripcion as descripcion',DB::raw('CONCAT(asignado.apellidos," ",asignado.nombres) as asignado'),'programa.nombre as programa',
         'tramite.idEstado_tramite')
         ->join('usuario','tramite.idUsuario','usuario.idUsuario')
@@ -1891,6 +1892,8 @@ class ReporteController extends Controller
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
         ->join('programa','programa.idPrograma','tramite.idPrograma')
+        ->join('tramite_requisito','tramite_requisito.idTramite','tramite.idTramite')
+        ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
         ->where('tipo_tramite_unidad.idTipo_tramite',1)
         ->where('tramite.idEstado_tramite',9)
         ->where('tramite.idDependencia',$idDependencia)
@@ -1900,6 +1903,23 @@ class ReporteController extends Controller
                 $query->where('tramite.idUsuario_asignado',$idUsuario);
             }
         })
+        ->where(function($query)
+        {
+            $query->where('requisito.idRequisito',1)
+            ->orWhere('requisito.idRequisito',2)
+            ->orWhere('requisito.idRequisito',3)
+            ->orWhere('requisito.idRequisito',4)
+            ->orWhere('requisito.idRequisito',5)
+            ->orWhere('requisito.idRequisito',6)
+            ->orWhere('requisito.idRequisito',7)
+            ->orWhere('requisito.idRequisito',8)
+            ->orWhere('requisito.idRequisito',9)
+            ->orWhere('requisito.idRequisito',10)
+            ->orWhere('requisito.idRequisito',11)
+            ->orWhere('requisito.idRequisito',12)
+            ->orWhere('requisito.idRequisito',13)
+            ->orWhere('requisito.idRequisito',14);
+        })
         ->orderby('programa')
         ->orderby('solicitante')
         ->get();
@@ -1908,6 +1928,29 @@ class ReporteController extends Controller
         $this->pdf->AddPage('L');
 
         $pag=1;
+
+        $tramitet=15;
+        $matriculat=20;
+        $egresadost=60;
+        $estadot=70;
+        $celulart=40;
+
+        $observaciont=148;
+        $observacionx=145;
+
+        if($idTipo_usuario==1){
+            $tramitet=15;
+            $matriculat=20;
+            $egresadost=60;
+            $estadot=70;
+            $celulart=20;
+
+            $observaciont=110;
+            $observacionx=185;
+
+            $asignadot=60;
+
+        }
 
         $this->pdf->SetFont('Arial','', 9);
         $this->pdf->SetXY(10,10);
@@ -1940,22 +1983,25 @@ class ReporteController extends Controller
             $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
             //N° TRÁMITE
             $this->pdf->SetXY(10,42);
-            $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
+            $this->pdf->Cell($tramitet,4,utf8_decode('N°TRÁMITE'),1,'C');
             //N° MATRÍCULA
             $this->pdf->SetXY(25,42);
-            $this->pdf->Cell(20,4,utf8_decode('N°MATRÍCULA'),1,'C');
+            $this->pdf->Cell($matriculat,4,utf8_decode('N°MATRÍCULA'),1,'C');
             //EGRESADOS
             $this->pdf->SetXY(45,42);
-            $this->pdf->Cell(70,4,utf8_decode('EGRESADOS'),1,'C');
+            $this->pdf->Cell($egresadost,4,utf8_decode('EGRESADOS'),1,'C');
             //ESTADO
-            $this->pdf->SetXY(115,42);
-            $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
-            //ASIGNADO
-            $this->pdf->SetXY(185,42);
-            $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
+            $this->pdf->SetXY(105,42);
+            $this->pdf->Cell($celulart, 4,'CELULAR',1,0,'C');
+            
+            if($idTipo_usuario==1){
+                //ASIGNADO
+                $this->pdf->SetXY(125,42);
+                $this->pdf->Cell($asignadot, 4,'ASIGNADO',1,0,'C');
+            }
             //OBSERVACION
-            $this->pdf->SetXY(235,42);
-            $this->pdf->Cell(57, 4,'OBSERVACION',1,0,'C');
+            $this->pdf->SetXY($observacionx,42);
+            $this->pdf->Cell($observaciont, 4,'OBSERVACION',1,0,'C');
     
             $salto=0;
             $i=0;
@@ -1968,22 +2014,27 @@ class ReporteController extends Controller
                     $this->pdf->Cell(5,4,$i+1,1,'C');
                     //N° TRÁMITE
                     $this->pdf->SetXY(10,$inicioY+$salto);
-                    $this->pdf->Cell(15,4,$tramite->nro_tramite,1,'C');
+                    $this->pdf->Cell($tramitet,4,$tramite->nro_tramite,1,'C');
                     //N° MATRÍCULA
                     $this->pdf->SetXY(25,$inicioY+$salto);
-                    $this->pdf->Cell(20,4,$tramite->nro_matricula,1,'C');
+                    $this->pdf->Cell($matriculat,4,$tramite->nro_matricula,1,'C');
                     //EGRESADOS
                     $this->pdf->SetXY(45,$inicioY+$salto);
-                    $this->pdf->Cell(70,4,utf8_decode($tramite->solicitante),1,'C');
+                    $this->pdf->Cell($egresadost,4,utf8_decode($tramite->solicitante),1,'C');
                     //ESTADO
-                    $this->pdf->SetXY(115,$inicioY+$salto);
-                    $this->pdf->Cell(70, 4,utf8_decode($tramite->descripcion),1,0,'C');
-                    //ASIGNADO
-                    $this->pdf->SetXY(185,$inicioY+$salto);
-                    $this->pdf->Cell(50, 4,utf8_decode($tramite->asignado),1,0,'C');
+                    $this->pdf->SetXY(105,$inicioY+$salto);
+                    $this->pdf->Cell($celulart, 4,utf8_decode($tramite->celular),1,0,'C');
+                     if($idTipo_usuario==1){
+                        //ASIGNADO
+                        $this->pdf->SetXY(125,$inicioY+$salto);
+                        $this->pdf->Cell($asignadot, 4,utf8_decode($tramite->asignado),1,0,'L');
+                        if(strlen($tramite->comentario)>80){ 
+                            $tramite->comentario=substr($tramite->comentario,0,80).'...';
+                        }
+                     }
                     //OBSERVACION
-                    $this->pdf->SetXY(235,$inicioY+$salto);
-                    $this->pdf->Cell(57, 4,'',1,0,'C');
+                    $this->pdf->SetXY($observacionx,$inicioY+$salto);
+                    $this->pdf->Cell($observaciont, 4,$tramite->nombre.': '.utf8_decode($tramite->comentario),1,0,'L');
                     $salto+=4;
                     $i+=1;
                     if($key<(count($tramites)-1)&&$tramites[$key]['programa']!=$tramites[$key+1]['programa']){
@@ -2000,22 +2051,24 @@ class ReporteController extends Controller
                         $this->pdf->Cell(5,4,utf8_decode('N°'),1,'C');
                         //N° TRÁMITE
                         $this->pdf->SetXY(10,$inicioY+$salto);
-                        $this->pdf->Cell(15,4,utf8_decode('N°TRÁMITE'),1,'C');
+                        $this->pdf->Cell($tramitet,4,utf8_decode('N°TRÁMITE'),1,'C');
                         //N° MATRÍCULA
                         $this->pdf->SetXY(25,$inicioY+$salto);
-                        $this->pdf->Cell(20,4,utf8_decode('N°MATRÍCULA'),1,'C');
+                        $this->pdf->Cell($matriculat,4,utf8_decode('N°MATRÍCULA'),1,'C');
                         //EGRESADOS
                         $this->pdf->SetXY(45,$inicioY+$salto);
-                        $this->pdf->Cell(70,4,'EGRESADOS',1,'C');
+                        $this->pdf->Cell($egresadost,4,'EGRESADOS',1,'C');
                         //ESTADO
-                        $this->pdf->SetXY(115,$inicioY+$salto);
-                        $this->pdf->Cell(70, 4,'ESTADO',1,0,'C');
-                        //ASIGNADO
-                        $this->pdf->SetXY(185,$inicioY+$salto);
-                        $this->pdf->Cell(50, 4,'ASIGNADO',1,0,'C');
+                        $this->pdf->SetXY(105,$inicioY+$salto);
+                        $this->pdf->Cell($celulart, 4,'CELULAR',1,0,'C');
+                        if($idTipo_usuario==1){
+                            //ASIGNADO
+                            $this->pdf->SetXY(125,$inicioY+$salto);
+                            $this->pdf->Cell($asignadot, 4,'ASIGNADO',1,0,'C');
+                        }   
                         //OBSERVACION
-                        $this->pdf->SetXY(235,$inicioY+$salto);
-                        $this->pdf->Cell(57, 4,'OBSERVACION',1,0,'C');
+                        $this->pdf->SetXY($observacionx,$inicioY+$salto);
+                        $this->pdf->Cell($observaciont, 4,'OBSERVACION',1,0,'C');
                         $this->pdf->SetFont('Arial','', 7);
     
                         $salto+=4;
