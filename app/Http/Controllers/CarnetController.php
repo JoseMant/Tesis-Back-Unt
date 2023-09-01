@@ -59,7 +59,7 @@ class CarnetController extends Controller
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','programa.nombre as programa')
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -166,7 +166,7 @@ class CarnetController extends Controller
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','programa.nombre as programa')
+        ,'tramite.exonerado_archivo','tramite.idUnidad','tramite.idEstado_tramite','programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -274,7 +274,7 @@ class CarnetController extends Controller
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa')
+        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -361,7 +361,7 @@ class CarnetController extends Controller
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa')
+        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -471,7 +471,7 @@ class CarnetController extends Controller
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa')
+        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','tramite.uuid')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
