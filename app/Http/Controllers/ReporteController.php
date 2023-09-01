@@ -2029,12 +2029,17 @@ class ReporteController extends Controller
                         $this->pdf->SetXY(125,$inicioY+$salto);
                         $this->pdf->Cell($asignadot, 4,utf8_decode($tramite->asignado),1,0,'L');
                         if(strlen($tramite->comentario)>80){ 
-                            $tramite->comentario=substr($tramite->comentario,0,80).'...';
+                            $tramite->comentario=substr($tramite->comentario,0,75).'...';
                         }
+                     }else if(strlen($tramite->comentario)>110){
+                        
+                        $tramite->comentario=substr($tramite->comentario,0,110).'...';
+                     }else{
+                        $tramite->comentario=substr($tramite->comentario,0,110);
                      }
                     //OBSERVACION
                     $this->pdf->SetXY($observacionx,$inicioY+$salto);
-                    $this->pdf->Cell($observaciont, 4,$tramite->nombre.': '.utf8_decode($tramite->comentario),1,0,'L');
+                    $this->pdf->Cell($observaciont, 4,$tramite->nombre.': '.ucfirst(strtolower(utf8_decode($tramite->comentario))),1,0,'L');
                     $salto+=4;
                     $i+=1;
                     if($key<(count($tramites)-1)&&$tramites[$key]['programa']!=$tramites[$key+1]['programa']){
