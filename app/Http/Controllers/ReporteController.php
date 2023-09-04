@@ -1918,7 +1918,9 @@ class ReporteController extends Controller
             ->orWhere('requisito.idRequisito',11)
             ->orWhere('requisito.idRequisito',12)
             ->orWhere('requisito.idRequisito',13)
-            ->orWhere('requisito.idRequisito',14);
+            ->orWhere('requisito.idRequisito',14)
+            ->orWhere('requisito.idRequisito',15)
+            ->orWhere('requisito.idRequisito',61);
         })
         ->orderby('programa')
         ->orderby('solicitante')
