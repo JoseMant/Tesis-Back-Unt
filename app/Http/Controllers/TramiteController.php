@@ -630,14 +630,26 @@ class TramiteController extends Controller
                     $nombre = $dni.".".$file->guessExtension();
                     if ($tipo_tramite_unidad->idTipo_tramite==2) {
                         $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
-                    }else {
+                    }elseif ($tipo_tramite_unidad->idTipo_tramite==5) {
+                        if ($requisito["idRequisito"]==74||$requisito["idRequisito"]==76||$requisito["idRequisito"]==78) {
+                            $nombre=$tramite->nro_tramite.".".$file->guessExtension();
+                        }
+                        $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
+                    }
+                    else {
                         $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
                     }
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
                             if ($tipo_tramite->idTipo_tramite==2) {
                                 $file->storeAs("/public"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"], $nombre);
-                            }else {
+                            }elseif ($tipo_tramite->idTipo_tramite==5) {
+                                if ($requisito["idRequisito"]==74||$requisito["idRequisito"]==76||$requisito["idRequisito"]==78) {
+                                    $nombre=$tramite->nro_tramite.".".$file->guessExtension();
+                                }
+                                $file->storeAs("/public"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"], $nombre);
+                            }
+                            else {
                                 $file->storeAs("/public"."/".$tipo_tramite->filename."/".$requisito["nombre"], $nombre);
                             }
                             $tramite_requisito->archivo = $nombreBD;
