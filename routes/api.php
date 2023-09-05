@@ -298,6 +298,9 @@ Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');//usado
 // Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
+//DUPLICADOS
+Route::get('diplomas/duplicados/validar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicados');
+
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');
 Route::get('carpetas/search', 'CarpetaController@getCarpetaBySearch');
