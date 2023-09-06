@@ -300,6 +300,8 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 
 //DUPLICADOS
 Route::get('diplomas/duplicados/validar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicados');
+Route::get('diplomas/duplicados/aprobar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosAprobados');
+
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');
