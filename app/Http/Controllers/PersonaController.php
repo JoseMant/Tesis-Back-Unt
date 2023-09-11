@@ -136,7 +136,8 @@ class PersonaController extends Controller
                     $usuario->apellido_materno=$personaSE->materno;
                     $usuario->tipo_documento=$personaSE->idTipo_documento;
                     $usuario->nro_documento=$personaSE->nro_documento;
-                    $usuario->correo=$personaSE->correo_personal;
+                    if($personaSE->correo_unitru!=null) $usuario->correo=$personaSE->correo_unitru;
+                    else $usuario->correo=$personaSE->correo_personal;
                     $usuario->direccion=$personaSE->direccion;
                     $usuario->fecha_nacimiento=$personaSE->nacimiento;
                     $usuario->celular=$personaSE->celular;
@@ -156,7 +157,8 @@ class PersonaController extends Controller
                         $usuario->apellido_materno=$personaSuv->per_apematerno;
                         $usuario->tipo_documento=$personaSuv->per_tipo_documento;
                         $usuario->nro_documento=$personaSuv->per_dni;
-                        $usuario->correo=$personaSuv->per_email;
+                        if($personaSuv->per_email_institucional) $usuario->correo=$personaSuv->per_email_institucional;
+                        else $usuario->correo=$personaSuv->per_email;
                         $usuario->direccion=$personaSuv->per_direccionlocal;
                         $usuario->fecha_nacimiento=$personaSuv->per_fechanacimiento;
                         $usuario->celular=$personaSuv->per_celular;
@@ -179,10 +181,8 @@ class PersonaController extends Controller
                             $usuario->apellido_paterno= $apellidos[0];
                             $usuario->apellido_materno=$apellidos[1];
                             $usuario->tipo_documento=1;
-                            if($personaSga->per_email_institucional!=null)
-                                $usuario->correo=$personaSga->per_email_institucional;
-                            else
-                                $usuario->correo=$personaSga->per_mail;
+                            if($personaSga->per_email_institucional!=null) $usuario->correo=$personaSga->per_email_institucional;
+                            else $usuario->correo=$personaSga->per_mail;
                             $usuario->nro_documento=$personaSga->per_dni;
                             $usuario->direccion=$personaSga->per_direccion;
                             $usuario->fecha_nacimiento=$personaSga->per_fnaci;
