@@ -126,9 +126,9 @@ class PersonaController extends Controller
             //     return $personaPos[0];
             // }else{
                 // verificamos en la bd de SE
-                $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento'
-                ,'alumno.nro_documento','alumno.correo_personal','alumno.celular','alumno.sexo','alumno.direccion','alumno.nacimiento')
-                        ->Where('alumno.nro_documento',$request->input('dni'))->first();
+                $personaSE=PersonaSE::select('alumno.codigo','alumno.nombre','alumno.paterno','alumno.materno','alumno.idTipo_documento',
+                'alumno.nro_documento','alumno.correo_unitru','alumno.correo_personal','alumno.celular','alumno.sexo','alumno.direccion','alumno.nacimiento')
+                ->Where('alumno.nro_documento',$request->input('dni'))->first();
                 if($personaSE){
                     $usuario=new User;
                     $usuario->nro_matricula=$personaSE->nro_tramite;
@@ -137,7 +137,8 @@ class PersonaController extends Controller
                     $usuario->apellido_materno=$personaSE->materno;
                     $usuario->tipo_documento=$personaSE->idTipo_documento;
                     $usuario->nro_documento=$personaSE->nro_documento;
-                    $usuario->correo=$personaSE->correo_personal;
+                    if($personaSE->correo_unitru!=null) $usuario->correo=$personaSE->correo_unitru;
+                    else $usuario->correo=$personaSE->correo_personal;
                     $usuario->direccion=$personaSE->direccion;
                     $usuario->fecha_nacimiento=$personaSE->nacimiento;
                     $usuario->celular=$personaSE->celular;
@@ -145,8 +146,9 @@ class PersonaController extends Controller
                     return response()->json(['status' => '200', 'datos_alumno' => $usuario], 200);
                 }else{
                     // verificamos en la bd del suv
-                    $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento','persona.per_dni','persona.per_carneextranjeria',
-                    'persona.per_email','persona.per_celular','persona.per_sexo','persona.per_direccionlocal','persona.per_fechanacimiento','alumno.idalumno')
+                    $personaSuv=PersonaSuv::select('persona.per_nombres','persona.per_apepaterno','persona.per_apematerno','per_tipo_documento',
+                    'persona.per_dni','persona.per_carneextranjeria','persona.per_email_institucional','persona.per_email','persona.per_celular','persona.per_sexo',
+                    'persona.per_direccionlocal','persona.per_fechanacimiento','alumno.idalumno')
                     ->join('alumno','persona.idpersona','alumno.idpersona')
                     ->Where('persona.per_dni',$request->input('dni'))->first();
                     if($personaSuv){
@@ -157,7 +159,8 @@ class PersonaController extends Controller
                         $usuario->apellido_materno=$personaSuv->per_apematerno;
                         $usuario->tipo_documento=$personaSuv->per_tipo_documento;
                         $usuario->nro_documento=$personaSuv->per_dni;
-                        $usuario->correo=$personaSuv->per_email;
+                        if($personaSuv->per_email_institucional) $usuario->correo=$personaSuv->per_email_institucional;
+                        else $usuario->correo=$personaSuv->per_email;
                         $usuario->direccion=$personaSuv->per_direccionlocal;
                         $usuario->fecha_nacimiento=$personaSuv->per_fechanacimiento;
                         $usuario->celular=$personaSuv->per_celular;
@@ -180,10 +183,8 @@ class PersonaController extends Controller
                             $usuario->apellido_paterno= $apellidos[0];
                             $usuario->apellido_materno=$apellidos[1];
                             $usuario->tipo_documento=1;
-                            if($personaSga->per_email_institucional!=null)
-                                $usuario->correo=$personaSga->per_email_institucional;
-                            else
-                                $usuario->correo=$personaSga->per_mail;
+                            if($personaSga->per_email_institucional!=null) $usuario->correo=$personaSga->per_email_institucional;
+                            else $usuario->correo=$personaSga->per_mail;
                             $usuario->nro_documento=$personaSga->per_dni;
                             $usuario->direccion=$personaSga->per_direccion;
                             $usuario->fecha_nacimiento=$personaSga->per_fnaci;

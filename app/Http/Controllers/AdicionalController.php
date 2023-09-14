@@ -169,7 +169,7 @@ class AdicionalController extends Controller
             // return count($tramites);
             //Recorremos los trámites y chancamos cada uno la resolución
             foreach ($tramites as $key => $tramite) {
-                $requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
+                $tramite->requisito=Tramite_Requisito::where('idTramite',$tramite->idTramite)
                 ->where(function($query)
                 {
                     $query->where('idRequisito',21)
@@ -177,13 +177,17 @@ class AdicionalController extends Controller
                     ->orWhere('idRequisito',68);
                 })
                 ->first();
+                $archivo=explode("/", $tramite->requisito->archivo, 6);
+                // $tramite->requisito->archivo=substr($tramite->requisito->archivo,9,-13);
+                $tramite->requisito->archivo=$archivo[2].'/'.$archivo[3].'/'.$archivo[4];
+
                 $nombre=$tramite->nro_documento.'.pdf';
-                if ($requisito->idRequisito==21) {
-                    $file->storeAs('public/elaboracion_carpeta/GRADO DE BACHILLER/RESOLUCION DE DECANATO', $nombre);
-                }else if($requisito->idRequisito==31){
-                    $file->storeAs('public/elaboracion_carpeta/TÍTULO PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
-                }else if($requisito->idRequisito==68){
-                    $file->storeAs('public/elaboracion_carpeta/TÍTULO EN SEGUNDA ESPECIALIDAD  PROFESIONAL/RESOLUCION DE DECANATO', $nombre);
+                if ($tramite->requisito->idRequisito==21) {
+                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                }else if($tramite->requisito->idRequisito==31){
+                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                }else if($tramite->requisito->idRequisito==68){
+                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
                 }
             }
         }
