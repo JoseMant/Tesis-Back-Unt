@@ -19,6 +19,7 @@ use App\Segunda_Especialidad;
 use App\Mencion;
 use App\ProgramaURAA;
 use Illuminate\Support\Facades\Http;
+use App\DependenciaSGA;
 
 class PersonaController extends Controller
 {
@@ -228,7 +229,7 @@ class PersonaController extends Controller
                     //Guardamos la(s) facultad(es) a la que pertenece dicho alumno
                     $facultades=[];
                     foreach ($alumnoEscuelasSGA as $key => $escuela) {
-                        $facultad=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
+                        $facultad=DependenciaSGA::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
                         $existe= false;
                         foreach ($facultades as $value) {
                             if (strtoupper($value->nombre)==strtoupper($facultad->dep_nombre)) {
@@ -244,7 +245,7 @@ class PersonaController extends Controller
                     foreach ($facultades as $key => $facultad) {
                         $escuelas=[];
                         foreach ($alumnoEscuelasSGA as $key => $escuela) {
-                            $facultadEscuela=Dependencia::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
+                            $facultadEscuela=DependenciaSGA::select('dep_nombre')->Where('dep_id',$escuela->sdep_id)->first();
                             if ($facultad['nombre']===strtoupper($facultadEscuela['dep_nombre'])) {
                                 if ($escuela->dep_id == 221) {
                                     $escuelasSede=ProgramaURAA::where('idSGA_PREG',$escuela->dep_id)->get();
