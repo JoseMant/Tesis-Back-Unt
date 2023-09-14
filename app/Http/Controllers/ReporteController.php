@@ -612,7 +612,71 @@ class ReporteController extends Controller
             })
             ->orderBy('usuario.apellidos','asc')
             ->count();
-        }else {
+        } elseif ($idTipo_usuario==17) {
+            // TRÁMITES POR USUARIO
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+            ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.nro_matricula','usuario.nro_documento','tramite.idUnidad','tipo_tramite.idTipo_tramite'
+            ,'cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite','estado_tramite.descripcion as estado')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where('tramite.idDependencia', $idDependencia)
+            ->where(function($query) use($request)
+            {
+                if ($request->idTipo_tramite_unidad!=0) {
+                    $query->where('tramite.idTipo_tramite_unidad',17);
+                }
+                if ($request->idPrograma!=0) {
+                    $query->where('tramite.idPrograma',$request->idPrograma);
+                }
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
+                }
+            })
+            ->orderBy('usuario.apellidos','asc')
+            ->take($request->query('size'))
+            ->skip($request->query('page')*$request->query('size'))
+            ->get();
+
+            // TRÁMITES POR USUARIO
+            $total=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+            ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+            ,'tramite.nro_matricula','usuario.nro_documento','tramite.idUnidad','tipo_tramite.idTipo_tramite'
+            ,'cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite','estado_tramite.descripcion as estado')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->where('tipo_tramite.idTipo_tramite',2)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where('tramite.idDependencia', $idDependencia)
+            ->where(function($query) use($request, $idDependencia)
+            {
+                if ($request->idTipo_tramite_unidad!=0) {
+                    $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
+                }
+                if ($request->idPrograma!=0) {
+                    $query->where('tramite.idPrograma',$request->idPrograma);
+                }
+                if ($request->cronograma!=0) {
+                    $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
+                }
+            })
+            ->orderBy('usuario.apellidos','asc')
+            ->count();
+        } else {
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
