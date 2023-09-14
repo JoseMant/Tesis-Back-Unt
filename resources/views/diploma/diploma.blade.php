@@ -40,12 +40,16 @@
 	<title>Diploma UNT</title>
 </head>
 <style type="text/css">
-    
+        /* @font-face {
+            font-family: 'TheGreatestFont';
+            src: url('../font/letra1.otf');
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Mystery+Quest&display=swap'); */
         #cara1{
             margin: -20px;
             /* margin-left: -20px; 
             margin-top: -20px;  */
-            padding: 180px 70px 50px;
+            padding: 190px 70px 50px;
             /* padding-bottom:50px; */
             background-image: url(<?php echo public_path('\img')."\\nueva_diploma_unt-7.jpg"; ?>);
             height: 100%;
@@ -69,13 +73,13 @@
         }
         h1 {
             text-align: center;
-            font-family: Times; 
+            font-family: brandey;
             font-size:27px;
             margin: 10px 0;
         }
         h2 {
             text-align: center;
-            font-family: Times; 
+            font-family: brandey; 
             font-size:27px;
             margin: 0px 0;
         }
@@ -107,10 +111,6 @@
             text-align: justify;
             /* border: 1px; */
         }
-        /* @font-face {
-            font-family: TheGreatestFont;
-            src: url(<?php echo public_path('\font').'\\letra1.otf'; ?>);
-        } */
     
 </style>
 <body>
@@ -142,9 +142,6 @@
                 </tr>
             </tbody>
         </table>
-        <!-- <h1><?php echo $tramite->denominacion; ?></h1>
-        <p style="margin: 0;">a:</p>
-        <h2><?php echo $tramite->nombreComp; ?></h2> -->
         <p>De la <b><?php echo $tramite->facultad.", ".$tramite->programa; ?></b></p>
         <p>Cumpliendo con los requisitos exigidos por las disposiciones legales y reglamentarias vigentes, se expide el presente diploma para que se le reconozca como tal y se le otorgue los goces y privilegios que le confieren las Leyes de la República.</p>
         <p style="text-align: right"><?php echo "Trujillo, ".$dia." de ".$meses[$mes-1]. " de ".$año; ?></p>
