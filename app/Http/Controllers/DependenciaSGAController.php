@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\DependenciaSGA;
-use App\Dependencia;
 use Illuminate\Support\Facades\DB;
 
 
