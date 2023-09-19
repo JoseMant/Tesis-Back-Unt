@@ -403,7 +403,7 @@ class VoucherController extends Controller
         'tramite.nro_matricula', 'tramite.exonerado_archivo',
         'programa.nombre as programa',
         DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'), 'tipo_tramite_unidad.costo',
-        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'), 
+        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'),'usuario.celular as celular','usuario.correo as correo',
         'voucher.idVoucher', 'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','voucher.comentario')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')

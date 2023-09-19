@@ -632,7 +632,7 @@ class ReporteController extends Controller
             ->where(function($query) use($request)
             {
                 if ($request->idTipo_tramite_unidad!=0) {
-                    $query->where('tramite.idTipo_tramite_unidad',17);
+                    $query->where('tramite.idTipo_tramite_unidad',$request->idTipo_tramite_unidad);
                 }
                 if ($request->idPrograma!=0) {
                     $query->where('tramite.idPrograma',$request->idPrograma);
