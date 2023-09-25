@@ -97,6 +97,7 @@ Route::get('unidades','UnidadController@index');
 Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getAllByTipo_tramiteUnidad');
 Route::get('requisitos/{idTipo_tramite_unidad}','RequisitoController@getAllByTipo_tramite_unidad');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
+//Route::post('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2'); //Método duplicado para la documentación en POSTMAN
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
