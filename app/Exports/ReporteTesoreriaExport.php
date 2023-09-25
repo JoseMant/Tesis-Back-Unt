@@ -114,9 +114,9 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if ($idTipo_usuario==3) {
-                $query->where('voucher.entidad','!=','Tesoreria UNT');
+                $query->where('voucher.entidad','!=','Tesorería');
             }elseif($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
