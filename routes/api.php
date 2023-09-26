@@ -54,6 +54,8 @@ Route::get('tramites/docentes/finalizados','TramiteSecretariaController@GetDocen
 
 // Route::post('tramite/update/{id}','TramiteController@update');
 Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+Route::get('tramite/{id}','TramiteController@GetTramiteById');
+
 //tramite fisico
 Route::post('tramites_fisicos','Tramite_FisicoController@PostTramiteFisicoByUser');
 //
@@ -97,6 +99,7 @@ Route::get('unidades','UnidadController@index');
 Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getAllByTipo_tramiteUnidad');
 Route::get('requisitos/{idTipo_tramite_unidad}','RequisitoController@getAllByTipo_tramite_unidad');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
+//Route::post('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2'); //Método duplicado para la documentación en POSTMAN
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
