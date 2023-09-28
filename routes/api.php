@@ -164,8 +164,9 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 
 //DIPLOMA_ANULACION
-Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
 
+Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
+Route::put('edit_ultimo_historial','Historial_Codigo_DiplomaController@editUltimoRegistro');
 
 
 // E-mail verification
