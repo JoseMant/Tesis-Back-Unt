@@ -50,6 +50,7 @@ Route::get('tramites/docentes/validar','TramiteSecretariaController@GetDocenteVa
 Route::post('tramites/docentes/validados','TramiteSecretariaController@validarDocente');
 Route::post('docente/rechazar/{id}','TramiteSecretariaController@rechazarDocente');
 Route::get('tramites/docentes/finalizados','TramiteSecretariaController@GetDocenteFinalizados');
+Route::get('docente/search', 'TramiteSecretariaController@getDocenteByCodigo');
 
 
 // Route::post('tramite/update/{id}','TramiteController@update');

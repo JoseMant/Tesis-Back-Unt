@@ -191,7 +191,40 @@ class TramiteSecretariaController extends Controller
         $historial_estados->fecha = date('Y-m-d h:i:s');
         return $historial_estados;
     }
- 
+
+    public function getDocenteByCodigo(Request $request){
+
+        $docente=PersonaSga::select('persona.per_apellidos as apellidos','persona.per_nombres as nombres','persona.per_celular as celular','persona.per_telefono as telefono'
+        ,'persona.per_login as codigo',
+        'persona.per_email_institucional as correounitru','persona.per_mail as correo','persona.per_direccion as direccion','persona.per_dni as dni','persona.per_sexo as sexo'
+        ,'persona.per_fnaci as fecha_nacimiento','persona.pon_id as idProfesion','perfil.cia_id as idCategoria','perfil.pfl_cond as idCondicion',
+        'perfil.uni_id as idDependencia','perfil.ded_id as idDedicacion','perfil.dep_id as idDepartamento','perfil.pfl_boss as jefe','persona.per_cod_pais as idPais','perfil.sed_id as idSede')
+        ->join('perfil','perfil.per_id','persona.per_id')
+        ->where('persona.per_login',$request->codigo)->first();
+        $tramiteDocente=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
+                'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
+                'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where('tramite.nro_tramite',$request->nro_tramite)->first();
+        $tramiteDocente->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+        'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
+        ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+        ->where('idTramite',$tramiteDocente->idTramite)
+        ->get();        
+
+        $docente->idTramite=$tramiteDocente->idTramite;
+        $docente->nro_tramite=$request->nro_tramite;
+        $docente->solicitante=$tramiteDocente->solicitante;
+        $docente->tramite=$tramiteDocente->tramite;
+        $docente->fecha=$tramiteDocente->fecha;
+        $docente->idTipo_tramite_unidad=$tramiteDocente->idTipo_tramite_unidad;
+        $docente->requisitos=$tramiteDocente->requisitos;
+        
+        return $docente;
+    }    
+
     public function GetTramitesDocente(Request $request){
 
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -201,75 +234,78 @@ class TramiteSecretariaController extends Controller
         $usuario = User::findOrFail($idUsuario);
         $idTipo_usuario=$apy['idTipo_usuario'];
 
-                $tramites=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
-                'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
-                'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
-                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-                ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
-                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-                ->where(function($query) 
-                {            
-                    $query->where('tramite.idTipo_tramite_unidad',38)
-                    ->orWhere('tramite.idTipo_tramite_unidad',39);
-                })
-                ->where('tramite.idEstado_tramite',51)
-                ->where(function($query) use ($idTipo_usuario,$idUsuario)
-                {   
-                    if($idTipo_usuario==21){
-                        $query->where('tramite.idUsuario',$idUsuario);
-                    }
-                
-                })
-                ->where(function($query) use ($request)
-                {   
-            
-                    $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%');
-                
-                })
-                ->orderBy($request->query('sort'), $request->query('order'))
-                ->take($request->query('size'))
-                ->skip($request->query('page')*$request->query('size'))->get();
-
-                $total=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
-                'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
-                'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
-                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-                ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
-                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-                ->where(function($query) 
-                {            
-                    $query->where('tramite.idTipo_tramite_unidad',38)
-                    ->orWhere('tramite.idTipo_tramite_unidad',39);
-                })
-                ->where('tramite.idEstado_tramite',51)
-                ->where(function($query) use ($idTipo_usuario,$usuario)
-                {   
-                    if($idTipo_usuario==21){
-                        $query->where('tramite.idUsuario',$idUsuario);
-                    }
-                
-                })
-                ->where(function($query) use ($request)
-                {
-                    $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
-                })
-                ->count();
-
-                foreach ($tramites as $key => $tramite) {
-                    $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-                    'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
-                    ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-                    ->where('idTramite',$tramite->idTramite)
-                    ->get();
-                }
+        $tramites=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
+        'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
+        'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad','docentes.*')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->where(function($query) 
+        {            
+            $query->where('tramite.idTipo_tramite_unidad',38)
+            ->orWhere('tramite.idTipo_tramite_unidad',39)
+            ->orWhere('tramite.idTipo_tramite_unidad',40)
+            ->orWhere('tramite.idTipo_tramite_unidad',41);
+        })
+        ->where('tramite.idEstado_tramite',51)
+        ->where(function($query) use ($idTipo_usuario,$idUsuario)
+        {   
+            if($idTipo_usuario==21){
+                $query->where('tramite.idUsuario',$idUsuario);
+            }
+        
+        })
+        ->where(function($query) use ($request)
+        {   
+    
+            $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%');
+        
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))->get();
+        
+        $total=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
+        'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
+        'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->where(function($query) 
+        {            
+            $query->where('tramite.idTipo_tramite_unidad',38)
+            ->orWhere('tramite.idTipo_tramite_unidad',39)
+            ->orWhere('tramite.idTipo_tramite_unidad',40)
+            ->orWhere('tramite.idTipo_tramite_unidad',41);
+        })
+        ->where('tramite.idEstado_tramite',51)
+        ->where(function($query) use ($idTipo_usuario,$usuario)
+        {   
+            if($idTipo_usuario==21){
+                $query->where('tramite.idUsuario',$idUsuario);
+            }
+        
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
+        })
+        ->count();
+        foreach ($tramites as $key => $tramite) {
+            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
+        }
         
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
@@ -397,7 +433,9 @@ class TramiteSecretariaController extends Controller
         ->where(function($query) 
         {            
             $query->where('tramite.idTipo_tramite_unidad',38)
-            ->orWhere('tramite.idTipo_tramite_unidad',39);
+            ->orWhere('tramite.idTipo_tramite_unidad',39)
+            ->orWhere('tramite.idTipo_tramite_unidad',40)
+            ->orWhere('tramite.idTipo_tramite_unidad',41);
         })
         ->where('tramite.idEstado_tramite',7)
         ->where(function($query) use ($request)
@@ -421,7 +459,9 @@ class TramiteSecretariaController extends Controller
         ->where(function($query) 
         {            
             $query->where('tramite.idTipo_tramite_unidad',38)
-            ->orWhere('tramite.idTipo_tramite_unidad',39);
+            ->orWhere('tramite.idTipo_tramite_unidad',39)
+            ->orWhere('tramite.idTipo_tramite_unidad',40)
+            ->orWhere('tramite.idTipo_tramite_unidad',41);
         })
         ->where('tramite.idEstado_tramite',7)
         ->where(function($query) use ($request)
@@ -458,7 +498,6 @@ class TramiteSecretariaController extends Controller
 
         DB::beginTransaction();
         try{
-
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
@@ -466,10 +505,9 @@ class TramiteSecretariaController extends Controller
             $dni=$apy['nro_documento'];
             $usuario = User::findOrFail($idUsuario);
 
-            $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
-            ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
-            ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
-            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
+            $tramite=Tramite::findOrFail($request->idTramite);
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::findOrFail($tramite->idTipo_tramite_unidad);
+            $tipo_tramite = Tipo_Tramite::findOrFail($tipo_tramite_unidad->idTipo_tramite);
 
             $login=Perfil::select('persona.per_login')
             ->join('persona','persona.per_id','perfil.per_id')
@@ -504,71 +542,71 @@ class TramiteSecretariaController extends Controller
 
             $departamento=DependenciaSGA::where('dependencia.dep_id',$request->idDepartamento)->first();
 
-            $persona=new PersonaSga();
-            $persona->pon_id=$request->idProfesion;
-            $persona->per_login=(string)$per_login;
-            $persona->per_password=md5($per_login);
-            $persona->per_nombres=$request->nombres;
-            $persona->per_apellidos=$request->apellidos;
-            $persona->per_sexo=$request->sexo;
-            $persona->per_fnaci=$request->fecha_nacimiento;
-            $persona->per_direccion=$request->direccion;
-            $persona->per_cod_pais=(string)$request->idPais;
-            $persona->per_dni=$request->dni;
-            $persona->per_telefono=$request->telefono;
-            $persona->per_celular=$request->celular;
-            $persona->per_mail=$request->correo;
-            $persona->per_estado=1;
-            $persona->per_email_institucional=$request->correounitru;
-            $persona->save();
+            // $persona=new PersonaSga();
+            // $persona->pon_id=$request->idProfesion;
+            // $persona->per_login=(string)$per_login;
+            // $persona->per_password=md5($per_login);
+            // $persona->per_nombres=$request->nombres;
+            // $persona->per_apellidos=$request->apellidos;
+            // $persona->per_sexo=$request->sexo;
+            // $persona->per_fnaci=$request->fecha_nacimiento;
+            // $persona->per_direccion=$request->direccion;
+            // $persona->per_cod_pais=(string)$request->idPais;
+            // $persona->per_dni=$request->dni;
+            // $persona->per_telefono=$request->telefono;
+            // $persona->per_celular=$request->celular;
+            // $persona->per_mail=$request->correo;
+            // $persona->per_estado=1;
+            // $persona->per_email_institucional=$request->correounitru;
+            // $persona->save();
 
-            $perfil=new Perfil();
-            $perfil->sed_id=$request->idSede;
-            $perfil->uni_id=$request->idDependencia;
-            $perfil->dep_id=$request->idDepartamento;
-            $perfil->ded_id=$request->idDedicacion;
-            $perfil->cia_id=$request->idCategoria;
-            $perfil->cgo_id=2;
-            $perfil->per_id=$persona->per_id;
-            $perfil->pfl_main=1;
-            $perfil->pfl_boss=$request->jefe;
-            $perfil->pfl_cond=$request->idCondicion;
-            $perfil->pfl_estado=1;
-            $perfil->save();
+            // $perfil=new Perfil();
+            // $perfil->sed_id=$request->idSede;
+            // $perfil->uni_id=$request->idDependencia;
+            // $perfil->dep_id=$request->idDepartamento;
+            // $perfil->ded_id=$request->idDedicacion;
+            // $perfil->cia_id=$request->idCategoria;
+            // $perfil->cgo_id=2;
+            // $perfil->per_id=$persona->per_id;
+            // $perfil->pfl_main=1;
+            // $perfil->pfl_boss=$request->jefe;
+            // $perfil->pfl_cond=$request->idCondicion;
+            // $perfil->pfl_estado=1;
+            // $perfil->save();
 
-            $array = array(8, 9, 10, 73,123,140);
-            foreach ($array as $valor) {
-                $permisos= new PermisosDocente;
-                $permisos->pfl_id=$perfil->pfl_id;
-                $permisos->tar_id=$valor;
-                $permisos->pso_estado=1;
-                $permisos->save();
-            }
+            // $array = array(8, 9, 10, 73,123,140);
+            // foreach ($array as $valor) {
+            //     $permisos= new PermisosDocente;
+            //     $permisos->pfl_id=$perfil->pfl_id;
+            //     $permisos->tar_id=$valor;
+            //     $permisos->pso_estado=1;
+            //     $permisos->save();
+            // }
 
-            $personaSUNT=new PersonaSUNT();
-            $personaSUNT->pon_id=$request->idProfesion;
-            $personaSUNT->per_login=(string)$per_login;
-            $personaSUNT->per_password=md5($per_login);
-            $personaSUNT->per_nombres=$request->nombres;
-            $personaSUNT->per_apellidos=$request->apellidos;
-            $personaSUNT->per_sexo=$request->sexo;
-            $personaSUNT->per_fnaci=$request->fecha_nacimiento;
-            $personaSUNT->per_direccion=$request->direccion;
-            $personaSUNT->per_cod_pais=(string)$request->idPais;
-            $personaSUNT->per_dni=$request->dni;
-            $personaSUNT->per_telefono=$request->telefono;
-            $personaSUNT->per_celular=$request->celular;
-            $personaSUNT->per_mail=$request->correo;
-            $personaSUNT->per_estado=1;
-            $personaSUNT->per_email_institucional=$request->correounitru;
-            $personaSUNT->save();
+            // $personaSUNT=new PersonaSUNT();
+            // $personaSUNT->pon_id=$request->idProfesion;
+            // $personaSUNT->per_login=(string)$per_login;
+            // $personaSUNT->per_password=md5($per_login);
+            // $personaSUNT->per_nombres=$request->nombres;
+            // $personaSUNT->per_apellidos=$request->apellidos;
+            // $personaSUNT->per_sexo=$request->sexo;
+            // $personaSUNT->per_fnaci=$request->fecha_nacimiento;
+            // $personaSUNT->per_direccion=$request->direccion;
+            // $personaSUNT->per_cod_pais=(string)$request->idPais;
+            // $personaSUNT->per_dni=$request->dni;
+            // $personaSUNT->per_telefono=$request->telefono;
+            // $personaSUNT->per_celular=$request->celular;
+            // $personaSUNT->per_mail=$request->correo;
+            // $personaSUNT->per_estado=1;
+            // $personaSUNT->per_email_institucional=$request->correounitru;
+            // $personaSUNT->save();
 
-            $usuarioSUNT=new UsuarioSUNT();
-            $usuarioSUNT->per_id=$personaSUNT->per_id;
-            $usuarioSUNT->sis_id=1;
-            $usuarioSUNT->usu_fecha=date('Y-m-d');
-            $usuarioSUNT->usu_estado=1;
-            $usuarioSUNT->save();
+            // $usuarioSUNT=new UsuarioSUNT();
+            // $usuarioSUNT->per_id=$personaSUNT->per_id;
+            // $usuarioSUNT->sis_id=1;
+            // $usuarioSUNT->usu_fecha=date('Y-m-d');
+            // $usuarioSUNT->usu_estado=1;
+            // $usuarioSUNT->save();
 
      
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
@@ -584,10 +622,10 @@ class TramiteSecretariaController extends Controller
             $tramite_requisito->des_estado_requisito="APROBADO";
             $tramite_requisito->update();
             
-            $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
-            ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
-            ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
-            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
+            // $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
+            // ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
+            // ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
+            // $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
 
                 $oti="dsc@unitru.edu.pe";
                 if ($docente->correounitru) {
@@ -620,10 +658,14 @@ class TramiteSecretariaController extends Controller
             $dni=$apy['nro_documento'];
             $usuario = User::findOrFail($idUsuario);
 
-            $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
-            ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
-            ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
-            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
+            $tramite=Tramite::findOrFail($id);
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::findOrFail($tramite->idTipo_tramite_unidad);
+            $tipo_tramite = Tipo_Tramite::findOrFail($tipo_tramite_unidad->idTipo_tramite);
+
+            // $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
+            // ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
+            // ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
+            // $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
         
             $tramite=Tramite::find($id);
             $historial_estado=$this->setHistorialEstado($id, 7, 9, $idUsuario);
@@ -668,7 +710,9 @@ class TramiteSecretariaController extends Controller
         ->where(function($query) 
         {            
             $query->where('tramite.idTipo_tramite_unidad',38)
-            ->orWhere('tramite.idTipo_tramite_unidad',39);
+            ->orWhere('tramite.idTipo_tramite_unidad',39)
+            ->orWhere('tramite.idTipo_tramite_unidad',40)
+            ->orWhere('tramite.idTipo_tramite_unidad',41);
         })
         ->where('tramite.idEstado_tramite',15)
         ->where(function($query) use ($idTipo_usuario,$idUsuario)
@@ -701,7 +745,9 @@ class TramiteSecretariaController extends Controller
         ->where(function($query) 
         {            
             $query->where('tramite.idTipo_tramite_unidad',38)
-            ->orWhere('tramite.idTipo_tramite_unidad',39);
+            ->orWhere('tramite.idTipo_tramite_unidad',39)
+            ->orWhere('tramite.idTipo_tramite_unidad',40)
+            ->orWhere('tramite.idTipo_tramite_unidad',41);
         })
         ->where('tramite.idEstado_tramite',15)
         ->where(function($query) use ($request)
