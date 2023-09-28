@@ -32,7 +32,15 @@ class RegistroUsuarioJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->usuario->correo)
-        ->send(new \App\Mail\RegistroUsuarioMail($this->usuario,$this->rol));
+        if($this->usuario->correo2){
+            Mail::to($this->usuario->correo)
+            ->cc($this->usuario->correo2)
+            ->send(new \App\Mail\RegistroUsuarioMail($this->usuario,$this->rol));
+        }
+        else{
+            Mail::to($this->usuario->correo)
+            ->send(new \App\Mail\RegistroUsuarioMail($this->usuario,$this->rol));
+        }
+ 
     }
 }
