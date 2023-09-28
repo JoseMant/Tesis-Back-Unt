@@ -26,6 +26,8 @@ use App\Jobs\ObservacionTramiteJob;
 use App\Jobs\FinalizacionCarnetJob;
 use App\Jobs\NotificacionCertificadoJob;
 use App\Jobs\NotificacionCarpetaJob;
+use App\Jobs\RegistroTramiteDocenteJob;
+use App\Jobs\RegistroDatosDocenteJob;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -169,6 +171,7 @@ class TramiteSecretariaController extends Controller
             $historial_estado=$this->setHistorialEstado($tramite->idTramite, 1, 51, $idUsuario);
             $historial_estado->save();
 
+            dispatch(new RegistroTramiteDocenteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente'], 200);
         
@@ -188,69 +191,86 @@ class TramiteSecretariaController extends Controller
         $historial_estados->fecha = date('Y-m-d h:i:s');
         return $historial_estados;
     }
-
-    
+ 
     public function GetTramitesDocente(Request $request){
 
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
+        $usuario = User::findOrFail($idUsuario);
+        $idTipo_usuario=$apy['idTipo_usuario'];
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
-        'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
-        'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
-        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-        ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
-        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-        ->where(function($query) 
-        {            
-            $query->where('tramite.idTipo_tramite_unidad',38)
-            ->orWhere('tramite.idTipo_tramite_unidad',39);
-        })
-        ->where('tramite.idEstado_tramite',51)
-        ->where(function($query) use ($request)
-        {   
-      
-            $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
+                $tramites=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
+                'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
+                'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where(function($query) 
+                {            
+                    $query->where('tramite.idTipo_tramite_unidad',38)
+                    ->orWhere('tramite.idTipo_tramite_unidad',39);
+                })
+                ->where('tramite.idEstado_tramite',51)
+                ->where(function($query) use ($idTipo_usuario,$idUsuario)
+                {   
+                    if($idTipo_usuario==21){
+                        $query->where('tramite.idUsuario',$idUsuario);
+                    }
+                
+                })
+                ->where(function($query) use ($request)
+                {   
+            
+                    $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%');
+                
+                })
+                ->orderBy($request->query('sort'), $request->query('order'))
+                ->take($request->query('size'))
+                ->skip($request->query('page')*$request->query('size'))->get();
+
+                $total=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
+                'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
+                'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where(function($query) 
+                {            
+                    $query->where('tramite.idTipo_tramite_unidad',38)
+                    ->orWhere('tramite.idTipo_tramite_unidad',39);
+                })
+                ->where('tramite.idEstado_tramite',51)
+                ->where(function($query) use ($idTipo_usuario,$usuario)
+                {   
+                    if($idTipo_usuario==21){
+                        $query->where('tramite.idUsuario',$idUsuario);
+                    }
+                
+                })
+                ->where(function($query) use ($request)
+                {
+                    $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                    ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
+                })
+                ->count();
+
+                foreach ($tramites as $key => $tramite) {
+                    $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+                    'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
+                    ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+                    ->where('idTramite',$tramite->idTramite)
+                    ->get();
+                }
         
-        })
-        ->orderBy($request->query('sort'), $request->query('order'))
-        ->take($request->query('size'))
-        ->skip($request->query('page')*$request->query('size'))->get();
-
-        $total=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
-        'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
-        'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','docentes.*')
-        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-        ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
-        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-        ->where(function($query) 
-        {            
-            $query->where('tramite.idTipo_tramite_unidad',38)
-            ->orWhere('tramite.idTipo_tramite_unidad',39);
-        })
-        ->where('tramite.idEstado_tramite',51)
-        ->where(function($query) use ($request)
-        {
-            $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
-        })
-        ->count();
-
-        foreach ($tramites as $key => $tramite) {
-            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
-            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-            ->where('idTramite',$tramite->idTramite)
-            ->get();
-        }
-
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
         return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
@@ -263,10 +283,7 @@ class TramiteSecretariaController extends Controller
         ]], 200);
 
     }
-    
     public function registroDocente(Request $request){
-
-
         DB::beginTransaction();
         try{
             
@@ -308,11 +325,7 @@ class TramiteSecretariaController extends Controller
             $docente->telefono=$request->telefono;
             $docente->celular=$request->celular;
             $docente->correo=$request->correo;
-            if ($request->correounitru) {
-                $docente->correounitru=$request->correounitru;
-            }else {
-               $docente->correounitru=null;
-            }
+            $docente->correounitru=$request->correounitru;
             $docente->correounitru=$request->correounitru;
             $docente->jefe=$request->jefe;
             $docente->idDependencia=$request->idDependencia;
@@ -356,6 +369,8 @@ class TramiteSecretariaController extends Controller
             $tramite_requisito->des_estado_requisito="PENDIENTE";
             $tramite_requisito->update();
             
+            $correojefe="rrodriguezg@unitru.edu.pe";
+            dispatch(new RegistroDatosDocenteJob($correojefe,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -486,7 +501,8 @@ class TramiteSecretariaController extends Controller
             $docente->idCategoria=$request->idCategoria;
             $docente->idDedicacion=$request->idDedicacion;
             $docente->update();
-        
+
+            $departamento=DependenciaSGA::where('dependencia.dep_id',$request->idDepartamento)->first();
 
             $persona=new PersonaSga();
             $persona->pon_id=$request->idProfesion;
@@ -573,7 +589,18 @@ class TramiteSecretariaController extends Controller
             ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
 
-            dispatch(new DocenteTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                $oti="dsc@unitru.edu.pe";
+                if ($docente->correounitru) {
+                    
+                    $copias=[$docente->correo,$docente->correounitru,$oti];
+                }else{
+                    $copias=[$docente->correo,$oti];
+                }
+                if($usuario->correo2){
+                    array_push($copias,$usuario->correo2);
+                }
+
+                dispatch(new DocenteTramiteJob($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad,$copias));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -627,6 +654,8 @@ class TramiteSecretariaController extends Controller
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
+        $usuario = User::findOrFail($idUsuario);
+        $idTipo_usuario=$apy['idTipo_usuario'];
 
         $tramites=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite_requisito.archivo','tramite.nro_tramite','tramite_detalle.idDocente',
         DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'docentes.per_login as codigoDocente','docentes.idDepartamento','tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite',
@@ -642,6 +671,13 @@ class TramiteSecretariaController extends Controller
             ->orWhere('tramite.idTipo_tramite_unidad',39);
         })
         ->where('tramite.idEstado_tramite',15)
+        ->where(function($query) use ($idTipo_usuario,$idUsuario)
+        {   
+            if($idTipo_usuario==21){
+                $query->where('tramite.idUsuario',$idUsuario);
+            }
+                
+        })
         ->where(function($query) use ($request)
         {
             $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')

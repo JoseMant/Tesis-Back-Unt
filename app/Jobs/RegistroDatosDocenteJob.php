@@ -8,35 +8,30 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\DocenteTramiteMail;
+use App\Mail\RegistroDatosDocenteMail;
 
-
-
-
-class DocenteTramiteJob implements ShouldQueue
+class RegistroDatosDocenteJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $departamento;
+
+    public $correojefe;
     public $usuario;
-    public $docente;
     public $tramite;
     public $tipo_tramite;
     public $tipo_tramite_unidad;
-    public $copias;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad,$copias)
+    public function __construct($correojefe,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad)
     {   
-        $this->departamento = $departamento;
-        $this->usuario = $usuario;
-        $this->docente = $docente;
+        $this->correojefe = $correojefe;
+        $this->usuario = $usuario;    
         $this->tramite = $tramite;
         $this->tipo_tramite = $tipo_tramite;
         $this->tipo_tramite_unidad = $tipo_tramite_unidad;
-        $this->copias = $copias;
     }
 
     /**
@@ -46,8 +41,7 @@ class DocenteTramiteJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->usuario->correo)
-            ->cc($this->copias)
-            ->send(new \App\Mail\DocenteTramiteMail($this->departamento,$this->usuario,$this->docente,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad));
+        Mail::to($this->correojefe)
+            ->send(new \App\Mail\RegistroDatosDocenteMail($this->usuario,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad));
     }
 }
