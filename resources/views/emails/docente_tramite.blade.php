@@ -150,9 +150,13 @@
 						<hr>
 						<div style="text-align: justify!important;">
 							<p>
-                                Se ha finalizado el proceso de tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado. 
-                                Tu código de trámite es: N° {{$tramite['nro_tramite']}}. 
-                                Recuerda ingresar al sistema para revisar el estado de tus trámites.
+                                Se ha finalizado el proceso del trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado
+                                para el docente: {{$docente['apellidos']}} {{$docente['nombres']}} del {{$departamento['dep_nombre']}}. 
+                                Código de trámite es: N° {{$tramite['nro_tramite']}}. 
+                                Datos de la cuenta:
+                                    Usuario: {{$docente['per_login']}}
+                                    Contraseña: {{$docente['per_login']}}
+                                Buen día.
                             </p>
 						</div>
             <hr>

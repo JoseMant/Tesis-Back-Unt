@@ -40,9 +40,14 @@ class ObservacionDocenteTramiteJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->usuario->correo)
-        // ->cc($this->correoUsuario)
-        ->send(new \App\Mail\ObservacionDocenteTramiteMail($this->usuario,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad));
+        if ($this->usuario->correo2) {
+            Mail::to($this->usuario->correo)
+            ->cc($this->usuario->correo2)
+            ->send(new \App\Mail\ObservacionDocenteTramiteMail($this->usuario,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad));
+        }else {
+            Mail::to($this->usuario->correo)
+            ->send(new \App\Mail\ObservacionDocenteTramiteMail($this->usuario,$this->tramite,$this->tipo_tramite,$this->tipo_tramite_unidad));
+        }
     }
     
 }
