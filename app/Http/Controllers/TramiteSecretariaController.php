@@ -201,28 +201,34 @@ class TramiteSecretariaController extends Controller
         'perfil.uni_id as idDependencia','perfil.ded_id as idDedicacion','perfil.dep_id as idDepartamento','perfil.pfl_boss as jefe','persona.per_cod_pais as idPais','perfil.sed_id as idSede')
         ->join('perfil','perfil.per_id','persona.per_id')
         ->where('persona.per_login',$request->codigo)->first();
+        
         $tramiteDocente=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
-                'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
-                'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad')
-                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-                ->where('tramite.nro_tramite',$request->nro_tramite)->first();
+            'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
+            'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->where('tramite.nro_tramite',$request->nro_tramite)->first();
+
         $tramiteDocente->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
         'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
         ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
         ->where('idTramite',$tramiteDocente->idTramite)
         ->get();        
 
-        $docente->idTramite=$tramiteDocente->idTramite;
-        $docente->nro_tramite=$request->nro_tramite;
-        $docente->solicitante=$tramiteDocente->solicitante;
-        $docente->tramite=$tramiteDocente->tramite;
-        $docente->fecha=$tramiteDocente->fecha;
-        $docente->idTipo_tramite_unidad=$tramiteDocente->idTipo_tramite_unidad;
-        $docente->requisitos=$tramiteDocente->requisitos;
-        
-        return $docente;
+        if ($docente) {
+            $docente->idTramite=$tramiteDocente->idTramite;
+            $docente->nro_tramite=$request->nro_tramite;
+            $docente->solicitante=$tramiteDocente->solicitante;
+            $docente->tramite=$tramiteDocente->tramite;
+            $docente->fecha=$tramiteDocente->fecha;
+            $docente->idTipo_tramite_unidad=$tramiteDocente->idTipo_tramite_unidad;
+            $docente->requisitos=$tramiteDocente->requisitos;
+            return $docente;
+        }else {
+            return $tramiteDocente;
+        }
+
     }    
 
     public function GetTramitesDocente(Request $request){
@@ -339,39 +345,66 @@ class TramiteSecretariaController extends Controller
 
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
 
-            $per=PersonaSga::select('persona.per_nombres','persona.per_apellidos','perfil.dep_id')
+            $persona=PersonaSga::select('persona.per_nombres','persona.per_apellidos','perfil.dep_id','persona.per_login')
             ->join('perfil','perfil.per_id','persona.per_id')
             ->where('persona.per_nombres',$request->nombres)
             ->where('persona.per_apellidos',$request->apellidos)
             ->where('perfil.dep_id',$request->idDepartamento)->first();
-            if($per){
-                DB::rollback();
-                 return response()->json(['status' => '400', 'message' => 'Docente ya esta registrado'], 400);
+            
+            if($persona){
+                if ($tipo_tramite_unidad->idTipo_tramite_unidad==40 || $tipo_tramite_unidad->idtipo_tramite_unidad==41) {
+                    $docente=DocenteURA::find($tramite_detalle->idDocente);
+                    $docente->apellidos=$request->apellidos;
+                    $docente->nombres=$request->nombres;
+                    $docente->idProfesion=$request->idProfesion;
+                    $docente->sexo=$request->sexo;
+                    $docente->fecha_nacimiento=$request->fecha_nacimiento;
+                    $docente->direccion=$request->direccion;
+                    $docente->idPais=$request->idPais;
+                    $docente->dni=$request->dni;
+                    $docente->telefono=$request->telefono;
+                    $docente->celular=$request->celular;
+                    $docente->correo=$request->correo;
+                    $docente->correounitru=$request->correounitru;
+                    $docente->correounitru=$request->correounitru;
+                    $docente->jefe=$request->jefe;
+                    $docente->idDependencia=$request->idDependencia;
+                    $docente->idDepartamento=$request->idDepartamento;
+                    $docente->idSede=$request->idSede;
+                    $docente->idCondicion=$request->idCondicion;
+                    $docente->idCategoria=$request->idCategoria;
+                    $docente->idDedicacion=$request->idDedicacion;
+                    $docente->save();
+                }else{
+                    DB::rollback();
+                     return response()->json(['status' => '400', 'message' => 'Docente ya esta registrado'], 400);
+                }
+            }else{
+                $docente=DocenteURA::find($tramite_detalle->idDocente);
+                $docente->apellidos=$request->apellidos;
+                $docente->nombres=$request->nombres;
+                $docente->idProfesion=$request->idProfesion;
+                $docente->sexo=$request->sexo;
+                $docente->fecha_nacimiento=$request->fecha_nacimiento;
+                $docente->direccion=$request->direccion;
+                $docente->idPais=$request->idPais;
+                $docente->dni=$request->dni;
+                $docente->telefono=$request->telefono;
+                $docente->celular=$request->celular;
+                $docente->correo=$request->correo;
+                $docente->correounitru=$request->correounitru;
+                $docente->correounitru=$request->correounitru;
+                $docente->jefe=$request->jefe;
+                $docente->idDependencia=$request->idDependencia;
+                $docente->idDepartamento=$request->idDepartamento;
+                $docente->idSede=$request->idSede;
+                $docente->idCondicion=$request->idCondicion;
+                $docente->idCategoria=$request->idCategoria;
+                $docente->idDedicacion=$request->idDedicacion;
+                $docente->save();
             }
+                
 
-            $docente=DocenteURA::find($tramite_detalle->idDocente);
-            $docente->apellidos=$request->apellidos;
-            $docente->nombres=$request->nombres;
-            $docente->idProfesion=$request->idProfesion;
-            $docente->sexo=$request->sexo;
-            $docente->fecha_nacimiento=$request->fecha_nacimiento;
-            $docente->direccion=$request->direccion;
-            $docente->idPais=$request->idPais;
-            $docente->dni=$request->dni;
-            $docente->telefono=$request->telefono;
-            $docente->celular=$request->celular;
-            $docente->correo=$request->correo;
-            $docente->correounitru=$request->correounitru;
-            $docente->correounitru=$request->correounitru;
-            $docente->jefe=$request->jefe;
-            $docente->idDependencia=$request->idDependencia;
-            $docente->idDepartamento=$request->idDepartamento;
-            $docente->idSede=$request->idSede;
-            $docente->idCondicion=$request->idCondicion;
-            $docente->idCategoria=$request->idCategoria;
-            $docente->idDedicacion=$request->idDedicacion;
-            $docente->save();
-     
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
             $historial_estado=$this->setHistorialEstado($tramite->idTramite, 51, 52, $idUsuario);
             $historial_estado->save();
@@ -405,8 +438,8 @@ class TramiteSecretariaController extends Controller
             $tramite_requisito->des_estado_requisito="PENDIENTE";
             $tramite_requisito->update();
             
-            $correojefe="rrodriguezg@unitru.edu.pe";
-            dispatch(new RegistroDatosDocenteJob($correojefe,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+            // $correojefe="rrodriguezg@unitru.edu.pe";
+            // dispatch(new RegistroDatosDocenteJob($correojefe,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -495,7 +528,6 @@ class TramiteSecretariaController extends Controller
     }
 
     public function validarDocente(Request $request){
-
         DB::beginTransaction();
         try{
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -514,100 +546,116 @@ class TramiteSecretariaController extends Controller
             ->where('cgo_id','!=',1)
             ->orderby('persona.per_id', 'DESC')->first();
             $per_login=intval($login->per_login)+1;
-
-            $tramite=Tramite::find($request->idTramite);
-            $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
-            $docente=DocenteURA::find($tramite_detalle->idDocente);
-            $docente->apellidos=$request->apellidos;
-            $docente->nombres=$request->nombres;
-            $docente->idProfesion=$request->idProfesion;
-            $docente->sexo=$request->sexo;
-            $docente->fecha_nacimiento=$request->fecha_nacimiento;
-            $docente->direccion=$request->direccion;
-            $docente->idPais=$request->idPais;
-            $docente->per_login=$per_login;
-            $docente->dni=$request->dni;
-            $docente->telefono=$request->telefono;
-            $docente->celular=$request->celular;
-            $docente->correo=$request->correo;
-            $docente->correounitru=$request->correounitru;
-            $docente->jefe=$request->jefe;
-            $docente->idDependencia=$request->idDependencia;
-            $docente->idDepartamento=$request->idDepartamento;
-            $docente->idSede=$request->idSede;
-            $docente->idCondicion=$request->idCondicion;
-            $docente->idCategoria=$request->idCategoria;
-            $docente->idDedicacion=$request->idDedicacion;
-            $docente->update();
-
             $departamento=DependenciaSGA::where('dependencia.dep_id',$request->idDepartamento)->first();
 
-            // $persona=new PersonaSga();
-            // $persona->pon_id=$request->idProfesion;
-            // $persona->per_login=(string)$per_login;
-            // $persona->per_password=md5($per_login);
-            // $persona->per_nombres=$request->nombres;
-            // $persona->per_apellidos=$request->apellidos;
-            // $persona->per_sexo=$request->sexo;
-            // $persona->per_fnaci=$request->fecha_nacimiento;
-            // $persona->per_direccion=$request->direccion;
-            // $persona->per_cod_pais=(string)$request->idPais;
-            // $persona->per_dni=$request->dni;
-            // $persona->per_telefono=$request->telefono;
-            // $persona->per_celular=$request->celular;
-            // $persona->per_mail=$request->correo;
-            // $persona->per_estado=1;
-            // $persona->per_email_institucional=$request->correounitru;
-            // $persona->save();
+            if ($tramite->idTipo_tramite_unidad=40 || $tramite->idTipo_tramite_unidad=41) {
+                $docente=PersonaSga::select('persona.per_id','persona.per_mail as correo','persona.per_email_institucional as correounitru')
+                ->where('persona.per_nombres',$request->nombres)
+                ->where('persona.per_apellidos',$request->apellidos)
+                ->where('persona.per_dni',$request->dni)->first();
+                
+                $perfil=Perfil::where('perfil.per_id',$docente->per_id)->first();
+                $perfil->dep_id=$request->idDepartamento;
+                $perfil->update();
 
-            // $perfil=new Perfil();
-            // $perfil->sed_id=$request->idSede;
-            // $perfil->uni_id=$request->idDependencia;
-            // $perfil->dep_id=$request->idDepartamento;
-            // $perfil->ded_id=$request->idDedicacion;
-            // $perfil->cia_id=$request->idCategoria;
-            // $perfil->cgo_id=2;
-            // $perfil->per_id=$persona->per_id;
-            // $perfil->pfl_main=1;
-            // $perfil->pfl_boss=$request->jefe;
-            // $perfil->pfl_cond=$request->idCondicion;
-            // $perfil->pfl_estado=1;
-            // $perfil->save();
+                // $docenteURA=DocenteURA::where('docentes.nombres',$request->nombres)
+                // ->where('docentes.apellidos',$request->apellidos)
+                // ->where('docentes.dni',$request->dni)->first();
+                // $docenteURA->update();
 
-            // $array = array(8, 9, 10, 73,123,140);
-            // foreach ($array as $valor) {
-            //     $permisos= new PermisosDocente;
-            //     $permisos->pfl_id=$perfil->pfl_id;
-            //     $permisos->tar_id=$valor;
-            //     $permisos->pso_estado=1;
-            //     $permisos->save();
-            // }
+            }else {
+                    $tramite=Tramite::find($request->idTramite);
+                    $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                    $docente=DocenteURA::find($tramite_detalle->idDocente);
+                    $docente->apellidos=$request->apellidos;
+                    $docente->nombres=$request->nombres;
+                    $docente->idProfesion=$request->idProfesion;
+                    $docente->sexo=$request->sexo;
+                    $docente->fecha_nacimiento=$request->fecha_nacimiento;
+                    $docente->direccion=$request->direccion;
+                    $docente->idPais=$request->idPais;
+                    $docente->per_login=$per_login;
+                    $docente->dni=$request->dni;
+                    $docente->telefono=$request->telefono;
+                    $docente->celular=$request->celular;
+                    $docente->correo=$request->correo;
+                    $docente->correounitru=$request->correounitru;
+                    $docente->jefe=$request->jefe;
+                    $docente->idDependencia=$request->idDependencia;
+                    $docente->idDepartamento=$request->idDepartamento;
+                    $docente->idSede=$request->idSede;
+                    $docente->idCondicion=$request->idCondicion;
+                    $docente->idCategoria=$request->idCategoria;
+                    $docente->idDedicacion=$request->idDedicacion;
+                    $docente->update();
 
-            // $personaSUNT=new PersonaSUNT();
-            // $personaSUNT->pon_id=$request->idProfesion;
-            // $personaSUNT->per_login=(string)$per_login;
-            // $personaSUNT->per_password=md5($per_login);
-            // $personaSUNT->per_nombres=$request->nombres;
-            // $personaSUNT->per_apellidos=$request->apellidos;
-            // $personaSUNT->per_sexo=$request->sexo;
-            // $personaSUNT->per_fnaci=$request->fecha_nacimiento;
-            // $personaSUNT->per_direccion=$request->direccion;
-            // $personaSUNT->per_cod_pais=(string)$request->idPais;
-            // $personaSUNT->per_dni=$request->dni;
-            // $personaSUNT->per_telefono=$request->telefono;
-            // $personaSUNT->per_celular=$request->celular;
-            // $personaSUNT->per_mail=$request->correo;
-            // $personaSUNT->per_estado=1;
-            // $personaSUNT->per_email_institucional=$request->correounitru;
-            // $personaSUNT->save();
+                    $persona=new PersonaSga();
+                    $persona->pon_id=$request->idProfesion;
+                    $persona->per_login=(string)$per_login;
+                    $persona->per_password=md5($per_login);
+                    $persona->per_nombres=$request->nombres;
+                    $persona->per_apellidos=$request->apellidos;
+                    $persona->per_sexo=$request->sexo;
+                    $persona->per_fnaci=$request->fecha_nacimiento;
+                    $persona->per_direccion=$request->direccion;
+                    $persona->per_cod_pais=(string)$request->idPais;
+                    $persona->per_dni=$request->dni;
+                    $persona->per_telefono=$request->telefono;
+                    $persona->per_celular=$request->celular;
+                    $persona->per_mail=$request->correo;
+                    $persona->per_estado=1;
+                    $persona->per_email_institucional=$request->correounitru;
+                    $persona->save();
 
-            // $usuarioSUNT=new UsuarioSUNT();
-            // $usuarioSUNT->per_id=$personaSUNT->per_id;
-            // $usuarioSUNT->sis_id=1;
-            // $usuarioSUNT->usu_fecha=date('Y-m-d');
-            // $usuarioSUNT->usu_estado=1;
-            // $usuarioSUNT->save();
+                    $perfil=new Perfil();
+                    $perfil->sed_id=$request->idSede;
+                    $perfil->uni_id=$request->idDependencia;
+                    $perfil->dep_id=$request->idDepartamento;
+                    $perfil->ded_id=$request->idDedicacion;
+                    $perfil->cia_id=$request->idCategoria;
+                    $perfil->cgo_id=2;
+                    $perfil->per_id=$persona->per_id;
+                    $perfil->pfl_main=1;
+                    $perfil->pfl_boss=$request->jefe;
+                    $perfil->pfl_cond=$request->idCondicion;
+                    $perfil->pfl_estado=1;
+                    $perfil->save();
 
+                    $array = array(8, 9, 10, 73,123,140);
+                    foreach ($array as $valor) {
+                        $permisos= new PermisosDocente;
+                        $permisos->pfl_id=$perfil->pfl_id;
+                        $permisos->tar_id=$valor;
+                        $permisos->pso_estado=1;
+                        $permisos->save();
+                    }
+
+                    $personaSUNT=new PersonaSUNT();
+                    $personaSUNT->pon_id=$request->idProfesion;
+                    $personaSUNT->per_login=(string)$per_login;
+                    $personaSUNT->per_password=md5($per_login);
+                    $personaSUNT->per_nombres=$request->nombres;
+                    $personaSUNT->per_apellidos=$request->apellidos;
+                    $personaSUNT->per_sexo=$request->sexo;
+                    $personaSUNT->per_fnaci=$request->fecha_nacimiento;
+                    $personaSUNT->per_direccion=$request->direccion;
+                    $personaSUNT->per_cod_pais=(string)$request->idPais;
+                    $personaSUNT->per_dni=$request->dni;
+                    $personaSUNT->per_telefono=$request->telefono;
+                    $personaSUNT->per_celular=$request->celular;
+                    $personaSUNT->per_mail=$request->correo;
+                    $personaSUNT->per_estado=1;
+                    $personaSUNT->per_email_institucional=$request->correounitru;
+                    $personaSUNT->save();
+
+                    $usuarioSUNT=new UsuarioSUNT();
+                    $usuarioSUNT->per_id=$personaSUNT->per_id;
+                    $usuarioSUNT->sis_id=1;
+                    $usuarioSUNT->usu_fecha=date('Y-m-d');
+                    $usuarioSUNT->usu_estado=1;
+                    $usuarioSUNT->save();
+            
+                  }
      
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
             $historial_estado=$this->setHistorialEstado($tramite->idTramite, 7, 8, $idUsuario);
@@ -638,7 +686,7 @@ class TramiteSecretariaController extends Controller
                     array_push($copias,$usuario->correo2);
                 }
 
-                dispatch(new DocenteTramiteJob($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad,$copias));
+                // dispatch(new DocenteTramiteJob($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad,$copias));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -681,7 +729,7 @@ class TramiteSecretariaController extends Controller
             $requisito->des_estado_requisito="RECHAZADO";
             $requisito->update();
 
-            dispatch(new ObservacionDocenteTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+            // dispatch(new ObservacionDocenteTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
