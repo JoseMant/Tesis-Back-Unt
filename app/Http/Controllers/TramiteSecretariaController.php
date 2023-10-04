@@ -118,18 +118,18 @@ class TramiteSecretariaController extends Controller
             $tramite -> idDependencia=trim($request->idDependencia);
             $tramite -> idPrograma=trim($request->idPrograma);
             $tramite -> comentario=trim($request->comentario);
-            $tramite -> idUsuario_asignado=null;
-            $tramite -> idEstado_tramite=51;
+            $tramite -> idUsuario_asignado=17479;
+            $tramite -> idEstado_tramite=51;//7
 
             // Creando un uudi para realizar el llamado a los trámites por ruta
 
-                // Verificando que no haya un uuid ya guardado en bd
-                $tramiteUUID=true;
-                while ($tramiteUUID) {
-                    $uuid=Str::orderedUuid();
-                    $tramiteUUID=Tramite::where('uuid',$uuid)->first();
-                }
-                $tramite -> uuid=$uuid;    
+            // Verificando que no haya un uuid ya guardado en bd
+            $tramiteUUID=true;
+            while ($tramiteUUID) {
+                $uuid=Str::orderedUuid();
+                $tramiteUUID=Tramite::where('uuid',$uuid)->first();
+            }
+            $tramite -> uuid=$uuid;    
             $tramite -> save();
 
             // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
