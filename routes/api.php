@@ -54,7 +54,7 @@ Route::get('docente/search', 'TramiteSecretariaController@getDocenteByCodigo');
 
 
 // Route::post('tramite/update/{id}','TramiteController@update');
-Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+// Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
 Route::get('tramite/{id}','TramiteController@GetTramiteById');
 
 //tramite fisico
