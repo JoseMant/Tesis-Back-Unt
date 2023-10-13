@@ -79,7 +79,6 @@ class TramiteSecretariaController extends Controller
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
             $usuario = User::findOrFail($idUsuario);
-            // return $request->all();
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
             
             $tramite=new Tramite;
@@ -119,18 +118,18 @@ class TramiteSecretariaController extends Controller
             $tramite -> idDependencia=trim($request->idDependencia);
             $tramite -> idPrograma=trim($request->idPrograma);
             $tramite -> comentario=trim($request->comentario);
-            $tramite -> idUsuario_asignado=null;
-            $tramite -> idEstado_tramite=51;
+            $tramite -> idUsuario_asignado=17479;
+            $tramite -> idEstado_tramite=51;//7
 
             // Creando un uudi para realizar el llamado a los trámites por ruta
 
-                // Verificando que no haya un uuid ya guardado en bd
-                $tramiteUUID=true;
-                while ($tramiteUUID) {
-                    $uuid=Str::orderedUuid();
-                    $tramiteUUID=Tramite::where('uuid',$uuid)->first();
-                }
-                $tramite -> uuid=$uuid;    
+            // Verificando que no haya un uuid ya guardado en bd
+            $tramiteUUID=true;
+            while ($tramiteUUID) {
+                $uuid=Str::orderedUuid();
+                $tramiteUUID=Tramite::where('uuid',$uuid)->first();
+            }
+            $tramite -> uuid=$uuid;    
             $tramite -> save();
 
             // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
@@ -195,7 +194,7 @@ class TramiteSecretariaController extends Controller
     public function getDocenteByCodigo(Request $request){
 
         $docente=PersonaSga::select('persona.per_apellidos as apellidos','persona.per_nombres as nombres','persona.per_celular as celular','persona.per_telefono as telefono'
-        ,'persona.per_login as codigo',
+        ,'persona.per_login as codigo','persona.per_login as per_login',
         'persona.per_email_institucional as correounitru','persona.per_mail as correo','persona.per_direccion as direccion','persona.per_dni as dni','persona.per_sexo as sexo'
         ,'persona.per_fnaci as fecha_nacimiento','persona.pon_id as idProfesion','perfil.cia_id as idCategoria','perfil.pfl_cond as idCondicion',
         'perfil.uni_id as idDependencia','perfil.ded_id as idDedicacion','perfil.dep_id as idDepartamento','perfil.pfl_boss as jefe','persona.per_cod_pais as idPais','perfil.sed_id as idSede')
@@ -302,7 +301,9 @@ class TramiteSecretariaController extends Controller
         {
             $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%');
         })
         ->count();
         foreach ($tramites as $key => $tramite) {
@@ -362,6 +363,7 @@ class TramiteSecretariaController extends Controller
                     $docente->direccion=$request->direccion;
                     $docente->idPais=$request->idPais;
                     $docente->dni=$request->dni;
+                    $docente->per_login=$request->per_login;
                     $docente->telefono=$request->telefono;
                     $docente->celular=$request->celular;
                     $docente->correo=$request->correo;
@@ -438,8 +440,8 @@ class TramiteSecretariaController extends Controller
             $tramite_requisito->des_estado_requisito="PENDIENTE";
             $tramite_requisito->update();
             
-            // $correojefe="rrodriguezg@unitru.edu.pe";
-            // dispatch(new RegistroDatosDocenteJob($correojefe,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+            $correojefe="rrodriguezg@unitru.edu.pe";
+            dispatch(new RegistroDatosDocenteJob($correojefe,$usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -475,7 +477,9 @@ class TramiteSecretariaController extends Controller
         {
             $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%');
         })
         ->orderBy($request->query('sort'), $request->query('order'))
         ->take($request->query('size'))
@@ -501,7 +505,9 @@ class TramiteSecretariaController extends Controller
         {
             $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%');
 
         })
         ->count();
@@ -548,20 +554,23 @@ class TramiteSecretariaController extends Controller
             $per_login=intval($login->per_login)+1;
             $departamento=DependenciaSGA::where('dependencia.dep_id',$request->idDepartamento)->first();
 
-            if ($tramite->idTipo_tramite_unidad=40 || $tramite->idTipo_tramite_unidad=41) {
-                $docente=PersonaSga::select('persona.per_id','persona.per_mail as correo','persona.per_email_institucional as correounitru')
+            if ($tipo_tramite_unidad->idTipo_tramite_unidad==40 || $tipo_tramite_unidad->idTipo_tramite_unidad==41) {
+                $docente2=PersonaSga::select('persona.per_id','persona.per_mail as correo','persona.per_email_institucional as correounitru',
+                'persona.per_apellidos as apellidos','persona.per_nombres as nombres')
                 ->where('persona.per_nombres',$request->nombres)
                 ->where('persona.per_apellidos',$request->apellidos)
                 ->where('persona.per_dni',$request->dni)->first();
-                
+
+                $docente = (object)[];
+                $docente->per_id=$docente2->per_id;
+                $docente->correo=$docente2->correo;
+                $docente->correounitru=$docente2->correounitru;
+                $docente->apellidos=$docente2->apellidos;
+                $docente->nombres=$docente2->nombres;
+
                 $perfil=Perfil::where('perfil.per_id',$docente->per_id)->first();
                 $perfil->dep_id=$request->idDepartamento;
                 $perfil->update();
-
-                // $docenteURA=DocenteURA::where('docentes.nombres',$request->nombres)
-                // ->where('docentes.apellidos',$request->apellidos)
-                // ->where('docentes.dni',$request->dni)->first();
-                // $docenteURA->update();
 
             }else {
                     $tramite=Tramite::find($request->idTramite);
@@ -669,11 +678,6 @@ class TramiteSecretariaController extends Controller
             $tramite_requisito->idUsuario_aprobador=$idUsuario;
             $tramite_requisito->des_estado_requisito="APROBADO";
             $tramite_requisito->update();
-            
-            // $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
-            // ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
-            // ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
-            // $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
 
                 $oti="dsc@unitru.edu.pe";
                 if ($docente->correounitru) {
@@ -685,9 +689,8 @@ class TramiteSecretariaController extends Controller
                 if($usuario->correo2){
                     array_push($copias,$usuario->correo2);
                 }
-
-                // dispatch(new DocenteTramiteJob($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad,$copias));
-            DB::commit();
+                dispatch(new DocenteTramiteJob($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad,$copias));
+                DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
             DB::rollback();
@@ -709,11 +712,6 @@ class TramiteSecretariaController extends Controller
             $tramite=Tramite::findOrFail($id);
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::findOrFail($tramite->idTipo_tramite_unidad);
             $tipo_tramite = Tipo_Tramite::findOrFail($tipo_tramite_unidad->idTipo_tramite);
-
-            // $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')
-            // ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
-            // ->where('tipo_tramite_unidad.idTipo_tramite_unidad', 38)->first();
-            // $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',38)->first();
         
             $tramite=Tramite::find($id);
             $historial_estado=$this->setHistorialEstado($id, 7, 9, $idUsuario);
@@ -729,7 +727,7 @@ class TramiteSecretariaController extends Controller
             $requisito->des_estado_requisito="RECHAZADO";
             $requisito->update();
 
-            // dispatch(new ObservacionDocenteTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+            dispatch(new ObservacionDocenteTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -748,7 +746,7 @@ class TramiteSecretariaController extends Controller
         $idTipo_usuario=$apy['idTipo_usuario'];
 
         $tramites=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite_requisito.archivo','tramite.nro_tramite','tramite_detalle.idDocente',
-        DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'docentes.per_login as codigoDocente','docentes.idDepartamento','tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite',
+        DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'docentes.per_login','docentes.idDepartamento','tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite',
         'docentes.*')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('docentes','docentes.idDocente','tramite_detalle.idDocente')
@@ -775,6 +773,8 @@ class TramiteSecretariaController extends Controller
             $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('docentes.per_login','LIKE', '%'.$request->query('search').'%');
 
         })
@@ -803,8 +803,9 @@ class TramiteSecretariaController extends Controller
             $query->where('tramite.nro_tramite','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('docentes.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('docentes.per_login','LIKE', '%'.$request->query('search').'%');
-
         })
         ->count();
 
