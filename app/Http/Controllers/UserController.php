@@ -132,8 +132,8 @@ class UserController extends Controller
             $usuario->apellido_paterno=$request->apellido_paterno;
             $usuario->apellido_materno=$request->apellido_materno;
             $usuario->apellidos=$request->apellido_paterno.' '.$request->apellido_materno;
-            
             $usuario->tipo_documento=$request->tipo_documento;
+
             if ($request->idDependencia) {
                 if($usuario->idTipo_usuario!=5){
                     $usuario->idDependencia=$request->idDependencia;
@@ -222,6 +222,8 @@ class UserController extends Controller
         try {
             $usuario=User::find($id);
             $usuario->idTipo_usuario=$request->idTipo_usuario;
+            $usuario->nro_documento=$request->nro_documento;
+            $usuario->tipo_documento=$request->tipo_documento;
             $usuario->username=$request->username;
             $usuario->nombres=$request->nombres;
             $usuario->apellido_paterno=$request->apellido_paterno;
@@ -234,10 +236,11 @@ class UserController extends Controller
                 }
             }
 
-            if($request->correo2){
-                $usuario->correo2=$request->correo2;
-            }
+            $usuario->correo=$request->correo;
 
+            if($request->correo2) $usuario->correo2=$request->correo2;
+
+            $usuario->sexo=$request->sexo;
             $usuario->celular=$request->celular;
             $usuario->estado=$request->estado;
             $usuario->update();
@@ -271,6 +274,7 @@ class UserController extends Controller
                 $programa=ProgramaURAA::find($programas[0]);
                 $usuario->idFacultad=$programa->idDependencia;
             }
+            
             $usuario->programas=$request->programas;
             
             DB::commit();
