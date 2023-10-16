@@ -122,11 +122,15 @@ class TramiteSecretariaController extends Controller
             // REGISTRAMOS EL TRÁMITE
             $tramite -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
             $tramite -> idTipo_tramite_unidad=trim($request->idTipo_tramite_unidad);
+            // $tramite -> idVoucher=22352;
+            $tramite -> idVoucher=1;
             $tramite -> idUsuario=$idUsuario;
             $tramite -> idUnidad=trim($request->idUnidad);
             $tramite -> idDependencia=trim($request->idDependencia);
             $tramite -> idPrograma=trim($request->idPrograma);
+            $tramite -> nro_matricula=0;
             $tramite -> comentario=trim($request->comentario);
+            $tramite -> sede=" ";
             $tramite -> idUsuario_asignado=17479;
             // $tramite -> idUsuario_asignado=null;
             if($tipo_tramite->idTipo_tramite==5){
@@ -145,7 +149,8 @@ class TramiteSecretariaController extends Controller
                 $uuid=Str::orderedUuid();
                 $tramiteUUID=Tramite::where('uuid',$uuid)->first();
             }
-            $tramite -> uuid=$uuid;    
+            $tramite -> uuid=$uuid;
+            $tramite->firma_tramite = " ";
             $tramite -> save();
 
             // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
@@ -227,33 +232,7 @@ class TramiteSecretariaController extends Controller
         'perfil.uni_id as idDependencia','perfil.ded_id as idDedicacion','perfil.dep_id as idDepartamento','perfil.pfl_boss as jefe','persona.per_cod_pais as idPais','perfil.sed_id as idSede')
         ->join('perfil','perfil.per_id','persona.per_id')
         ->where('persona.per_login',$request->codigo)->first();
-        
-        $tramiteDocente=Tramite::select('tramite.idTramite','tramite.idTramite_detalle','tramite.nro_tramite',
-            'tramite_detalle.idDocente',DB::raw("CONCAT(usuario.apellidos,' ',usuario.nombres) as solicitante"),'tramite.idEstado_tramite',
-            'tramite.created_at as fecha','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.idTipo_tramite_unidad')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->where('tramite.nro_tramite',$request->nro_tramite)->first();
-
-        $tramiteDocente->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-        'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
-        ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
-        ->where('idTramite',$tramiteDocente->idTramite)
-        ->get();        
-
-        if ($docente) {
-            $docente->idTramite=$tramiteDocente->idTramite;
-            $docente->nro_tramite=$request->nro_tramite;
-            $docente->solicitante=$tramiteDocente->solicitante;
-            $docente->tramite=$tramiteDocente->tramite;
-            $docente->fecha=$tramiteDocente->fecha;
-            $docente->idTipo_tramite_unidad=$tramiteDocente->idTipo_tramite_unidad;
-            $docente->requisitos=$tramiteDocente->requisitos;
-            return $docente;
-        }else {
-            return $tramiteDocente;
-        }
+        return $docente;
 
     }    
 
@@ -379,12 +358,14 @@ class TramiteSecretariaController extends Controller
             // ->where('persona.per_apellidos',$request->apellidos)
             // ->where('perfil.dep_id',$request->idDepartamento)->first();
 
-            $persona=PersonaSga::select('persona.per_nombres','persona.per_apellidos','perfil.dep_id','persona.per_login')
-            ->join('perfil','perfil.per_id','persona.per_id')
-            ->where('persona.per_dni',$request->dni)->first();
-            
-            if($persona){
-                if ($tipo_tramite_unidad->idTipo_tramite_unidad==40 || $tipo_tramite_unidad->idtipo_tramite_unidad==41) {
+            if ($tipo_tramite_unidad->idTipo_tramite_unidad==38 || $tipo_tramite_unidad->idtipo_tramite_unidad==39) {
+                $persona=PersonaSga::select('persona.per_nombres','persona.per_apellidos','perfil.dep_id','persona.per_login')
+                ->join('perfil','perfil.per_id','persona.per_id')
+                ->where('persona.per_dni',$request->dni)->first();
+                if ($persona) {
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' => 'Docente ya esta registrado'], 400);
+                } else {
                     $docente=DocenteURA::find($tramite_detalle->idDocente);
                     $docente->apellidos=$request->apellidos;
                     $docente->nombres=$request->nombres;
@@ -394,7 +375,6 @@ class TramiteSecretariaController extends Controller
                     $docente->direccion=$request->direccion;
                     $docente->idPais=$request->idPais;
                     $docente->dni=$request->dni;
-                    $docente->per_login=$request->per_login;
                     $docente->telefono=$request->telefono;
                     $docente->celular=$request->celular;
                     $docente->correo=$request->correo;
@@ -408,11 +388,9 @@ class TramiteSecretariaController extends Controller
                     $docente->idCategoria=$request->idCategoria;
                     $docente->idDedicacion=$request->idDedicacion;
                     $docente->save();
-                }else{
-                    DB::rollback();
-                     return response()->json(['status' => '400', 'message' => 'Docente ya esta registrado'], 400);
                 }
-            }else{
+            
+            } else if ($tipo_tramite_unidad->idTipo_tramite_unidad==40 || $tipo_tramite_unidad->idtipo_tramite_unidad==41) {
                 $docente=DocenteURA::find($tramite_detalle->idDocente);
                 $docente->apellidos=$request->apellidos;
                 $docente->nombres=$request->nombres;
@@ -600,6 +578,7 @@ class TramiteSecretariaController extends Controller
                 $docente->nombres=$docente2->nombres;
 
                 $perfil=Perfil::where('perfil.per_id',$docente->per_id)->first();
+                $perfil->uni_id=$request->idDependencia;
                 $perfil->dep_id=$request->idDepartamento;
                 $perfil->update();
 
