@@ -1792,6 +1792,33 @@ class TramiteController extends Controller
         ->first();
     }
 
+    public function validarVoucher2(Request $request, $id)
+    {
+        $tramite = Tramite::findOrFail($id);
+        $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $tramite->idUsuario);
+        
+        if($voucher_validate) {
+            return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
+        }
+        else{
+            DB::beginTransaction();
+            try {
+                 $voucher = Voucher::findOrFail($tramite->idVoucher);
+                 $voucher->entidad = $request->entidad;
+                 $voucher->nro_operacion = $request->nro_operacion;
+                 $voucher->fecha_operacion = $request->fecha_operacion;
+                 $voucher->update();
+                 DB::commit();
+                return response()->json($voucher, 200);
+            } catch (\Exception $e) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+            }
+
+        }
+    }
+
+
 
     public function setHistorialEstado($idTramite, $idEstado_actual, $idEstado_nuevo, $idUsuario)
     {
