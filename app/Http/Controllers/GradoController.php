@@ -1417,7 +1417,7 @@ class GradoController extends Controller
             
             $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
             $tramite_detalle->idModalidad_carpeta=$request->idModalidad_carpeta;
-            if ($tramite->idTipo_tramite_unidad==15) {
+            if ($tramite->idTipo_tramite_unidad==15 && $request->idModalidad_carpeta == 1) {
                 $cronograma=Cronograma::find($tramite_detalle->idCronograma_carpeta);
                 $tramite_detalle->fecha_sustentacion_carpeta =$cronograma->fecha_colacion;
             }else {
@@ -2915,7 +2915,8 @@ class GradoController extends Controller
                 // Creando el diploma con los datos obtenidos
                 // return $tramite;
                 $html2pdf = new Html2Pdf('L', 'A4', 'es', true, 'UTF-8');
-                $html2pdf->AddFont('brandey', '', 'brandey.php');
+                // $html2pdf->AddFont('brandey', '', 'brandey.php');
+                $html2pdf->AddFont('algerian', '', 'algerian.php');
                 $html2pdf->writeHTML(view('diploma.diploma', [
                     'foto_interesado'=>$requisito_foto->archivo,
                     'decano'=>$decano,'secretaria'=>$secretariaGeneral,'rector'=>$rector,
@@ -2955,7 +2956,7 @@ class GradoController extends Controller
             ->get(); 
 
 
-            DB::commit();
+            DB::rollback();
             set_time_limit(60);
 
             return response()->json($tramites,200);

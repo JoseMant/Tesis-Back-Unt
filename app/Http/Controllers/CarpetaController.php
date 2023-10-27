@@ -12,6 +12,7 @@ use App\Cronograma;
 use App\Diploma_Carpeta;
 use App\Tramite_Requisito;
 use App\Historial_estado;
+use App\Graduado;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -209,6 +210,7 @@ class CarpetaController extends Controller
     }
 
     public function getCarpetaBySearch(Request $request){
+        $diplomas = [];
         $tramites=Tramite::select('tramite.idTramite','usuario.nombres','usuario.apellidos','usuario.nro_documento','tramite.sede',
         'tipo_tramite_unidad.descripcion as tipo_tramite',
         'modalidad_carpeta.acto_academico as modalidadSustentancion','tramite_detalle.nro_libro','tramite_detalle.folio','tramite_detalle.nro_registro','resolucion.nro_resolucion',
@@ -242,25 +244,66 @@ class CarpetaController extends Controller
             }
         })
         ->get();
-
-        if (!$tramites) return response()->json(['status' => '400', 'message' => "No se encuentra carpeta con esa búsqueda"], 400);
-
-        foreach ($tramites as $key => $tramite) {
-            $requisito=Tramite_Requisito::select('tramite_requisito.archivo')
-            ->where(function($query) {
-                $query->where('tramite_requisito.idRequisito',15)
-                ->orWhere('tramite_requisito.idRequisito',23)
-                ->orWhere('tramite_requisito.idRequisito',44)
-                ->orWhere('tramite_requisito.idRequisito',52)
-                ->orWhere('tramite_requisito.idRequisito',61);
-            })
-            ->where('idTramite',$tramite->idTramite)
-            ->first();
-    
-            $tramite->foto=$requisito->archivo;
+        if (count($tramites)) {
+            foreach ($tramites as $key => $tramite) {
+                $requisito=Tramite_Requisito::select('tramite_requisito.archivo')
+                ->where(function($query) {
+                    $query->where('tramite_requisito.idRequisito',15)
+                    ->orWhere('tramite_requisito.idRequisito',23)
+                    ->orWhere('tramite_requisito.idRequisito',44)
+                    ->orWhere('tramite_requisito.idRequisito',52)
+                    ->orWhere('tramite_requisito.idRequisito',61);
+                })
+                ->where('idTramite',$tramite->idTramite)
+                ->first();
+                $tramite->foto=$requisito->archivo;
+                array_push($diplomas, $tramite);
+            }
         }
 
-        return $tramites;
+        $tramites_diploma = Graduado::select('graduado.idgraduado as idTramite', 'alumno.Nom_alumno as nombres', DB::raw("CONCAT(alumno.Pat_alumno,' ',alumno.Mat_alumno) AS apellidos"), 
+        'alumno.Nro_documento as nro_documento', 'sedes.Des_sede as sede', 'tipoficha.Nom_ficha as tipo_tramite', 'actoacad.Nom_acto as modalidadSustentancion',
+        'graduado.num_libro as nro_libro', 'graduado.num_folio as folio', 'graduado.num_registro as nro_registro', 'graduado.num_reso_r as nro_resolucion',
+        'facultad.Nom_facultad as facultad', 'escuela.Nom_escuela as programa', 'graduado.cod_alumno as nro_matricula', 
+        'diplomas.Des_diploma_h as denominacion', // Corregir para diplomas masculino y femenino
+        'graduado.cod_ficha as codigo_diploma',
+        'graduado.fec_expe_d as fecha_colacion', //Validar si es fecha de colación
+        //Detectar cuando es original y duplicado
+        'graduado.grad_foto as foto' //Configurar para leer fotos
+        )
+        
+        ->join('alumno', 'alumno.Cod_alumno', 'graduado.cod_alumno')
+        ->join('sedes', 'sedes.Cod_general', 'alumno.Cod_sede')
+        ->join('tipoficha','tipoficha.Tip_ficha','graduado.tipo_ficha')
+        ->join('actoacad','actoacad.Cod_acto','graduado.cod_acto')
+        ->join('escuela','escuela.Cod_escuela','alumno.Cod_escuela')
+        ->join('facultad','facultad.Cod_facultad','escuela.Cod_facultad')
+        ->join('diplomas', 'diplomas.Cod_diploma', 'graduado.Cod_diploma')
+        ->where(function($query) use ($request)
+        {
+            if ($request->query('tipo')=="codigo_diploma") {
+                $query->where('graduado.cod_ficha', 'LIKE', $request->query('search'));
+            } else if ($request->query('tipo')=="nro_documento") {
+                $query->where('alumno.Nro_documento', 'LIKE', '%'.$request->query('search').'%');
+            } else if ($request->query('tipo')=="apellidos") {
+                $query->where('alumno.Pat_alumno', 'LIKE', '%'.$request->query('search').'%')
+                ->orWhere('alumno.Mat_alumno', 'LIKE', '%'.$request->query('search').'%');
+            } else if ($request->query('tipo')=="nombres") {
+                $query->where('alumno.Nom_alumno', 'LIKE', '%'.$request->query('search').'%');
+            } else {
+                return response()->json(['status' => '400', 'message' => "Búsqueda incorrecta"], 400);
+            }
+        })
+        ->get();
+        if (count($tramites_diploma)) {
+            foreach ($tramites_diploma as $key => $tramite) {
+                array_push($diplomas, $tramite);
+            }
+        }
+
+        if (!$diplomas) return response()->json(['status' => '400', 'message' => "No se encuentra carpeta con esa búsqueda"], 400);
+
+        return $diplomas;
     }
 
     public function setHistorialEstado($idTramite, $idEstado_actual, $idEstado_nuevo, $idUsuario)

@@ -21,10 +21,11 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
     public $usuario_programas;
 
     public function __construct($fecha_inicio,$fecha_fin,$idTipo_usuario,$usuario_programas){
+        // dd($usuario_programas);
         $this->fecha_inicio = $fecha_inicio;
         $this->fecha_fin = $fecha_fin;
-        $this->$idTipo_usuario=$idTipo_usuario;
-        $this->$usuario_programas=$usuario_programas;
+        $this->idTipo_usuario=$idTipo_usuario;
+        $this->usuario_programas=$usuario_programas;
     }
     public function registerEvents(): array
     {
@@ -113,9 +114,9 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if ($idTipo_usuario==3) {
-                $query->where('voucher.entidad','!=','Tesoreria UNT');
+                $query->where('voucher.entidad','!=','Tesorería');
             }elseif($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })

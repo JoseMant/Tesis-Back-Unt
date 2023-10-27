@@ -39,6 +39,7 @@ use App\PersonaSuv;
 use App\PersonaSga;
 use App\Cronograma;
 use App\Resolucion;
+use App\Resolucion_Secretaria;
 use App\MatriculaSUV;
 use App\MatriculaSGA;
 use App\SemestreAcademico;
@@ -96,15 +97,19 @@ class TramiteController extends Controller
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                 ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-                ->Where('tramite.idEstado_tramite','!=',29)
-                ->Where('tramite.idEstado_tramite','!=',15)
                 ->where(function($query) use ($request)
                 {
-                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
-                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    if ($request->query('search')) {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    }
+                    else {
+                        $query->Where('tramite.idEstado_tramite','!=',29)
+                        ->Where('tramite.idEstado_tramite','!=',15);
+                    }
                 })
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->take($request->query('size'))
@@ -113,15 +118,19 @@ class TramiteController extends Controller
                 $total = Tramite::join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-                ->Where('tramite.idEstado_tramite','!=',29)
-                ->Where('tramite.idEstado_tramite','!=',15)
                 ->where(function($query) use ($request)
                 {
-                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
-                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    if ($request->query('search')) {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    }
+                    else {
+                        $query->Where('tramite.idEstado_tramite','!=',29)
+                        ->Where('tramite.idEstado_tramite','!=',15);
+                    }
                 })
                 ->count();
             }elseif($idTipo_usuario==13){
@@ -133,15 +142,19 @@ class TramiteController extends Controller
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                 ->where('tipo_tramite.idTipo_tramite',1)
-                ->Where('tramite.idEstado_tramite','!=',29)
-                ->Where('tramite.idEstado_tramite','!=',15)
                 ->where(function($query) use ($request)
                 {
-                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
-                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    if ($request->query('search')) {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    }
+                    else {
+                        $query->Where('tramite.idEstado_tramite','!=',29)
+                        ->Where('tramite.idEstado_tramite','!=',15);
+                    }
                 })
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->take($request->query('size'))
@@ -151,15 +164,20 @@ class TramiteController extends Controller
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->where('tipo_tramite.idTipo_tramite',1)
-                ->Where('tramite.idEstado_tramite','!=',29)
-                ->Where('tramite.idEstado_tramite','!=',15)
                 ->where(function($query) use ($request)
                 {
-                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
-                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    if ($request->query('search')) {
+                        # code...
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    }
+                    else {
+                        $query->Where('tramite.idEstado_tramite','!=',29)
+                        ->Where('tramite.idEstado_tramite','!=',15);
+                    }
                 })
                 ->count();
             }elseif($idTipo_usuario==9){
@@ -170,16 +188,20 @@ class TramiteController extends Controller
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
-                ->Where('tramite.idEstado_tramite','!=',29)
-                ->Where('tramite.idEstado_tramite','!=',15)
                 ->where('tipo_tramite.idTipo_tramite',2)
                 ->where(function($query) use ($request)
                 {
-                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
-                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    if ($request->query('search')) {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    }
+                    else {
+                        $query->Where('tramite.idEstado_tramite','!=',29)
+                        ->Where('tramite.idEstado_tramite','!=',15);
+                    }
                 })
                 ->orderBy($request->query('sort'), $request->query('order'))
                 ->take($request->query('size'))
@@ -188,16 +210,20 @@ class TramiteController extends Controller
                 $total = Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
-                ->Where('tramite.idEstado_tramite','!=',29)
-                ->Where('tramite.idEstado_tramite','!=',15)
                 ->where('tipo_tramite.idTipo_tramite',2)
                 ->where(function($query) use ($request)
                 {
-                    $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
-                    ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
-                    ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    if ($request->query('search')) {
+                        $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('nro_tramite','LIKE', '%'.$request->query('search').'%')
+                        ->orWhere('created_at','LIKE','%'.$request->query('search').'%')
+                        ->orWhere('estado_tramite.nombre','LIKE','%'.$request->query('search').'%');
+                    }
+                    else {
+                        $query->Where('tramite.idEstado_tramite','!=',29)
+                        ->Where('tramite.idEstado_tramite','!=',15);
+                    }
                 })
                 ->count();
             }else {
@@ -209,7 +235,6 @@ class TramiteController extends Controller
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->join('estado_tramite','estado_tramite.idEstado_tramite','tramite.idEstado_tramite')
                 ->Where('tramite.idUsuario',$idUsuario)
-                ->Where('tramite.idEstado_tramite','!=',29)
                 ->where(function($query) use ($request)
                 {
                     $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -227,7 +252,6 @@ class TramiteController extends Controller
                 ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
                 ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
                 ->Where('tramite.idUsuario',$idUsuario)
-                ->Where('tramite.idEstado_tramite','!=',29)
                 ->where(function($query) use ($request)
                 {
                     $query->where('tipo_tramite.descripcion','LIKE', '%'.$request->query('search').'%')
@@ -267,6 +291,76 @@ class TramiteController extends Controller
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }  
+    }
+
+    public function GetTramiteById($id)
+    {
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $dni=$apy['nro_documento'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+        $tramite=Tramite::findOrFail($id);
+        $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite->idTipo_tramite_unidad);
+
+        if ($tipo_tramite_unidad->idTipo_tramite_unidad==45||$tipo_tramite_unidad->idTipo_tramite_unidad==46) {
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+            'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
+            'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
+            'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+            'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
+            'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite.uuid','resolucion_secretaria.*')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('resolucion_secretaria','resolucion_secretaria.idResolucion_secretaria','tramite_detalle.idResolucion_secretaria')
+            ->Where('tramite.idTramite',$id)
+            ->first();   
+         
+                $tramite->fut="fut/".$tramite->uuid;
+                //Requisitos
+                $tramite->requisitos=Tramite_Requisito::select('requisito.*','tramite_requisito.idTramite','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador',
+                'tramite_requisito.validado','tramite_requisito.comentario','tramite_requisito.des_estado_requisito','tramite_requisito.estado')
+                ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                ->where('tramite_requisito.idTramite',$tramite->idTramite)
+                ->get();
+        }else{
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+            'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
+            'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
+            'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+            'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
+            'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+            'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher',
+            'voucher.des_estado_voucher','tramite.uuid')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->Where('tramite.idTramite',$id)
+            ->first();   
+         
+                $tramite->fut="fut/".$tramite->uuid;
+                //Requisitos
+                $tramite->requisitos=Tramite_Requisito::select('requisito.*','tramite_requisito.idTramite','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador',
+                'tramite_requisito.validado','tramite_requisito.comentario','tramite_requisito.des_estado_requisito','tramite_requisito.estado')
+                ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                ->where('tramite_requisito.idTramite',$tramite->idTramite)
+                ->get();
+        }  
+
+        return response()->json($tramite, 200);
     }
 
     public function GetTramitesByUser(Request $request)
@@ -516,10 +610,12 @@ class TramiteController extends Controller
                                                                             y usted ya cuenta con una solicitud.'], 400);
                 }
             }
-            
-            $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $idUsuario);
-            if($voucher_validate) return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
-            
+            if ($tipo_tramite_unidad->require_voucher==1) {
+                $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $idUsuario);
+                if($voucher_validate) return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
+            }
+               
+
             $tramite=new Tramite;
             //AÑADIMOS EL NÚMERO DE TRÁMITE
             $inicio=date('Y-m-d')." 00:00:00";
@@ -538,42 +634,45 @@ class TramiteController extends Controller
                 $tramite -> nro_tramite="0001".date('d').date('m').substr(date('Y'),2,3);
             }
             
-            // REGISTRAMOS LE VOUCHER
-            if(!$request->hasFile("archivo") && !$request->hasFile("archivo_exonerado")) {
-                return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
-            }
-            $voucher=new Voucher;
-            $voucher->entidad=trim($request->entidad);
-            $voucher->nro_operacion=trim($request->nro_operacion);
-            $voucher->fecha_operacion=trim($request->fecha_operacion);
+            if ($tipo_tramite_unidad->require_voucher==1) {
+            
+                // REGISTRAMOS LE VOUCHER
+                if(!$request->hasFile("archivo") && !$request->hasFile("archivo_exonerado")) {
+                    return response()->json(['status' => '400', 'message' =>"Datos incompletos"], 400);
+                }
+                $voucher=new Voucher;
+                $voucher->entidad=trim($request->entidad);
+                $voucher->nro_operacion=trim($request->nro_operacion);
+                $voucher->fecha_operacion=trim($request->fecha_operacion);
 
-            // GUARDAMOS EL ARCHIVO DEL VOUCHER
-            if($request->hasFile("archivo")){
-                $file=$request->file("archivo");
-                $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
-                $nombreBD = "/storage/vouchers_tramites/".$nombre;
-                if($file->guessExtension()=="pdf"){
-                  $file->storeAs('public/vouchers_tramites', $nombre);
-                  $voucher->archivo = $nombreBD;
-                }else {
-                    DB::rollback();
-                    return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
+                // GUARDAMOS EL ARCHIVO DEL VOUCHER
+                if($request->hasFile("archivo")){
+                    $file=$request->file("archivo");
+                    $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                    $nombreBD = "/storage/vouchers_tramites/".$nombre;
+                    if($file->guessExtension()=="pdf"){
+                    $file->storeAs('public/vouchers_tramites', $nombre);
+                    $voucher->archivo = $nombreBD;
+                    }else {
+                        DB::rollback();
+                        return response()->json(['status' => '400', 'message' => "Subir archivo del comprobante de pago en pdf"], 400);
+                    }
                 }
-            }
-            if($request->hasFile("archivo_exonerado")){
-                $file=$request->file("archivo_exonerado");
-                $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
-                $nombreBD = "/storage/exonerados/".$nombre;
-                if($file->guessExtension()=="pdf"){
-                  $file->storeAs('public/exonerados', $nombre);
-                  $tramite->exonerado_archivo = $nombreBD;
-                }else {
-                    DB::rollback();
-                    return response()->json(['status' => '400', 'message' => "Subir archivo de exonerado en pdf"], 400);
+                if($request->hasFile("archivo_exonerado")){
+                    $file=$request->file("archivo_exonerado");
+                    $nombre = $tramite->nro_tramite.'.'.$file->guessExtension();
+                    $nombreBD = "/storage/exonerados/".$nombre;
+                    if($file->guessExtension()=="pdf"){
+                    $file->storeAs('public/exonerados', $nombre);
+                    $tramite->exonerado_archivo = $nombreBD;
+                    }else {
+                        DB::rollback();
+                        return response()->json(['status' => '400', 'message' => "Subir archivo de exonerado en pdf"], 400);
+                    }
                 }
+                $voucher->comentario=null;
+                $voucher->save();
             }
-            $voucher->comentario=null;
-            $voucher->save();
 
             // REGISTRAMOS EL DETALLE DEL TRÁMITE REGISTRADO
             $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion','tipo_tramite.filename')->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
@@ -597,51 +696,83 @@ class TramiteController extends Controller
                     $tramite_detalle->idCronograma_carpeta = null;
                     $tramite_detalle->idMotivo_certificado = null;
                     break;
+                case 7:
+                    $resolucion_secretaria=new Resolucion_Secretaria();
+
+                    $resolucion_secretaria->nro_resolucion=$request->nro_resolucion;
+                    $resolucion_secretaria->fecha_resolucion=$request->fecha_resolucion;
+                    $resolucion_secretaria->motivo=$request->motivo;
+                    $resolucion_secretaria->save();
+                    $tramite_detalle->idResolucion_secretaria=$resolucion_secretaria->idResolucion_secretaria;
+                    $tramite_detalle->idCronograma_carpeta = null;
+                    $tramite_detalle->idMotivo_certificado = null;
+                    break;
+                case 8:
+                    $resolucion_secretaria=new Resolucion_Secretaria();
+                    $resolucion_secretaria->nro_resolucion=$request->nro_resolucion;
+                    $resolucion_secretaria->fecha_resolucion=$request->fecha_resolucion;
+                    $resolucion_secretaria->motivo=$request->motivo;
+                    $resolucion_secretaria->save();
+
+                    $tramite_detalle->idResolucion_secretaria=$resolucion_secretaria->idResolucion_secretaria;
+                    $tramite_detalle->idCronograma_carpeta = null;
+                    $tramite_detalle->idMotivo_certificado = null;
+                break;
             }
+            
             $tramite_detalle->save();
             
+
             // REGISTRAMOS EL TRÁMITE
             $tramite -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
             $tramite -> idTipo_tramite_unidad=trim($request->idTipo_tramite_unidad);
-            $tramite -> idVoucher=$voucher->idVoucher;
             $tramite -> idUsuario=$idUsuario;
             $tramite -> idUnidad=trim($request->idUnidad);
             $tramite -> idDependencia=trim($request->idDependencia);
             $tramite -> idPrograma=trim($request->idPrograma);
-            $tramite -> nro_matricula=trim($request->nro_matricula);
             $tramite -> comentario=trim($request->comentario);
-            $tramite -> sede=trim($request->sede);
             $tramite -> idUsuario_asignado=null;
-            $tramite -> idEstado_tramite=2;
+            if ($tipo_tramite_unidad->requiere_voucher==1) {
+                $tramite -> idVoucher=$voucher->idVoucher;
+                $tramite -> nro_matricula=trim($request->nro_matricula);
+                $tramite -> sede=trim($request->sede);
+                $tramite -> idEstado_tramite=2;
+            }else{
+                $tramite -> idVoucher=1;
+                $tramite -> nro_matricula=0;
+                $tramite -> sede=" ";
+                // $tramite -> idUsuario_asignado=17479;
+                $tramite -> idEstado_tramite=7;
+            }
 
             // Creando un uudi para realizar el llamado a los trámites por ruta
-
-                // Verificando que no haya un uuid ya guardado en bd
-                $tramiteUUID=true;
-                while ($tramiteUUID) {
-                    $uuid=Str::orderedUuid();
-                    $tramiteUUID=Tramite::where('uuid',$uuid)->first();
-                }
-                $tramite -> uuid=$uuid;
+            // Verificando que no haya un uuid ya guardado en bd
+            $tramiteUUID=true;
+            while ($tramiteUUID) {
+                $uuid=Str::orderedUuid();
+                $tramiteUUID=Tramite::where('uuid',$uuid)->first();
+            }
+            $tramite -> uuid=$uuid;
             
             // ---------------------------------------------------
-            if($request->hasFile("archivo_firma")){
-                $file=$request->file("archivo_firma");
-                $nombre = $tramite->nro_tramite.".".$file->guessExtension();
-                $nombreBD = "/storage/firmas_tramites/".$nombre;
-                if($file->guessExtension()=="jpg"){
-                  $file->storeAs('public/firmas_tramites', $nombre);
-                  $tramite->firma_tramite = $nombreBD;
-                }else{
+            if ($tipo_tramite_unidad->requiere_voucher==1) {
+                if($request->hasFile("archivo_firma")){
+                    $file=$request->file("archivo_firma");
+                    $nombre = $tramite->nro_tramite.".".$file->guessExtension();
+                    $nombreBD = "/storage/firmas_tramites/".$nombre;
+                    if($file->guessExtension()=="jpg"){
+                      $file->storeAs('public/firmas_tramites', $nombre);
+                      $tramite->firma_tramite = $nombreBD;
+                    }else{
+                        DB::rollback();
+                        return response()->json(['status' => '400', 'message' => "Subir archivo de la firma en jpg o revisar que no esté dañado"], 400);
+                    }
+                } else {
                     DB::rollback();
-                    return response()->json(['status' => '400', 'message' => "Subir archivo de la firma en jpg o revisar que no esté dañado"], 400);
+                    return response()->json(['status' => '400', 'message' =>"Adjuntar firma"], 400);
                 }
-            } else {
-                DB::rollback();
-                return response()->json(['status' => '400', 'message' =>"Adjuntar firma"], 400);
             }
             $tramite -> save();
-
             // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
             if($request->hasFile("files")){
                 foreach ($request->file("files") as $key => $file) {
@@ -650,15 +781,12 @@ class TramiteController extends Controller
                     $tramite_requisito->idTramite=$tramite->idTramite;
                     $tramite_requisito->idRequisito=$requisito["idRequisito"];
                     $nombre = $dni.".".$file->guessExtension();
-                    if ($tipo_tramite_unidad->idTipo_tramite==2) {
-                        $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
-                    }elseif ($tipo_tramite_unidad->idTipo_tramite==6||$tipo_tramite_unidad->idTipo_tramite==9) {
-                        if ($requisito["guardado"]=='nro_tramite') {
-                            $nombre=$tramite->nro_tramite.".".$file->guessExtension();
-                        }
-                        $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
+                    if ($requisito["guardado"]=='nro_tramite') {
+                        $nombre=$tramite->nro_tramite.".".$file->guessExtension();
                     }
-                    else {
+                    if ($tipo_tramite_unidad->idTipo_tramite==2 ||$tipo_tramite_unidad->idTipo_tramite==6||$tipo_tramite_unidad->idTipo_tramite==9 ) {
+                        $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
+                    } else {
                         $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$requisito["nombre"]."/".$nombre;
                     }
                     if ($file->getClientOriginalName()!=="vacio.kj") {
@@ -679,13 +807,20 @@ class TramiteController extends Controller
                 }
             }
 
+
             //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
             $historial_estado=$this->setHistorialEstado($tramite->idTramite, null, 1, $idUsuario);
             $historial_estado->save();
-
-            //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-            $historial_estado=$this->setHistorialEstado($tramite->idTramite, 1, 2, $idUsuario);
-            $historial_estado->save();
+            if ($tipo_tramite_unidad->requiere_voucher==1) {
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estado=$this->setHistorialEstado($tramite->idTramite, 1, 2, $idUsuario);
+                $historial_estado->save();
+            }else{
+                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
+                $historial_estado=$this->setHistorialEstado($tramite->idTramite, 1, 7, $idUsuario);
+                $historial_estado->save();
+            }
+            
             dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
             return response()->json(['status' => '200', 'usuario' => 'Trámite registrado correctamente'], 200);
@@ -1292,6 +1427,76 @@ class TramiteController extends Controller
         }
     }
 
+    public function updateResolucion(Request $request, $id)
+    {
+        
+        DB::beginTransaction();
+        try {
+            // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+            $token = JWTAuth::getToken();
+            $apy = JWTAuth::getPayload($token);
+            $idUsuario=$apy['idUsuario'];
+            $dni=$apy['nro_documento'];
+            
+            
+            // Editamos el voucher
+            $tramite=Tramite::where('idTramite',$id)->first();
+            $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+            $resolucion_secretaria=Resolucion_Secretaria::find($tramite_detalle->idResolucion_secretaria);
+            $resolucion_secretaria->motivo=$request->motivo;
+            $resolucion_secretaria->fecha_resolucion=$request->fecha_resolucion;
+            $resolucion_secretaria->nro_resolucion=$request->nro_resolucion;
+            
+            //Validar si número de la resolucion ya existe en otro trámite
+            $resolucion_validate = Tramite::join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('resolucion_secretaria','resolucion_secretaria.idResolucion_secretaria','tramite_detalle.idResolucion_secretaria')
+            ->where('idEstado_tramite', '!=', 29)
+            ->where('idUsuario', $tramite->idUsuario)
+            ->where('resolucion_secretaria.idResolucion_secretaria','!=',$tramite_detalle->idResolucion_secretaria)
+            ->where('nro_resolucion', $request->nro_resolucion)
+            ->where('fecha_resolucion', $request->fecha_resolucion)
+            ->first();
+            if ($resolucion_validate) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' => "La resolucion ya fue registrada en otro trámite"], 400);
+            }
+
+            $tramite->update();
+            $resolucion_secretaria->update();
+
+            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+            'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
+            'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
+            'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.idTipo_tramite_unidad', 'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+            'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
+            'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),'tramite.uuid','resolucion_secretaria.*')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('resolucion_secretaria','resolucion_secretaria.idResolucion_secretaria','tramite_detalle.idResolucion_secretaria')
+            ->Where('tramite.idTramite',$id)
+            ->first();   
+         
+            $tramite->fut="fut/".$tramite->uuid;
+            
+            //Requisitos
+            $tramite->requisitos=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+            ->where('tramite_requisito.idTramite',$tramite->idTramite)
+            ->get();
+            
+            DB::commit();
+            return $tramite;
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e], 400);
+        }
+    }
     public function UpdateFilesRequisitos(Request $request, $id)
     {
         DB::beginTransaction();
@@ -1301,26 +1506,50 @@ class TramiteController extends Controller
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
             $dni=$apy['nro_documento'];
-
-            $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
-            'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
-            'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
-            'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
-            'tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
-            'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
-            'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
-            'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher',
-            'voucher.des_estado_voucher','tramite.uuid','tipo_tramite.filename')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-            ->where('tramite.idTramite',$id)
-            ->first();  
+            $tramite_validate=Tramite::find($id);
+            $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite_validate->idTipo_tramite_unidad);
+            if ($tipo_tramite_unidad->idTipo_tramite_unidad==45||$tipo_tramite_unidad->idTipo_tramite_unidad==46) {
+                $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+                'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
+                'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
+                'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
+                'tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+                'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
+                'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+                'tramite.uuid','tipo_tramite.filename','resolucion_secretaria.*')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+                ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('resolucion_secretaria','resolucion_secretaria.idResolucion_secretaria','tramite_detalle.idResolucion_secretaria')
+                ->where('tramite.idTramite',$id)
+                ->first(); 
+            }else{
+                $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+                'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
+                'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
+                'unidad.descripcion as unidad', 'dependencia.nombre as dependencia', 'programa.nombre as programa',
+                'tipo_tramite_unidad.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo','tipo_tramite_unidad.costo_exonerado',
+                'tipo_tramite.descripcion as tipo_tramite', 'tipo_tramite.idTipo_tramite',
+                'usuario.nro_documento','usuario.correo', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'),
+                'voucher.archivo as voucher', 'voucher.nro_operacion', 'voucher.entidad', 'voucher.fecha_operacion', 'voucher.comentario as comentario_voucher',
+                'voucher.des_estado_voucher','tramite.uuid','tipo_tramite.filename')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+                ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+                ->where('tramite.idTramite',$id)
+                ->first();  
+                
+            }
+            
             
             // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
             if($request->hasFile("files")){
@@ -1336,12 +1565,10 @@ class TramiteController extends Controller
                         $tramite_requisito->des_estado_requisito=$requisito['des_estado_requisito'];
                     }
                     $nombre = $tramite->nro_documento.".".$file->guessExtension();
-                    if ($tramite->idTipo_tramite==2) {
-                        $nombreBD = "/storage"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
-                    }elseif ($tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
-                        if ($requisito["guardado"]=='nro_tramite') {
-                            $nombre=$tramite->nro_tramite.".".$file->guessExtension();
-                        }
+                    if ($requisito["guardado"]=='nro_tramite') {
+                        $nombre=$tramite->nro_tramite.".".$file->guessExtension();
+                    }
+                    if ($tramite->idTipo_tramite==2||$tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
                         $nombreBD = "/storage"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
                     }else {
                         $nombreBD = "/storage"."/".$tramite->filename."/".$requisito["nombre"]."/".$nombre;
@@ -1511,7 +1738,11 @@ class TramiteController extends Controller
             ->join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
             ->where('tramite_requisito.idTramite',$tramite->idTramite)
             ->get();
-            
+
+            if($tipo_tramite_unidad->idTipo_tramite_unidad==45||$tipo_tramite_unidad->idTipo_tramite_unidad==46){
+                $tramite=$this->updateResolucion($request,$id);
+            }
+
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -1870,6 +2101,33 @@ class TramiteController extends Controller
         ->where('tramite.idEstado_tramite','!=',29)
         ->first();
     }
+
+    public function validarVoucher2(Request $request, $id)
+    {
+        $tramite = Tramite::findOrFail($id);
+        $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $tramite->idUsuario);
+        
+        if($voucher_validate) {
+            return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
+        }
+        else{
+            DB::beginTransaction();
+            try {
+                 $voucher = Voucher::findOrFail($tramite->idVoucher);
+                 $voucher->entidad = $request->entidad;
+                 $voucher->nro_operacion = $request->nro_operacion;
+                 $voucher->fecha_operacion = $request->fecha_operacion;
+                 $voucher->update();
+                 DB::commit();
+                return response()->json($voucher, 200);
+            } catch (\Exception $e) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+            }
+
+        }
+    }
+
 
 
     public function setHistorialEstado($idTramite, $idEstado_actual, $idEstado_nuevo, $idUsuario)

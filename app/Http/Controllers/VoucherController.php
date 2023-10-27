@@ -210,7 +210,7 @@ class VoucherController extends Controller
         $apy = JWTAuth::getPayload($token);
         $idUsuario=$apy['idUsuario'];
         $idTipo_usuario=$apy['idTipo_usuario'];
-        
+        $idDependencia=$apy['idDependencia'];        
         $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
 
         $tramites=Tramite::select('tramite.idTramite','tramite.nro_tramite','tramite.idUnidad','tramite.idPrograma',
@@ -250,12 +250,15 @@ class VoucherController extends Controller
             ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
         })
-        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+        ->where(function($query) use ($idTipo_usuario, $usuario_programas, $idDependencia) {
             if ($idTipo_usuario==3) {
-                $query->where('voucher.entidad','!=','Tesoreria UNT');
-            }elseif($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','!=','Tesorería');
+            }elseif($idTipo_usuario==5){
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
+            }elseif($idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesorería')
+                ->where('tramite.idDependencia',$idDependencia);
             }
         })
         ->orderBy($request->query('sort'), $request->query('order'))
@@ -282,12 +285,15 @@ class VoucherController extends Controller
             ->orWhere('usuario.nombres','LIKE','%'.$request->query('search').'%')
             ->orWhere('usuario.apellidos','LIKE','%'.$request->query('search').'%');
         })
-        ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
+        ->where(function($query) use ($idTipo_usuario, $usuario_programas, $idDependencia) {
             if ($idTipo_usuario==3) {
-                $query->where('voucher.entidad','!=','Tesoreria UNT');
-            }elseif($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','!=','Tesorería');
+            }elseif($idTipo_usuario==5){
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
+            }elseif($idTipo_usuario==17){
+                $query->where('voucher.entidad','Tesorería')
+                ->where('tramite.idDependencia',$idDependencia);
             }
         })
         ->count();
@@ -341,7 +347,7 @@ class VoucherController extends Controller
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
@@ -372,7 +378,7 @@ class VoucherController extends Controller
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
@@ -403,7 +409,7 @@ class VoucherController extends Controller
         'tramite.nro_matricula', 'tramite.exonerado_archivo',
         'programa.nombre as programa',
         DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'), 'tipo_tramite_unidad.costo',
-        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'), 
+        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'),'usuario.celular as celular','usuario.correo as correo',
         'voucher.idVoucher', 'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','voucher.comentario')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
@@ -426,7 +432,7 @@ class VoucherController extends Controller
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
@@ -456,7 +462,7 @@ class VoucherController extends Controller
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
@@ -525,9 +531,9 @@ class VoucherController extends Controller
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if ($idTipo_usuario==3) {
-                $query->where('voucher.entidad','!=','Tesoreria UNT');
+                $query->where('voucher.entidad','!=','Tesorería');
             }elseif($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })
@@ -558,9 +564,9 @@ class VoucherController extends Controller
         })
         ->where(function($query) use ($idTipo_usuario,$usuario_programas) {
             if ($idTipo_usuario==3) {
-                $query->where('voucher.entidad','!=','Tesoreria UNT');
+                $query->where('voucher.entidad','!=','Tesorería');
             }elseif($idTipo_usuario==5||$idTipo_usuario==17){
-                $query->where('voucher.entidad','Tesoreria UNT')
+                $query->where('voucher.entidad','Tesorería')
                 ->whereIn('tramite.idPrograma',$usuario_programas);
             }
         })

@@ -143,6 +143,51 @@ class Historial_Codigo_DiplomaController extends Controller
         //
     }
 
+    public function editUltimoRegistro(Request $request)
+    {
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+
+        $tramite = Tramite::findOrFail($request->idTramite);
+        $idTramite_detalle = $tramite->idTramite_detalle;
+        $tramite_detalle = Tramite_Detalle::findOrFail($idTramite_detalle);
+
+        $codigo_unique = Historial_Codigo_Diploma::where('codigo_diploma_after', $request->ultimo_codigo_diploma_after)->first(); 
+
+        DB::beginTransaction();
+        try {
+    
+            if($codigo_unique == null)
+            {
+              
+                $historial = Historial_Codigo_Diploma::findOrFail($request->idHistorial_codigo_diploma);
+               
+                $historial->codigo_diploma_after = $request->ultimo_codigo_diploma_after;
+                $historial->descripcion = $request->ultimo_descripcion;
+                $historial->idUsuario = $idUsuario;
+                $historial -> save();
+                
+                //Actualizar el codigo de diploma del tramite mismo
+                $tramite_detalle->codigo_diploma = $request->ultimo_codigo_diploma_after;
+                $tramite_detalle->save();
+
+                DB::commit();
+                return response()->json($historial, 200); 
+
+            }
+
+            else
+            {
+                return response()->json(['status' => '400', 'message' => 'Código Diploma ya existe'], 400);
+            }            
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
+
     /**
      * Update the specified resource in storage.
      *

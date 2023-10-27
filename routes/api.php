@@ -50,10 +50,20 @@ Route::get('tramites/docentes/validar','TramiteSecretariaController@GetDocenteVa
 Route::post('tramites/docentes/validados','TramiteSecretariaController@validarDocente');
 Route::post('docente/rechazar/{id}','TramiteSecretariaController@rechazarDocente');
 Route::get('tramites/docentes/finalizados','TramiteSecretariaController@GetDocenteFinalizados');
+Route::get('docente/search', 'TramiteSecretariaController@getDocenteByCodigo');
 
+//RESOLUCIONES
+Route::post('resoluciones/update/{id}','TramiteController@updateResolucion');
+
+Route::get('tramites/resoluciones/validar','TramiteSecretariaController@GetResolucionesValidar');
+Route::put('tramites/resoluciones/update','TramiteSecretariaController@updateTramiteRequisitos');
+Route::get('tramites/resoluciones/observadas','TramiteSecretariaController@GetResolucionesObservadas');
+Route::get('tramites/resoluciones/finalizadas','TramiteSecretariaController@GetResolucionesFinalizados');
 
 // Route::post('tramite/update/{id}','TramiteController@update');
-Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+// Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+Route::get('tramite/{id}','TramiteController@GetTramiteById');
+
 //tramite fisico
 Route::post('tramites_fisicos','Tramite_FisicoController@PostTramiteFisicoByUser');
 //
@@ -97,6 +107,7 @@ Route::get('unidades','UnidadController@index');
 Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getAllByTipo_tramiteUnidad');
 Route::get('requisitos/{idTipo_tramite_unidad}','RequisitoController@getAllByTipo_tramite_unidad');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
+//Route::post('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2'); //Método duplicado para la documentación en POSTMAN
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
@@ -109,7 +120,6 @@ Route::get('dedicaciones/docente','DedicacionDocenteController@index');
 
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
-
 
 //VOUCHERS Y TRÁMITES
 Route::resource('/voucher','VoucherController');
@@ -125,6 +135,9 @@ Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
 Route::post('carpetas/finalizar','CarpetaController@finalizarCarpetas');
+
+Route::put('vouchers/pendientes/validarVoucher/{id}', 'TramiteController@validarVoucher2');
+
 //-----------------PDFs
 Route::get('fut/{uuid}','PDF_FutController@pdf_fut');
 Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');
@@ -164,8 +177,9 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 
 //DIPLOMA_ANULACION
-Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
 
+Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
+Route::put('edit_ultimo_historial','Historial_Codigo_DiplomaController@editUltimoRegistro');
 
 
 // E-mail verification

@@ -144,23 +144,31 @@
     <div class="contenido">
         <div class="alert alert-info mensaje" role="alert">
 						<div style="text-align: center;">
-							<h4>NOTIFICACIÓN DE REGISTRO DE TRÁMITE</h4>
+							<h4>NOTIFICACIÓN DE FINALIZACIÓN DE TRÁMITE</h4>
 							<img class="robot" src="https://i.ibb.co/5RsJVpc/robot-Confirmation.png" width="50%">
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-                            @if($tipo_tramite['idTipo_tramite']==7 || $tipo_tramite['idTipo_tramite']==8)
-                                <p>Se ha registrado con éxito tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado. 
-                                    Tu código de trámite es: N° {{$tramite['nro_tramite']}}. 
+							
+                                @if($tipo_tramite_unidad['idTipo_tramite_unidad']==38 || $tipo_tramite_unidad['idTipo_tramite_unidad']==39) 
+                                <p>
+                                    Se ha finalizado el proceso del trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado
+                                    para el docente: {{$docente['apellidos']}} {{$docente['nombres']}} del {{$departamento['dep_nombre']}}. 
+                                    Código de trámite es: N° {{$tramite['nro_tramite']}}.
+                                
+                                    Datos de la cuenta:
+                                        Usuario: {{$docente['per_login']}}
+                                        Contraseña: {{$docente['per_login']}}
                                     Buen día.
                                 </p>
-                            @else
-                                <p>Se ha registrado con éxito tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
-                                    virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Tu voucher de pago sera validado en un maximo de 48 horas. Recuerda ingresar al 
-                                    sistema para revisar el estado de tus trámites.
+                                @else
+                                <p>
+                                    Se ha finalizado el proceso del trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado
+                                    para el docente: {{$docente->apellidos}} {{$docente->nombres}} del {{$departamento['dep_nombre']}}. 
+                                    Código de trámite es: N° {{$tramite['nro_tramite']}}.
                                 </p>
-                            @endif
-							
+                                @endif
+                            
 						</div>
             <hr>
 						<a href="https://tramites-uraa.unitru.edu.pe/" target="_blank"><button type="button" class="btn btn-info">Ingresar al sistema</button></a>
