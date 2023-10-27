@@ -121,7 +121,6 @@ Route::get('dedicaciones/docente','DedicacionDocenteController@index');
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
-
 //VOUCHERS Y TRÁMITES
 Route::resource('/voucher','VoucherController');
 Route::get('vouchers/pendientes','VoucherController@Pendientes');
