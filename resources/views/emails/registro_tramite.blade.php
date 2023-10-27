@@ -149,10 +149,18 @@
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-							<p>Se ha registrado con éxito tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
-                                virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Tu voucher de pago sera validado en un maximo de 48 horas. Recuerda ingresar al 
-                                sistema para revisar el estado de tus trámites.
-                            </p>
+                            @if($tipo_tramite['idTipo_tramite']==7 || $tipo_tramite['idTipo_tramite']==8)
+                                <p>Se ha registrado con éxito tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado. 
+                                    Tu código de trámite es: N° {{$tramite['nro_tramite']}}. 
+                                    Buen día.
+                                </p>
+                            @else
+                                <p>Se ha registrado con éxito tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado en la mesa de partes 
+                                    virtual. Tu código de trámite es: N° {{$tramite['nro_tramite']}}. Tu voucher de pago sera validado en un maximo de 48 horas. Recuerda ingresar al 
+                                    sistema para revisar el estado de tus trámites.
+                                </p>
+                            @endif
+							
 						</div>
             <hr>
 						<a href="https://tramites-uraa.unitru.edu.pe/" target="_blank"><button type="button" class="btn btn-info">Ingresar al sistema</button></a>

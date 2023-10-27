@@ -52,6 +52,13 @@ Route::post('docente/rechazar/{id}','TramiteSecretariaController@rechazarDocente
 Route::get('tramites/docentes/finalizados','TramiteSecretariaController@GetDocenteFinalizados');
 Route::get('docente/search', 'TramiteSecretariaController@getDocenteByCodigo');
 
+//RESOLUCIONES
+Route::post('resoluciones/update/{id}','TramiteController@updateResolucion');
+
+Route::get('tramites/resoluciones/validar','TramiteSecretariaController@GetResolucionesValidar');
+Route::put('tramites/resoluciones/update','TramiteSecretariaController@updateTramiteRequisitos');
+Route::get('tramites/resoluciones/observadas','TramiteSecretariaController@GetResolucionesObservadas');
+Route::get('tramites/resoluciones/finalizadas','TramiteSecretariaController@GetResolucionesFinalizados');
 
 // Route::post('tramite/update/{id}','TramiteController@update');
 // Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
