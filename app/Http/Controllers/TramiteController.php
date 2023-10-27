@@ -588,7 +588,7 @@ class TramiteController extends Controller
                     }
                 }
             }
-            if ($tipo_tramite_unidad->require_voucher==1) {
+            if ($tipo_tramite_unidad->requiere_voucher==1) {
                 $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $idUsuario);
                 if($voucher_validate) return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
             }
@@ -612,7 +612,7 @@ class TramiteController extends Controller
                 $tramite -> nro_tramite="0001".date('d').date('m').substr(date('Y'),2,3);
             }
             
-            if ($tipo_tramite_unidad->require_voucher==1) {
+            if ($tipo_tramite_unidad->requiere_voucher==1) {
             
                 // REGISTRAMOS LE VOUCHER
                 if(!$request->hasFile("archivo") && !$request->hasFile("archivo_exonerado")) {
@@ -712,15 +712,20 @@ class TramiteController extends Controller
             $tramite -> idUsuario_asignado=null;
             if ($tipo_tramite_unidad->requiere_voucher==1) {
                 $tramite -> idVoucher=$voucher->idVoucher;
-                $tramite -> nro_matricula=trim($request->nro_matricula);
-                $tramite -> sede=trim($request->sede);
                 $tramite -> idEstado_tramite=2;
-            }else{
-                $tramite -> idVoucher=1;
+            }else{ 
+                $tramite -> idVoucher=1; 
+                $tramite -> idEstado_tramite=7;
+            }
+
+            if($tipo_tramite->idTipo_tramite==7||$tipo_tramite->idTipo_tramite==8) {
                 $tramite -> nro_matricula=0;
                 $tramite -> sede=" ";
-                // $tramite -> idUsuario_asignado=17479;
-                $tramite -> idEstado_tramite=7;
+                $tramite -> idUsuario_asignado=17479;
+                $tramite->firma_tramite=" ";
+            }else{
+                $tramite -> nro_matricula=trim($request->nro_matricula);
+                $tramite -> sede=trim($request->sede);
             }
 
             // Creando un uudi para realizar el llamado a los trámites por ruta
@@ -731,7 +736,6 @@ class TramiteController extends Controller
                 $tramiteUUID=Tramite::where('uuid',$uuid)->first();
             }
             $tramite -> uuid=$uuid;
-            
             // ---------------------------------------------------
             if ($tipo_tramite_unidad->requiere_voucher==1) {
                 if($request->hasFile("archivo_firma")){
@@ -751,6 +755,7 @@ class TramiteController extends Controller
                 }
             }
             $tramite -> save();
+            
             // REGISTRAMOS LOS REQUISITOS DEL TRÁMITE REGISTRADO
             if($request->hasFile("files")){
                 foreach ($request->file("files") as $key => $file) {
