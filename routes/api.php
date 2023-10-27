@@ -148,6 +148,7 @@ Route::put('settings/password','UserController@resetPassword');
 
 //TIPO TRAMITE UNIDAD
 Route::get('tipos_unidad_tramite/pendientes_impresion','Tipo_Tramite_UnidadController@getTramitesforPendientesImpresion');
+Route::get('tipos_unidad_tramite/validacion_ura','Tipo_Tramite_UnidadController@getTramitesforValidaUraDuplicados');
 
 //TIPOS DE TRÁMITE
 Route::resource('tipos_tramites','Tipo_TramiteController');
@@ -299,8 +300,11 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 // Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 //DUPLICADOS
-Route::get('diplomas/duplicados/validar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicados');
-Route::get('diplomas/duplicados/aprobar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosAprobados');
+Route::get('diplomas/duplicados/validar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosValidados');
+Route::get('diplomas/duplicados/aprobar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosAprobados');
+Route::get('diplomas/duplicados/validar/ura', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosValidacionUra');
+Route::get('diplomas/duplicados/datos/diplomas/ura', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosDatosDiplomaUra');
+Route::put('diplomas/duplicados/datos', 'Diplomas_DuplicadosController@GuardarDatosDiploma');//Usado
 
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
@@ -322,6 +326,8 @@ Route::get('resoluciones/all', 'ResolucionController@index');
 Route::post('resoluciones/create', 'ResolucionController@store');
 Route::put('resoluciones/update/{id}', 'ResolucionController@update');
 Route::get('oficio/resoluciones/{idOficio}', 'ResolucionController@getResolucionesLibres');
+Route::get('tipos/resoluciones', 'ResolucionController@getTipoResoluciones');
+Route::get('resolucion/tramites/duplicados/{idResolucion}', 'ResolucionController@getTramitesDuplicadosLibres');
 
 // OFICIOS
 Route::get('oficios/all', 'OficioController@index');
@@ -360,3 +366,5 @@ Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
 Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
 Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
 Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
+Route::get('graduado', 'AdicionalController@getGraduado');
+

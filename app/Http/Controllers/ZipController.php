@@ -115,7 +115,7 @@ class ZipController extends Controller
             ->join('voucher','voucher.idVoucher','tramite.idVoucher')
             ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',44)
+            ->where('tramite.idEstado_tramite',15)
             ->where(function($query)
             {
                 $query->where('tramite.idTipo_tramite_unidad',15)

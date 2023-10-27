@@ -490,8 +490,30 @@ class TramiteController extends Controller
                     ->where('idEstado_tramite','!=','29')
                     ->first();
                     if ($tramite_validate) {
-                        return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
+                        return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para trámite de carnet'.$tipo_tramite_unidad->descripcion.' 
+                                                                                . Recuerda que este tipo de trámite solo se realiza por una única vez'], 400);
                     }
+                }else {
+                    $tramite_validate=Tramite::where('idUsuario',$idUsuario)
+                    ->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)
+                    ->where('idEstado_tramite','!=','29')
+                    ->where('idEstado_tramite','!=','15')
+                    ->first();
+                    if ($tramite_validate) {
+                        return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite en proceso para trámite de carnet '.$tipo_tramite_unidad->descripcion], 400);
+                    }
+                }
+            }
+
+            if ($tipo_tramite_unidad->idTipo_tramite==6||$tipo_tramite_unidad->idTipo_tramite==9) {
+                // VALIDACION DE REPETICIÓN DE TRÁMITES
+                $tramite_validate=Tramite::where('idUsuario',$idUsuario)
+                ->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)
+                ->where('idEstado_tramite','!=','29')
+                ->first();
+                if ($tramite_validate) {
+                    return response()->json(['status' => '400', 'message' => 'Recuerda, para el trámite de '.$tipo_tramite_unidad->descripcion.' solo se permite realizar una solicitud, 
+                                                                            y usted ya cuenta con una solicitud.'], 400);
                 }
             }
             
@@ -630,8 +652,8 @@ class TramiteController extends Controller
                     $nombre = $dni.".".$file->guessExtension();
                     if ($tipo_tramite_unidad->idTipo_tramite==2) {
                         $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
-                    }elseif ($tipo_tramite_unidad->idTipo_tramite==5) {
-                        if ($requisito["idRequisito"]==74||$requisito["idRequisito"]==76||$requisito["idRequisito"]==78) {
+                    }elseif ($tipo_tramite_unidad->idTipo_tramite==6||$tipo_tramite_unidad->idTipo_tramite==9) {
+                        if ($requisito["guardado"]=='nro_tramite') {
                             $nombre=$tramite->nro_tramite.".".$file->guessExtension();
                         }
                         $nombreBD = "/storage"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"]."/".$nombre;
@@ -641,12 +663,7 @@ class TramiteController extends Controller
                     }
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
-                            if ($tipo_tramite->idTipo_tramite==2) {
-                                $file->storeAs("/public"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"], $nombre);
-                            }elseif ($tipo_tramite->idTipo_tramite==5) {
-                                if ($requisito["idRequisito"]==74||$requisito["idRequisito"]==76||$requisito["idRequisito"]==78) {
-                                    $nombre=$tramite->nro_tramite.".".$file->guessExtension();
-                                }
+                            if ($tipo_tramite->idTipo_tramite==2 || $tipo_tramite->idTipo_tramite==6|| $tipo_tramite->idTipo_tramite==9) {
                                 $file->storeAs("/public"."/".$tipo_tramite->filename."/".$tipo_tramite_unidad->descripcion."/".$requisito["nombre"], $nombre);
                             }
                             else {
@@ -758,7 +775,6 @@ class TramiteController extends Controller
     
     public function updateTramiteRequisitos(Request $request)
     {
-        // return $request->all();
         DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -772,6 +788,7 @@ class TramiteController extends Controller
             $flagAlumno=false;
             $flagEscuela=false;
             $flagFacultad=false;
+            $flagSecretariaG=false;
             
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.idEstado_tramite',
             'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
@@ -804,40 +821,65 @@ class TramiteController extends Controller
                 $tramite_requisito->comentario=$requisito['comentario'];
                 $tramite_requisito->save();
                 // VERIFICANDO SI SE APRUEBA O RECHAZA POR PARTE DE LA ESCUELA O FACULTAD
-                if ($tramite->idEstado_tramite==17) {
-                    // Verificando que el estado del responsable sea el alumno(4)
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && $requisito['responsable']==4 ) {
-                        $flag=false;
-                    }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && $requisito['responsable']==4) {
-                        $flag2=false;
-                    }
-                }elseif($tramite->idEstado_tramite==20){
-                    // Verificando que el estado del responsable sea el alumno(4) o escuela(5)
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
-                        $flag=false;
-                        if ($requisito['responsable']==4) {
-                            $flagAlumno=true;
-                        } else if ($requisito['responsable']==5||$requisito['responsable']==17) {
-                            $flagEscuela = true;
+                if ($tramite->idTipo_tramite==6 || $tramite->idTipo_tramite==9) {
+                    if ($tramite->idEstado_tramite==53) { // VALIDACIÓN DE REQUISITOS DE DUPLICADO DE DIPLOMA POR PARTE DE SECRETARÍA GENERAL
+                        if ($requisito['des_estado_requisito']=="RECHAZADO" && $requisito['responsable']==4 && $requisito['idRequisito']!=89 && $requisito['idRequisito']!=90
+                            && $requisito['idRequisito']!=91 && $requisito['idRequisito']!=102 && $requisito['idRequisito']!=108 && $requisito['idRequisito']!=114) {
+                                $flag=false;
                         }
-                    }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
-                        $flag2=false;
+                        if ($requisito['des_estado_requisito']=="PENDIENTE" && $requisito['responsable']==4 && $requisito['idRequisito']!=89 && $requisito['idRequisito']!=90
+                            && $requisito['idRequisito']!=91 && $requisito['idRequisito']!=102 && $requisito['idRequisito']!=108 && $requisito['idRequisito']!=114) {
+                                $flag2=false;
+                        }
+                    }elseif($tramite->idEstado_tramite==7) {
+                        if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==23)) {
+                            $flag=false;
+                            if ($requisito['responsable']==4) {
+                                $flagAlumno=true;
+                            }elseif($requisito['responsable']==23){
+                                $flagSecretariaG=true;
+                            }
+                        }
+                        if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==23)) {
+                            $flag2=false;
+                        }
                     }
                 }else {
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
-                        $flag=false;
-                        if ($requisito['responsable']==4) {
-                            $flagAlumno=true;
-                        }elseif($requisito['responsable']==5||$requisito['responsable']==17){
-                            $flagEscuela=true;
-                        }elseif($requisito['responsable']==8) {
-                            $flagFacultad=true;
+                    if ($tramite->idEstado_tramite==17) {
+                        // Verificando que el estado del responsable sea el alumno(4)
+                        if ($requisito['des_estado_requisito']=="RECHAZADO" && $requisito['responsable']==4 ) {
+                            $flag=false;
                         }
-                    }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
-                        $flag2=false;
+                        if ($requisito['des_estado_requisito']=="PENDIENTE" && $requisito['responsable']==4) {
+                            $flag2=false;
+                        }
+                    }elseif($tramite->idEstado_tramite==20){
+                        // Verificando que el estado del responsable sea el alumno(4) o escuela(5)
+                        if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
+                            $flag=false;
+                            if ($requisito['responsable']==4) {
+                                $flagAlumno=true;
+                            } else if ($requisito['responsable']==5||$requisito['responsable']==17) {
+                                $flagEscuela = true;
+                            }
+                        }
+                        if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
+                            $flag2=false;
+                        }
+                    }else {
+                        if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
+                            $flag=false;
+                            if ($requisito['responsable']==4) {
+                                $flagAlumno=true;
+                            }elseif($requisito['responsable']==5||$requisito['responsable']==17){
+                                $flagEscuela=true;
+                            }elseif($requisito['responsable']==8) {
+                                $flagFacultad=true;
+                            }
+                        }
+                        if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
+                            $flag2=false;
+                        }
                     }
                 }
             }
@@ -854,7 +896,7 @@ class TramiteController extends Controller
                 $historial_estados->idTramite=$tramite->idTramite;
                 $historial_estados->idUsuario=$idUsuario;
                 $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                //Verificamos si todos los requisitos fueron aprobados($flag=true) o no($flag=false) 
+                //Verificamos si todos los requisitos fueron aprobados $flag=true (NO HAY rechazados) o no $flag=false (HAY rechazados) 
                 if ($flag) {
                     if ($tramite->idTipo_tramite==1) {
                         $historial_estados->idEstado_nuevo=8;
@@ -907,11 +949,36 @@ class TramiteController extends Controller
                         $historial_estados->idUsuario=$idUsuario;
                         $historial_estados->idEstado_actual=8;
                         $historial_estados->idEstado_nuevo=25;
+                    }elseif ($tramite->idTipo_tramite==6 || $tramite->idTipo_tramite==9) {
+                        if ($tramite->idEstado_tramite==53) {
+                            $historial_estados->idEstado_nuevo=54;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            
+                            //REGISTRAMOS EL ESTADO DEL TRÁMITE 
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=54;
+                            $historial_estados->idEstado_nuevo=55;
+                        }elseif ($tramite->idEstado_tramite==7) {
+                            $historial_estados->idEstado_nuevo=8;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            
+                            //REGISTRAMOS EL ESTADO DEL TRÁMITE 
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=8;
+                            $historial_estados->idEstado_nuevo=58;
+                        }
                     }
-                    // $historial_estados->idEstado_nuevo=8;
-                }else{
+                    
+                }else{ // SI HAY RECHAZADOS
                     if ($tramite->idTipo_tramite==1 || $tramite->idTipo_tramite==3) {
                         $historial_estados->idEstado_nuevo=9;
+                        dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
                     }elseif ($tramite->idTipo_tramite==2) {
                         // VERIFICANDO SI EL RECHAZO SE ESTÁ HACIENDO DESDE ESCUELA O FACULTAD MEDIANTE EL ESTADO DEL TRÁMITE
                         if ($tramite->idEstado_tramite==7) {
@@ -960,6 +1027,32 @@ class TramiteController extends Controller
                                 $historial_estados->idEstado_nuevo=30;
                             }
                         }
+                    }elseif ($tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
+                        if ($tramite->idEstado_tramite==53) {
+
+                            $historial_estados->idEstado_nuevo=50;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+
+                            dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+
+                        }elseif ($tramite->idEstado_tramite==7) {
+                            $historial_estados->idEstado_nuevo=9;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                             
+                            if ($flagAlumno) { // SI HAY REQUISITO DE ALUMNO
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                            }elseif ($flagSecretariaG) { // SI HAY REQUISITO DE SECRETARÍA GENERAL
+                                // PASAMOS A ESTADO DE ADJUNTAR DE SECRETARÍA GENERAL
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=55;
+                            }
+                        }
                     }
                 }
                 $historial_estados->fecha=date('Y-m-d h:i:s');
@@ -967,63 +1060,93 @@ class TramiteController extends Controller
                 $tramite->idEstado_tramite = $historial_estados->idEstado_nuevo;
                 $tramite->update();
 
-            }else {
-                // SI HAY PENDIENTES
-                if ($flag==false) {
-                    // SI HAY RECHAZADOS
+            }else { // SI HAY PENDIENTES
+                if (!$flag) { // SI HAY RECHAZADOS
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE
                     $historial_estados=new Historial_Estado;
                     $historial_estados->idTramite=$tramite->idTramite;
                     $historial_estados->idUsuario=$idUsuario;
                     $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                    // VERIFICANDO SI EL RECHAZO SE ESTÁ HACIENDO DESDE ESCUELA, FACULTAD O URA MEDIANTE EL ESTADO DEL TRÁMITE
-                    // SI URA OBSERVA
-                    if ($tramite->idEstado_tramite==7) {
+                    
+                    if ($tramite->idTipo_tramite==1 || $tramite->idTipo_tramite==3) {
                         $historial_estados->idEstado_nuevo=9;
-                        $historial_estados->fecha=date('Y-m-d h:i:s');
-                        $historial_estados->save();
-                        // SI HAY REQUISITO DE ALUMNO 
-                        if ($flagAlumno) {
-                            // ENVIAR CORREO AL ALUMNO
-                            dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
-                        }elseif ($flagEscuela) {
-                            // SI HAY REQUISITO DE LA ESCUELA
-                            // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
-                            $historial_estados=new Historial_Estado;
-                            $historial_estados->idTramite=$tramite->idTramite;
-                            $historial_estados->idUsuario=$idUsuario;
-                            $historial_estados->idEstado_actual=9;
-                            $historial_estados->idEstado_nuevo=30;
-                        }elseif ($flagFacultad) {
-                            // SI HAY REQUISITO DE LA FACULTAD
-                            // PASAMOS A ESTADO DE ADJUNTAR DE LA FACULTAD
-                            $historial_estados=new Historial_Estado;
-                            $historial_estados->idTramite=$tramite->idTramite;
-                            $historial_estados->idUsuario=$idUsuario;
-                            $historial_estados->idEstado_actual=9;
-                            $historial_estados->idEstado_nuevo=32;
-                        }
-                    }elseif ($tramite->idEstado_tramite==17) {
-                        $historial_estados->idEstado_nuevo=19;
-                        // CORREO DE TRÁMITE OBSERVADO
                         dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
-                    }else{
-                        $historial_estados->idEstado_nuevo=22;
-                        $historial_estados->fecha=date('Y-m-d h:i:s');
-                        $historial_estados->save();
-                        if ($flagAlumno) {
-                            // ENVIAR CORREO AL ALUMNO
+                    }elseif ($tramite->idTipo_tramite==2) {
+                        // VERIFICANDO SI EL RECHAZO SE ESTÁ HACIENDO DESDE ESCUELA O FACULTAD MEDIANTE EL ESTADO DEL TRÁMITE
+                        if ($tramite->idEstado_tramite==7) {
+                            $historial_estados->idEstado_nuevo=9;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            // SI HAY REQUISITO DE ALUMNO 
+                            if ($flagAlumno) {
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                            }elseif ($flagEscuela) {
+                                // SI HAY REQUISITO DE LA ESCUELA
+                                // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=30;
+                            }elseif ($flagFacultad) {
+                                // SI HAY REQUISITO DE LA FACULTAD
+                                // PASAMOS A ESTADO DE ADJUNTAR DE LA FACULTAD
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=32;
+                            }
+                        }elseif ($tramite->idEstado_tramite==17) {
+                            $historial_estados->idEstado_nuevo=19;
+                            // CORREO DE TRÁMITE OBSERVADO
                             dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
-                        }elseif ($flagEscuela) {
-                            // SI HAY REQUISITO DE LA ESCUELA
-                            // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
-                            $historial_estados=new Historial_Estado;
-                            $historial_estados->idTramite=$tramite->idTramite;
-                            $historial_estados->idUsuario=$idUsuario;
-                            $historial_estados->idEstado_actual=22;
-                            $historial_estados->idEstado_nuevo=30;
+                        }else{
+                            $historial_estados->idEstado_nuevo=22;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            if ($flagAlumno) {
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad)); 
+                            }elseif ($flagEscuela) {
+                                // SI HAY REQUISITO DE LA ESCUELA
+                                // PASAMOS A ESTADO DE ADJUNTAR DE LA ESCUELA
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=22;
+                                $historial_estados->idEstado_nuevo=30;
+                            }
+                        }
+                    }elseif ($tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
+                        if ($tramite->idEstado_tramite==53) {
+
+                            $historial_estados->idEstado_nuevo=50;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+
+                            dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+
+                        }elseif ($tramite->idEstado_tramite==7) {
+                            $historial_estados->idEstado_nuevo=9;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                             
+                            if ($flagAlumno) { // SI HAY REQUISITO DE ALUMNO
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                            }elseif ($flagSecretariaG) { // SI HAY REQUISITO DE SECRETARÍA GENERAL
+                                // PASAMOS A ESTADO DE ADJUNTAR DE SECRETARÍA GENERAL
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=55;
+                            }
                         }
                     }
+
                     $historial_estados->fecha=date('Y-m-d h:i:s');
                     $historial_estados->save();
 
@@ -1215,13 +1338,18 @@ class TramiteController extends Controller
                     $nombre = $tramite->nro_documento.".".$file->guessExtension();
                     if ($tramite->idTipo_tramite==2) {
                         $nombreBD = "/storage"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
+                    }elseif ($tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
+                        if ($requisito["guardado"]=='nro_tramite') {
+                            $nombre=$tramite->nro_tramite.".".$file->guessExtension();
+                        }
+                        $nombreBD = "/storage"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"]."/".$nombre;
                     }else {
                         $nombreBD = "/storage"."/".$tramite->filename."/".$requisito["nombre"]."/".$nombre;
                     }
 
                     if ($file->getClientOriginalName()!=="vacio.kj") {
                         if($file->guessExtension()==$requisito["extension"]){
-                            if ($tramite->idTipo_tramite==2) {
+                            if ($tramite->idTipo_tramite==2 || $tramite->idTipo_tramite==6 || $tramite->idTipo_tramite==9) {
                                 $file->storeAs("/public"."/".$tramite->filename."/".$tramite->tramite."/".$requisito["nombre"], $nombre);
                             }else {
                                 $file->storeAs("/public"."/".$tramite->filename."/".$requisito["nombre"], $nombre);
@@ -1325,7 +1453,49 @@ class TramiteController extends Controller
                         }
                         
                     }
-                } else {
+                }elseif($tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
+                    // obetener historial
+                    $ultimo_historial=Historial_Estado::where('idTramite',$tramite->idTramite)->where('estado',1)->orderBy('idHistorial_estado','desc')->first();
+                    if ($tramite->idEstado_tramite==50) {
+                        if ($ultimo_historial->idEstado_actual==53) {
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, 50, 53, $idUsuario);
+                            $historial_estado->save();
+                            $tramite-> idEstado_tramite=53;
+                        }
+                    }elseif($tramite->idEstado_tramite==55) {
+                        if ($ultimo_historial->idEstado_actual==54) {
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 56, $idUsuario);
+                            $historial_estado->save();
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, 56, 57, $idUsuario);
+                            $historial_estado->save();
+                            $tramite-> idEstado_tramite=57;
+                        }elseif ($ultimo_historial->idEstado_actual==9) {
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 7, $idUsuario);
+                            $historial_estado->save();
+                            $tramite-> idEstado_tramite=7;
+                        }
+                    }elseif($tramite->idEstado_tramite==57) {
+                        $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 7, $idUsuario);
+                        $historial_estado->save();
+                        $tramite-> idEstado_tramite=7;
+                    }elseif($tramite->idEstado_tramite==9) {
+                        // VERIFICANDO SI HAY RECHAZADOS DE SEC GENERAL PARA PASARLO A ESE ESTADO
+                        $rechazados_sec_general=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                        ->where('tramite_requisito.idTramite',$tramite->idTramite)->where('tramite_requisito.des_estado_requisito','RECHAZADO')
+                        ->where('requisito.responsable',10)->first();
+                        if ($rechazados_sec_general) {
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 55, $idUsuario);
+                            $historial_estado->save();
+                            $tramite-> idEstado_tramite=55;
+                        }else {
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 7, $idUsuario);
+                            $historial_estado->save();
+                            $tramite-> idEstado_tramite=7;
+                        }
+                    }
+                
+                } 
+                else {
                     $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 7, $idUsuario);
                     $historial_estado->save();
                     $tramite-> idEstado_tramite=7;

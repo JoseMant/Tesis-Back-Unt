@@ -179,9 +179,15 @@ class VoucherController extends Controller
                     $historial_estado->save();
                     $tramite->idEstado_tramite = $historial_estado->idEstado_nuevo;
                     $tramite->update();
-                } elseif ($tipo_tramite->idTipo_tramite==5){
+                } elseif ($tipo_tramite->idTipo_tramite==6||$tipo_tramite->idTipo_tramite==9){
+                    // SI EL TRÁMITE ES DE GRADO o TITULO, SE ASIGNA AUTOMÁTICAMENTE UN USUARIO
+                    if ($tramite->idTipo_tramite_unidad==42) {
+                        $tramite->idUsuario_asignado=67;
+                    } else {
+                        $tramite->idUsuario_asignado=68;
+                    }
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                    $historial_estado = $this->setHistorialEstado($tramite->idTramite, 3, 42, $idUsuario);
+                    $historial_estado = $this->setHistorialEstado($tramite->idTramite, 3, 53, $idUsuario);
                     $historial_estado->save();
                 }
             } elseif ($voucher->des_estado_voucher=="RECHAZADO") {

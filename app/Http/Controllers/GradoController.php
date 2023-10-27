@@ -1572,68 +1572,88 @@ class GradoController extends Controller
 
         $resolucion=Resolucion::find($idResolucion);
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.sede','tramite.idEstado_tramite', 
-        'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula',
-        'tramite.exonerado_archivo', 'tramite_detalle.*', 'tramite.idTipo_tramite_unidad',
-        'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
-        'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
-        DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher',
-        'resolucion.idResolucion', 'cronograma_carpeta.fecha_cierre_alumno',
-        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
-        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-        ->join('resolucion', 'resolucion.idResolucion', 'cronograma_carpeta.idResolucion')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-        ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
-        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
-        ->where('tramite.idEstado_tramite',42)
-        ->where('tipo_tramite_unidad.idTipo_tramite',2)
-        ->where(function($query)
-        {
-            $query->where('tramite.idTipo_tramite_unidad',15)
-            ->orWhere('tramite.idTipo_tramite_unidad',16)
-            ->orWhere('tramite.idTipo_tramite_unidad',34);
-        })
-        ->where('resolucion.idResolucion',$resolucion->idResolucion)
-        ->where(function($query) use ($request)
-        {
-            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-            ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
-            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-        })
-        ->orderBy($request->query('sort'), $request->query('order'))
-        ->get();
-        
-        foreach ($tramites as $key => $tramite) {
-            // Verificación de programa acreditada
-            $acreditacion=Acreditacion::where('fecha_inicio','<=',$tramite->fecha_colacion)
-            ->where('fecha_fin','>=',$tramite->fecha_colacion)
-            ->where('idPrograma',$tramite->idPrograma)
-            ->where('sede',$tramite->sede)
-            ->where('estado',1)
-            ->first();
-            if ($acreditacion) {
-                $tramite->dependencia_acreditado="SÍ";
-                $tramite->fecha_inicio=$acreditacion->fecha_inicio;
-                $tramite->fecha_fin=$acreditacion->fecha_fin;
-                $tramite->idAcreditacion=$acreditacion->idAcreditacion;
-            }else {
-                $tramite->dependencia_acreditado="NO";
-                $tramite->fecha_inicio=null;
-                $tramite->fecha_fin=null;
-                $tramite->idAcreditacion=null;
-            }
+        if ($resolucion->tipo_emision=='O') {
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.sede','tramite.idEstado_tramite', 
+            'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula',
+            'tramite.exonerado_archivo', 'tramite_detalle.*', 'tramite.idTipo_tramite_unidad',
+            'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
+            DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
+            'voucher.archivo as voucher',
+            'resolucion.idResolucion', 'cronograma_carpeta.fecha_cierre_alumno',
+            'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('resolucion', 'resolucion.idResolucion', 'cronograma_carpeta.idResolucion')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tramite.idEstado_tramite',42)
+            ->where('tipo_tramite_unidad.idTipo_tramite',2)
+            ->where(function($query)
+            {
+                $query->where('tramite.idTipo_tramite_unidad',15)
+                ->orWhere('tramite.idTipo_tramite_unidad',16)
+                ->orWhere('tramite.idTipo_tramite_unidad',34);
+            })
+            ->where('resolucion.idResolucion',$resolucion->idResolucion)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+            })
+            ->orderBy($request->query('sort'), $request->query('order'))
+            ->get();
+        }elseif ($resolucion->tipo_emision=='D') {
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma','tramite.sede','tramite.idEstado_tramite', 
+            'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula',
+            'tramite.exonerado_archivo', 'tramite_detalle.*', 'tramite.idTipo_tramite_unidad',
+            'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo',
+            DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
+            'voucher.archivo as voucher',
+            'resolucion.idResolucion')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('resolucion', 'resolucion.idResolucion', 'tramite_detalle.idResolucion_rectoral')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            ->where('tramite.idEstado_tramite',42)
+            ->where(function($query)
+            {
+                $query->where('tipo_tramite_unidad.idTipo_tramite',6)
+                ->orWhere('tipo_tramite_unidad.idTipo_tramite',9);
+            })
+            ->where('resolucion.idResolucion',$resolucion->idResolucion)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+            })
+            ->orderBy($request->query('sort'), $request->query('order'))
+            ->get();
         }
+
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
         $begin = ($pagination->currentPage()-1)*$pagination->perPage();
         $end = min(($pagination->perPage() * $pagination->currentPage()-1), $pagination->total());
@@ -1809,62 +1829,92 @@ class GradoController extends Controller
             $token = JWTAuth::getToken();
             $apy = JWTAuth::getPayload($token);
             $idUsuario=$apy['idUsuario'];
-
-
-            // Recorremos todos los trámites y le añadimos su numeracion a cada uno
-            $tramites=Tramite::select('tramite.*')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-            ->where('tramite.idEstado_tramite','!=',42)
-	        ->where('tramite.idEstado_tramite','!=',29)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',15)
-                ->orWhere('tramite.idTipo_tramite_unidad',16)
-                ->orWhere('tramite.idTipo_tramite_unidad',34);
-            })
             
-            ->where('resolucion.idResolucion',$request->idResolucion)
-            ->get();  
+            $resolucion=Resolucion::find($request->idResolucion);
 
+            if ($resolucion->tipo_emision=='O') { // Trámites de carpetas regulares
+                // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+                $tramites=Tramite::select('tramite.*')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+                ->where('tramite.idEstado_tramite','!=',42)
+                ->where('tramite.idEstado_tramite','!=',29)
+                ->where(function($query)
+                {
+                    $query->where('tramite.idTipo_tramite_unidad',15)
+                    ->orWhere('tramite.idTipo_tramite_unidad',16)
+                    ->orWhere('tramite.idTipo_tramite_unidad',34);
+                })
+                ->where('resolucion.idResolucion',$request->idResolucion)
+                ->get();  
+                
+                if (count($tramites)>0) {
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' =>"Hay ".count($tramites)." trámites en estados pendientes"], 400);
+                }
 
-            if (count($tramites)>0) {
-                DB::rollback();
-                return response()->json(['status' => '400', 'message' =>"Hay ".count($tramites)." trámites en estados pendientes"], 400);
+                // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+                $tramites=Tramite::select('tramite.*','dependencia.idDependencia2')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+                ->join('programa','programa.idPrograma','tramite.idPrograma')
+                ->where('tramite.idEstado_tramite',42)
+                ->where(function($query)
+                {
+                    $query->where('tramite.idTipo_tramite_unidad',15)
+                    ->orWhere('tramite.idTipo_tramite_unidad',16)
+                    ->orWhere('tramite.idTipo_tramite_unidad',34);
+                })
+                
+                ->where('resolucion.idResolucion',$request->idResolucion)
+                ->orderBy('tramite.idTipo_tramite_unidad','asc')
+                ->orderBy('dependencia.nombre','asc')
+                ->orderBy('programa.nombre','asc')
+                ->orderBy('usuario.apellidos','asc')
+                ->orderBy('usuario.nombres','asc')
+                ->get();  
+            }elseif ($resolucion->tipo_emision=='D') { // Trámites de carpetas duplicados
+                // Recorremos todos los trámites y le añadimos su numeracion a cada uno
+                $tramites=Tramite::select('tramite.*','dependencia.idDependencia2')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                ->join('resolucion','resolucion.idResolucion','tramite_detalle.idResolucion_rectoral')
+                ->join('programa','programa.idPrograma','tramite.idPrograma')
+                ->where('tramite.idEstado_tramite',42)
+                ->where(function($query)
+                {
+                    $query->where('tipo_tramite_unidad.idTipo_tramite',6)
+                    ->orWhere('tipo_tramite_unidad.idTipo_tramite',9);
+                })
+                ->where('resolucion.idResolucion',$request->idResolucion)
+                ->orderBy('tramite.idTipo_tramite_unidad','asc')
+                ->orderBy('dependencia.nombre','asc')
+                ->orderBy('programa.nombre','asc')
+                ->orderBy('usuario.apellidos','asc')
+                ->orderBy('usuario.nombres','asc')
+                ->get();
             }
 
-            // Recorremos todos los trámites y le añadimos su numeracion a cada uno
-            $tramites=Tramite::select('tramite.*','dependencia.idDependencia2')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-            ->join('programa','programa.idPrograma','tramite.idPrograma')
-            ->where('tramite.idEstado_tramite',42)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',15)
-                ->orWhere('tramite.idTipo_tramite_unidad',16)
-                ->orWhere('tramite.idTipo_tramite_unidad',34);
-            })
-            
-            ->where('resolucion.idResolucion',$request->idResolucion)
-            ->orderBy('tramite.idTipo_tramite_unidad','asc')
-            ->orderBy('dependencia.nombre','asc')
-            ->orderBy('programa.nombre','asc')
-            ->orderBy('usuario.apellidos','asc')
-            ->orderBy('usuario.nombres','asc')
-            ->get();  
-            
             foreach ($tramites as $key => $tramite) {
                 // obtenemos datos del último registro del libro
-                $ultimoRegistro=Libro::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->orderBy('nro_registro','desc')
-                ->limit(1)
-                ->first();
+                if ($resolucion->tipo_emision=='O') {
+                    $ultimoRegistro=Libro::where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->orderBy('nro_registro','desc')
+                    ->limit(1)
+                    ->first();
+                }elseif ($resolucion->tipo_emision=='D') {
+                    $ultimoRegistro=Libro::whereIn('idTipo_tramite_unidad',[42,43,44,47,48,49])
+                    ->orderBy('nro_registro','desc')
+                    ->limit(1)
+                    ->first();
+                }
                 
                 // GUARDAMOS EL REGISTRO EN EL LIBRO
                 $newRegistro=new Libro();
@@ -1886,14 +1936,21 @@ class GradoController extends Controller
                 }
                 $newRegistro->idTipo_tramite_unidad=$tramite->idTipo_tramite_unidad;
                 $newRegistro->save();
+
+                
                 // OBTENER DATOS DE AUTORIDADES
                 $rector=User::where('idTipo_usuario',12)->where('estado',1)->first();
                 $secretaria=User::where('idTipo_usuario',10)->where('estado',1)->first();
-                if ($tramite->idTipo_tramite_unidad!==34) {
-                    $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',1)->first();
-                }else {
+                if ($tramite->idTipo_tramite_unidad==34 || $tramite->idTipo_tramite_unidad==44 || $tramite->idTipo_tramite_unidad==49) {
                     $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia2)->where('estado',1)->first();
+                }else {
+                    $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',1)->first();
                 }
+                // if ($tramite->idTipo_tramite_unidad!==34 && $tramite->idTipo_tramite_unidad!==44 && $tramite->idTipo_tramite_unidad!==49) {
+                //     $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia)->where('estado',1)->first();
+                // }else {
+                //     $decano=User::where('idTipo_usuario',6)->where('idDependencia',$tramite->idDependencia2)->where('estado',1)->first();
+                // }
 
                 //Obtenemos el detalle de cada uno de los trámites Y ACTUALIZAMOS LOS DATOS QUE VAN EN EL LIBRO
                 $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
@@ -1909,6 +1966,10 @@ class GradoController extends Controller
                 }
                 if ($decano) {
                     $tramite_detalle->autoridad3=$decano->idUsuario;
+                }
+                // Agregando la fecha de emisión de duplicados
+                if ($resolucion->tipo_emision=='D') {
+                    $tramite_detalle->fecha_emision_duplicado=(Carbon::parse(Carbon::now()))->format('Y-m-d');
                 }
                 $tramite_detalle->save();
 
@@ -2261,53 +2322,119 @@ class GradoController extends Controller
 
         $resolucion=Resolucion::find($idResolucion);
 
-        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
-        'tramite.idEstado_tramite', 'tramite.nro_tramite','tramite.nro_matricula', 'tramite.exonerado_archivo', 
-        'tramite.idTipo_tramite_unidad', 'tramite_detalle.codigo_diploma', 'tramite_detalle.diploma_final',
-        'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
-        'tipo_tramite_unidad.descripcion as tramite', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 
-        'resolucion.idResolucion','tramite_detalle.observacion_diploma')
-        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-        ->join('resolucion', 'resolucion.idResolucion', 'cronograma_carpeta.idResolucion')
-        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-        ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
-        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-        ->where('tramite.idEstado_tramite',44)
-        ->where('tipo_tramite_unidad.idTipo_tramite',2)
-        ->where(function($query) use ($request)
-        {
-            if ($request->query('tramite') != 0) {
-                $query->Where('tipo_tramite_unidad.idTipo_tramite_unidad',$request->query('tramite'));
-            }
-            else{
-                $query->where('tramite.idTipo_tramite_unidad',15)
-                ->orWhere('tramite.idTipo_tramite_unidad',16)
-                ->orWhere('tramite.idTipo_tramite_unidad',34);
-            }
+        if ($resolucion->tipo_emision=='O') {
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+            'tramite.idEstado_tramite', 'tramite.nro_tramite','tramite.nro_matricula', 'tramite.exonerado_archivo', 
+            'tramite.idTipo_tramite_unidad', 'tramite_detalle.codigo_diploma', 'tramite_detalle.diploma_final',
+            'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.descripcion as tramite', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 
+            'resolucion.idResolucion','tramite_detalle.observacion_diploma')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('resolucion', 'resolucion.idResolucion', 'cronograma_carpeta.idResolucion')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->where('tramite.idEstado_tramite',44)
+            ->where('tipo_tramite_unidad.idTipo_tramite',2)
+            ->where(function($query) use ($request)
+            {
+                if ($request->query('tramite') != 0) {
+                    $query->Where('tipo_tramite_unidad.idTipo_tramite_unidad',$request->query('tramite'));
+                }
+                else{
+                    $query->where('tramite.idTipo_tramite_unidad',15)
+                    ->orWhere('tramite.idTipo_tramite_unidad',16)
+                    ->orWhere('tramite.idTipo_tramite_unidad',34);
+                }
+    
+            })
+            ->where('resolucion.idResolucion',$resolucion->idResolucion)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+            })
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('programa.nombre','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
+            ->get();
+        }elseif($resolucion->tipo_emision=='D') {
+            $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
+            'tramite.idEstado_tramite', 'tramite.nro_tramite','tramite.nro_matricula', 'tramite.exonerado_archivo', 
+            'tramite.idTipo_tramite_unidad', 'tramite_detalle.codigo_diploma', 'tramite_detalle.diploma_final',
+            'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
+            'tipo_tramite_unidad.descripcion as tramite', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 
+            'resolucion.idResolucion','tramite_detalle.observacion_diploma')
+            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+            ->join('resolucion', 'resolucion.idResolucion', 'tramite_detalle.idResolucion_rectoral')
+            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')
+            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+            ->where('tramite.idEstado_tramite',44)
+            ->where(function($query)
+            {
+                $query->where('tipo_tramite_unidad.idTipo_tramite',6)
+                ->orWhere('tipo_tramite_unidad.idTipo_tramite',9);
+            })
+            ->where(function($query) use ($request)
+            {
+                // if ($request->query('tramite') != 0) {
+                //     $query->Where('tipo_tramite_unidad.idTipo_tramite_unidad',$request->query('tramite'));
+                // }
+                if ($request->query('tramite')!=0) {
+                    if($request->query('tramite')==15){
+                        $query ->whereIn('tramite.idTipo_tramite_unidad',[42,47]);
+                    }elseif ($request->query('tramite')==16) {
+                        $query ->whereIn('tramite.idTipo_tramite_unidad',[43,48]);
+                    }elseif ($request->query('tramite')==34) {
+                        $query ->whereIn('tramite.idTipo_tramite_unidad',[44,49]);
+                    }
+                }
+                // else{
+                //     $query->where('tramite.idTipo_tramite_unidad',42)
+                //     ->orWhere('tramite.idTipo_tramite_unidad',43)
+                //     ->orWhere('tramite.idTipo_tramite_unidad',44)
+                //     ->orWhere('tramite.idTipo_tramite_unidad',47)
+                //     ->orWhere('tramite.idTipo_tramite_unidad',48)
+                //     ->orWhere('tramite.idTipo_tramite_unidad',49);
+                // }
+    
+            })
+            ->where('resolucion.idResolucion',$resolucion->idResolucion)
+            ->where(function($query) use ($request)
+            {
+                $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+                ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+                ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
+                ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+            })
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('programa.nombre','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
+            ->get();
+        }
 
-        })
-        ->where('resolucion.idResolucion',$resolucion->idResolucion)
-        ->where(function($query) use ($request)
-        {
-            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
-            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
-            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
-            ->orWhere('programa.nombre','LIKE','%'.$request->query('search').'%')
-            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
-        })
-        ->orderBy('tramite.idTipo_tramite_unidad','asc')
-        ->orderBy('dependencia.nombre','asc')
-        ->orderBy('programa.nombre','asc')
-        ->orderBy('usuario.apellidos','asc')
-        ->orderBy('usuario.nombres','asc')
-        ->get();
 
         foreach ($tramites as $key => $tramite) {
             $tramite->historial = Historial_Codigo_Diploma::where('idTramite',$tramite->idTramite)->where('estado',1)->get();

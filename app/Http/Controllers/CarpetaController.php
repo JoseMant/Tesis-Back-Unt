@@ -70,7 +70,7 @@ class CarpetaController extends Controller
                 $tramite->save();
             }
 
-            DB::rollback();
+            DB::commit();
             return response()->json($tramites, 200);
         } catch (\Exception $e) {
             DB::rollback();
