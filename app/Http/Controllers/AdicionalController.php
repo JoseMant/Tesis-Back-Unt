@@ -37,9 +37,11 @@ use App\PersonaSuv;
 use App\PersonaSga;
 use App\Diploma_Carpeta;
 use App\Historial_Codigo_Diploma;
+use App\Graduado;
 
 class AdicionalController extends Controller
 {
+
     public function eliminarHistorial(){
         try {
             // return "hola";
@@ -182,13 +184,15 @@ class AdicionalController extends Controller
                 $tramite->requisito->archivo=$archivo[2].'/'.$archivo[3].'/'.$archivo[4];
 
                 $nombre=$tramite->nro_documento.'.pdf';
-                if ($tramite->requisito->idRequisito==21) {
-                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
-                }else if($tramite->requisito->idRequisito==31){
-                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
-                }else if($tramite->requisito->idRequisito==68){
-                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
-                }
+                $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+
+                // if ($tramite->requisito->idRequisito==21) {
+                //     $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                // }else if($tramite->requisito->idRequisito==31){
+                //     $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                // }else if($tramite->requisito->idRequisito==68){
+                //     $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                // }
             }
         }
         
@@ -456,5 +460,7 @@ class AdicionalController extends Controller
         }
     }
 
-
+    public function getGraduado(){
+        return Graduado::join('alumno','alumno.Cod_alumno','graduado.cod_alumno')->where('Nro_documento','75411199')->first();
+    }
 }

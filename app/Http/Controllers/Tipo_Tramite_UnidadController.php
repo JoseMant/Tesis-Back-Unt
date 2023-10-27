@@ -26,7 +26,10 @@ class Tipo_Tramite_UnidadController extends Controller
         return Tipo_tramite_unidad::whereIn('idTipo_tramite_unidad',[15,16,34])->get();
     }
 
-
+    public function getTramitesforValidaUraDuplicados()
+    {
+        return Tipo_tramite_unidad::whereIn('idTipo_tramite_unidad',[42,43,44])->get();
+    }
     /**
      * Show the form for creating a new resource.
      *

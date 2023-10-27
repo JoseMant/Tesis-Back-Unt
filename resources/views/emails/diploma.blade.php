@@ -280,11 +280,10 @@ if ($tramite->tipo_documento==1) {
                             ?>
                         </b><br>
                         CÓDIGO DEL DIPLOMA:  <b><?php echo $tramite->codigo_diploma; ?></b><br>
-                        EMISIÓN DE DIPLOMA:  <b><?php echo $diplomasEstado; ?></b><br><br>
-                        <?php if($diplomasEstado=='DUPLICADO') {
-                            $date = date_create($fechaEmision);
-                            echo "FECHA DE EMISIÃ“N: ";?><b>
-                            <?php echo date_format($date,'d/m/Y');?></b>
+                        EMISIÓN DE DIPLOMA:  <b><?php echo $diplomasEstado; ?></b><br>
+                        <?php if($tramite->idTipo_tramite==6||$tramite->idTipo_tramite==9) {
+                            $date = date_create($tramite->fecha_emision_duplicado);?>
+                            FECHA DE EMISIÓN: <b><?php echo date_format($date,'d/m/Y');?></b><br>
                         <?php
                         }
                     ?>

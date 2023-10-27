@@ -23,14 +23,20 @@ class PadronController extends Controller
         DB::beginTransaction();
         try {
             // Verificando que el oficio exista
-             $resolucion=Resolucion::find($idResolucion);
+            $resolucion=Resolucion::find($idResolucion);
             
             if (!$resolucion) {
                 return response()->json(['status' => '400', 'message' =>"La resolución ingresada no existe"], 400);
             }
 
             $name_resolucion=explode("/", $resolucion->nro_resolucion, 2);
-            $descarga=Excel::download(new PadronSuneduExport($idResolucion), 'PADRON_SUNEDU_'.$name_resolucion[0].'.xlsx');
+            $descarga=Excel::download(new PadronSuneduExport($idResolucion,$resolucion->tipo_emision), 'PADRON_SUNEDU_'.$name_resolucion[0].'.xlsx');
+
+            // if ($resolucion->tipo_emision=='O') {
+            //     $descarga=Excel::download(new PadronSuneduExport($idResolucion), 'PADRON_SUNEDU_'.$name_resolucion[0].'.xlsx');
+            // }else {
+            //     $descarga=Excel::download(new PadronSuneduExport($idResolucion), 'PADRON_SUNEDU_'.$name_resolucion[0].'.xlsx');
+            // }
             return $descarga;
         } catch (\Exception $e) {
             DB::rollback();
