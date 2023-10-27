@@ -719,8 +719,7 @@ class TramiteController extends Controller
                 $tramite -> idVoucher=1;
                 $tramite -> nro_matricula=0;
                 $tramite -> sede=" ";
-                $tramite -> idUsuario_asignado=17479;
-                // $tramite -> idUsuario_asignado=2;
+                // $tramite -> idUsuario_asignado=17479;
                 $tramite -> idEstado_tramite=7;
             }
 
