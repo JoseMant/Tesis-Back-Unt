@@ -590,12 +590,6 @@ class TramiteController extends Controller
             $voucher->nro_operacion=trim($request->nro_operacion);
             $voucher->fecha_operacion=trim($request->fecha_operacion);
 
-            if($tipo_tramite_unidad->idTipo_tramite==2) {
-                $voucher->des_estado_voucher = 'APROBADO';
-                $voucher->idUsuario_aprobador = 69;
-                $voucher->validado = 1;
-            }
-
             // GUARDAMOS EL ARCHIVO DEL VOUCHER
             if($request->hasFile("archivo")){
                 $file=$request->file("archivo");
@@ -662,9 +656,6 @@ class TramiteController extends Controller
             $tramite -> sede=trim($request->sede);
             $tramite -> idUsuario_asignado=null;
             $tramite -> idEstado_tramite=2;
-            if($tipo_tramite_unidad->idTipo_tramite==2) {
-                $tramite -> idEstado_tramite=17;
-            }
 
             // Creando un uudi para realizar el llamado a los trámites por ruta
             // Verificando que no haya un uuid ya guardado en bd
@@ -743,14 +734,6 @@ class TramiteController extends Controller
             $historial_estado=$this->setHistorialEstado($tramite->idTramite, 1, 2, $idUsuario);
             $historial_estado->save();
 
-            if($tipo_tramite_unidad->idTipo_tramite==2) {
-                //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                $historial_estado=$this->setHistorialEstado($tramite->idTramite, 2, 3, 69);
-                $historial_estado->save();
-                
-                $historial_estado=$this->setHistorialEstado($tramite->idTramite, 3, 17, 69);
-                $historial_estado->save();
-            }
 
             dispatch(new RegistroTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
