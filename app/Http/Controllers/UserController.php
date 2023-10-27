@@ -51,8 +51,8 @@ class UserController extends Controller
     }
     public function getUsuariosUraa()
     {
-        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos', 'usuario.apellido_paterno', 'usuario.apellido_materno', 'usuario.tipo_documento','usuario.nro_documento',
-        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.apellido_paterno','usuario.apellido_materno', 'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo', 'usuario.correo2', 'usuario.celular','usuario.sexo','tipo_usuario.nombre as rol',
+        'usuario.confirmed','usuario.estado','usuario.idDependencia')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario',2)
         ->get();
@@ -74,6 +74,12 @@ class UserController extends Controller
             ->get();
             foreach ($usuarios as $key => $usuario) {
                 $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
+                if (count($usuario->programas) > 0) {
+                    $programa = ProgramaURAA::find($usuario->programas[0]);
+                    $usuario->idFacultad = $programa->idDependencia;
+                } else {
+                    $usuario->idFacultad = $usuario->idDependencia;
+                }
             }
         }else{
             $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos', 'usuario.apellido_paterno', 'usuario.apellido_materno','usuario.tipo_documento','usuario.nro_documento',
@@ -85,6 +91,12 @@ class UserController extends Controller
             ->get();
             foreach ($usuarios as $key => $usuario) {
                 $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
+                if (count($usuario->programas) > 0) {
+                    $programa = ProgramaURAA::find($usuario->programas[0]);
+                    $usuario->idFacultad = $programa->idDependencia;
+                } else {
+                    $usuario->idFacultad = $usuario->idDependencia;
+                }
             }
         }
         return response()->json($usuarios, 200);
@@ -244,8 +256,9 @@ class UserController extends Controller
             $usuario->celular=$request->celular;
             $usuario->estado=$request->estado;
             $usuario->update();
-            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
+            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos',
+            'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo','usuario.correo2','usuario.celular','usuario.sexo',
+            'tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$id)
             ->first();

@@ -136,6 +136,9 @@ Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
 Route::post('carpetas/finalizar','CarpetaController@finalizarCarpetas');
+
+Route::put('vouchers/pendientes/validarVoucher/{id}', 'TramiteController@validarVoucher2');
+
 //-----------------PDFs
 Route::get('fut/{uuid}','PDF_FutController@pdf_fut');
 Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');

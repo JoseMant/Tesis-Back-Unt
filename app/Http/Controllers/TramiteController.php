@@ -703,17 +703,17 @@ class TramiteController extends Controller
 
             // REGISTRAMOS EL TRÁMITE
             $tramite -> idTramite_detalle=$tramite_detalle->idTramite_detalle;
+            $tramite -> idTipo_tramite_unidad=trim($request->idTipo_tramite_unidad);
             $tramite -> idUsuario=$idUsuario;
             $tramite -> idUnidad=trim($request->idUnidad);
             $tramite -> idDependencia=trim($request->idDependencia);
             $tramite -> idPrograma=trim($request->idPrograma);
             $tramite -> comentario=trim($request->comentario);
-            $tramite -> idTipo_tramite_unidad=trim($request->idTipo_tramite_unidad);
+            $tramite -> idUsuario_asignado=null;
             if ($tipo_tramite_unidad->requiere_voucher==1) {
                 $tramite -> idVoucher=$voucher->idVoucher;
                 $tramite -> nro_matricula=trim($request->nro_matricula);
                 $tramite -> sede=trim($request->sede);
-                $tramite -> idUsuario_asignado=null;
                 $tramite -> idEstado_tramite=2;
             }else{
                 $tramite -> idVoucher=1;
@@ -725,14 +725,13 @@ class TramiteController extends Controller
             }
 
             // Creando un uudi para realizar el llamado a los trámites por ruta
-
-                // Verificando que no haya un uuid ya guardado en bd
-                $tramiteUUID=true;
-                while ($tramiteUUID) {
-                    $uuid=Str::orderedUuid();
-                    $tramiteUUID=Tramite::where('uuid',$uuid)->first();
-                }
-                $tramite -> uuid=$uuid;
+            // Verificando que no haya un uuid ya guardado en bd
+            $tramiteUUID=true;
+            while ($tramiteUUID) {
+                $uuid=Str::orderedUuid();
+                $tramiteUUID=Tramite::where('uuid',$uuid)->first();
+            }
+            $tramite -> uuid=$uuid;
             
             // ---------------------------------------------------
             if ($tipo_tramite_unidad->requiere_voucher==1) {
@@ -1942,6 +1941,33 @@ class TramiteController extends Controller
         ->where('tramite.idEstado_tramite','!=',29)
         ->first();
     }
+
+    public function validarVoucher2(Request $request, $id)
+    {
+        $tramite = Tramite::findOrFail($id);
+        $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $tramite->idUsuario);
+        
+        if($voucher_validate) {
+            return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
+        }
+        else{
+            DB::beginTransaction();
+            try {
+                 $voucher = Voucher::findOrFail($tramite->idVoucher);
+                 $voucher->entidad = $request->entidad;
+                 $voucher->nro_operacion = $request->nro_operacion;
+                 $voucher->fecha_operacion = $request->fecha_operacion;
+                 $voucher->update();
+                 DB::commit();
+                return response()->json($voucher, 200);
+            } catch (\Exception $e) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+            }
+
+        }
+    }
+
 
 
     public function setHistorialEstado($idTramite, $idEstado_actual, $idEstado_nuevo, $idUsuario)
