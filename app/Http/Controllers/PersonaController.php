@@ -225,7 +225,7 @@ class PersonaController extends Controller
             $dni=$apy['nro_documento'];
             $idUsuario=$apy['idUsuario'];
             $idTipo_usuario=$apy['idTipo_usuario'];
-            if ($idTipo_usuario==4) {
+            if ($idTipo_usuario==4||$idTipo_usuario==1) {
                 if($idUnidad==1){ //pregrado
                     $facultadesTotales=[];
                     //Obtenemos escuela(s) de la persona que inicia sesión
