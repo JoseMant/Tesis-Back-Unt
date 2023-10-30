@@ -108,36 +108,48 @@ class ZipController extends Controller
         try {
             // Obteniendo la resolución para el nombre del zip
             $resolucion=Resolucion::find($idResolucion);
-            // Obteniendo los trámites de dicha resolución con los archivos de voucher y resolución
-            $tramites=Tramite::select('tramite.idTramite','voucher.archivo','tramite.exonerado_archivo','tramite.idUsuario','tramite.idTipo_tramite_unidad',
-            'tramite.idEstado_tramite','tramite.idUsuario','tramite_detalle.certificado_final')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('voucher','voucher.idVoucher','tramite.idVoucher')
-            ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->where('tramite.idEstado_tramite',15)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',15)
-                ->orWhere('tramite.idTipo_tramite_unidad',16)
-                ->orWhere('tramite.idTipo_tramite_unidad',34);
-            })
-            ->where('cronograma_carpeta.idResolucion',$idResolucion)
-            ->get();
+            
+            if ($resolucion->tipo_emision=='O') {
+                // Obteniendo los trámites de dicha resolución con los archivos de voucher y resolución
+                $tramites=Tramite::select('tramite.idTramite','voucher.archivo','tramite.exonerado_archivo','tramite.idUsuario','tramite.idTipo_tramite_unidad',
+                'tramite.idEstado_tramite','tramite.idUsuario','tramite_detalle.certificado_final','tipo_tramite_unidad.descripcion as tipo_tramite_unidad')
+                ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('voucher','voucher.idVoucher','tramite.idVoucher')
+                ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
+                ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                ->where('tramite.idEstado_tramite',15)
+                ->where(function($query)
+                {
+                    $query->where('tramite.idTipo_tramite_unidad',15)
+                    ->orWhere('tramite.idTipo_tramite_unidad',16)
+                    ->orWhere('tramite.idTipo_tramite_unidad',34);
+                })
+                ->where('cronograma_carpeta.idResolucion',$idResolucion)
+                ->get();
+            }else {
+                // Obteniendo los trámites de dicha resolución con los archivos de voucher y resolución
+                $tramites=Tramite::select('tramite.idTramite','voucher.archivo','tramite.exonerado_archivo','tramite.idUsuario','tramite.idTipo_tramite_unidad',
+                'tramite.idEstado_tramite','tramite.idUsuario','tramite_detalle.certificado_final','tipo_tramite_unidad.descripcion as tipo_tramite_unidad')
+                ->join('tipo_tramite_unidad','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('voucher','voucher.idVoucher','tramite.idVoucher')
+                ->join('tramite_detalle','tramite.idTramite_detalle','tramite_detalle.idTramite_detalle')
+                ->where('tramite.idEstado_tramite',15)
+                ->where(function($query)
+                {
+                    $query->where('tramite.idTipo_tramite_unidad',42)
+                    ->orWhere('tramite.idTipo_tramite_unidad',43)
+                    ->orWhere('tramite.idTipo_tramite_unidad',44)
+                    ->orWhere('tramite.idTipo_tramite_unidad',47)
+                    ->orWhere('tramite.idTipo_tramite_unidad',48)
+                    ->orWhere('tramite.idTipo_tramite_unidad',49);
+                })
+                ->where('tramite_detalle.idResolucion_rectoral',$idResolucion)
+                ->get();
+            }
             
             foreach ($tramites as $key => $tramite) {
-                // // finalización de trámite
-                // $historial_estados=new Historial_Estado;
-                // $historial_estados->idTramite=$tramite->idTramite;
-                // $historial_estados->idUsuario=$tramite->idUsuario;
-                // $historial_estados->idEstado_actual=$tramite->idEstado_tramite;
-                // $historial_estados->idEstado_nuevo=15;
-                // $historial_estados->fecha=date('Y-m-d h:i:s');
-                // $historial_estados->save();
-                
-                // $tramite->idEstado_tramite=15;
-                // $tramite->save();
-
                 // Obteniendo los requisitos de cada trámite
                 $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
                 'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.extension')
@@ -145,97 +157,57 @@ class ZipController extends Controller
                 ->where('idTramite',$tramite->idTramite)
                 ->get();
             }
-
             if (count($tramites)>0) {
                 // Creando el zip
                 $zip = new ZipArchive;
                 $resolucion=explode("/", $resolucion->nro_resolucion, 2);
-                $fileName = $resolucion[0]."-".$resolucion[1].".zip";
+                $nameResolusion = $resolucion[0]."-".$resolucion[1].".zip";
 
-                // Eliminamos el zip creado con la descarga de días anteriores(si es que existe) para que no se guarde en el proyecto
-                for ($i=1; $i <= 31; $i++) { 
-                    if ($zip->open($fileName)===TRUE) {
-                        $zip->close();
-                        unlink($fileName);
-                    }
-                }
-
-                //Eliminamos el zip creado de la descarga de hoy(si es que existe) para que al momento de ser creado no se sobreescriba y tenga fotos antiguas
-                if ($zip->open($fileName)===TRUE) {
+                // Variable para el nombre de los archivos
+                $filename="";
+                // Eliminamos el zip creado de la descarga de hoy(si es que existe) para que al momento de ser creado no se sobreescriba y tenga archivos antiguos
+                if ($zip->open($nameResolusion)===TRUE) {
                     $zip->close();
-                    unlink($fileName);
+                    unlink($nameResolusion);
                 }
 
-                if ($zip->open(public_path($fileName),ZipArchive::CREATE) === TRUE)
+                if ($zip->open(public_path($nameResolusion),ZipArchive::CREATE) === TRUE)
                 {
                     foreach ($tramites as $key => $tramite) {
                             $usuario=User::findOrFail($tramite->idUsuario);
                             
                             // Agragando los requisitos de cada trámite al zip
                             foreach ($tramite->requisitos as $key => $requisito) {
-                                $value =public_path($requisito->archivo);
+                                $file =public_path($requisito->archivo);
+                                
                                 if ($requisito->archivo!=null) {
                                     // nombre del archivo
-                                    $relativeNameInZipFile = $requisito->nombre.".".$requisito->extension;
-                                    // añadiendo archivos al zip 
-                                    if ($tramite->idTipo_tramite_unidad==15) {
-                                        $zip->addFile(public_path($requisito->archivo), "GRADO DE BACHILLER"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                    }
-                                    if ($tramite->idTipo_tramite_unidad==16) {
-                                        $zip->addFile(public_path($requisito->archivo), "TITULO PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                    }
-                                    if ($tramite->idTipo_tramite_unidad==34) {
-                                        $zip->addFile(public_path($requisito->archivo), "TITULO DE SEGUNDA ESPECIALIDAD PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                    }
+                                    $filename = $requisito->nombre.".".$requisito->extension;
+
+                                    $zip->addFile($file,$tramite->tipo_tramite_unidad."/".$usuario->apellidos." ".$usuario->nombres."/".$filename);
                                 }
                             }
                             
                             // Agregando el voucher al zip
                             if ($tramite->archivo!=null) {
                                 // nombre del archivo
-                                $relativeNameInZipFile ="voucher.pdf";
-                                // añadiendo archivo al zip 
-                                if ($tramite->idTipo_tramite_unidad==15) {
-                                    $zip->addFile(public_path($tramite->archivo), "GRADO DE BACHILLER"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
-                                if ($tramite->idTipo_tramite_unidad==16) {
-                                    $zip->addFile(public_path($tramite->archivo), "TITULO PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
-                                if ($tramite->idTipo_tramite_unidad==34) {
-                                    $zip->addFile(public_path($tramite->archivo), "TITULO DE SEGUNDA ESPECIALIDAD PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
+                                $filename ="voucher.pdf";
+                                $zip->addFile(public_path($tramite->archivo), $tramite->tipo_tramite_unidad."/".$usuario->apellidos." ".$usuario->nombres."/".$filename);
                             }
                             
                             // Agregando el exonerado al zip
                             if ($tramite->exonerado_archivo!=null) {
                                 // nombre del archivo
-                                $relativeNameInZipFile ="resolucion_exoneracion.pdf";
-                                // añadiendo archivo al zip 
-                                if ($tramite->idTipo_tramite_unidad==15) {
-                                    $zip->addFile(public_path($tramite->exonerado_archivo), "GRADO DE BACHILLER"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
-                                if ($tramite->idTipo_tramite_unidad==16) {
-                                    $zip->addFile(public_path($tramite->exonerado_archivo), "TITULO PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
-                                if ($tramite->idTipo_tramite_unidad==34) {
-                                    $zip->addFile(public_path($tramite->exonerado_archivo), "TITULO DE SEGUNDA ESPECIALIDAD PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
+                                $filename ="resolucion_exoneracion.pdf";
+                                $zip->addFile(public_path($tramite->exonerado_archivo),$tramite->tipo_tramite_unidad."/".$usuario->apellidos." ".$usuario->nombres."/".$filename);
                             }
 
                             // Agregando el certificado en caso lo tenga al zip
                             if ($tramite->certificado_final!=null) {
                                 // nombre del archivo
-                                $relativeNameInZipFile ="certificado.pdf";
-                                // añadiendo archivo al zip 
-                                if ($tramite->idTipo_tramite_unidad==15) {
-                                    $zip->addFile(public_path($tramite->certificado_final), "GRADO DE BACHILLER"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
-                                if ($tramite->idTipo_tramite_unidad==16) {
-                                    $zip->addFile(public_path($tramite->certificado_final), "TITULO PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
-                                if ($tramite->idTipo_tramite_unidad==34) {
-                                    $zip->addFile(public_path($tramite->certificado_final), "TITULO DE SEGUNDA ESPECIALIDAD PROFESIONAL"."/".$usuario->apellidos." ".$usuario->nombres."/".$relativeNameInZipFile);
-                                }
+                                $filename ="certificado.pdf";
+
+                                $zip->addFile(public_path($tramite->certificado_final), $tramite->tipo_tramite_unidad."/".$usuario->apellidos." ".$usuario->nombres."/".$filename);
                             }
                             
                     }
@@ -243,7 +215,7 @@ class ZipController extends Controller
                 }
 
                 DB::commit();
-                return response()->download(public_path($fileName));
+                return response()->download(public_path($nameResolusion));
             }else {
                 return response()->json(['status' => '400', 'message' =>"La resolución no tiene trámites"], 400);
             }
