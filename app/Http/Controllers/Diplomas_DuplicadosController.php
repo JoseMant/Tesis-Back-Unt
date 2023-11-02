@@ -40,9 +40,10 @@ class Diplomas_DuplicadosController extends Controller
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
         'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher','tramite.uuid')
+        'voucher.archivo as voucher','tramite.uuid','tipo_tramite.descripcion as tipo_tramite','tramite.sede')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
@@ -131,9 +132,10 @@ class Diplomas_DuplicadosController extends Controller
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
         'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher','tramite.uuid')
+        'voucher.archivo as voucher','tramite.uuid','tipo_tramite.descripcion as tipo_tramite','tramite.sede')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
@@ -222,9 +224,11 @@ class Diplomas_DuplicadosController extends Controller
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
         'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'voucher.archivo as voucher','tramite.uuid','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion')
+        'voucher.archivo as voucher','tramite.uuid','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion','tipo_tramite.descripcion as tipo_tramite'
+        ,'tramite.sede')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
@@ -337,8 +341,9 @@ class Diplomas_DuplicadosController extends Controller
         'tramite.created_at as fecha','tramite.nro_tramite','tramite.nro_matricula','tramite.exonerado_archivo',
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
         'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-        'tramite.uuid','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion','tramite.sede')
+        'tramite.uuid','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion','tramite.sede','tipo_tramite.descripcion as tipo_tramite')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
         ->join('usuario','usuario.idUsuario','tramite.idUsuario')
         ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
@@ -647,8 +652,9 @@ class Diplomas_DuplicadosController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
             'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
             'tramite.uuid','tramite.idTipo_tramite_unidad','tipo_tramite_unidad.descripcion','tramite.sede','tramite_detalle.idModalidad_carpeta',
-            'tramite_detalle.idDiploma_carpeta','tramite_detalle.idUniversidad','cronograma_carpeta.fecha_colacion')
+            'tramite_detalle.idDiploma_carpeta','tramite_detalle.idUniversidad','cronograma_carpeta.fecha_colacion','tipo_tramite.descripcion as tipo_tramite')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')

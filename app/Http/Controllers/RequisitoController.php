@@ -95,17 +95,24 @@ class RequisitoController extends Controller
         $apy = JWTAuth::getPayload($token);
         $dni=$apy['nro_documento'];
 
-        $amnistiado=Amnistia::where('nro_documento',$dni)->first();
+        $amnistiado=Amnistia::where('nro_documento',$dni)->where('idTipo_tramite_unidad',$idTipo_tramite_unidad)->first();
         if ($amnistiado) {
-            if ($idTipo_tramite_unidad==15) {
+            if ($idTipo_tramite_unidad==15 && $amnistiado->tipo='G') {
                 $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
                 ->where('estado',true)
-                // ->orWhere('idRequisito',71)
+                // ->orWhere('idRequisito',71) // Se ha comentado el requisito de curso intensivo por el bachiller automático
+                ->orWhere('idRequisito',136) // constancia de no adeudo de amnistía
                 ->get();
-            }elseif ($idTipo_tramite_unidad==16) {
+            }elseif ($idTipo_tramite_unidad==16 && $amnistiado->tipo='T') {
                 $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
                 ->where('estado',true)
-                ->orWhere('idRequisito',72)
+                ->orWhere('idRequisito',72) //curso intensivo
+                ->orWhere('idRequisito',137) // constancia de no adeudo de amnistía
+                ->get();
+            }else {
+                $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+                ->where('estado',true)
+                ->orWhere('idRequisito',136) // constancia de no adeudo de amnistía
                 ->get();
             }
         }else {
