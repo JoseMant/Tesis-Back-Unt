@@ -483,27 +483,29 @@ class TramiteController extends Controller
                     return response()->json(['status' => '400', 'message' => 'Ya tiene un trámite registrado para '.$tipo_tramite_unidad->descripcion], 400);
                 }
 
-                // Verificando que sea alumno de universidad no licenciada(10) o amnistiados(9)
-                $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
-                ->where(function($query) {
-                    $query->where('idmodalidadingreso',9)
-                    ->orWhere('idmodalidadingreso',10);
-                })
-                ->Where('per_dni',$dni)
-                ->first();
-                
-                if (!$alumnoSUV) {
-                    // VERIFICAR QUE LA PERSONA QUE REGISTRA SEA EGRESADO
-                    // DEBE VALIDARSE SI ES EGRESADO POR NÚMERO DE MATRÍCULA PORQUE EXISTEN ALUMNOS CON 2 CARRERAS
-                    if ($request->idUnidad==1) {
-                        $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
-                        ->where('alu_estado',6)
-                        ->Where('per_dni',$dni)
+                if ($request->idUnidad==1) {
+                    // Verificando que sea alumno de universidad no licenciada(10)
+                    $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('idmodalidadingreso',10)
+                    ->Where('per_dni',$dni)
+                    ->first();
+                    
+                    if (!$noLicenciado) {
+                        // Amnistia
+                        $amnistiado=Amnistia::where('nro_documento',$dni)->where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)
+                        ->where(function($query)
+                        {
+                            $query->where('tipo','G')
+                            ->orWhere('tipo','T');
+                        })
                         ->first();
-                        if (!$alumnoSUV) {
-
-                            $amnistiado=Amnistia::where('nro_documento',$dni)->first();
-                            if (!$amnistiado) {
+    
+                        if (!$amnistiado) {
+                            $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                            ->where('alu_estado',6)
+                            ->Where('per_dni',$dni)
+                            ->first();
+                            if (!$alumnoSUV) {
                                 # code...
                                 $alumnoSGA=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
                                 ->join('sga_datos_alumno','sga_datos_alumno.pfl_id','perfil.pfl_id')
@@ -514,15 +516,16 @@ class TramiteController extends Controller
                                 if (!$alumnoSGA) {
                                     return response()->json(['status' => '400', 'message' => 'Usted no se encuentra registrado como egresado para realizar este trámite. Coordinar con tu secretaria de escuela para actualizar tu condición.'], 400);
                                 }
+                                
                             }
                         }
-                    }elseif ($request->idUnidad==2) {
-                        
-                    }elseif ($request->idUnidad==3) {
-                        
-                    }else {
-                       
                     }
+                }elseif ($request->idUnidad==2) {
+                                
+                }elseif ($request->idUnidad==3) {
+                    
+                }else {
+                   
                 }
             }
             if ($tipo_tramite_unidad->idTipo_tramite==3) {
@@ -935,8 +938,10 @@ class TramiteController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad','tramite.uuid','tramite_detalle.certificado_final')
+            'voucher.archivo as voucher','tramite.idTipo_tramite_unidad','tramite.uuid','tramite_detalle.certificado_final',
+            'tipo_tramite.descripcion as tipo_tramite','tramite.sede')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
             ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
