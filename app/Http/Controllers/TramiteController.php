@@ -304,7 +304,7 @@ class TramiteController extends Controller
         $tramite=Tramite::findOrFail($id);
         $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite->idTipo_tramite_unidad);
 
-        if ($tipo_tramite_unidad->idTipo_tramite_unidad==45||$tipo_tramite_unidad->idTipo_tramite_unidad==46) {
+        if ($tipo_tramite_unidad->idTipo_tramite==7||$tipo_tramite_unidad->idTipo_tramite==8) {
             $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
             'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
             'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
@@ -1513,7 +1513,7 @@ class TramiteController extends Controller
             $dni=$apy['nro_documento'];
             $tramite_validate=Tramite::find($id);
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::find($tramite_validate->idTipo_tramite_unidad);
-            if ($tipo_tramite_unidad->idTipo_tramite_unidad==45||$tipo_tramite_unidad->idTipo_tramite_unidad==46) {
+            if ($tipo_tramite_unidad->idTipo_tramite==7||$tipo_tramite_unidad->idTipo_tramite==8) {
                 $tramite=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idUnidad','tramite.idPrograma',
                 'tramite.created_at as fecha', 'tramite.exonerado_archivo', 'tramite.nro_tramite', 'tramite.nro_matricula',
                 'tramite.comentario as comentario_tramite','tramite.sede','tramite.idEstado_tramite','tramite_detalle.idMotivo_certificado',
@@ -1744,7 +1744,7 @@ class TramiteController extends Controller
             ->where('tramite_requisito.idTramite',$tramite->idTramite)
             ->get();
 
-            if($tipo_tramite_unidad->idTipo_tramite_unidad==45||$tipo_tramite_unidad->idTipo_tramite_unidad==46){
+            if($tipo_tramite_unidad->idTipo_tramite==7||$tipo_tramite_unidad->idTipo_tramite==8){
                 $tramite=$this->updateResolucion($request,$id);
             }
 
