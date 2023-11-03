@@ -91,6 +91,7 @@ Route::get('tramite/carnets/solicitados','CarnetController@GetCarnetsSolicitados
 // Route::get('tramite/carnets/aprobados/refresh','CarnetController@GetCarnetsAprobadosRefresh');
 Route::get('carnets/solicitados/recibidos','CarnetController@setRecibidos');
 Route::get('tramite/carnets/recibidos','CarnetController@GetCarnetsRecibidos');
+Route::get('tramite/carnets/finalizados','CarnetController@GetCarnetsFinalizados');
 // Route::get('tramite/carnets/entregados','CarnetController@GetCarnetsEntregados');
 Route::get('carnets/validacion/sunedu','CarnetController@EnvioValidacionSunedu');
 Route::put('carnets/recibidos/finalizar','CarnetController@setEntregado');
@@ -286,6 +287,7 @@ Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
 //Route::put('create/codigo', 'TituloController@createCodeDiploma');
 Route::get('carnets/solicitados','PDF_CarnetsController@pdf_carnetsSolicitados');
 Route::get('carnets/recibidos','PDF_CarnetsController@pdf_carnetsRecibidos');
+Route::get('carnets/finalizados','PDF_CarnetsController@pdf_carnetsFinalizados');
 Route::get('sedes/uraa','PDF_CarnetsController@getSedesUraa');
 
 //TITULOS segunda especialidad

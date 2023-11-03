@@ -471,7 +471,7 @@ class CarnetController extends Controller
         ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
         ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
-        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','tramite.uuid')
+        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','tramite.uuid','historial_estado.fecha as fecha_entrega')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -481,8 +481,11 @@ class CarnetController extends Controller
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
         ->where('tramite.idEstado_tramite',27)
         ->where('tipo_tramite.idTipo_tramite',3)
+        ->where('historial_estado.idEstado_actual',26)
+        ->where('historial_estado.idEstado_nuevo',27)
         ->where(function($query) use ($usuario_programas)
         {
             if (count($usuario_programas) > 0) {
@@ -520,8 +523,11 @@ class CarnetController extends Controller
         ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
         ->where('tramite.idEstado_tramite',27)
         ->where('tipo_tramite.idTipo_tramite',3)
+        ->where('historial_estado.idEstado_actual',26)
+        ->where('historial_estado.idEstado_nuevo',27)
         ->where(function($query) use ($usuario_programas)
         {
             if (count($usuario_programas) > 0) {
@@ -569,6 +575,124 @@ class CarnetController extends Controller
         ]], 200);
     }
 
+    public function GetCarnetsFinalizados(Request $request)
+    {
+        // return $request->all();
+        // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $idDependencia=$apy['idDependencia'];
+        $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
+
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario', 'tramite.sede', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tramite.created_at as fecha','unidad.descripcion as unidad','tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+        ,'tramite.nro_matricula','usuario.nro_documento','usuario.correo','voucher.archivo as voucher'
+        , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
+        ,'tramite.exonerado_archivo','tramite.idUnidad','programa.nombre as programa','tramite.uuid','historial_estado.fecha as fecha_entrega')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
+        ->where('tramite.idEstado_tramite',15)
+        ->where('tipo_tramite.idTipo_tramite',3)
+        ->where('historial_estado.idEstado_actual',27)
+        ->where('historial_estado.idEstado_nuevo',15)
+        ->where(function($query) use ($usuario_programas)
+        {
+            if (count($usuario_programas) > 0) {
+                $query->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->where(function($query) use ($request)
+        {
+            if ($request->query('sede')) {
+                $query->where('tramite.sede',$request->query('sede'));
+            }
+        })
+        ->orderBy($request->query('sort'), $request->query('order'))
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+        
+
+        $total=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+        ->join('programa','tramite.idPrograma','programa.idPrograma')
+        ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
+        ->where('tramite.idEstado_tramite',15)
+        ->where('tipo_tramite.idTipo_tramite',3)
+        ->where('historial_estado.idEstado_actual',27)
+        ->where('historial_estado.idEstado_nuevo',15)
+        ->where(function($query) use ($usuario_programas)
+        {
+            if (count($usuario_programas) > 0) {
+                $query->whereIn('tramite.idPrograma',$usuario_programas);
+            }
+        })
+        ->where(function($query) use ($request)
+        {
+            $query->where('usuario.nombres','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_tramite','LIKE','%'.$request->query('search').'%')
+            ->orWhere('dependencia.nombre','LIKE','%'.$request->query('search').'%')
+            ->orWhere('tramite.nro_matricula','LIKE','%'.$request->query('search').'%');
+        })
+        ->where(function($query) use ($request)
+        {
+            if ($request->query('sede')) {
+                $query->where('tramite.sede',$request->query('sede'));
+            }
+        })
+        ->count();
+        
+
+
+        foreach ($tramites as $key => $tramite) {
+            $tramite->requisitos=Tramite_Requisito::select('requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','tramite_requisito.idRequisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
+
+            $tramite->fut="fut/".$tramite->uuid;
+        }
+
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
+    }
 
     public function setEntregado(Request $request){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN

@@ -867,8 +867,8 @@ class TramiteSecretariaController extends Controller
         ->join('programa','programa.idPrograma','tramite.idPrograma')
         ->where(function($query) 
         {            
-            $query->where('tramite.idTipo_tramite_unidad',45)
-            ->orWhere('tramite.idTipo_tramite_unidad',46);
+            $query->where('tipo_tramite_unidad.idTipo_tramite',7)
+            ->orWhere('tipo_tramite_unidad.idTipo_tramite',8);
         })
         ->where('tramite.idEstado_tramite',7)
         ->where(function($query) use ($request)
@@ -877,7 +877,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
         })
         ->orderBy($request->query('sort'), $request->query('order'))
         ->take($request->query('size'))
@@ -897,8 +898,8 @@ class TramiteSecretariaController extends Controller
         ->join('programa','programa.idPrograma','tramite.idPrograma')
         ->where(function($query) 
         {            
-            $query->where('tramite.idTipo_tramite_unidad',45)
-            ->orWhere('tramite.idTipo_tramite_unidad',46);
+            $query->where('tipo_tramite_unidad.idTipo_tramite',7)
+            ->orWhere('tipo_tramite_unidad.idTipo_tramite',8);
         })
         ->where('tramite.idEstado_tramite',7)
         ->where(function($query) use ($request)
@@ -907,7 +908,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
         })
         ->count();
 
@@ -1084,8 +1086,8 @@ class TramiteSecretariaController extends Controller
         ->join('programa','programa.idPrograma','tramite.idPrograma')
         ->where(function($query) 
         {            
-            $query->where('tramite.idTipo_tramite_unidad',45)
-            ->orWhere('tramite.idTipo_tramite_unidad',46);
+            $query->where('tipo_tramite_unidad.idTipo_tramite',7)
+            ->orWhere('tipo_tramite_unidad.idTipo_tramite',8);
         })
         ->where('tramite.idEstado_tramite',9)
         ->where(function($query) use ($request)
@@ -1094,7 +1096,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
 
         })
         ->orderBy($request->query('sort'), $request->query('order'))
@@ -1115,8 +1118,8 @@ class TramiteSecretariaController extends Controller
         ->join('programa','programa.idPrograma','tramite.idPrograma')
         ->where(function($query) 
         {            
-            $query->where('tramite.idTipo_tramite_unidad',45)
-            ->orWhere('tramite.idTipo_tramite_unidad',46);
+            $query->where('tipo_tramite_unidad.idTipo_tramite',7)
+            ->orWhere('tipo_tramite_unidad.idTipo_tramite',8);
         })
         ->where('tramite.idEstado_tramite',9)
         ->where(function($query) use ($request)
@@ -1125,7 +1128,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
 
         })
         ->count();
@@ -1175,8 +1179,8 @@ class TramiteSecretariaController extends Controller
         ->join('programa','programa.idPrograma','tramite.idPrograma')
         ->where(function($query) 
         {            
-            $query->where('tramite.idTipo_tramite_unidad',45)
-            ->orWhere('tramite.idTipo_tramite_unidad',46);
+            $query->where('tipo_tramite_unidad.idTipo_tramite',7)
+            ->orWhere('tipo_tramite_unidad.idTipo_tramite',8);
         })
         ->where('tramite.idEstado_tramite',8)
         ->where(function($query) use ($idTipo_usuario,$idUsuario)
@@ -1192,7 +1196,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
             
 
         })
@@ -1214,8 +1219,8 @@ class TramiteSecretariaController extends Controller
         ->join('programa','programa.idPrograma','tramite.idPrograma')
         ->where(function($query) 
         {            
-            $query->where('tramite.idTipo_tramite_unidad',45)
-            ->orWhere('tramite.idTipo_tramite_unidad',46);
+            $query->where('tipo_tramite_unidad.idTipo_tramite',7)
+            ->orWhere('tipo_tramite_unidad.idTipo_tramite',8);
         })
         ->where('tramite.idEstado_tramite',8)
         ->where(function($query) use ($idTipo_usuario,$idUsuario)
@@ -1231,7 +1236,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.apellidos','LIKE', '%'.$request->query('search').'%')
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
 
         })
         ->count();
