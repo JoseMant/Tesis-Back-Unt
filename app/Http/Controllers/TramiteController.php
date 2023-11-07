@@ -43,6 +43,7 @@ use App\Resolucion_Secretaria;
 use App\MatriculaSUV;
 use App\MatriculaSGA;
 use App\SemestreAcademico;
+use App\ProgramaURAA;
 class TramiteController extends Controller
 {
     public function __construct()
@@ -748,6 +749,20 @@ class TramiteController extends Controller
                 $tramite -> sede=" ";
                 $tramite -> idUsuario_asignado=17479;
                 $tramite->firma_tramite=" ";
+
+                $resolucion_validate = Tramite::join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('resolucion_secretaria','resolucion_secretaria.idResolucion_secretaria','tramite_detalle.idResolucion_secretaria')
+                ->where('idEstado_tramite', '!=', 29)
+                ->where('resolucion_secretaria.idResolucion_secretaria','!=',$tramite_detalle->idResolucion_secretaria)
+                ->where('tramite.idPrograma',$request->idPrograma)
+                ->where('nro_resolucion', $request->nro_resolucion)
+                ->where('fecha_resolucion', $request->fecha_resolucion)
+                ->first();
+                if ($resolucion_validate) {
+                    $programa=ProgramaURAA::find($request->idPrograma);
+                    DB::rollback();
+                    return response()->json(['status' => '400', 'message' => "Ya existe un trámite con la resolución N° ".$request->nro_resolucion." para el programa de ". $programa->nombre], 400);
+                }
             }else{
                 $tramite -> nro_matricula=trim($request->nro_matricula);
                 $tramite -> sede=trim($request->sede);
