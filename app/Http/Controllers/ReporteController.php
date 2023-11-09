@@ -12,10 +12,12 @@ use App\ProgramaURAA;
 use App\Mencion;
 use App\DependenciaURAA;
 use App\Tramite_Detalle;
+use App\Usuario_Programa;
 use Codedge\Fpdf\Fpdf\Fpdf;
 use App\Exports\ReporteGradoExport;
 use App\Exports\ReporteGradoObservadosExport;
 use App\Exports\ReporteDecanatoExport;
+use App\Exports\ReporteCarpetasAptasExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
@@ -26,7 +28,7 @@ class ReporteController extends Controller
     public function __construct(\App\PDF_Fut $pdf)
     {
         $this->pdf = $pdf;
-        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcelCertificadosPendientes','crearExcelCertificadosObservados','crearPDF'
+        $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcelCertificadosPendientes','crearExcelCertificadosObservados','crearExcelCarpetasAptas','crearPDF'
         ,'reporteAprobados','aptosColacion','certificadosObservados']]);
     }
     public function enviadoFacultad(Request $request){
@@ -425,6 +427,83 @@ class ReporteController extends Controller
         ]], 200);
     }
 
+    public function tramitesEspera(Request $request){
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token);
+        $idUsuario=$apy['idUsuario'];
+        $dni=$apy['nro_documento'];
+        $idTipo_usuario=$apy['idTipo_usuario'];
+        $idDependencia=$apy['idDependencia'];
+        $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
+
+        // TRÁMITES POR USUARIO
+        $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','tramite.nro_matricula','tipo_tramite_unidad.costo',
+        'dependencia.nombre as facultad','programa.nombre as programa','voucher.entidad','voucher.fecha_operacion',
+        'usuario.nro_documento','tramite.idUnidad','tipo_tramite.idTipo_tramite'
+        ,'cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite','estado_tramite.descripcion as estado')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('programa','programa.idPrograma','tramite.idPrograma')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->join('voucher','voucher.idVoucher','tramite.idVoucher')
+        ->where('tramite.idEstado_tramite',28)
+        ->where(function($query) use($request,$usuario_programas,$idTipo_usuario,$idDependencia)
+            {
+                if ($idTipo_usuario==5||$idTipo_usuario==17) {
+                    $query->whereIn('tramite.idPrograma',$usuario_programas);
+                }elseif($idTipo_usuario==8){
+                    $query->where('tramite.idDpendencia',$idDependencia);
+
+                }
+            })
+        ->orderBy('usuario.apellidos','asc')
+        ->take($request->query('size'))
+        ->skip($request->query('page')*$request->query('size'))
+        ->get();
+
+        // TRÁMITES POR USUARIO
+        $total=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+        ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+        ,'tramite.nro_matricula','usuario.nro_documento','tramite.idUnidad','tipo_tramite.idTipo_tramite'
+        ,'cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite','estado_tramite.descripcion as estado')
+        ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+        ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+        ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+        ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+        ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+        ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+        ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+        ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+        ->where('tramite.idEstado_tramite',28)
+        ->orderBy('usuario.apellidos','asc')
+        ->count();
+        foreach ($tramites as $key => $tramite) {
+            $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable')
+            ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
+            ->where('idTramite',$tramite->idTramite)
+            ->get();
+
+            $tramite->fut="fut/".$tramite->uuid;
+        }
+        $begin = $request->query('page')*$request->query('size');
+        $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
+        return response()->json(['status' => '200', 'data' =>$tramites,"pagination"=>[
+            'length'    => $total,
+            'size'      => $request->query('size'),
+            'page'      => $request->query('page'),
+            'lastPage'  => (int)($total/$request->query('size')),
+            'startIndex'=> $begin,
+            'endIndex'  => $end
+        ]], 200);
+    }
+
     public function reporteCarpeta(Request $request){
         // return $request->all();
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -435,12 +514,14 @@ class ReporteController extends Controller
         $idTipo_usuario=$apy['idTipo_usuario'];
         $idDependencia=$apy['idDependencia'];
         if ($idTipo_usuario==5) {
+            $usuario_programas = Usuario_Programa::where('idUsuario', $idUsuario)->pluck('idPrograma');
             // TRÁMITES POR USUARIO
             $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
             ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','tramite.nro_matricula',
-            'dependencia.nombre as facultad',
+            'dependencia.nombre as facultad','programa.nombre as programa',
             'usuario.nro_documento','tramite.idUnidad','tipo_tramite.idTipo_tramite'
             ,'cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite','estado_tramite.descripcion as estado')
+            ->join('programa','programa.idPrograma','tramite.idPrograma')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -461,22 +542,11 @@ class ReporteController extends Controller
                     $query->where('cronograma_carpeta.fecha_colacion',$request->cronograma);
                 }
             })
-            ->where(function($query) use($idDependencia)
+            ->where(function($query) use($usuario_programas)
             {
-                if ($idDependencia) {
-                    if ($idDependencia==15) {
-                        $query->where('tramite.idPrograma',41)
-                        ->orWhere('tramite.idPrograma',42)
-                        ->orWhere('tramite.idPrograma',43)
-                        ->orWhere('tramite.idPrograma',44)
-                        ->orWhere('tramite.idPrograma',45)
-                        ->orWhere('tramite.idPrograma',46);
-                    }elseif($idDependencia==11){
-                        $query->where('tramite.idPrograma',11)
-                        ->orWhere('tramite.idPrograma',47);
-                    }else{
-                        $query->where('tramite.idPrograma',$idDependencia);
-                    }
+                if ($usuario_programas) {
+                 $query->whereIn('tramite.idPrograma',$usuario_programas);
+                    
                 }
             })
             ->orderBy('usuario.apellidos','asc')
@@ -1214,7 +1284,117 @@ class ReporteController extends Controller
         }
 
     }
+    public function crearExcelCarpetasAptas($idUnidad,$idDependencia,$idPrograma,$idTipo_tramite_unidad,$cronograma,$idTipo_usuario){
 
+        DB::beginTransaction();
+        try {
+            // Declarando la respuesta a exportar
+            $response=array();
+            // Seleccionando la dependencia que será la cabecera general y añadiendo a response
+            $dependencia=DependenciaURAA::where('idDependencia',$idDependencia)->first();
+            $response[0] = [""," COLACIÓN DEL ".$cronograma." DE LA ".$dependencia->nombre];
+
+            // Declarando variable con información de inicio de cada programa y la cantidad de filas que ocupa
+            $datos=array();
+
+            // Declarando variable que indicará en qué fila de Response se almacenará cada array
+            $cont_cells=0;
+
+            // Declarando variable que indicará el key en la variable datos de cada programa que se imprimirá
+            // Obteniendo las escuelas pertenecientes a la dependencia
+            if ($idPrograma==0) {
+                $programas=ProgramaURAA::where('idDependencia',$idDependencia)->where('estado',true)->orderBy('nombre','asc')->get();
+            }else {
+                $programas=ProgramaURAA::where('idPrograma',$idPrograma)->where('estado',true)->orderBy('nombre','asc')->get();
+            }
+
+            foreach ($programas as $key => $programa) {
+                // // Obteniendo los trámites de cada programa pertenecientes a la colación seleccionada
+             
+                    // TRÁMITES POR USUARIO
+                    
+                    $tramites=Tramite::select('tramite.idTramite','tramite.idUsuario','tramite.idPrograma', DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante')
+                    ,'tipo_tramite_unidad.descripcion as tramite','tramite.nro_tramite','dependencia.nombre as facultad'
+                    ,'tramite.nro_matricula','usuario.nro_documento','tramite.idUnidad','tipo_tramite.idTipo_tramite'
+                    ,'cronograma_carpeta.fecha_colacion','tramite.idEstado_tramite','estado_tramite.descripcion as estado','programa.nombre as programa')
+                    ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                    ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
+                    ->join('unidad','unidad.idUnidad','tramite.idUnidad')
+                    ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                    ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                    ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+                    ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
+                    ->join('historial_estado','tramite.idTramite','historial_estado.idTramite')
+                    ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                    ->join('programa','programa.idPrograma','tramite.idPrograma')
+                    ->where('tipo_tramite.idTipo_tramite',2)
+                    ->where('tramite.idEstado_tramite','!=',29)
+                    ->where('historial_estado.idEstado_actual',21)
+                    ->where('historial_estado.idEstado_nuevo',32)
+                    ->where('tramite.idPrograma',$programa->idPrograma)
+                    ->where(function($query) use($idUnidad,$idDependencia,$idTipo_tramite_unidad,$idPrograma,$programa,$cronograma)
+                    {
+                        if ($idTipo_tramite_unidad!=0) {
+                            $query->where('tramite.idTipo_tramite_unidad',$idTipo_tramite_unidad);
+                        }
+                        
+                        if ($cronograma!=0) {
+                            $query->where('cronograma_carpeta.fecha_colacion',$cronograma);
+                        }
+                        if ($idUnidad!=0) {
+                            if ($idUnidad==1) {
+                                $query->where('tramite.idDependencia',$idDependencia);
+                            }elseif ($idUnidad==4) {
+                                $query->where('dependencia.idDependencia2',$idDependencia);
+        
+                            }
+                        }else {
+                            $query->where('tramite.idDependencia',$idDependencia)
+                            ->orWhere('dependencia.idDependencia2',$idDependencia);
+                        }
+                    })
+                    ->orderBy('usuario.apellidos','asc')
+                    ->get();
+                
+                if (count($tramites)>0) {
+                    // Añadiendo dos espacios antes de empezar cada programa
+                    $cont_cells++;
+                    $response[$cont_cells]=[""];
+                    // Añadiendo la cabecera con el nombre del programa
+                    $cont_cells++;
+                    $response[$cont_cells]=["","CERTIFICADOS PENDIENTES DE ".$programa->nombre];
+                    // Añadiendo información referente a la fila de inicio y cantidad de datos de cada programa
+                    $datos[$key]=[$cont_cells,count($tramites)];
+                    // Agregando las cabeceras de cada programa
+                    $cont_cells++;
+                    $response[$cont_cells]=["","N°","N° TRÁMITE","N° MATRÍCULA","EGRESADOS","ESTADO","OBSERVACIONES"];
+
+                    foreach ($tramites as $key => $tramite) {
+                        // Personalizando los mensajes del reporte
+                        if ($tramite->idEstado_tramite==5) {
+                            $tramite->descripcion="PENDIENTE DE ASIGNACIÓN A ENCARGADO";
+                        }elseif ($tramite->idEstado_tramite==7) {
+                            $tramite->descripcion="PENDIENTE DE VALIDACIÓN DE FOTOGRAFÍA";
+                        }elseif ($tramite->idEstado_tramite==8) {
+                            $tramite->descripcion="PENDIENTE DE GENERACIÓN DE CERTIFICADO";
+                        }
+
+                        $cont_cells++;
+                        $response[$cont_cells]=["",$key+1,$tramite->nro_tramite,$tramite->nro_matricula,$tramite->solicitante,$tramite->estado];
+                    }
+
+                }
+
+            }
+
+            $descarga=Excel::download(new ReporteCarpetasAptasExport($response,$datos), 'REPORTE.xlsx');
+            return $descarga;
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+
+    }
     public function crearExcelCertificadosObservados($idDependencia,$cronograma){
 
         // return $idDependencia."-".$cronograma;
