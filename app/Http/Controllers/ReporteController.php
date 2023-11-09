@@ -27,7 +27,7 @@ class ReporteController extends Controller
     {
         $this->pdf = $pdf;
         $this->middleware('jwt', ['except' => ['expedientesPDF','crearExcelCertificadosPendientes','crearExcelCertificadosObservados','crearPDF'
-        ,'reporteAprobados','aptosColacion','certificadosObservados']]);
+        ,'reporteAprobados','aptosColacion','certificadosObservados','indicadorCertificados']]);
     }
     public function enviadoFacultad(Request $request){
         // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
@@ -2179,6 +2179,156 @@ class ReporteController extends Controller
         ->header('Content-Type', 'application/pdf');
     }
 
+    public function indicadorCertificados(Request $request){
+        $response=array();
+        $overview=array();
+        $series=array();
+        $inicio=1;
+        $fin=3;
+        for ($i=1; $i <= 4; $i++) { 
+
+            // Overview -----------------------------------------------------
+            $certificados=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+            ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->whereYear('created_at', '2023')
+            ->whereMonth('created_at','>=', $inicio)
+            ->whereMonth('created_at','<=', $fin)
+            ->count();
+
+            $certificados_dentro_plazo=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
+            ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+            ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where(DB::raw('TIMESTAMPDIFF(DAY, tramite.created_at,historial_estado.fecha)'),'<=',5)
+            ->where('historial_estado.idEstado_actual',14)
+            ->where('historial_estado.idEstado_nuevo',15)
+            ->whereYear('created_at', '2023')
+            ->whereMonth('created_at','>=', $inicio)
+            ->whereMonth('created_at','<=', $fin)
+            ->count();
+
+            $terminados=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+            ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+            ->where('tramite.idEstado_tramite',15)
+            ->whereYear('created_at', '2023')
+            ->whereMonth('created_at','>=', $inicio)
+            ->whereMonth('created_at','<=', $fin)
+            ->count();
+
+            $pendientes=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+            ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+            ->where('tramite.idEstado_tramite','!=',15)
+            ->where('tramite.idEstado_tramite','!=',29)
+            ->where('tramite.idEstado_tramite','!=',9)
+            ->where('tramite.idEstado_tramite','!=',4)
+            ->whereYear('created_at', '2023')
+            ->whereMonth('created_at','>=', $inicio)
+            ->whereMonth('created_at','<=', $fin)
+            ->count();
+
+            $observados=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+            ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+            ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+            ->where(function($query)
+            {
+                $query->where('tramite.idEstado_tramite',9)
+                ->orWhere('tramite.idEstado_tramite',4);
+            })
+            ->whereYear('created_at', '2023')
+            ->whereMonth('created_at','>=', $inicio)
+            ->whereMonth('created_at','<=', $fin)
+            ->count();
+
+            $indicador=0;
+            if ($certificados>0) {
+                $indicador=($certificados_dentro_plazo/$certificados)*100;
+            }
+
+            $semestre=[
+                "certificados"=>$certificados,
+                "certificados-dentro"=>$certificados_dentro_plazo,
+                "indicador"=>round($indicador,0),
+                "terminados"=>$terminados,
+                "pendientes"=>$pendientes,
+                "observados"=>$observados
+            ];
+            
+            $nombre="trimestre-".$i;
+            $overview[$nombre]=$semestre;
+
+            // Series --------------------------------------
+            $solicitados=array();
+            $dentro_plazo=array();
+            for ($j=$inicio; $j <=$fin ; $j++) { 
+                // Solicitados
+                $solicitadosMensual=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+                ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+                ->where('tramite.idEstado_tramite','!=',29)
+                ->whereYear('created_at', '2023')
+                ->whereMonth('created_at',$j)
+                ->count();
+                array_push($solicitados,$solicitadosMensual);
+
+                // Dentro del plazo
+                $dentro_plazoMensual=Tramite::join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('historial_estado','historial_estado.idTramite','tramite.idTramite')
+                ->where('tipo_tramite_unidad.idTipo_tramite', 1)
+                ->where('tipo_tramite_unidad.idTipo_tramite_unidad','!=', 37)
+                ->where('tramite.idEstado_tramite','!=',29)
+                ->where(DB::raw('TIMESTAMPDIFF(DAY, tramite.created_at,historial_estado.fecha)'),'<=',5)
+                ->where('historial_estado.idEstado_actual',14)
+                ->where('historial_estado.idEstado_nuevo',15)
+                ->whereYear('created_at', '2023')
+                ->whereMonth('created_at',$j)
+                ->count();
+
+                array_push($dentro_plazo,$dentro_plazoMensual);
+            }
+
+            $semestre=[
+                [
+                    "name"=>"Certificados Solicitados",
+                    "type"=>"line",
+                    "data"=>$solicitados
+                ],
+                [
+                    "name"=>"Certificados dentro del plazo",
+                    "type"=>"column",
+                    "data"=>$dentro_plazo
+                ]
+            ];
+
+            $series[$nombre]=$semestre;
+
+            if ($fin==12) {
+                break;
+            }
+
+
+
+            $inicio=$inicio+3;
+            $fin=$fin+3;
+        }
+        $response=[
+            "certificadosIndicador1"=>[
+                "overview"=>$overview,
+                "labels"=>[
+                    "trimestre-1"=>["Enero","Febrero","Marzo"],
+                    "trimestre-2"=>["Abril","Mayo","Junio"],
+                    "trimestre-3"=>["Julio","Agosto","Setiembre"],
+                    "trimestre-4"=>["Octubre","Noviembre","Diciembre"],
+                ],
+                "series"=>$series
+            ]
+        ];
+        return $response;
+    }
 
 }
 
