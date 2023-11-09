@@ -976,7 +976,7 @@ class TramiteController extends Controller
                             && $requisito['idRequisito']!=91 && $requisito['idRequisito']!=102 && $requisito['idRequisito']!=108 && $requisito['idRequisito']!=114) {
                                 $flag2=false;
                         }
-                    }elseif($tramite->idEstado_tramite==7) {
+                    }elseif($tramite->idEstado_tramite==60||$tramite->idEstado_tramite==7) {
                         if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==23)) {
                             $flag=false;
                             if ($requisito['responsable']==4) {
@@ -1106,7 +1106,19 @@ class TramiteController extends Controller
                             $historial_estados->idUsuario=$idUsuario;
                             $historial_estados->idEstado_actual=54;
                             $historial_estados->idEstado_nuevo=55;
-                        }elseif ($tramite->idEstado_tramite==7) {
+                        }elseif ($tramite->idEstado_tramite==60) {
+                            $historial_estados->idEstado_nuevo=54;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                            
+                            //REGISTRAMOS EL ESTADO DEL TRÁMITE 
+                            $historial_estados=new Historial_Estado;
+                            $historial_estados->idTramite=$tramite->idTramite;
+                            $historial_estados->idUsuario=$idUsuario;
+                            $historial_estados->idEstado_actual=54;
+                            $historial_estados->idEstado_nuevo=7;
+                        }
+                        elseif ($tramite->idEstado_tramite==7) {
                             $historial_estados->idEstado_nuevo=8;
                             $historial_estados->fecha=date('Y-m-d h:i:s');
                             $historial_estados->save();
@@ -1195,6 +1207,22 @@ class TramiteController extends Controller
                                 $historial_estados->idTramite=$tramite->idTramite;
                                 $historial_estados->idUsuario=$idUsuario;
                                 $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=55;
+                            }
+                        }elseif ($tramite->idEstado_tramite==60) {
+                            $historial_estados->idEstado_nuevo=50;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                             
+                            if ($flagAlumno) { // SI HAY REQUISITO DE ALUMNO
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                            }elseif ($flagSecretariaG) { // SI HAY REQUISITO DE SECRETARÍA GENERAL
+                                // PASAMOS A ESTADO DE ADJUNTAR DE SECRETARÍA GENERAL
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=50;
                                 $historial_estados->idEstado_nuevo=55;
                             }
                         }
@@ -1287,6 +1315,22 @@ class TramiteController extends Controller
                                 $historial_estados->idTramite=$tramite->idTramite;
                                 $historial_estados->idUsuario=$idUsuario;
                                 $historial_estados->idEstado_actual=9;
+                                $historial_estados->idEstado_nuevo=55;
+                            }
+                        }elseif ($tramite->idEstado_tramite==60) {
+                            $historial_estados->idEstado_nuevo=50;
+                            $historial_estados->fecha=date('Y-m-d h:i:s');
+                            $historial_estados->save();
+                             
+                            if ($flagAlumno) { // SI HAY REQUISITO DE ALUMNO
+                                // ENVIAR CORREO AL ALUMNO
+                                dispatch(new ObservacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+                            }elseif ($flagSecretariaG) { // SI HAY REQUISITO DE SECRETARÍA GENERAL
+                                // PASAMOS A ESTADO DE ADJUNTAR DE SECRETARÍA GENERAL
+                                $historial_estados=new Historial_Estado;
+                                $historial_estados->idTramite=$tramite->idTramite;
+                                $historial_estados->idUsuario=$idUsuario;
+                                $historial_estados->idEstado_actual=50;
                                 $historial_estados->idEstado_nuevo=55;
                             }
                         }
@@ -1698,6 +1742,19 @@ class TramiteController extends Controller
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, 50, 53, $idUsuario);
                             $historial_estado->save();
                             $tramite-> idEstado_tramite=53;
+                        }elseif ($ultimo_historial->idEstado_actual==60) {
+                            $rechazados_sec_general=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
+                            ->where('tramite_requisito.idTramite',$tramite->idTramite)->where('tramite_requisito.des_estado_requisito','RECHAZADO')
+                            ->where('requisito.responsable',23)->first();
+                            if ($rechazados_sec_general) {
+                                $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 55, $idUsuario);
+                                $historial_estado->save();
+                                $tramite-> idEstado_tramite=55;
+                            }else {
+                                $historial_estado = $this->setHistorialEstado($tramite->idTramite, 50, 60, $idUsuario);
+                                $historial_estado->save();
+                                $tramite-> idEstado_tramite=60;
+                            }
                         }
                     }elseif($tramite->idEstado_tramite==55) {
                         if ($ultimo_historial->idEstado_actual==54) {
@@ -1706,20 +1763,26 @@ class TramiteController extends Controller
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, 56, 57, $idUsuario);
                             $historial_estado->save();
                             $tramite-> idEstado_tramite=57;
+                        }elseif ($ultimo_historial->idEstado_actual==50) {
+                            $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 60, $idUsuario);
+                            $historial_estado->save();
+                            $tramite-> idEstado_tramite=60;
                         }elseif ($ultimo_historial->idEstado_actual==9) {
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 7, $idUsuario);
                             $historial_estado->save();
                             $tramite-> idEstado_tramite=7;
                         }
                     }elseif($tramite->idEstado_tramite==57) {
-                        $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 7, $idUsuario);
+                        $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 59, $idUsuario);
                         $historial_estado->save();
-                        $tramite-> idEstado_tramite=7;
+                        $historial_estado = $this->setHistorialEstado($tramite->idTramite, 59, 60, $idUsuario);
+                        $historial_estado->save();
+                        $tramite-> idEstado_tramite=60;
                     }elseif($tramite->idEstado_tramite==9) {
                         // VERIFICANDO SI HAY RECHAZADOS DE SEC GENERAL PARA PASARLO A ESE ESTADO
                         $rechazados_sec_general=Tramite_Requisito::join('requisito','tramite_requisito.idRequisito','requisito.idRequisito')
                         ->where('tramite_requisito.idTramite',$tramite->idTramite)->where('tramite_requisito.des_estado_requisito','RECHAZADO')
-                        ->where('requisito.responsable',10)->first();
+                        ->where('requisito.responsable',23)->first();
                         if ($rechazados_sec_general) {
                             $historial_estado = $this->setHistorialEstado($tramite->idTramite, $tramite->idEstado_tramite, 55, $idUsuario);
                             $historial_estado->save();

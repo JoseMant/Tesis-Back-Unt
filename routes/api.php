@@ -316,6 +316,7 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 //DUPLICADOS
 Route::get('diplomas/duplicados/validar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosValidados');
 Route::get('diplomas/duplicados/aprobar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosAprobados');
+Route::get('diplomas/duplicados/revalidar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosRevalidados');
 Route::get('diplomas/duplicados/validar/ura', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosValidacionUra');
 Route::get('diplomas/duplicados/datos/diplomas/ura', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosDatosDiplomaUra');
 Route::put('diplomas/duplicados/datos', 'Diplomas_DuplicadosController@GuardarDatosDiploma');//Usado
@@ -367,6 +368,11 @@ Route::get('reporte/expedientesPDF', 'ReporteController@expedientesPDF');
 Route::get('reporte/certificados/observados', 'ReporteController@certificadosObservados');
 Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
 Route::get('diploma', 'ReporteController@GetDiploma');
+Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
+Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
+Route::get('indicador/certificados', 'ReporteController@indicadorCertificados');
+
+// Adicional
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
@@ -378,7 +384,6 @@ Route::get('agregar/programa/diploma_carpeta', 'AdicionalController@setValuesPro
 Route::get('uuid', 'AdicionalController@setValuesUuid');
 Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
 Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
-Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
-Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
+
 Route::get('graduado', 'AdicionalController@getGraduado');
 
