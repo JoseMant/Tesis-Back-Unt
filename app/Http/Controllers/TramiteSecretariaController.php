@@ -878,7 +878,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE', '%'.$request->query('search').'%');
         })
         ->orderBy($request->query('sort'), $request->query('order'))
         ->take($request->query('size'))
@@ -909,6 +910,7 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
         })
         ->count();
@@ -1097,7 +1099,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE', '%'.$request->query('search').'%');
 
         })
         ->orderBy($request->query('sort'), $request->query('order'))
@@ -1129,7 +1132,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE', '%'.$request->query('search').'%');
 
         })
         ->count();
@@ -1197,7 +1201,8 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
-            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
+            ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE', '%'.$request->query('search').'%');
             
 
         })
@@ -1237,6 +1242,7 @@ class TramiteSecretariaController extends Controller
             ->orWhere('usuario.nombres','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.nro_resolucion','LIKE', '%'.$request->query('search').'%')
             ->orWhere('tipo_tramite_unidad.descripcion','LIKE', '%'.$request->query('search').'%')
+            ->orWhere('programa.nombre','LIKE', '%'.$request->query('search').'%')
             ->orWhere('resolucion_secretaria.motivo','LIKE', '%'.$request->query('search').'%');
 
         })
