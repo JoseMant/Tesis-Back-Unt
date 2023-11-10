@@ -19,7 +19,8 @@ class OficioController extends Controller
         $oficios=Oficio::where('estado',1)
         ->get();
         foreach ($oficios as $key => $oficio) {
-            $oficio->resoluciones=Resolucion::where('idOficio',$oficio->idOficio)->where('estado',1)->get();
+            $oficio->resoluciones=Resolucion::join('tipo_resolucion','tipo_resolucion.idTipo_resolucion','resolucion.idTipo_resolucion')
+            ->where('resolucion.idOficio',$oficio->idOficio)->where('resolucion.estado',1)->get();
         }
         return response()->json($oficios, 200);
     }

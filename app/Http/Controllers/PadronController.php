@@ -49,7 +49,7 @@ class PadronController extends Controller
         DB::beginTransaction();
         try {
             // Verificando que el oficio exista
-             $oficio=Oficio::find($idOficio);
+            $oficio=Oficio::find($idOficio);
             
             if (!$oficio) {
                 return response()->json(['status' => '400', 'message' =>"El oficio ingresado no existe"], 400);

@@ -186,8 +186,8 @@ class ResolucionController extends Controller
     }
 
     public function getResolucionesLibres($idOficio){
-        $resoluciones=Resolucion::
-        where(function($query) use ($idOficio)
+        $resoluciones=Resolucion::join('tipo_resolucion','tipo_resolucion.idTipo_resolucion','resolucion.idTipo_resolucion')
+        ->where(function($query) use ($idOficio)
         {
             if ($idOficio!=0) {
                 $query->where('idOficio',null)
@@ -197,7 +197,7 @@ class ResolucionController extends Controller
             }
             
         })
-        ->where('estado',1)
+        ->where('resolucion.estado',1)
         ->orderBy('resolucion.nro_resolucion')
         ->get();
         return response()->json($resoluciones, 200);
