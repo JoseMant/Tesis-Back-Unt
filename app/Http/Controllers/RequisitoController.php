@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Requisito;
 use App\Amnistia;
+use App\PersonaSuv;
 class RequisitoController extends Controller
 {
     public function __construct()
@@ -95,6 +96,7 @@ class RequisitoController extends Controller
         $apy = JWTAuth::getPayload($token);
         $dni=$apy['nro_documento'];
 
+        // Verificando amnistia para agregarle requisitos adicionales
         $amnistiado=Amnistia::where('nro_documento',$dni)->where('idTipo_tramite_unidad',$idTipo_tramite_unidad)->first();
         if ($amnistiado) {
             if ($idTipo_tramite_unidad==15 && $amnistiado->tipo='G') {
@@ -116,8 +118,22 @@ class RequisitoController extends Controller
                 ->get();
             }
         }else {
-            $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
-            ->where('estado',true)->get();
+            // Verificando Universidad no licenciada para agregarle requisitos adicionales
+            $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+            ->where(function($query) {
+                $query->where('idmodalidadingreso',10);
+            })
+            ->Where('per_dni',$dni)
+            ->first();
+            if ($noLicenciado && $idTipo_tramite_unidad==15) {
+                $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+                ->where('estado',true)
+                ->orWhere('idRequisito',138) // certificado de estudios de universidad de origen
+                ->get();
+            }else {
+                $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
+                ->where('estado',true)->get();
+            }
         }
         return response()->json(['status' => '200', 'requisitos'=>$requisitos], 200);
     }
