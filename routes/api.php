@@ -389,4 +389,4 @@ Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
 Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
 
 Route::get('graduado', 'AdicionalController@getGraduado');
-
+Route::get('reporte/tramites/espera', 'ReporteController@tramitesEspera');
