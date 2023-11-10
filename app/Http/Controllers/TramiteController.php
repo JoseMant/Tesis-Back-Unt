@@ -472,7 +472,7 @@ class TramiteController extends Controller
             $usuario = User::findOrFail($idUsuario);
             $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$request->idTipo_tramite_unidad)->first();
             
-            //VALIDACIONES CUANDO ES ELABORACIÓN DE CARPETA O SOLICITUD DE CARNÉ
+            //VALIDACIONES SEGÚN TIPO DE TRÁMITE
             if ($tipo_tramite_unidad->idTipo_tramite==2) {
                 // VALIDACION DE REPETICIÓN DE TRÁMITES
                 $tramite_validate=Tramite::where('idUsuario',$idUsuario)
@@ -601,7 +601,6 @@ class TramiteController extends Controller
                     }
                 }
             }
-
             if ($tipo_tramite_unidad->idTipo_tramite==6||$tipo_tramite_unidad->idTipo_tramite==9) {
                 // VALIDACION DE REPETICIÓN DE TRÁMITES
                 $tramite_validate=Tramite::where('idUsuario',$idUsuario)
@@ -613,6 +612,8 @@ class TramiteController extends Controller
                                                                             y usted ya cuenta con una solicitud.'], 400);
                 }
             }
+
+            // VALIDACIÓN SI REQUIERE VOUCHER
             if ($tipo_tramite_unidad->requiere_voucher==1) {
                 $voucher_validate=$this->validarVoucher(trim($request->entidad),trim($request->nro_operacion),trim($request->fecha_operacion), $idUsuario);
                 if($voucher_validate) return response()->json(['status' => '400', 'message' => 'El voucher ya se encuentra registrado'], 400);
