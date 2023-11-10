@@ -777,7 +777,7 @@ class TramiteController extends Controller
             }
             $tramite -> uuid=$uuid;
             // ---------------------------------------------------
-            if ($tipo_tramite_unidad->requiere_voucher==1) {
+            if ($tipo_tramite->idTipo_tramite!=7&&$tipo_tramite->idTipo_tramite!=8) {
                 if($request->hasFile("archivo_firma")){
                     $file=$request->file("archivo_firma");
                     $nombre = $tramite->nro_tramite.".".$file->guessExtension();
