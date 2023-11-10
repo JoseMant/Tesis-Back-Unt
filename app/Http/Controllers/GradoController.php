@@ -29,7 +29,7 @@ use Illuminate\Support\Arr;
 use Spipu\Html2Pdf\Html2Pdf;
 
 use App\PersonaSE;
-
+use App\Amnistia;
 use App\Mencion;
 use App\Escuela;
 use App\PersonaSuv;
@@ -59,7 +59,7 @@ class GradoController extends Controller
         'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa','tipo_tramite_unidad.descripcion as tramite',
         'tipo_tramite_unidad.costo',DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
         'voucher.archivo as voucher','cronograma_carpeta.fecha_cierre_alumno','cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato',
-        'cronograma_carpeta.fecha_colacion','tramite.uuid')
+        'cronograma_carpeta.fecha_colacion','tramite.uuid','tramite.idTipo_tramite_unidad')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -131,6 +131,35 @@ class GradoController extends Controller
             ->get();
 
             $tramite->fut="fut/".$tramite->uuid;
+
+            $tramite->condicion="REGULAR";
+            // Condición No licenciado
+            $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+            ->where('idmodalidadingreso',10)
+            ->Where('per_dni',$tramite->nro_documento)
+            ->first();
+            if ($noLicenciado) {
+                $tramite->condicion="UNIVERSIDAD NO LICENCIADA";
+            }else {
+                // Amnistiado
+                $amnistiado=Amnistia::where('nro_documento',$tramite->nro_documento)->where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+                if ($amnistiado) {
+                    $tramite->condicion="AMNISTÍA ACADÉMICA";
+                }else {
+                    // Condición segunda profesión en suv
+                    $segundaProfesion=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('idmodalidadingreso',5)
+                    ->Where('alumno.idalumno',$tramite->nro_matricula)
+                    ->first();
+                    if ($segundaProfesion) {
+                        $tramite->condicion="SEGUNDA PROFESIÓN";
+                    }else {
+                        // Condición segunda profesión en sga
+
+                    }
+
+                }
+            }
         }
 
         $begin = $request->query('page')*$request->query('size');
@@ -923,7 +952,7 @@ class GradoController extends Controller
         , DB::raw('CONCAT("N° ",voucher.nro_operacion," - ",voucher.entidad) as entidad'),'tipo_tramite_unidad.costo'
         ,'tramite.exonerado_archivo','tramite.idUnidad','tipo_tramite.idTipo_tramite','tramite.idEstado_tramite','cronograma_carpeta.fecha_cierre_alumno',
         'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion',
-        'tramite_detalle.certificado_final','programa.nombre as programa','tramite.uuid')
+        'tramite_detalle.certificado_final','programa.nombre as programa','tramite.uuid','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
         ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
         ->join('unidad','unidad.idUnidad','tramite.idUnidad')
@@ -981,6 +1010,36 @@ class GradoController extends Controller
             ->get();
             
             $tramite->fut="fut/".$tramite->uuid;
+
+            $tramite->condicion="REGULAR";
+            // Condición No licenciado
+            $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+            ->where('idmodalidadingreso',10)
+            ->Where('per_dni',$tramite->nro_documento)
+            ->first();
+            if ($noLicenciado) {
+                $tramite->condicion="UNIVERSIDAD NO LICENCIADA";
+            }else {
+                // Amnistiado
+                $amnistiado=Amnistia::where('nro_documento',$tramite->nro_documento)->where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+                if ($amnistiado) {
+                    $tramite->condicion="AMNISTÍA ACADÉMICA";
+                }else {
+                    // Condición segunda profesión en suv
+                    $segundaProfesion=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('idmodalidadingreso',5)
+                    ->Where('alumno.idalumno',$tramite->nro_matricula)
+                    ->first();
+                    if ($segundaProfesion) {
+                        $tramite->condicion="SEGUNDA PROFESIÓN";
+                    }else {
+                        // Condición segunda profesión en sga
+
+                    }
+
+                }
+            }
+
         }
         $begin = $request->query('page')*$request->query('size');
         $end = min(($request->query('size') * ($request->query('page')+1)-1), $total);
