@@ -372,6 +372,7 @@ Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
 Route::get('diploma', 'ReporteController@GetDiploma');
 Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
 Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
+Route::get('reporte/status_tramites/carpetas/aptas/{idDependencia}/{idTipo_tramite_unidad}/{cronograma}', 'ReporteController@crearExcelCarpetasAptas');
 Route::get('indicador/certificados', 'ReporteController@indicadorCertificados');
 
 // Adicional
