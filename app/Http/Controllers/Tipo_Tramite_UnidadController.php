@@ -100,9 +100,8 @@ class Tipo_Tramite_UnidadController extends Controller
         $tipo_tramites= Tipo_Tramite_Unidad::where('idTipo_tramite',$idTipo_tramite)
         ->where('idUnidad',$idUnidad)
         ->where('estado',true)
+        ->orderBy('descripcion', 'ASC')
         ->get();
-        // $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite)->get();
-        // return response()->json(['status' => '200', 'tipos_unida_tratmites' => $tipos,'requisitos'=>$requisitos], 200);
         return response()->json(['status' => '200', 'tipo_tramite_unidad' => $tipo_tramites], 200);
     }
 }
