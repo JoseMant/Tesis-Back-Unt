@@ -41,8 +41,13 @@ class CronogramaController extends Controller
             ->where('cronograma_carpeta.fecha_cierre_alumno','>=',date('Y-m-d'))
             ->where('cronograma_carpeta.estado',true)
             ->get();
+            if (count($cronogramas)==0) {
+                DB::rollback();
+                return response()->json(['status' => '400', 'message' => 'No hay colaciones disponibles para el presente año.'], 400);
+            }
             DB::commit();
             return response()->json($cronogramas, 200);
+            
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
