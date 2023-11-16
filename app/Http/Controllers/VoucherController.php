@@ -90,9 +90,7 @@ class VoucherController extends Controller
                     // VERIFICANDO SI ES DE UNA UNIVERSIDAD NO LICENCIADA(10)
                     $noLicenciado=false;
                     $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
-                    ->where(function($query) {
-                        $query->where('idmodalidadingreso',10);
-                    })
+                    ->where('idmodalidadingreso',10)
                     ->Where('per_dni',$usuario->nro_documento)
                     ->first();
                     if ($alumnoSUV) {
@@ -100,7 +98,7 @@ class VoucherController extends Controller
                     }
 
                     // REGISTRAMOS EL CERTIFICADO EN PARALELO
-                    if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==34 
+                    if (($tramite->idTipo_tramite_unidad==15 && $noLicenciado==false) || $tramite->idTipo_tramite_unidad==34 
                     || ($tramite->idTipo_tramite_unidad==16 && $noLicenciado==false && ($tramite->idPrograma==11 || $tramite->idPrograma==47))) {
                         $tramiteCertificado=new Tramite;
                         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;

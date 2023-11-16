@@ -120,9 +120,7 @@ class RequisitoController extends Controller
         }else {
             // Verificando Universidad no licenciada para agregarle requisitos adicionales
             $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
-            ->where(function($query) {
-                $query->where('idmodalidadingreso',10);
-            })
+            ->where('idmodalidadingreso',10)
             ->Where('per_dni',$dni)
             ->first();
             if ($noLicenciado && $idTipo_tramite_unidad==15) {
@@ -130,7 +128,7 @@ class RequisitoController extends Controller
                 ->where('estado',true)
                 ->orWhere('idRequisito',138) // certificado de estudios de universidad de origen
                 ->get();
-            }else {
+            } else {
                 $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite_unidad)
                 ->where('estado',true)->get();
             }
