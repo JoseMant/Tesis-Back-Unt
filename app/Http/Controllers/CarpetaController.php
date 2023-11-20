@@ -11,7 +11,7 @@ use App\Resolucion;
 use App\Cronograma;
 use App\Diploma_Carpeta;
 use App\Tramite_Requisito;
-use App\Historial_estado;
+use App\Historial_Estado;
 use App\Graduado;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
