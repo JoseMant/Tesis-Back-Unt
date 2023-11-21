@@ -38,7 +38,8 @@ use App\PersonaSga;
 use App\Diploma_Carpeta;
 use App\Historial_Codigo_Diploma;
 use App\Graduado;
-
+use File;
+use ZipArchive;
 class AdicionalController extends Controller
 {
 
@@ -462,5 +463,52 @@ class AdicionalController extends Controller
 
     public function getGraduado(){
         return Graduado::join('alumno','alumno.Cod_alumno','graduado.cod_alumno')->where('Nro_documento','75411199')->first();
+    }
+
+    public function fotosIngresantes2023(){
+        DB::beginTransaction();
+        try {
+            $ingresantes=Tramite::select('usuario.nro_documento','tramite.nro_matricula','tramite_requisito.archivo')
+            ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+            ->join('tramite_requisito','tramite.idTramite','tramite_requisito.idTramite')
+            ->where('tramite.idTipo_tramite_unidad',17)
+            ->where('tramite.nro_matricula','like','%23')
+            ->get();
+
+            $zip = new ZipArchive;
+            $nameZip = "FOTOS INGRESANTES 2023.zip";
+
+            // Variable para el nombre de los archivos
+            $filename="";
+            // Eliminamos el zip creado de la descarga de hoy(si es que existe) para que al momento de ser creado no se sobreescriba y tenga archivos antiguos
+            if ($zip->open($nameZip)===TRUE) {
+                $zip->close();
+                unlink($nameZip);
+            }
+
+
+            if ($zip->open(public_path($nameZip),ZipArchive::CREATE) === TRUE)
+            {
+                foreach ($ingresantes as $ingresante) {
+                    $file =public_path($ingresante->archivo);
+                    
+                    if ($ingresante->archivo!=null) {
+                        // nombre del archivo
+                        $filename = $ingresante->nro_documento.".jpg";
+    
+                        $zip->addFile($file,"FOTOS INGRESANTES 2023/".$filename);
+                    }
+                }
+                $zip->close();   
+            }
+
+
+            DB::commit();
+            return response()->download(public_path($nameZip));
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
     }
 }

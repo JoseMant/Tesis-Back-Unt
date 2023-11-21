@@ -374,6 +374,7 @@ Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@repo
 Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
 Route::get('reporte/status_tramites/carpetas/aptas/{idDependencia}/{idTipo_tramite_unidad}/{cronograma}', 'ReporteController@crearExcelCarpetasAptas');
 Route::get('indicador/certificados', 'ReporteController@indicadorCertificados');
+Route::get('indicador/carpetas', 'ReporteController@indicadorCarpetas');
 
 // Adicional
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
@@ -387,6 +388,7 @@ Route::get('agregar/programa/diploma_carpeta', 'AdicionalController@setValuesPro
 Route::get('uuid', 'AdicionalController@setValuesUuid');
 Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
 Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
+Route::get('fotosIngresantes', 'AdicionalController@fotosIngresantes2023');
 
 Route::get('graduado', 'AdicionalController@getGraduado');
 Route::get('reporte/tramites/espera', 'ReporteController@tramitesEspera');
