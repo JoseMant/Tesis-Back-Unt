@@ -104,6 +104,7 @@ class ZipController extends Controller
     }
 
     public function backupFiles($idResolucion){
+        set_time_limit(0);
         DB::beginTransaction();
         try {
             // Obteniendo la resolución para el nombre del zip
@@ -215,6 +216,7 @@ class ZipController extends Controller
                 }
 
                 DB::commit();
+                set_time_limit(60);
                 return response()->download(public_path($nameResolusion));
             }else {
                 return response()->json(['status' => '400', 'message' =>"La resolución no tiene trámites"], 400);
@@ -223,6 +225,7 @@ class ZipController extends Controller
             
         } catch (\Exception $e) {
             DB::rollback();
+            set_time_limit(60);
             return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
         }
 
