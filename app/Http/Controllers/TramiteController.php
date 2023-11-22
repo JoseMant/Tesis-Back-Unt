@@ -1368,13 +1368,37 @@ class TramiteController extends Controller
             ->where('idTramite',$request->idTramite)
             ->get();
             $tramite->fut="fut/".$tramite->uuid;
-            // mensaje de validación de voucher
-            $tipo_tramite_unidad=Tipo_Tramite_Unidad::Where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
-            $tipo_tramite = Tipo_Tramite::select('tipo_tramite.idTipo_tramite','tipo_tramite.descripcion')
-            ->join('tipo_tramite_unidad', 'tipo_tramite_unidad.idTipo_tramite', 'tipo_tramite.idTipo_tramite')
-            ->where('tipo_tramite_unidad.idTipo_tramite_unidad', $tramite->idTipo_tramite_unidad)->first();
-            $usuario = User::findOrFail($tramite->idUsuario);
-            // dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
+
+
+            $tramite->condicion="REGULAR";
+            // Condición No licenciado
+            $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+            ->where('idmodalidadingreso',10)
+            ->Where('per_dni',$tramite->nro_documento)
+            ->first();
+            if ($noLicenciado) {
+                $tramite->condicion="UNIVERSIDAD NO LICENCIADA";
+            }else {
+                // Amnistiado
+                $amnistiado=Amnistia::where('nro_documento',$tramite->nro_documento)->where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+                if ($amnistiado) {
+                    $tramite->condicion="AMNISTÍA ACADÉMICA";
+                }else {
+                    // Condición segunda profesión en suv
+                    $segundaProfesion=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('idmodalidadingreso',5)
+                    ->Where('alumno.idalumno',$tramite->nro_matricula)
+                    ->first();
+                    if ($segundaProfesion) {
+                        $tramite->condicion="SEGUNDA PROFESIÓN";
+                    }else {
+                        // Condición segunda profesión en sga
+
+                    }
+
+                }
+            }
+
             DB::commit();
             return response()->json($tramite, 200);
         } catch (\Exception $e) {
@@ -1999,7 +2023,7 @@ class TramiteController extends Controller
             'unidad.descripcion as unidad','dependencia.nombre as dependencia', 'programa.nombre as programa',
             'tipo_tramite_unidad.descripcion as tramite','tipo_tramite_unidad.costo', 'tipo_tramite_unidad.idTipo_tramite',
             DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
-            'voucher.archivo as voucher','tramite_detalle.certificado_final')
+            'voucher.archivo as voucher','tramite_detalle.certificado_final','tramite.sede')
             ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
             ->join('unidad','unidad.idUnidad','tramite.idUnidad')
             ->join('usuario','usuario.idUsuario','tramite.idUsuario')
@@ -2034,31 +2058,31 @@ class TramiteController extends Controller
                     }
                 }elseif($tramite->idEstado_tramite==20){
                     // Verificando que el estado del responsable sea el alumno(4) o escuela(5)
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5 || $requisito['responsable']==17)) {
                         $flag=false;
                         if ($requisito['responsable']==4) {
                             $flagAlumno=true;
-                        } else if ($requisito['responsable']==5) {
+                        } else if ($requisito['responsable']==5||$requisito['responsable']==17) {
                             $flagEscuela = true;
                         }
                     }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5)) {
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5||$requisito['responsable']==17)) {
                         
                         $flag2=false;
                     }
                     
                 }else {
-                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8)) {
+                    if ($requisito['des_estado_requisito']=="RECHAZADO" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
                         $flag=false;
                         if ($requisito['responsable']==4) {
                             $flagAlumno=true;
-                        }elseif($requisito['responsable']==5){
+                        }elseif($requisito['responsable']==5||$requisito['responsable']==17){
                             $flagEscuela=true;
                         }elseif($requisito['responsable']==8) {
                             $flagFacultad=true;
                         }
                     }
-                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8)) {
+                    if ($requisito['des_estado_requisito']=="PENDIENTE" && ($requisito['responsable']==4 || $requisito['responsable']==5|| $requisito['responsable']==8||$requisito['responsable']==17)) {
                         $flag2=false;
                     }
                 }
@@ -2163,6 +2187,35 @@ class TramiteController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$request->idTramite)
             ->get();
+
+            $tramite->condicion="REGULAR";
+            // Condición No licenciado
+            $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+            ->where('idmodalidadingreso',10)
+            ->Where('per_dni',$tramite->nro_documento)
+            ->first();
+            if ($noLicenciado) {
+                $tramite->condicion="UNIVERSIDAD NO LICENCIADA";
+            }else {
+                // Amnistiado
+                $amnistiado=Amnistia::where('nro_documento',$tramite->nro_documento)->where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+                if ($amnistiado) {
+                    $tramite->condicion="AMNISTÍA ACADÉMICA";
+                }else {
+                    // Condición segunda profesión en suv
+                    $segundaProfesion=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('idmodalidadingreso',5)
+                    ->Where('alumno.idalumno',$tramite->nro_matricula)
+                    ->first();
+                    if ($segundaProfesion) {
+                        $tramite->condicion="SEGUNDA PROFESIÓN";
+                    }else {
+                        // Condición segunda profesión en sga
+
+                    }
+
+                }
+            }            
 
             // dispatch(new ActualizacionTramiteJob($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad));
             DB::commit();
