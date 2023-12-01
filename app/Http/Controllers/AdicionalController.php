@@ -42,7 +42,10 @@ use File;
 use ZipArchive;
 class AdicionalController extends Controller
 {
-
+    public function __construct()
+    {
+        $this->middleware('jwt', ['except' => ['createCodeDiploma']]);
+    }
     public function eliminarHistorial(){
         try {
             // return "hola";
@@ -353,36 +356,29 @@ class AdicionalController extends Controller
         DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-            $token = JWTAuth::getToken();
-            $apy = JWTAuth::getPayload($token);
-            $idUsuario=$apy['idUsuario'];
-
-            $tramites=Tramite::select('tramite.idTramite_detalle','usuario.apellidos','usuario.nombres')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            // $token = JWTAuth::getToken();
+            // $apy = JWTAuth::getPayload($token);
+            // $idUsuario=$apy['idUsuario'];
+            
+            $tramites=Tramite::select('usuario.apellidos', 'usuario.nombres','tramite.idTramite_detalle')->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa','programa.idPrograma','tramite.idPrograma')
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',44)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',16);
-            })
-            ->where('resolucion.idResolucion',24)
-            ->orderBy('tramite_detalle.nro_libro', 'asc')
-            ->orderBy('tramite_detalle.folio', 'asc')
-            ->orderBy('tramite_detalle.nro_registro', 'asc')
+            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where('resolucion.idResolucion',45)
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('programa.nombre','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
             ->get(); 
 
 
-            $codigoInicial='00044325';
-            foreach ($tramites as $key => $value) {
+            $codigoInicial='00047533';
+            foreach ($tramites as $key=>$tramite) {
                 $codigo=$codigoInicial+$key+1;
                 $tamCodigo=strlen($codigo);
                 switch ($tamCodigo) {
@@ -408,9 +404,8 @@ class AdicionalController extends Controller
                         $codigo="0".$codigo;
                         break;
                 }
-
-                $tramite_detalle=Tramite_Detalle::find($value->idTramite_detalle);
-                $tramite_detalle->codigo_diploma="T".$codigo;
+                $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                $tramite_detalle->codigo_diploma="G".$codigo;
                 $tramite_detalle->save();
             }
             // return $tramites;
