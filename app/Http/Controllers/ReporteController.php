@@ -2376,12 +2376,12 @@ class ReporteController extends Controller
 
     public function indicadores(Request $request){
         return [
-            "certificadosIndicador1"=>$this->indicadorCertificados(2023),
-            "gradosIndicador1"=>$this->indicadorCarpetas()
+            "certificadosIndicador1"=>$this->indicadorCertificados(),
+            "gradosIndicador1"=>$this->indicadorGrados()
         ];
     }
 
-    public function indicadorCertificados($anio){
+    public function indicadorCertificados(){
         $response=array();
         $overview=array();
         $series=array();
@@ -2541,12 +2541,15 @@ class ReporteController extends Controller
             // añadimos los labels  
             array_push($labels,$dependencia->denominacion);
         }        
-        for ($i=0; $i <=3 ; $i++) { 
-            $anio_ingreso=$anio+$i;
+        for ($i=0; $i <=3 ; $i++) {
+            $contIngresantesTotal=0;
+            $contEgresadosTotal=0;
+            
+            $anio_ingreso=substr(($anio+$i),-2);
+            
             $ingresantesFacultad=array(); // array de ingresantes por facultad que van en las series
             $egresadosFacultad=array(); // array de egresados por facultad que van en las series
             
-            // PROGRAMAS DEL SUV SON 40
             foreach ($dependencias as $dependencia) {
 
                 // Total de ingresantes por facultad
@@ -2555,11 +2558,11 @@ class ReporteController extends Controller
                 $contEgresados=0;
                             
 
-                // Programas DEL SUV 
+                // Programas DEL SUV(40 programas) 
                 $programas=ProgramaURAA::where('idUnidad',1)->where('idDependencia',$dependencia->idDependencia)->whereNotNull('idSUV_PREG')->pluck("idSUV_PREG");
                 
                 foreach ($programas as $programa) {
-                    
+                    // return $programa;
                     // INGRESANTES SUV
                     $ingresantesPrograma=Alumno::join('patrimonio.area', 'alumno.idarea','area.idarea')
                     ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
@@ -2567,6 +2570,7 @@ class ReporteController extends Controller
                     ->where('estructura.idestructura',$programa)
                     ->count();
     
+                    // Aumentando la cantidad de ingresantes de la facultad
                     $contIngresantes+=$ingresantesPrograma;
 
                     // EGRESADOS SUV
@@ -2575,7 +2579,7 @@ class ReporteController extends Controller
                     ->join('patrimonio.area', 'alumno.idarea','area.idarea')
                     ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
                     ->where('alumno.alu_estado',6)
-                    ->where('estructura.idestructura',21)
+                    ->where('estructura.idestructura',$programa)
                     ->where('alumno.idalumno','LIKE','%'.$anio_ingreso) // Egresados con el mismo año de ingreso que los ingresantes
                     ->groupBy('alumno.idalumno')
                     ;
@@ -2584,17 +2588,17 @@ class ReporteController extends Controller
                     ->joinSub($subQueryEgresados, 'subQueryEgresados', 
                     function($join){
                         $join->on('subQueryEgresados.idalumno','alumno.idalumno');
-                    })->whereYear('subQueryEgresados.fecha_egreso',($anio_egreso))->count();
+                    })->count();
 
+                    // Aumentando la cantidad de egresados de la facultad
                     $contEgresados+=$egresadosPrograma;
 
                 }
 
                 
-                // Programas DEL SGA, excepto la escuela de derecho, de la facultad de derecho y ciencias políticas, porque es de 6 años
-                $programas=ProgramaURAA::where('idUnidad',1)->where('idDependencia',$dependencia->idDependencia)->whereNotNull('idSGA_PREG')
-                ->where('idPrograma','!=',11)->pluck("idSGA_PREG");
-    
+                // Programas DEL SGA(45 programas)
+                $programas=ProgramaURAA::where('idUnidad',1)->where('idDependencia',$dependencia->idDependencia)->whereNotNull('idSGA_PREG')->pluck("idSGA_PREG");
+
                 foreach ($programas as $programa) {
                     // INGRESANTES SGA
                     $ingresantesPrograma=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
@@ -2603,7 +2607,8 @@ class ReporteController extends Controller
                     ->where('persona.per_login','LIKE','%'.$anio_ingreso)
                     ->where('dependencia.dep_id',$programa)
                     ->count();
-    
+
+                    // Aumentando la cantidad de ingresantes de la facultad
                     $contIngresantes+=$ingresantesPrograma;
 
                     // EGRESADOS SGA
@@ -2615,249 +2620,66 @@ class ReporteController extends Controller
                     ->where('perfil.pfl_estado',true)
                     ->where('sga_datos_alumno.con_id',6)
                     ->where('dependencia.dep_id',$programa)
+                    ->where('persona.per_login','LIKE','%'.$anio_ingreso) // Egresados con el mismo año de ingreso que los ingresantes
                     ->groupBy('perfil.pfl_id');
-
+                    
                     $egresadosPrograma=PersonaSga::select('subQueryEgresados.pfl_id','subQueryEgresados.fecha_egreso')
                     ->join('perfil','persona.per_id','perfil.per_id')
                     ->joinSub($subQueryEgresados, 'subQueryEgresados', 
                     function($join){
                         $join->on('subQueryEgresados.pfl_id','perfil.pfl_id');
-                    })->whereYear('subQueryEgresados.fecha_egreso',($anio_egreso))->count();
+                    })->count();
 
+                    // Aumentando la cantidad de egresados de la facultad
                     $contEgresados+=$egresadosPrograma;
 
                 }
 
                 // Guardando la cantidad de ingresantes por dependencia
                 array_push($ingresantesFacultad,$contIngresantes);
-                $totalIngresantes+=$contIngresantes;
+
+                // Aumentando la cantidad de ingresantes totales por año
+                $contIngresantesTotal+=$contIngresantes;
+
                 // Guardando la cantidad de egresados por dependencia
                 array_push($egresadosFacultad,$contEgresados);
-                $totalEgresados+=$contEgresados;
 
+                // Aumentando la cantidad de egresados totales por año
+                $contEgresadosTotal+=$contEgresados;
+                
+                
             }
-
-            $series1[$anio-$i]=[
+            
+            $series[$anio+$i]=[
                 [
                     "name"=>"Ingresantes",
                     "type"=>"line",
                     "data"=>$ingresantesFacultad
-                ]
-                ,
+
+                ],
                 [
                     "name"=>"Egresados",
                     "type"=>"column",
                     "data"=>$egresadosFacultad
+
                 ]
+            ];  
+
+            $overview[$anio+$i]=[
+                "ingresantes"=>$contIngresantesTotal,
+                "egresados"=>$contEgresadosTotal,
+                "indicador"=>round((($contEgresadosTotal/$contIngresantesTotal)*100),0)
             ];
 
-            // INDICADOR DE 6 AÑOS
-
-            /* restando $i al año de egreso para que se el año actual y el anterior, además se resta 4 para que sean ingresantes de 6 años antes */
-            $anio_ingreso=substr((($anio-$i)-5), -2);
-
-            $ingresantesFacultad=array(); // array de ingresantes por programa que van en las series
-            $egresadosFacultad=array(); // array de egresados por programa que van en las series
-
-            /* Programas SUV de estomatología, farmacia y derecho para el indicador de 6 años */
-            $programas=ProgramaURAA::select('nombre', 'idSUV_PREG')->where('idUnidad',1)->whereIn('idPrograma',[18,19,47])->orderBy('nombre')->get();
-            
-            // Recorriendo los programas del SUV
-            foreach ($programas as $key => $programa) {
-                if (count($labels2)<3) {
-                    array_push($labels2,$programa->nombre); // Labels para el gráfico de 6 años
-                }
-                
-                // INGRESANTES SUV
-                $ingresantesPrograma=Alumno::join('patrimonio.area', 'alumno.idarea','area.idarea')
-                ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
-                ->where('alumno.idalumno','LIKE','%'.$anio_ingreso)
-                ->where('estructura.idestructura',$programa->idSUV_PREG)
-                ->count();
-
-                // $ingresantesFacultad[$key]+=$ingresantesPrograma;
-                array_push($ingresantesFacultad,$ingresantesPrograma);
-
-                $totalIngresantes+=$ingresantesPrograma;
-
-                // EGRESADOS SUV
-                $subQueryEgresados=Alumno::select('alumno.idalumno',DB::raw('max(matricula.mat_fecha) as fecha_egreso'))
-                ->join('matriculas.matricula','matricula.idalumno', 'alumno.idalumno')
-                ->join('patrimonio.area', 'alumno.idarea','area.idarea')
-                ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
-                ->where('alumno.alu_estado',6)
-                ->where('estructura.idestructura',$programa->idSUV_PREG)
-                ->groupBy('alumno.idalumno')
-                ;
-                
-                $egresadosPrograma=Alumno::select('subQueryEgresados.idalumno','subQueryEgresados.fecha_egreso')
-                ->joinSub($subQueryEgresados, 'subQueryEgresados', 
-                function($join){
-                    $join->on('subQueryEgresados.idalumno', '=', 'alumno.idalumno');
-                })->whereYear('subQueryEgresados.fecha_egreso',($anio_egreso))->count();
-
-                // $egresadosFacultad[$key]+=$egresadosPrograma;
-                array_push($egresadosFacultad,$egresadosPrograma);
-                $totalEgresados+=$egresadosPrograma;
-                
-            }
-            
-            /* Programas SGA de estomatología, farmacia y derecho para el indicador de 6 años */
-            $programas=ProgramaURAA::where('idUnidad',1)->whereIn('idPrograma',[18,19,11])->orderBy('nombre')->pluck('idSGA_PREG');
-            foreach ($programas as $key => $programa) {                
-                // INGRESANTES SGA
-                $ingresantesPrograma=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
-                ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-                ->where('perfil.pfl_cond','AL')
-                ->where('persona.per_login','LIKE','%'.$anio_ingreso)
-                ->where('dependencia.dep_id',$programa)
-                ->count();
-
-                $ingresantesFacultad[$key]+=$ingresantesPrograma;
-
-                $totalIngresantes+=$ingresantesPrograma;
-                // EGRESADOS SGA
-                $subQueryEgresados= PersonaSga::select('perfil.pfl_id',DB::raw('max(sga_matricula.mat_fecha) as fecha_egreso'))
-                ->join('perfil','persona.per_id','perfil.per_id')
-                ->join('sga_datos_alumno','perfil.pfl_id','sga_datos_alumno.pfl_id')
-                ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-                ->join('sga_matricula','perfil.pfl_id','sga_matricula.pfl_id')
-                ->where('perfil.pfl_estado',true)
-                ->where('sga_datos_alumno.con_id',6)
-                ->where('dependencia.dep_id',$programa)
-                ->groupBy('perfil.pfl_id');
-
-                $egresadosPrograma=PersonaSga::select('subQueryEgresados.pfl_id','subQueryEgresados.fecha_egreso')
-                ->join('perfil','persona.per_id','perfil.per_id')
-                ->joinSub($subQueryEgresados, 'subQueryEgresados', 
-                function($join){
-                    $join->on('subQueryEgresados.pfl_id','perfil.pfl_id');
-                })->whereYear('subQueryEgresados.fecha_egreso',($anio_egreso))->count();
-
-                $egresadosFacultad[$key]+=$egresadosPrograma;
-                
-                $totalEgresados+=$egresadosPrograma;
-            }
-
-            $series2[$anio-$i]=[
-                [
-                    "name"=>"Ingresantes",
-                    "type"=>"line",
-                    "data"=>$ingresantesFacultad
-                ]
-                ,
-                [
-                    "name"=>"Egresados",
-                    "type"=>"column",
-                    "data"=>$egresadosFacultad
-                ]
-            ];
-
-            // INDICADOR 7 AÑOS
-
-            /* restando $i al año de egreso para que se el año actual y el anterior, además se resta 4 para que sean ingresantes de 6 años antes */
-            $anio_ingreso=substr((($anio-$i)-6), -2);
-
-            $ingresantesFacultad=array(); // array de ingresantes por programa que van en las series
-            $egresadosFacultad=array(); // array de egresados por programa que van en las series
-
-            // Programa de medicina de 7 años
-            $programaMedicina=ProgramaURAA::select('nombre', 'idSUV_PREG','idSGA_PREG')->where('idUnidad',1)->where('idPrograma',36)->first();
-            
-            // LABELS DEL PROGRAMA DE MEDICINA
-            if (count($labels3)<1) {
-                array_push($labels3,$programaMedicina->nombre); // Labels para el gráfico de 7 añoS
-            }
-
-            // INGRESANTES SUV
-            $ingresantesPrograma=Alumno::join('patrimonio.area', 'alumno.idarea','area.idarea')
-            ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
-            ->where('alumno.idalumno','LIKE','%'.$anio_ingreso)
-            ->where('estructura.idestructura',$programaMedicina->idSUV_PREG)
-            ->count();
-
-            array_push($ingresantesFacultad,$ingresantesPrograma);
-
-            $totalIngresantes+=$ingresantesPrograma;
-
-            // EGRESADOS SUV
-            $subQueryEgresados=Alumno::select('alumno.idalumno',DB::raw('max(matricula.mat_fecha) as fecha_egreso'))
-            ->join('matriculas.matricula','matricula.idalumno', 'alumno.idalumno')
-            ->join('patrimonio.area', 'alumno.idarea','area.idarea')
-            ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
-            ->where('alumno.alu_estado',6)
-            ->where('estructura.idestructura',$programaMedicina->idSUV_PREG)
-            ->groupBy('alumno.idalumno')
-            ;
-                
-            $egresadosPrograma=Alumno::select('subQueryEgresados.idalumno','subQueryEgresados.fecha_egreso')
-            ->joinSub($subQueryEgresados, 'subQueryEgresados', 
-            function($join){
-                $join->on('subQueryEgresados.idalumno', '=', 'alumno.idalumno');
-            })->whereYear('subQueryEgresados.fecha_egreso',($anio_egreso))->count();
-
-            array_push($egresadosFacultad,$egresadosPrograma);
-
-            $totalEgresados+=$egresadosPrograma;
-
-            // INGRESANTES SGA
-            $ingresantesPrograma=PersonaSga::join('perfil','persona.per_id','perfil.per_id')
-            ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-            ->where('perfil.pfl_cond','AL')
-            ->where('persona.per_login','LIKE','%'.$anio_ingreso)
-            ->where('dependencia.dep_id',$programaMedicina->idSGA_PREG)
-            ->count();
-
-            $ingresantesFacultad[0]+=$ingresantesPrograma;
-
-            $totalIngresantes+=$ingresantesPrograma;
-
-            // EGRESADOS SGA
-            $subQueryEgresados= PersonaSga::select('perfil.pfl_id',DB::raw('max(sga_matricula.mat_fecha) as fecha_egreso'))
-            ->join('perfil','persona.per_id','perfil.per_id')
-            ->join('sga_datos_alumno','perfil.pfl_id','sga_datos_alumno.pfl_id')
-            ->join('dependencia','dependencia.dep_id','perfil.dep_id')
-            ->join('sga_matricula','perfil.pfl_id','sga_matricula.pfl_id')
-            ->where('perfil.pfl_estado',true)
-            ->where('sga_datos_alumno.con_id',6)
-            ->where('dependencia.dep_id',$programaMedicina->idSGA_PREG)
-            ->groupBy('perfil.pfl_id');
-
-            $egresadosPrograma=PersonaSga::select('subQueryEgresados.pfl_id','subQueryEgresados.fecha_egreso')
-            ->join('perfil','persona.per_id','perfil.per_id')
-            ->joinSub($subQueryEgresados, 'subQueryEgresados', 
-            function($join){
-                $join->on('subQueryEgresados.pfl_id','perfil.pfl_id');
-            })->whereYear('subQueryEgresados.fecha_egreso',($anio_egreso))->count();
-
-            $egresadosFacultad[0]+=$egresadosPrograma;
-
-            $totalEgresados+=$egresadosPrograma;
-
-            $series3[$anio-$i]=[
-                [
-                    "name"=>"Ingresantes",
-                    "type"=>"line",
-                    "data"=>$ingresantesFacultad
-                ]
-                ,
-                [
-                    "name"=>"Egresados",
-                    "type"=>"column",
-                    "data"=>$egresadosFacultad
-                ]
-            ];
-
-            $overview[$anio-$i]=[
-                "ingresantes"=>$totalIngresantes,
-                "egresados"=>$totalEgresados,
-                "indicador"=>round((($totalEgresados/$totalIngresantes)*100),0)
-            ];
-
-            array_push($range,$anio_egreso);
-            
         }
+
+        return [
+            "labels"=> $labels,
+            "series"=> $series,
+            "overview"=>$overview
+        ];
     }
+
     public function indicadorCarpetas(){
         // Array de respuestas
         $response=array();
@@ -2965,6 +2787,7 @@ class ReporteController extends Controller
                     ->join('sga_matricula','perfil.pfl_id','sga_matricula.pfl_id')
                     ->where('perfil.pfl_estado',true)
                     ->where('sga_datos_alumno.con_id',6)
+                    ->where('persona.per_login','LIKE','%'.$anio_ingreso)
                     ->where('dependencia.dep_id',$programa)
                     ->groupBy('perfil.pfl_id');
 
@@ -3037,6 +2860,7 @@ class ReporteController extends Controller
                 ->join('patrimonio.area', 'alumno.idarea','area.idarea')
                 ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
                 ->where('alumno.alu_estado',6)
+                ->where('alumno.idalumno','LIKE','%'.$anio_ingreso)
                 ->where('estructura.idestructura',$programa->idSUV_PREG)
                 ->groupBy('alumno.idalumno')
                 ;
@@ -3075,6 +2899,7 @@ class ReporteController extends Controller
                 ->join('sga_matricula','perfil.pfl_id','sga_matricula.pfl_id')
                 ->where('perfil.pfl_estado',true)
                 ->where('sga_datos_alumno.con_id',6)
+                ->where('persona.per_login','LIKE','%'.$anio_ingreso)
                 ->where('dependencia.dep_id',$programa)
                 ->groupBy('perfil.pfl_id');
 
@@ -3137,6 +2962,7 @@ class ReporteController extends Controller
             ->join('patrimonio.area', 'alumno.idarea','area.idarea')
             ->join('patrimonio.estructura' , 'estructura.idestructura' , 'area.idestructura')
             ->where('alumno.alu_estado',6)
+            ->where('alumno.idalumno','LIKE','%'.$anio_ingreso)
             ->where('estructura.idestructura',$programaMedicina->idSUV_PREG)
             ->groupBy('alumno.idalumno')
             ;
@@ -3171,6 +2997,7 @@ class ReporteController extends Controller
             ->join('sga_matricula','perfil.pfl_id','sga_matricula.pfl_id')
             ->where('perfil.pfl_estado',true)
             ->where('sga_datos_alumno.con_id',6)
+            ->where('persona.per_login','LIKE','%'.$anio_ingreso)
             ->where('dependencia.dep_id',$programaMedicina->idSGA_PREG)
             ->groupBy('perfil.pfl_id');
 

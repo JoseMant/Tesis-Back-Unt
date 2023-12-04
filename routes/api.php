@@ -376,6 +376,7 @@ Route::get('reporte/status_tramites/carpetas/aptas/{idDependencia}/{idTipo_trami
 Route::get('indicadores', 'ReporteController@indicadores');
 Route::get('indicador/certificados', 'ReporteController@indicadorCertificados');
 Route::get('indicador/grados', 'ReporteController@indicadorGrados');
+Route::get('indicador/carpetas', 'ReporteController@indicadorCarpetas');
 
 // Adicional
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
