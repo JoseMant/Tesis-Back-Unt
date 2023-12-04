@@ -50,10 +50,20 @@ Route::get('tramites/docentes/validar','TramiteSecretariaController@GetDocenteVa
 Route::post('tramites/docentes/validados','TramiteSecretariaController@validarDocente');
 Route::post('docente/rechazar/{id}','TramiteSecretariaController@rechazarDocente');
 Route::get('tramites/docentes/finalizados','TramiteSecretariaController@GetDocenteFinalizados');
+Route::get('docente/search', 'TramiteSecretariaController@getDocenteByCodigo');
 
+//RESOLUCIONES
+Route::post('resoluciones/update/{id}','TramiteController@updateResolucion');
+
+Route::get('tramites/resoluciones/validar','TramiteSecretariaController@GetResolucionesValidar');
+Route::put('tramites/resoluciones/update','TramiteSecretariaController@updateTramiteRequisitos');
+Route::get('tramites/resoluciones/observadas','TramiteSecretariaController@GetResolucionesObservadas');
+Route::get('tramites/resoluciones/finalizadas','TramiteSecretariaController@GetResolucionesFinalizados');
 
 // Route::post('tramite/update/{id}','TramiteController@update');
-Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+// Route::get('tramite/usuario/all','TramiteController@GetTramitesByUser');
+Route::get('tramite/{id}','TramiteController@GetTramiteById');
+
 //tramite fisico
 Route::post('tramites_fisicos','Tramite_FisicoController@PostTramiteFisicoByUser');
 //
@@ -81,6 +91,7 @@ Route::get('tramite/carnets/solicitados','CarnetController@GetCarnetsSolicitados
 // Route::get('tramite/carnets/aprobados/refresh','CarnetController@GetCarnetsAprobadosRefresh');
 Route::get('carnets/solicitados/recibidos','CarnetController@setRecibidos');
 Route::get('tramite/carnets/recibidos','CarnetController@GetCarnetsRecibidos');
+Route::get('tramite/carnets/finalizados','CarnetController@GetCarnetsFinalizados');
 // Route::get('tramite/carnets/entregados','CarnetController@GetCarnetsEntregados');
 Route::get('carnets/validacion/sunedu','CarnetController@EnvioValidacionSunedu');
 Route::put('carnets/recibidos/finalizar','CarnetController@setEntregado');
@@ -97,6 +108,7 @@ Route::get('unidades','UnidadController@index');
 Route::get('tipo_tramites_unidades/{idTipo_tramite}/{idUnidad}','Tipo_Tramite_UnidadController@getAllByTipo_tramiteUnidad');
 Route::get('requisitos/{idTipo_tramite_unidad}','RequisitoController@getAllByTipo_tramite_unidad');
 Route::get('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2');
+//Route::post('facultades_alumno/{idUnidad}','PersonaController@DatosAlumno2'); //Método duplicado para la documentación en POSTMAN
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
 
@@ -109,7 +121,6 @@ Route::get('dedicaciones/docente','DedicacionDocenteController@index');
 
 Route::resource('motivos_certificado','Motivo_CertificadoController');
 Route::resource('alumnosSE','PersonaSEController');
-
 
 //VOUCHERS Y TRÁMITES
 Route::resource('/voucher','VoucherController');
@@ -125,6 +136,9 @@ Route::put('tramite/update/requisito','TramiteController@aprobarRequisito');
 Route::post('tramites/notification','TramiteController@notificacionUpdate');
 Route::post('tramites/anular','TramiteController@anularTramite');
 Route::post('carpetas/finalizar','CarpetaController@finalizarCarpetas');
+
+Route::put('vouchers/pendientes/validarVoucher/{id}', 'TramiteController@validarVoucher2');
+
 //-----------------PDFs
 Route::get('fut/{uuid}','PDF_FutController@pdf_fut');
 Route::get('fut_fisico/{idTramite}','PDF_Fut_FisicoController@pdf_fut_fisico');
@@ -148,6 +162,7 @@ Route::put('settings/password','UserController@resetPassword');
 
 //TIPO TRAMITE UNIDAD
 Route::get('tipos_unidad_tramite/pendientes_impresion','Tipo_Tramite_UnidadController@getTramitesforPendientesImpresion');
+Route::get('tipos_unidad_tramite/validacion_ura','Tipo_Tramite_UnidadController@getTramitesforValidaUraDuplicados');
 
 //TIPOS DE TRÁMITE
 Route::resource('tipos_tramites','Tipo_TramiteController');
@@ -163,8 +178,9 @@ Route::resource('historial_estados','Historial_EstadoController');
 
 
 //DIPLOMA_ANULACION
-Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
 
+Route::resource('historial_codigo_diploma','Historial_Codigo_DiplomaController');
+Route::put('edit_ultimo_historial','Historial_Codigo_DiplomaController@editUltimoRegistro');
 
 
 // E-mail verification
@@ -271,6 +287,7 @@ Route::put('titulos/datos', 'TituloController@GuardarDatosDiploma');
 //Route::put('create/codigo', 'TituloController@createCodeDiploma');
 Route::get('carnets/solicitados','PDF_CarnetsController@pdf_carnetsSolicitados');
 Route::get('carnets/recibidos','PDF_CarnetsController@pdf_carnetsRecibidos');
+Route::get('carnets/finalizados','PDF_CarnetsController@pdf_carnetsFinalizados');
 Route::get('sedes/uraa','PDF_CarnetsController@getSedesUraa');
 
 //TITULOS segunda especialidad
@@ -299,8 +316,12 @@ Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma
 // Route::put('create/codigo', 'TituloController@createCodeDiploma');
 
 //DUPLICADOS
-Route::get('diplomas/duplicados/validar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicados');
-Route::get('diplomas/duplicados/aprobar/', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosAprobados');
+Route::get('diplomas/duplicados/validar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosValidados');
+Route::get('diplomas/duplicados/aprobar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosAprobados');
+Route::get('diplomas/duplicados/revalidar', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosRevalidados');
+Route::get('diplomas/duplicados/validar/ura', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosValidacionUra');
+Route::get('diplomas/duplicados/datos/diplomas/ura', 'Diplomas_DuplicadosController@GetDiplomasDuplicadosDatosDiplomaUra');
+Route::put('diplomas/duplicados/datos', 'Diplomas_DuplicadosController@GuardarDatosDiploma');//Usado
 
 
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
@@ -322,6 +343,8 @@ Route::get('resoluciones/all', 'ResolucionController@index');
 Route::post('resoluciones/create', 'ResolucionController@store');
 Route::put('resoluciones/update/{id}', 'ResolucionController@update');
 Route::get('oficio/resoluciones/{idOficio}', 'ResolucionController@getResolucionesLibres');
+Route::get('tipos/resoluciones', 'ResolucionController@getTipoResoluciones');
+Route::get('resolucion/tramites/duplicados/{idResolucion}', 'ResolucionController@getTramitesDuplicadosLibres');
 
 // OFICIOS
 Route::get('oficios/all', 'OficioController@index');
@@ -347,6 +370,15 @@ Route::get('reporte/expedientesPDF', 'ReporteController@expedientesPDF');
 Route::get('reporte/certificados/observados', 'ReporteController@certificadosObservados');
 Route::get('programas/{idDependencia}', 'ReporteController@getProgramas');
 Route::get('diploma', 'ReporteController@GetDiploma');
+Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
+Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
+Route::get('reporte/status_tramites/carpetas/aptas/{idDependencia}/{idTipo_tramite_unidad}/{cronograma}', 'ReporteController@crearExcelCarpetasAptas');
+Route::get('indicadores', 'ReporteController@indicadores');
+Route::get('indicador/certificados', 'ReporteController@indicadorCertificados');
+Route::get('indicador/grados', 'ReporteController@indicadorGrados');
+Route::get('indicador/carpetas', 'ReporteController@indicadorCarpetas');
+
+// Adicional
 Route::post('eliminar', 'AdicionalController@eliminarHistorial');
 Route::get('fecha', 'AdicionalController@getFecha');
 Route::get('actualizar', 'AdicionalController@rechazar');
@@ -358,5 +390,7 @@ Route::get('agregar/programa/diploma_carpeta', 'AdicionalController@setValuesPro
 Route::get('uuid', 'AdicionalController@setValuesUuid');
 Route::get('createCodeDiploma', 'AdicionalController@createCodeDiploma');
 Route::get('createHistorialCodeDiploma', 'AdicionalController@createHistorialCodeDiploma');
-Route::get('reporte/elaboracion_carpeta/carpetas_aptas', 'ReporteController@reporteCarpetasAptas');
-Route::get('reporte/carpetas_aptas/excel/{idDependencia}/{cronograma}', 'ReporteController@aptosColacion');
+Route::get('fotosIngresantes', 'AdicionalController@fotosIngresantes2023');
+
+Route::get('graduado', 'AdicionalController@getGraduado');
+Route::get('reporte/tramites/espera', 'ReporteController@tramitesEspera');

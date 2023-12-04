@@ -90,9 +90,7 @@ class VoucherController extends Controller
                     // VERIFICANDO SI ES DE UNA UNIVERSIDAD NO LICENCIADA(10)
                     $noLicenciado=false;
                     $alumnoSUV=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
-                    ->where(function($query) {
-                        $query->where('idmodalidadingreso',10);
-                    })
+                    ->where('idmodalidadingreso',10)
                     ->Where('per_dni',$usuario->nro_documento)
                     ->first();
                     if ($alumnoSUV) {
@@ -100,7 +98,7 @@ class VoucherController extends Controller
                     }
 
                     // REGISTRAMOS EL CERTIFICADO EN PARALELO
-                    if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==34 
+                    if (($tramite->idTipo_tramite_unidad==15 && $noLicenciado==false) || $tramite->idTipo_tramite_unidad==34 
                     || ($tramite->idTipo_tramite_unidad==16 && $noLicenciado==false && ($tramite->idPrograma==11 || $tramite->idPrograma==47))) {
                         $tramiteCertificado=new Tramite;
                         $tramiteCertificado->nro_tramite=$tramite->nro_tramite;
@@ -179,9 +177,15 @@ class VoucherController extends Controller
                     $historial_estado->save();
                     $tramite->idEstado_tramite = $historial_estado->idEstado_nuevo;
                     $tramite->update();
-                } elseif ($tipo_tramite->idTipo_tramite==5){
+                } elseif ($tipo_tramite->idTipo_tramite==6||$tipo_tramite->idTipo_tramite==9){
+                    // SI EL TRÁMITE ES DE GRADO o TITULO, SE ASIGNA AUTOMÁTICAMENTE UN USUARIO
+                    if ($tramite->idTipo_tramite_unidad==42) {
+                        $tramite->idUsuario_asignado=67;
+                    } else {
+                        $tramite->idUsuario_asignado=68;
+                    }
                     //REGISTRAMOS EL ESTADO DEL TRÁMITE REGISTRADO
-                    $historial_estado = $this->setHistorialEstado($tramite->idTramite, 3, 42, $idUsuario);
+                    $historial_estado = $this->setHistorialEstado($tramite->idTramite, 3, 53, $idUsuario);
                     $historial_estado->save();
                 }
             } elseif ($voucher->des_estado_voucher=="RECHAZADO") {
@@ -403,7 +407,7 @@ class VoucherController extends Controller
         'tramite.nro_matricula', 'tramite.exonerado_archivo',
         'programa.nombre as programa',
         DB::raw('CONCAT(tipo_tramite.descripcion,"-",tipo_tramite_unidad.descripcion) as tramite'), 'tipo_tramite_unidad.costo',
-        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'), 
+        'usuario.nro_documento', DB::raw('CONCAT(usuario.nombres," ",usuario.apellidos) as alumno'),'usuario.celular as celular','usuario.correo as correo',
         'voucher.idVoucher', 'voucher.entidad','voucher.nro_operacion','voucher.fecha_operacion','voucher.archivo','voucher.comentario')
         ->join('voucher','tramite.idVoucher','voucher.idVoucher')
         ->join('programa', 'programa.idPrograma', 'tramite.idPrograma')

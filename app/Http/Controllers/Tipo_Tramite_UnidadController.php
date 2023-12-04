@@ -26,7 +26,10 @@ class Tipo_Tramite_UnidadController extends Controller
         return Tipo_tramite_unidad::whereIn('idTipo_tramite_unidad',[15,16,34])->get();
     }
 
-
+    public function getTramitesforValidaUraDuplicados()
+    {
+        return Tipo_tramite_unidad::whereIn('idTipo_tramite_unidad',[42,43,44])->get();
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -97,9 +100,8 @@ class Tipo_Tramite_UnidadController extends Controller
         $tipo_tramites= Tipo_Tramite_Unidad::where('idTipo_tramite',$idTipo_tramite)
         ->where('idUnidad',$idUnidad)
         ->where('estado',true)
+        ->orderBy('descripcion', 'ASC')
         ->get();
-        // $requisitos = Requisito::where('idTipo_tramite_unidad',$idTipo_tramite)->get();
-        // return response()->json(['status' => '200', 'tipos_unida_tratmites' => $tipos,'requisitos'=>$requisitos], 200);
         return response()->json(['status' => '200', 'tipo_tramite_unidad' => $tipo_tramites], 200);
     }
 }

@@ -144,14 +144,20 @@
     <div class="contenido">
         <div class="alert alert-info mensaje" role="alert">
 						<div style="text-align: center;">
-							<h4>NOTIFICACIÓN DE OBSERVACIÓN DE TRÁMITE</h4>
+							<h4>NOTIFICACIÓN DE FINALIZACIÓN DE TRÁMITE</h4>
 							<img class="robot" src="https://i.ibb.co/5RsJVpc/robot-Confirmation.png" width="50%">
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-							<p>Hola {{$usuario['nombres']}} {{$usuario['apellidos']}}, el trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado 
-                                virtualmente ha sido observado. Código de trámite es: N° {{$tramite['nro_tramite']}}.
-                            </p>
+							
+                                
+                                <p>
+                                    Se finalizó exitosamente el proceso del trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado.
+                                    Código de trámite es: N° {{$tramite['nro_tramite']}}.
+                                    Buen día.
+                                </p>
+                            
+                            
 						</div>
             <hr>
 						<a href="https://tramites-uraa.unitru.edu.pe/" target="_blank"><button type="button" class="btn btn-info">Ingresar al sistema</button></a>

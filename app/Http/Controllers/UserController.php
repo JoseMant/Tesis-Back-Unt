@@ -31,8 +31,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos',
-        'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol',
+        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.apellido_paterno','usuario.apellido_materno', 'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo', 'usuario.correo2', 'usuario.celular','usuario.sexo','tipo_usuario.nombre as rol',
         'usuario.confirmed','usuario.estado','usuario.idDependencia')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario','!=',1)
@@ -52,8 +51,8 @@ class UserController extends Controller
     }
     public function getUsuariosUraa()
     {
-        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-        'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol')
+        $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.apellido_paterno','usuario.apellido_materno', 'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo', 'usuario.correo2', 'usuario.celular','usuario.sexo','tipo_usuario.nombre as rol',
+        'usuario.confirmed','usuario.estado','usuario.idDependencia')
         ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
         ->where('usuario.idTipo_usuario',2)
         ->get();
@@ -62,8 +61,7 @@ class UserController extends Controller
     
     public function buscar(Request $request){
         if ($request->query('query')!="") {
-            $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
+            $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos', 'usuario.apellido_paterno', 'usuario.apellido_materno', 'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo', 'usuario.correo2', 'usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idTipo_usuario','!=',1)
             ->where(function($query) use ($request)
@@ -76,10 +74,16 @@ class UserController extends Controller
             ->get();
             foreach ($usuarios as $key => $usuario) {
                 $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
+                if (count($usuario->programas) > 0) {
+                    $programa = ProgramaURAA::find($usuario->programas[0]);
+                    $usuario->idFacultad = $programa->idDependencia;
+                } else {
+                    $usuario->idFacultad = $usuario->idDependencia;
+                }
             }
         }else{
-            $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
+            $usuarios=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos', 'usuario.apellido_paterno', 'usuario.apellido_materno','usuario.tipo_documento','usuario.nro_documento',
+            'usuario.correo', 'usuario.correo2', 'usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idTipo_usuario','!=',1)
             ->where('usuario.idTipo_usuario','!=',4)
@@ -87,6 +91,12 @@ class UserController extends Controller
             ->get();
             foreach ($usuarios as $key => $usuario) {
                 $usuario->programas = Usuario_Programa::where('idUsuario', $usuario->idUsuario)->pluck('idPrograma');
+                if (count($usuario->programas) > 0) {
+                    $programa = ProgramaURAA::find($usuario->programas[0]);
+                    $usuario->idFacultad = $programa->idDependencia;
+                } else {
+                    $usuario->idFacultad = $usuario->idDependencia;
+                }
             }
         }
         return response()->json($usuarios, 200);
@@ -123,20 +133,31 @@ class UserController extends Controller
                     return response()->json(['status' => '400', 'message' => 'El usuario ya se encuentra registrado!!'], 400);
                 }
             }
+
+            //NUEVO USUARIO
             $usuario=new User();
             $usuario->idTipo_usuario=$request->idTipo_usuario;
             $usuario->username=$request->username;
             $usuario->password=Hash::make($request->nro_documento);
+            $usuario->nro_documento=$request->nro_documento;
             $usuario->nombres=$request->nombres;
-            $usuario->apellidos=$request->apellidos;
+            $usuario->apellido_paterno=$request->apellido_paterno;
+            $usuario->apellido_materno=$request->apellido_materno;
+            $usuario->apellidos=$request->apellido_paterno.' '.$request->apellido_materno;
             $usuario->tipo_documento=$request->tipo_documento;
+
             if ($request->idDependencia) {
                 if($usuario->idTipo_usuario!=5){
                     $usuario->idDependencia=$request->idDependencia;
                 }
             }
-            $usuario->nro_documento=$request->nro_documento;
+            
             $usuario->correo=$request->correo;
+
+            if($request->correo2){
+                $usuario->correo2=$request->correo2;
+            }
+            
             $usuario->celular=$request->celular;
             $usuario->sexo=$request->sexo;
             $usuario->confirmed=1;
@@ -144,8 +165,8 @@ class UserController extends Controller
             $usuario->reset_password=null;
             $usuario->estado=1;
             $usuario->save();
-            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
+            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.apellido_paterno', 'usuario.apellido_materno','usuario.tipo_documento','usuario.nro_documento',
+            'usuario.correo', 'usuario.correo2', 'usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$usuario->idUsuario)
             ->first();
@@ -213,19 +234,31 @@ class UserController extends Controller
         try {
             $usuario=User::find($id);
             $usuario->idTipo_usuario=$request->idTipo_usuario;
+            $usuario->nro_documento=$request->nro_documento;
+            $usuario->tipo_documento=$request->tipo_documento;
             $usuario->username=$request->username;
             $usuario->nombres=$request->nombres;
-            $usuario->apellidos=$request->apellidos;
+            $usuario->apellido_paterno=$request->apellido_paterno;
+            $usuario->apellido_materno=$request->apellido_materno;
+            $usuario->apellidos=$request->apellido_paterno.' '.$request->apellido_materno;
+
             if ($request->idDependencia) {
                 if($usuario->idTipo_usuario!=5){
                     $usuario->idDependencia=$request->idDependencia;
                 }
             }
+
+            $usuario->correo=$request->correo;
+
+            if($request->correo2) $usuario->correo2=$request->correo2;
+
+            $usuario->sexo=$request->sexo;
             $usuario->celular=$request->celular;
             $usuario->estado=$request->estado;
             $usuario->update();
-            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos','usuario.tipo_documento','usuario.nro_documento',
-            'usuario.correo','usuario.celular','usuario.sexo','tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
+            $usuario=User::select('usuario.idUsuario','usuario.idTipo_usuario','usuario.username','usuario.nombres','usuario.apellidos',
+            'usuario.tipo_documento','usuario.nro_documento', 'usuario.correo','usuario.correo2','usuario.celular','usuario.sexo',
+            'tipo_usuario.nombre as rol','usuario.confirmed','usuario.estado','usuario.idDependencia')
             ->join('tipo_usuario','tipo_usuario.idTipo_usuario','usuario.idTipo_usuario')
             ->where('usuario.idUsuario',$id)
             ->first();
@@ -254,6 +287,7 @@ class UserController extends Controller
                 $programa=ProgramaURAA::find($programas[0]);
                 $usuario->idFacultad=$programa->idDependencia;
             }
+            
             $usuario->programas=$request->programas;
             
             DB::commit();

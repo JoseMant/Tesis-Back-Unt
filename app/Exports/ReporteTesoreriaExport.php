@@ -21,10 +21,11 @@ class ReporteTesoreriaExport implements FromCollection,WithHeadings,ShouldAutoSi
     public $usuario_programas;
 
     public function __construct($fecha_inicio,$fecha_fin,$idTipo_usuario,$usuario_programas){
+        // dd($usuario_programas);
         $this->fecha_inicio = $fecha_inicio;
         $this->fecha_fin = $fecha_fin;
-        $this->$idTipo_usuario=$idTipo_usuario;
-        $this->$usuario_programas=$usuario_programas;
+        $this->idTipo_usuario=$idTipo_usuario;
+        $this->usuario_programas=$usuario_programas;
     }
     public function registerEvents(): array
     {

@@ -149,11 +149,26 @@
 						</div>
 						<hr>
 						<div style="text-align: justify!important;">
-							<p>
-                                Se ha finalizado el proceso de tu trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado. 
-                                Tu código de trámite es: N° {{$tramite['nro_tramite']}}. 
-                                Recuerda ingresar al sistema para revisar el estado de tus trámites.
-                            </p>
+							
+                                @if($tipo_tramite_unidad['idTipo_tramite_unidad']==38 || $tipo_tramite_unidad['idTipo_tramite_unidad']==39) 
+                                <p>
+                                    Se ha finalizado el proceso del trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado
+                                    para el docente: {{$docente['apellidos']}} {{$docente['nombres']}} del {{$departamento['dep_nombre']}}. 
+                                    Código de trámite es: N° {{$tramite['nro_tramite']}}.
+                                
+                                    Datos de la cuenta:
+                                        Usuario: {{$docente['per_login']}}
+                                        Contraseña: {{$docente['per_login']}}
+                                    Buen día.
+                                </p>
+                                @else
+                                <p>
+                                    Se ha finalizado el proceso del trámite de {{$tipo_tramite['descripcion']}} - {{$tipo_tramite_unidad['descripcion']}} realizado
+                                    para el docente: {{$docente->apellidos}} {{$docente->nombres}} del {{$departamento['dep_nombre']}}. 
+                                    Código de trámite es: N° {{$tramite['nro_tramite']}}.
+                                </p>
+                                @endif
+                            
 						</div>
             <hr>
 						<a href="https://tramites-uraa.unitru.edu.pe/" target="_blank"><button type="button" class="btn btn-info">Ingresar al sistema</button></a>

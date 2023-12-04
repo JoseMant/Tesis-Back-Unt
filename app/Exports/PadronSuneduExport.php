@@ -13,9 +13,11 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 class PadronSuneduExport implements WithMultipleSheets
 {
     public $idResolucion;
+    public $tipo_emision;
 
-    public function __construct($idResolucion){
+    public function __construct($idResolucion,$tipo_emision){
         $this->idResolucion = $idResolucion;
+        $this->tipo_emision = $tipo_emision;
     }
     /**
      * @return array
@@ -24,7 +26,7 @@ class PadronSuneduExport implements WithMultipleSheets
     {
         $sheets = [];
 
-        $sheets[] = new HojaPadron($this->idResolucion);
+        $sheets[] = new HojaPadron($this->idResolucion,$this->tipo_emision);
         $sheets[] = new MaestroExport();
 
         return $sheets;

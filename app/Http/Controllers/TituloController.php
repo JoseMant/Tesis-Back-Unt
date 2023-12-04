@@ -36,6 +36,7 @@ use App\Alumno;
 use App\Acreditacion;
 use App\Graduado;
 use App\Usuario_Programa;
+use App\Amnistia;
 class TituloController extends Controller
 {
     public function __construct()
@@ -163,7 +164,7 @@ class TituloController extends Controller
         foreach ($tramites as $key => $tramite) {
             $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite','requisito.guardado')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
@@ -371,7 +372,7 @@ class TituloController extends Controller
         foreach ($tramites as $key => $tramite) {
             $tramite->fut="fut/".$tramite->uuid;
             $tramite->requisitos=Tramite_Requisito::select('requisito.idRequisito','requisito.nombre','tramite_requisito.archivo','tramite_requisito.idUsuario_aprobador','tramite_requisito.validado',
-            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite')
+            'tramite_requisito.comentario','tramite_requisito.des_estado_requisito','requisito.responsable','requisito.extension','tramite_requisito.idTramite','requisito.guardado')
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
@@ -708,7 +709,7 @@ class TituloController extends Controller
         DB::raw('CONCAT(usuario.apellidos," ",usuario.nombres) as solicitante'), 'usuario.nro_documento', 'usuario.correo',
         'voucher.archivo as voucher',
         'cronograma_carpeta.fecha_cierre_alumno',
-        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.uuid')
+        'cronograma_carpeta.fecha_cierre_secretaria','cronograma_carpeta.fecha_cierre_decanato','cronograma_carpeta.fecha_colacion','tramite.uuid','tramite.idTipo_tramite_unidad')
         ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
         ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
         ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
@@ -742,6 +743,36 @@ class TituloController extends Controller
             ->join('requisito','requisito.idRequisito','tramite_requisito.idRequisito')
             ->where('idTramite',$tramite->idTramite)
             ->get();
+
+            $tramite->condicion="REGULAR";
+            // Condición No licenciado
+            $noLicenciado=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+            ->where('idmodalidadingreso',10)
+            ->Where('per_dni',$tramite->nro_documento)
+            ->first();
+            if ($noLicenciado) {
+                $tramite->condicion="UNIVERSIDAD NO LICENCIADA";
+            }else {
+                // Amnistiado
+                $amnistiado=Amnistia::where('nro_documento',$tramite->nro_documento)->where('idTipo_tramite_unidad',$tramite->idTipo_tramite_unidad)->first();
+                if ($amnistiado) {
+                    $tramite->condicion="AMNISTÍA ACADÉMICA";
+                }else {
+                    // Condición segunda profesión en suv
+                    $segundaProfesion=PersonaSuv::join('matriculas.alumno','matriculas.alumno.idpersona','persona.idpersona')
+                    ->where('idmodalidadingreso',5)
+                    ->Where('alumno.idalumno',$tramite->nro_matricula)
+                    ->first();
+                    if ($segundaProfesion) {
+                        $tramite->condicion="SEGUNDA PROFESIÓN";
+                    }else {
+                        // Condición segunda profesión en sga
+
+                    }
+
+                }
+            }
+
         }
         $pagination=$this->Paginacion($tramites, $request->query('size'), $request->query('page')+1);
         $begin = ($pagination->currentPage()-1)*$pagination->perPage();

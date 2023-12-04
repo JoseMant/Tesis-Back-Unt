@@ -129,7 +129,7 @@ class HojaPadronOficio implements WithTitle,FromCollection,WithHeadings,ShouldAu
         DB::raw("(case 
                     when tramite_detalle.idModalidad_carpeta != 1 then 'SI' 
                 end) as TRAB_INVEST_ORIGINAL"),
-        DB::raw('tramite_detalle.originalidad AS MEC_UTI'),
+        DB::raw('CONCAT(tramite_detalle.originalidad,"%") AS MEC_UTI'),
         DB::raw("(case 
                     when tramite.idTipo_tramite_unidad = 16 then dependencia.denominacion  
                     when tramite.idTipo_tramite_unidad = 34 then  (select denominacion from dependencia d where d.idDependencia=dependencia.idDependencia2)
@@ -231,7 +231,8 @@ class HojaPadronOficio implements WithTitle,FromCollection,WithHeadings,ShouldAu
         ->where(function($query)
         {
             $query->where('tramite.idEstado_tramite',42)
-            ->orWhere('tramite.idEstado_tramite',44);
+            ->orWhere('tramite.idEstado_tramite',44)
+            ->orWhere('tramite.idEstado_tramite',15);
         })
         // ->where('tramite.idEstado_tramite',42)
         ->where('oficio.idOficio',$this->idOficio)

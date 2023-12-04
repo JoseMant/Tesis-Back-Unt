@@ -37,9 +37,15 @@ use App\PersonaSuv;
 use App\PersonaSga;
 use App\Diploma_Carpeta;
 use App\Historial_Codigo_Diploma;
-
+use App\Graduado;
+use File;
+use ZipArchive;
 class AdicionalController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt', ['except' => ['createCodeDiploma']]);
+    }
     public function eliminarHistorial(){
         try {
             // return "hola";
@@ -182,13 +188,15 @@ class AdicionalController extends Controller
                 $tramite->requisito->archivo=$archivo[2].'/'.$archivo[3].'/'.$archivo[4];
 
                 $nombre=$tramite->nro_documento.'.pdf';
-                if ($tramite->requisito->idRequisito==21) {
-                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
-                }else if($tramite->requisito->idRequisito==31){
-                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
-                }else if($tramite->requisito->idRequisito==68){
-                    $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
-                }
+                $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+
+                // if ($tramite->requisito->idRequisito==21) {
+                //     $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                // }else if($tramite->requisito->idRequisito==31){
+                //     $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                // }else if($tramite->requisito->idRequisito==68){
+                //     $file->storeAs('/public//'.$tramite->requisito->archivo, $nombre);
+                // }
             }
         }
         
@@ -348,36 +356,29 @@ class AdicionalController extends Controller
         DB::beginTransaction();
         try {
             // OBTENEMOS EL DATO DEL USUARIO QUE INICIO SESIÓN MEDIANTE EL TOKEN
-            $token = JWTAuth::getToken();
-            $apy = JWTAuth::getPayload($token);
-            $idUsuario=$apy['idUsuario'];
-
-            $tramites=Tramite::select('tramite.idTramite_detalle','usuario.apellidos','usuario.nombres')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('tipo_tramite','tipo_tramite.idTipo_tramite','tipo_tramite_unidad.idTipo_tramite')
-            ->join('unidad','unidad.idUnidad','tramite.idUnidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
-            ->join('estado_tramite','tramite.idEstado_tramite','estado_tramite.idEstado_tramite')
-            ->join('voucher','tramite.idVoucher','voucher.idVoucher')
+            // $token = JWTAuth::getToken();
+            // $apy = JWTAuth::getPayload($token);
+            // $idUsuario=$apy['idUsuario'];
+            
+            $tramites=Tramite::select('usuario.apellidos', 'usuario.nombres','tramite.idTramite_detalle')->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
             ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+            ->join('dependencia','dependencia.idDependencia','tramite.idDependencia')
+            ->join('programa','programa.idPrograma','tramite.idPrograma')
             ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
             ->where('tramite.idEstado_tramite',44)
-            ->where('tipo_tramite.idTipo_tramite',2)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',16);
-            })
-            ->where('resolucion.idResolucion',24)
-            ->orderBy('tramite_detalle.nro_libro', 'asc')
-            ->orderBy('tramite_detalle.folio', 'asc')
-            ->orderBy('tramite_detalle.nro_registro', 'asc')
+            ->where('tramite.idTipo_tramite_unidad',15)
+            ->where('resolucion.idResolucion',45)
+            ->orderBy('tramite.idTipo_tramite_unidad','asc')
+            ->orderBy('dependencia.nombre','asc')
+            ->orderBy('programa.nombre','asc')
+            ->orderBy('usuario.apellidos','asc')
+            ->orderBy('usuario.nombres','asc')
             ->get(); 
 
 
-            $codigoInicial='00044325';
-            foreach ($tramites as $key => $value) {
+            $codigoInicial='00047533';
+            foreach ($tramites as $key=>$tramite) {
                 $codigo=$codigoInicial+$key+1;
                 $tamCodigo=strlen($codigo);
                 switch ($tamCodigo) {
@@ -403,9 +404,8 @@ class AdicionalController extends Controller
                         $codigo="0".$codigo;
                         break;
                 }
-
-                $tramite_detalle=Tramite_Detalle::find($value->idTramite_detalle);
-                $tramite_detalle->codigo_diploma="T".$codigo;
+                $tramite_detalle=Tramite_Detalle::find($tramite->idTramite_detalle);
+                $tramite_detalle->codigo_diploma="G".$codigo;
                 $tramite_detalle->save();
             }
             // return $tramites;
@@ -456,5 +456,54 @@ class AdicionalController extends Controller
         }
     }
 
+    public function getGraduado(){
+        return Graduado::join('alumno','alumno.Cod_alumno','graduado.cod_alumno')->where('Nro_documento','75411199')->first();
+    }
 
+    public function fotosIngresantes2023(){
+        DB::beginTransaction();
+        try {
+            $ingresantes=Tramite::select('usuario.nro_documento','tramite.nro_matricula','tramite_requisito.archivo')
+            ->join('usuario','tramite.idUsuario','usuario.idUsuario')
+            ->join('tramite_requisito','tramite.idTramite','tramite_requisito.idTramite')
+            ->where('tramite.idTipo_tramite_unidad',17)
+            ->where('tramite.nro_matricula','like','%23')
+            ->get();
+
+            $zip = new ZipArchive;
+            $nameZip = "FOTOS INGRESANTES 2023.zip";
+
+            // Variable para el nombre de los archivos
+            $filename="";
+            // Eliminamos el zip creado de la descarga de hoy(si es que existe) para que al momento de ser creado no se sobreescriba y tenga archivos antiguos
+            if ($zip->open($nameZip)===TRUE) {
+                $zip->close();
+                unlink($nameZip);
+            }
+
+
+            if ($zip->open(public_path($nameZip),ZipArchive::CREATE) === TRUE)
+            {
+                foreach ($ingresantes as $ingresante) {
+                    $file =public_path($ingresante->archivo);
+                    
+                    if ($ingresante->archivo!=null) {
+                        // nombre del archivo
+                        $filename = $ingresante->nro_documento.".jpg";
+    
+                        $zip->addFile($file,"FOTOS INGRESANTES 2023/".$filename);
+                    }
+                }
+                $zip->close();   
+            }
+
+
+            DB::commit();
+            return response()->download(public_path($nameZip));
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => '400', 'message' => $e->getMessage()], 400);
+        }
+    }
 }

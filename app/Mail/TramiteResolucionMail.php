@@ -7,12 +7,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class DocenteTramiteMail extends Mailable
+class TramiteResolucionMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $departamento;
     public $usuario;
-    public $docente;
     public $tramite;
     public $tipo_tramite;
     public $tipo_tramite_unidad;
@@ -21,11 +19,9 @@ class DocenteTramiteMail extends Mailable
      *
      * @return void
      */
-    public function __construct($departamento,$usuario,$docente,$tramite,$tipo_tramite,$tipo_tramite_unidad)
+    public function __construct($usuario,$tramite,$tipo_tramite,$tipo_tramite_unidad)
     {
-        $this->departamento = $departamento;
         $this->usuario = $usuario;
-        $this->docente = $docente;
         $this->tramite = $tramite;
         $this->tipo_tramite = $tipo_tramite;
         $this->tipo_tramite_unidad = $tipo_tramite_unidad;
@@ -40,7 +36,6 @@ class DocenteTramiteMail extends Mailable
     {
         $subject = 'TRÁMITE N° '.$this->tramite->nro_tramite.' REGISTRADO CORRECTAMENTE';
         $emisor = config('mail.mailers.smtp.username');
-        return  $this->from($emisor, 'UNIDAD DE REGISTRO ACADÉMICO ADMINISTRATIVO')->subject($subject)->view('emails.docente_tramite');
-        
+        return  $this->from($emisor, 'UNIDAD DE REGISTRO ACADÉMICO ADMINISTRATIVO')->subject($subject)->view('emails.resolucion_tramite');
     }
 }
