@@ -241,16 +241,16 @@ Route::put('grados/correccion', 'GradoController@cambiarEstado');//Usado
 Route::put('grados/envio/facultad', 'GradoController@enviarFacultad');//Usado
 Route::put('grados/envio/ura', 'GradoController@enviarUraa');
 Route::put('grados/envio/escuela', 'GradoController@enviarEscuela');//Usado
-Route::put('grados/registrar/libro', 'GradoController@registrarEnLibro');
-Route::get('grados/firma/decano/{idResolucion}', 'GradoController@GetGradosFirmaDecano');
-Route::get('grados/firma/secretaria/{idResolucion}', 'GradoController@GetGradosFirmaSecretaria');
-Route::get('grados/firma/rector/{idResolucion}', 'GradoController@GetGradosFirmaRector');
-Route::get('grados/pendientes/impresion/{idResolucion}', 'GradoController@GetGradosPendientesImpresion');
+Route::put('registrar/libro', 'CarpetaController@registrarEnLibro');
+Route::get('carpetas/firma/decano/{idResolucion}', 'CarpetaController@GetCarpetasFirmaDecano');
+Route::get('carpetas/firma/secretaria/{idResolucion}', 'CarpetaController@GetCarpetasFirmaSecretaria');
+Route::get('carpetas/firma/rector/{idResolucion}', 'CarpetaController@GetCarpetasFirmaRector');
+Route::get('carpetas/pendientes/impresion/{idResolucion}', 'CarpetaController@GetCarpetasPendientesImpresion');
 Route::get('grados/finalizados', 'GradoController@GetGradosFinalizados');
 Route::post('grados/upload/{id}','GradoController@uploadDiploma');
 // Route::get('grados/validados/secretaria', 'GradoController@GetGradosValidadosSecretaria');
 Route::get('secretaria/observados', 'GradoController@GetGradosRechazadosSecretaria');
-Route::get('grados/validados/secretaria/{idResolucion}', 'GradoController@GetGradosResolucion');
+Route::get('grados/validados/secretaria/{idResolucion}', 'CarpetaController@GetGradosResolucion');
 Route::get('resolucion/secretaria/{nro_resolucion}', 'GradoController@GetResolucion');
 Route::get('grados/aprobados/secretaria', 'GradoController@GetGradosAprobadosSecretaria');
 Route::get('modalidad/carpeta/{idTipo_tramite_unidad}', 'Modalidad_CarpetaController@getModalidadGrado');
@@ -275,7 +275,7 @@ Route::put('titulos/correccion', 'TituloController@cambiarEstado');
 Route::put('titulos/envio/facultad', 'TituloController@enviarFacultad');
 Route::put('titulos/envio/ura', 'TituloController@enviarUraa');
 Route::put('titulos/envio/escuela', 'TituloController@enviarEscuela');
-Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
+// Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
 Route::get('titulos/firma/decano', 'TituloController@GetTitulosFirmaDecano');
 Route::get('titulos/firma/secretaria', 'TituloController@GetTitulosFirmaSecretaria');
 Route::get('titulos/firma/rector', 'TituloController@GetTitulosFirmaRector');
@@ -305,11 +305,11 @@ Route::put('titulos/correccionSE', 'SegundaEspecialidadController@cambiarEstado'
 Route::put('titulos/envio/facultadSE', 'SegundaEspecialidadController@enviarFacultad'); //usado
 Route::put('titulos/envio/ura', 'TituloController@enviarUraa');
 Route::put('titulos/envio/especialidad', 'SegundaEspecialidadController@enviarEscuela');//usado
-Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
+// Route::put('titulos/registrar/libro', 'TituloController@registrarEnLibro');
 Route::get('titulos/firma/decano', 'TituloController@GetTitulosFirmaDecano');
 Route::get('titulos/firma/secretaria', 'TituloController@GetTitulosFirmaSecretaria');
 Route::get('titulos/firma/rector', 'TituloController@GetTitulosFirmaRector');
-Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
+// Route::get('titulos/pendientes/impresion/{nro_resolucion}', 'TituloController@GetTitulosPendientesImpresion');
 Route::get('titulos/finalizados', 'TituloController@GetTitulosFinalizados');
 Route::post('titulos/upload/{id}','TituloController@uploadDiploma');
 Route::put('titulos/datosSE', 'SegundaEspecialidadController@GuardarDatosDiploma');//usado
@@ -327,9 +327,9 @@ Route::put('diplomas/duplicados/datos', 'Diplomas_DuplicadosController@GuardarDa
 Route::get('carpeta/{id}', 'CarpetaController@getDataPersona');
 Route::get('carpetas/finalizadas/{idResolucion}', 'CarpetaController@getFinalizados');
 Route::get('carpetas/search', 'CarpetaController@getCarpetaBySearch');
-Route::put('firmas/decano', 'GradoController@firmaDecano');
-Route::put('firmas/rector', 'GradoController@firmaRector');
-Route::put('firmas/secretaria', 'GradoController@firmaSecretaria');
+Route::put('firmas/decano', 'CarpetaController@firmaDecano');
+Route::put('firmas/rector', 'CarpetaController@firmaRector');
+Route::put('firmas/secretaria', 'CarpetaController@firmaSecretaria');
 
 //DEPENDENCIAS
 Route::get('dependencias/{idUnidad}', 'DependenciaController@getDependenciasByUnidad');

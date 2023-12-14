@@ -242,24 +242,44 @@ class ZipController extends Controller
             // Obteniendo la resolución para el nombre del zip
             $resolucion=Resolucion::find($idResolucion);
             
-            // Obteniendo los trámites de dicha resolución
-            $tramites=Tramite::select('tramite.idTramite','usuario.nro_documento','tipo_tramite_unidad.diploma_obtenido',
-            'tramite.idTipo_tramite_unidad','tramite.idEstado_tramite')
-            ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
-            ->join('usuario','usuario.idUsuario','tramite.idUsuario')
-            ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
-            ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
-            ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
-            ->where('tramite.idEstado_tramite',46)
-            ->where('tramite_detalle.autoridad2',$secretariaGeneral->idUsuario)
-            ->where('resolucion.idResolucion',$idResolucion)
-            ->where(function($query)
-            {
-                $query->where('tramite.idTipo_tramite_unidad',15)
-                ->orWhere('tramite.idTipo_tramite_unidad',16)
-                ->orWhere('tramite.idTipo_tramite_unidad',34);
-            })
-            ->get();  
+            if ($resolucion->tipo_emision=='O') {
+                // Obteniendo los trámites de dicha resolución
+                $tramites=Tramite::select('tramite.idTramite','usuario.nro_documento','tipo_tramite_unidad.diploma_obtenido',
+                'tramite.idTipo_tramite_unidad','tramite.idEstado_tramite')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('cronograma_carpeta','cronograma_carpeta.idCronograma_carpeta','tramite_detalle.idCronograma_carpeta')
+                ->join('resolucion','resolucion.idResolucion','cronograma_carpeta.idResolucion')
+                ->where('tramite.idEstado_tramite',46)
+                ->where('tramite_detalle.autoridad2',$secretariaGeneral->idUsuario)
+                ->where('resolucion.idResolucion',$idResolucion)
+                ->where(function($query)
+                {
+                    $query->where('tramite.idTipo_tramite_unidad',15)
+                    ->orWhere('tramite.idTipo_tramite_unidad',16)
+                    ->orWhere('tramite.idTipo_tramite_unidad',34);
+                })
+                ->get(); 
+            }elseif ($resolucion->tipo_emision=='D') {
+                // Obteniendo los trámites de dicha resolución
+                $tramites=Tramite::select('tramite.idTramite','usuario.nro_documento','tipo_tramite_unidad.diploma_obtenido',
+                'tramite.idTipo_tramite_unidad','tramite.idEstado_tramite')
+                ->join('tipo_tramite_unidad','tipo_tramite_unidad.idTipo_tramite_unidad','tramite.idTipo_tramite_unidad')
+                ->join('usuario','usuario.idUsuario','tramite.idUsuario')
+                ->join('tramite_detalle','tramite_detalle.idTramite_detalle','tramite.idTramite_detalle')
+                ->join('resolucion','resolucion.idResolucion','tramite_detalle.idResolucion_rectoral')
+                ->where('tramite.idEstado_tramite',46)
+                ->where('tramite_detalle.autoridad2',$secretariaGeneral->idUsuario)
+                ->where('resolucion.idResolucion',$idResolucion)
+                ->where(function($query)
+                {
+                    $query->where('tipo_tramite_unidad.idTipo_tramite',6)
+                    ->orWhere('tipo_tramite_unidad.idTipo_tramite',9);
+                })
+                ->get(); 
+            }
+             
             
             // return count($tramites);
             if (count($tramites)>0) {
@@ -290,11 +310,13 @@ class ZipController extends Controller
                 {
                     foreach ($tramites as $key => $tramite) {
                             // nombre del archivo
-                            $relativeNameInZipFile = 'T004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf';
+                            $relativeNameInZipFile = 'D004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf';
                             
                             // añadiendo archivos al zip 
                             if ($tramite->idTipo_tramite_unidad==15 || $tramite->idTipo_tramite_unidad==16 || $tramite->idTipo_tramite_unidad==34) {
-                                $zip->addFile(storage_path('app/public').'/diplomas/T004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf', $fileName2.'/'.$relativeNameInZipFile);
+                                $zip->addFile(storage_path('app/public').'/diplomas/D004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf', $fileName2.'/'.$relativeNameInZipFile);
+                            }else {
+                                $zip->addFile(storage_path('app/public').'/diplomas_duplicados/D004_'.$tramite->nro_documento.'_'.substr($tramite->diploma_obtenido, 0,1).'.pdf', $fileName2.'/'.$relativeNameInZipFile);
                             }
                     }
                     $zip->close();   

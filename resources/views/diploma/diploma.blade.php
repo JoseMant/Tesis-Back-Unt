@@ -73,13 +73,13 @@
         }
         h1 {
             text-align: center;
-            font-family: brandey;
+            font-family: algerian;
             font-size:27px;
             margin: 10px 0;
         }
         h2 {
             text-align: center;
-            font-family: brandey; 
+            font-family: algerian; 
             font-size:27px;
             margin: 0px 0;
         }
